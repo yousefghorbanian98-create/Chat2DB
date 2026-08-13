@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>استودیو تحلیل محتوای یوتیوب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">▶</span>
+      <div>
+        <strong>استودیو تحلیل محتوا</strong>
+        <small>پیدا کردن الگوی ویدیوهای پربازدید</small>
+      </div>
+    </div>
+    <div id="keyBadge" class="badge badge-muted">در حال بررسی…</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>کدام ویدیوها می‌ترکند — و چرا؟</h1>
+    <p>لینک یا نام هر کانال یوتیوب را وارد کنید. آخرین ویدیوها تحلیل می‌شوند تا ببینید چه عنوان‌ها، چه طول ویدیویی و چه زمان انتشاری بیشترین بازدید را می‌گیرد — تا برای محتوای <strong>خودتان</strong> ایده بگیرید.</p>
+
+    <form id="form" class="searchbar">
+      <input id="channel" type="text" placeholder="مثلاً @MrBeast یا youtube.com/@channel یا لینک یک ویدیو" autocomplete="off" spellcheck="false">
+      <select id="limit" title="چند ویدیوی اخیر تحلیل شود">
+        <option value="50">۵۰ ویدیو</option>
+        <option value="100">۱۰۰ ویدیو</option>
+        <option value="150" selected>۱۵۰ ویدیو</option>
+        <option value="250">۲۵۰ ویدیو</option>
+      </select>
+      <button id="go" type="submit">تحلیل کن</button>
+    </form>
+
+    <div class="quick">
+      <span>نمونه:</span>
+      <button class="chip" data-ch="@mkbhd">@mkbhd</button>
+      <button class="chip" data-ch="@veritasium">@veritasium</button>
+      <button class="chip" data-ch="@ali-abdaal">@ali-abdaal</button>
+      <button class="chip chip-demo" id="demoBtn">▶ اجرای دمو با داده‌ی نمونه</button>
+    </div>
+  </section>
+
+  <div id="notice" class="notice hidden"></div>
+  <div id="error" class="error hidden"></div>
+
+  <div id="loading" class="loading hidden">
+    <div class="spinner"></div>
+    <p>در حال گرفتن داده از یوتیوب…</p>
+  </div>
+
+  <section id="results" class="hidden">
+
+    <!-- channel header -->
+    <div class="channel-card" id="channelCard"></div>
+
+    <!-- KPI strip -->
+    <div class="kpis" id="kpis"></div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="ideas">💡 ایده‌های محتوا</button>
+      <button class="tab" data-tab="outliers">🚀 ویدیوهای منفجرشده</button>
+      <button class="tab" data-tab="titles">✍️ الگوی عنوان‌ها</button>
+      <button class="tab" data-tab="timing">🕐 زمان و طول</button>
+      <button class="tab" data-tab="all">📋 همه ویدیوها</button>
+    </nav>
+
+    <!-- IDEAS -->
+    <div class="panel active" id="panel-ideas">
+      <div class="grid2">
+        <div class="card">
+          <h3>عنوان‌های پیشنهادی برای شما</h3>
+          <p class="sub">بر پایه‌ی کلیدواژه‌ها و قلاب‌هایی که در همین کانال بهترین عملکرد را داشته‌اند.</p>
+          <div id="suggestions" class="suggest-list"></div>
+        </div>
+        <div class="card">
+          <h3>ایده‌های Shorts از ویدیوهای موفق</h3>
+          <p class="sub">پربازده‌ترین ویدیوهای بلند و زاویه‌ی پیشنهادی برای تبدیلشان به کلیپ کوتاه.</p>
+          <div id="shortIdeas" class="idea-list"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>کلیدواژه‌های برنده</h3>
+        <p class="sub">واژه‌هایی که وقتی در عنوان می‌آیند، بازدید روزانه بالاتر از میانه‌ی کانال است. عدد نشان‌دهنده‌ی ضریب نسبت به میانه است.</p>
+        <div id="keywords" class="kw-cloud"></div>
+      </div>
+    </div>
+
+    <!-- OUTLIERS -->
+    <div class="panel" id="panel-outliers">
+      <div class="card">
+        <h3>بیشترین عملکرد نسبت به میانه‌ی کانال</h3>
+        <p class="sub">«×۳.۲» یعنی این ویدیو روزانه ۳.۲ برابر ویدیوی متوسط این کانال بازدید می‌گیرد. این معیار منصفانه‌تر از بازدید خام است چون سن ویدیو را هم حساب می‌کند.</p>
+        <div id="outliers" class="vid-list"></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <h3>🔥 در حال رشد (۴۵ روز اخیر)</h3>
+          <div id="rising" class="vid-list compact"></div>
+        </div>
+        <div class="card">
+          <h3>📉 کم‌بازده‌ترین‌ها</h3>
+          <p class="sub">از این‌ها الگوبرداری نکنید.</p>
+          <div id="under" class="vid-list compact"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TITLES -->
+    <div class="panel" id="panel-titles">
+      <div class="card">
+        <h3>کدام قلاب عنوان جواب می‌دهد؟</h3>
+        <p class="sub">هر ردیف یک ویژگی ساختاری عنوان است. «ضریب» یعنی ویدیوهای دارای آن ویژگی چند برابر بقیه بازدید روزانه می‌گیرند. بالای ۱ = مؤثر.</p>
+        <div id="hooks" class="bars"></div>
+      </div>
+    </div>
+
+    <!-- TIMING -->
+    <div class="panel" id="panel-timing">
+      <div class="grid2">
+        <div class="card">
+          <h3>بهترین روز انتشار</h3>
+          <div id="days" class="bars"></div>
+        </div>
+        <div class="card">
+          <h3>بهترین ساعت انتشار</h3>
+          <div id="hours" class="bars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>طول ایده‌آل ویدیو</h3>
+        <p class="sub">میانه‌ی بازدید روزانه در هر بازه‌ی زمانی.</p>
+        <div id="durations" class="bars"></div>
+      </div>
+    </div>
+
+    <!-- ALL -->
+    <div class="panel" id="panel-all">
+      <div class="card">
+        <div class="table-head">
+          <h3>همه‌ی ویدیوهای تحلیل‌شده</h3>
+          <input id="filter" type="search" placeholder="جستجو در عنوان‌ها…">
+        </div>
+        <div class="table-scroll">
+          <table id="table">
+            <thead>
+              <tr>
+                <th data-sort="title">عنوان</th>
+                <th data-sort="views" class="num">بازدید</th>
+                <th data-sort="vpd" class="num">بازدید/روز</th>
+                <th data-sort="multiplier" class="num">ضریب</th>
+                <th data-sort="engagement" class="num">تعامل</th>
+                <th data-sort="durationSec" class="num">مدت</th>
+                <th data-sort="publishedAt" class="num">تاریخ</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <button id="csv" class="ghost">⬇ خروجی CSV</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="legal">
+    <h4>⚖️ یک یادآوری مهم</h4>
+    <p>این ابزار فقط <strong>آمار عمومی</strong> کانال‌ها را از YouTube Data API می‌خواند تا به شما در ایده‌گرفتن کمک کند. دانلود، بازنشر یا کپی ویدیوی دیگران نقض قوانین یوتیوب و کپی‌رایت است و به strike و بسته‌شدن کانال منجر می‌شود. از این تحلیل‌ها برای ساخت محتوای <strong>اورجینال خودتان</strong> استفاده کنید.</p>
+  </section>
+
+</main>
+
+<footer class="foot wrap">
+  <span>ساخته‌شده با YouTube Data API v3 — بدون هیچ وابستگی npm</span>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>
