@@ -1,31 +1,30 @@
 # EasyClip Desktop
 
-A Windows-first, local AI video clipping studio. The app is being built as a lightweight Tauri desktop application with a React interface and a Rust host.
+EasyClip Desktop is a Windows-first, local AI video clipping studio built with Tauri, React, and Rust. Version 0.2 generates Persian and English subtitles without uploading media, then burns them into vertical MP4 clips.
 
-## Current foundation (0.1.0)
+## Local caption and render pipeline
 
-- Persian/English RTL/LTR desktop interface
-- Local video file picker (MP4, MOV, MKV, WebM, AVI)
-- Local project library
-- Windows/NVIDIA capability detection through `nvidia-smi`
-- Tauri security capability and CSP configuration
-- NSIS installer configuration for Windows 11 x64
-- Windows GitHub Actions build that uploads the unsigned installer as an artifact
+1. The bundled FFmpeg 9.0.1 extracts 16 kHz mono PCM audio.
+2. The bundled whisper.cpp 1.9.2 CLI transcribes with the multilingual `ggml-base` model.
+3. The app writes a UTF-8 SRT file and previews its timed segments.
+4. Before export, full-source SRT timestamps are clipped and rebased to the selected clip range.
+5. FFmpeg/libass burns captions with the bundled Noto Sans Arabic font, including Persian RTL shaping.
+6. FFmpeg exports a 1080×1920 H.264/AAC MP4. NVIDIA NVENC is selected when both a supported GPU and `h264_nvenc` are available; a failed NVENC render automatically retries with libx264 on the CPU.
 
-The current build is a functional desktop foundation, not yet the complete video processor. It does not claim to generate clips yet.
+All processing is local. The Windows Setup includes FFmpeg, FFprobe, whisper.cpp, the multilingual model, the caption font, and their license notices.
 
-## Planned pipeline
+## Supported captions
 
-1. Bundle and verify FFmpeg/FFprobe
-2. Extract audio and generate Persian/English captions with Faster-Whisper (CUDA)
-3. Score transcript segments using a local language model
-4. Track faces/speakers and automatically crop to 9:16
-5. Render MP4 clips with animated captions using NVIDIA NVENC
-6. Add clip review, trim and caption editing
-7. Add Google OAuth and official YouTube Shorts upload
-8. Add optional watched-folder and automatic publishing mode
+- Explicit Persian (`fa`)
+- Explicit English (`en`)
+- Whisper automatic language detection
+- Generated or manually selected UTF-8 SubRip (`.srt`) files
+
+Selected SRT files are interpreted on the original video's timeline. This lets a single generated subtitle file be reused for any clip range.
 
 ## Development
+
+Node.js 18+ is required for the web interface:
 
 ```bash
 npm install
@@ -33,14 +32,44 @@ npm run dev
 npm run build
 ```
 
-A native desktop development build additionally requires Rust and the Tauri prerequisites:
+A native desktop build additionally requires stable Rust and the Tauri 2 Windows prerequisites:
 
 ```bash
-npm run tauri dev
+npm run tauri -- dev
 ```
 
-## Windows installer
+On non-Windows development hosts, the app can use `ffmpeg`, `ffprobe`, and `whisper-cli` from `PATH`; a model must still be available as `models/ggml-base.bin` in the Tauri resource directory.
 
-The workflow `.github/workflows/easyclip-windows.yml` runs on a Windows runner and builds an NSIS `Setup.exe`. The installer is unsigned during development, so Windows SmartScreen may warn until a code-signing certificate is configured.
+## Build `Setup.exe` on Windows
 
-No API keys, OAuth credentials, models, videos, or generated installers belong in Git.
+The preparation script downloads pinned x64 artifacts, validates each file's size and SHA-256, and stages only generated resources ignored by Git:
+
+```powershell
+npm ci
+npm run prepare:windows
+npm run tauri -- build --bundles nsis --target x86_64-pc-windows-msvc
+```
+
+Or run both preparation and packaging:
+
+```powershell
+npm run build:windows
+```
+
+The unsigned installer is created under:
+
+```text
+src-tauri/target/release/bundle/nsis/*-setup.exe
+```
+
+When an explicit target is passed (as in CI), it is under:
+
+```text
+src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe
+```
+
+`.github/workflows/easyclip-windows.yml` performs the verified download, frontend build, Rust tests, NSIS build, and uploads `EasyClip-Desktop-0.2.0-Setup.exe` plus `SHA256SUMS.txt` as a GitHub Actions artifact. It does not publish a GitHub Release. The development installer is unsigned, so Windows SmartScreen may warn until code signing is configured.
+
+## Dependency provenance
+
+Pinned versions, artifact hashes, source links, and license terms are documented in `src-tauri/resources/licenses/THIRD_PARTY_NOTICES.md`. Runtime binaries, model weights, generated manifests, videos, and installers must not be committed.

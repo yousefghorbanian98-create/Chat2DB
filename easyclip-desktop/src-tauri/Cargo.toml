@@ -1,6 +1,6 @@
 [package]
 name = "easyclip-desktop"
-version = "0.1.0"
+version = "0.2.0"
 description = "Local-first AI video clipping studio for Windows"
 authors = ["EasyClip"]
 edition = "2021"

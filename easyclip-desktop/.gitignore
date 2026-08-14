@@ -1,6 +1,12 @@
+!package-lock.json
 node_modules/
 dist/
 src-tauri/target/
+src-tauri/resources/bin/
+src-tauri/resources/fonts/
+src-tauri/resources/models/
+src-tauri/resources/runtime-manifest.json
+artifacts/
 .env
 .env.*
 *.log
