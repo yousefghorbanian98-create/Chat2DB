@@ -17,9 +17,11 @@ pub const UPLOAD_QUOTA_COST: u32 = 1600;
 /// Default daily quota for a fresh Google Cloud project.
 pub const DEFAULT_DAILY_QUOTA: u32 = 10_000;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum Privacy {
+    /// Safe by default: nothing goes public by accident.
+    #[default]
     Private,
     Unlisted,
     Public,
@@ -32,13 +34,6 @@ impl Privacy {
             Privacy::Unlisted => "unlisted",
             Privacy::Public => "public",
         }
-    }
-}
-
-impl Default for Privacy {
-    fn default() -> Self {
-        // Safe by default: nothing goes public by accident.
-        Privacy::Private
     }
 }
 

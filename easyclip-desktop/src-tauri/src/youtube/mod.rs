@@ -200,7 +200,7 @@ pub async fn autopilot_connect(
     app: AppHandle,
     state: State<'_, YoutubeState>,
 ) -> Result<ChannelInfo, String> {
-    let (client_id, client_secret) = state.with(&app, credentials)?;
+    let (client_id, client_secret) = state.with(&app, |runtime| credentials(runtime))?;
 
     let server = auth::LoopbackServer::bind()?;
     let redirect_uri = server.redirect_uri();
@@ -257,7 +257,7 @@ async fn access_token(app: &AppHandle, state: &State<'_, YoutubeState>) -> Resul
     if let Some(token) = state.with(app, |runtime| Ok(runtime.access_token.clone()))? {
         return Ok(token);
     }
-    let (client_id, client_secret) = state.with(app, credentials)?;
+    let (client_id, client_secret) = state.with(app, |runtime| credentials(runtime))?;
     let refresh = store::load_refresh_token()
         .ok_or_else(|| "Connect your Google account first".to_owned())?;
     let client = api::http_client()?;
@@ -561,6 +561,19 @@ async fn run_job_inner(
             .spawn()
             .map_err(|error| format!("Cannot start yt-dlp: {error}"))?;
 
+        // Drain stderr on a helper thread: yt-dlp can be chatty, and a full pipe
+        // buffer would otherwise block the child while we read stdout.
+        let stderr_handle = child.stderr.take().map(|stderr| {
+            std::thread::spawn(move || {
+                let mut collected = String::new();
+                for line in BufReader::new(stderr).lines().map_while(Result::ok) {
+                    collected.push_str(&line);
+                    collected.push('\n');
+                }
+                collected
+            })
+        });
+
         if let Some(stdout) = child.stdout.take() {
             for line in BufReader::new(stdout).lines().map_while(Result::ok) {
                 if let Some(percent) = download::parse_progress_line(&line) {
@@ -574,13 +587,15 @@ async fn run_job_inner(
                 }
             }
         }
-        let output = child
-            .wait_with_output()
+
+        let status = child
+            .wait()
             .map_err(|error| format!("yt-dlp did not finish: {error}"))?;
-        if !output.status.success() {
-            return Err(download::describe_download_error(
-                &String::from_utf8_lossy(&output.stderr),
-            ));
+        let stderr_text = stderr_handle
+            .and_then(|handle| handle.join().ok())
+            .unwrap_or_default();
+        if !status.success() {
+            return Err(download::describe_download_error(&stderr_text));
         }
         Ok(())
     })

@@ -131,7 +131,22 @@ jobs:
         run: npm run build
 
       - name: Run Rust unit tests
-        run: cargo test --manifest-path src-tauri/Cargo.toml
+        id: rust-tests
+        shell: pwsh
+        run: |
+          cargo test --manifest-path src-tauri/Cargo.toml 2>&1 | Tee-Object -FilePath cargo-test.log
+          exit $LASTEXITCODE
+
+      - name: Publish Rust diagnostics
+        if: failure() && steps.rust-tests.outcome == 'failure'
+        shell: pwsh
+        run: |
+          if (Test-Path cargo-test.log) {
+            $text = Get-Content cargo-test.log -Raw
+            "## Rust compiler output`n`n``````" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            $text | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            "``````" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
 
       - name: Build NSIS installer
         run: npm run tauri -- build --bundles nsis --target x86_64-pc-windows-msvc

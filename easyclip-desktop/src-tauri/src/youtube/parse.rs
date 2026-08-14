@@ -237,8 +237,12 @@ pub fn truncate_chars(value: &str, limit: usize) -> String {
 /// Build a YouTube-safe video title (≤ 100 characters, no angle brackets).
 pub fn safe_title(value: &str) -> String {
     let cleaned = strip_angle_brackets(value.trim());
-    let cleaned = if cleaned.is_empty() { "Untitled" } else { &cleaned };
-    truncate_chars(cleaned, 100)
+    let cleaned = if cleaned.trim().is_empty() {
+        "Untitled".to_owned()
+    } else {
+        cleaned
+    };
+    truncate_chars(&cleaned, 100)
 }
 
 /// Build a YouTube-safe description (≤ 5000 characters, no angle brackets).
