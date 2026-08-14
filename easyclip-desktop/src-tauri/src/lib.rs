@@ -1,4 +1,5 @@
 mod media;
+mod youtube;
 
 use media::{captions_for_clip, ensure_output_extension, escaped_filter_path, parse_srt, paths_are_equal, CaptionSegment, TemporaryDirectory};
 use serde::{Deserialize, Serialize};
@@ -95,6 +96,16 @@ fn bundled_resource(app: &AppHandle, relative_path: impl AsRef<Path>) -> PathBuf
         .map(|directory| directory.join(relative_path))
         .filter(|path| path.exists())
         .unwrap_or_else(|| PathBuf::from(relative_path))
+}
+
+/// Public wrapper so the youtube module can spawn bundled tools.
+pub fn media_command_public(executable: impl AsRef<std::ffi::OsStr>) -> Command {
+    media_command(executable)
+}
+
+/// Public wrapper so the youtube module can locate bundled tools.
+pub fn bundled_tool_path(app: &AppHandle, name: &str) -> PathBuf {
+    bundled_tool(app, name)
 }
 
 fn bundled_tool(app: &AppHandle, name: &str) -> PathBuf {
@@ -435,7 +446,25 @@ async fn render_vertical_clip(app: AppHandle, request: RenderRequest) -> Result<
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![system_profile, inspect_video, generate_subtitles, render_vertical_clip])
+        .plugin(tauri_plugin_opener::init())
+        .manage(youtube::YoutubeState::default())
+        .invoke_handler(tauri::generate_handler![
+            system_profile,
+            inspect_video,
+            generate_subtitles,
+            render_vertical_clip,
+            youtube::autopilot_status,
+            youtube::autopilot_save_credentials,
+            youtube::autopilot_connect,
+            youtube::autopilot_disconnect,
+            youtube::autopilot_load_source,
+            youtube::autopilot_acknowledge,
+            youtube::autopilot_enqueue,
+            youtube::autopilot_set_paused,
+            youtube::autopilot_remove_job,
+            youtube::autopilot_self_test,
+            youtube::autopilot_run_job
+        ])
         .run(tauri::generate_context!())
         .expect("error while running EasyClip Desktop");
 }

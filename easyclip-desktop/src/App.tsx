@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { open, save } from "@tauri-apps/plugin-dialog";
+import Autopilot from "./Autopilot";
 import {
   BarChart3,
   Captions,
@@ -78,6 +79,68 @@ const copy = {
     nvidia: "شتاب‌دهی NVIDIA",
     detected: "فعال و آماده",
     notDetected: "شناسایی نشد؛ حالت CPU استفاده می‌شود",
+    apTitle: "خلبان خودکار یوتیوب",
+    apLoading: "در حال بارگذاری…",
+    apAccount: "حساب گوگل شما",
+    apAccountSub: "ویدیوها در کانال خودِ شما منتشر می‌شوند",
+    apClientId: "شناسه کلاینت (Client ID)",
+    apClientSecret: "رمز کلاینت (Client secret)",
+    apSaveCredentials: "ذخیره اطلاعات",
+    apCredentialsSaved: "اطلاعات ذخیره شد",
+    apEditCredentials: "ویرایش اطلاعات",
+    apSignIn: "ورود با گوگل",
+    apWaitingBrowser: "منتظر مرورگر…",
+    apConnectedAs: "متصل شد به",
+    apDisconnect: "قطع اتصال",
+    apSubscribers: "دنبال‌کننده",
+    apVideos: "ویدیو",
+    apGuideTitle: "چطور Client ID بسازم؟",
+    apGuide1: "به console.cloud.google.com بروید و یک پروژه بسازید.",
+    apGuide2: "از بخش Library، سرویس YouTube Data API v3 را فعال کنید.",
+    apGuide3: "در OAuth consent screen نوع External را بزنید و ایمیل خودتان را در Test users اضافه کنید.",
+    apGuide4: "از Credentials یک OAuth client ID از نوع Desktop app بسازید.",
+    apGuide5: "توجه: تا وقتی برنامه در حالت Testing است، هر ۷ روز باید دوباره وارد شوید.",
+    apUploadsLeft: "آپلود باقی‌مانده امروز",
+    apQuotaNote: "هر آپلود ۱۶۰۰ واحد از سهمیه ۱۰٬۰۰۰ واحدی روزانه مصرف می‌کند؛ یعنی حدود ۶ آپلود در روز. سهمیه نیمه‌شب به وقت اقیانوس آرام صفر می‌شود.",
+    apSource: "کانال مبدأ",
+    apSourceSub: "لینک ویدیو یا کانال را بچسبانید",
+    apLoad: "خواندن",
+    apVideosFound: "ویدیو پیدا شد",
+    apOwnChannel: "کانال خودتان",
+    apFilter: "جستجو در عنوان‌ها…",
+    apSelectAll: "انتخاب همه",
+    apClear: "پاک کردن",
+    apCcLicence: "کریتیو کامانز",
+    apStdLicence: "لایسنس استاندارد",
+    apWarnTitle: "هشدار جدی درباره کپی‌رایت",
+    apWarnBody: "بازنشر ویدیوی دیگران بدون اجازه، استرایک کپی‌رایت می‌گیرد. سه استرایک در ۹۰ روز یعنی حذف دائمی کانال و تمام ویدیوها. دانلود ویدیوی دیگران هم خلاف شرایط خدمات یوتیوب است.",
+    apWarnAccept: "این محتوا متعلق به من است یا اجازه کتبی از صاحب اثر دارم.",
+    apPrivacy: "وضعیت انتشار",
+    apPrivate: "خصوصی",
+    apUnlisted: "لینک‌دار",
+    apPublic: "عمومی",
+    apTitleTemplate: "الگوی عنوان",
+    apAddToQueue: "افزودن به صف",
+    apQueued: "ویدیو به صف اضافه شد",
+    apSelectSomething: "اول چند ویدیو را انتخاب کنید",
+    apQueue: "صف پردازش",
+    apJobs: "کار",
+    apPause: "توقف",
+    apResume: "ادامه",
+    apDryRun: "اجرای آزمایشی (بدون آپلود)",
+    apDryRunDone: "اجرای آزمایشی کامل شد؛ چیزی آپلود نشد",
+    apUploadDone: "آپلود کامل شد",
+    apRun: "اجرا",
+    apRetry: "تلاش دوباره",
+    apSelfTest: "بررسی سلامت",
+    apNoYtDlp: "ابزار yt-dlp پیدا نشد. برنامه را دوباره نصب کنید.",
+    pending: "در انتظار",
+    downloading: "در حال دانلود",
+    clipping: "در حال کلیپ‌سازی",
+    uploading: "در حال آپلود",
+    done: "انجام شد",
+    failed: "ناموفق",
+    skipped: "رد شد",
     phase: "نسخه ۰.۲ محلی",
     phaseText: "FFmpeg، مدل چندزبانه Whisper و رندر زیرنویس فارسی و انگلیسی همراه برنامه آماده‌اند.",
     lang: "EN",
@@ -149,6 +212,68 @@ const copy = {
     nvidia: "NVIDIA acceleration",
     detected: "Active and ready",
     notDetected: "Not detected; CPU mode will be used",
+    apTitle: "YouTube Autopilot",
+    apLoading: "Loading…",
+    apAccount: "Your Google account",
+    apAccountSub: "Videos are published to your own channel",
+    apClientId: "Client ID",
+    apClientSecret: "Client secret",
+    apSaveCredentials: "Save credentials",
+    apCredentialsSaved: "Credentials saved",
+    apEditCredentials: "Edit credentials",
+    apSignIn: "Sign in with Google",
+    apWaitingBrowser: "Waiting for the browser…",
+    apConnectedAs: "Connected as",
+    apDisconnect: "Disconnect",
+    apSubscribers: "subscribers",
+    apVideos: "videos",
+    apGuideTitle: "How do I get a Client ID?",
+    apGuide1: "Open console.cloud.google.com and create a project.",
+    apGuide2: "In Library, enable the YouTube Data API v3.",
+    apGuide3: "On the OAuth consent screen pick External and add your own account under Test users.",
+    apGuide4: "Under Credentials create an OAuth client ID of type Desktop app.",
+    apGuide5: "Note: while the app stays in Testing mode Google expires the sign-in every 7 days.",
+    apUploadsLeft: "uploads left today",
+    apQuotaNote: "Each upload costs 1600 of the 10,000 daily quota units, so roughly 6 uploads per day. The quota resets at midnight Pacific time.",
+    apSource: "Source channel",
+    apSourceSub: "Paste a video or channel link",
+    apLoad: "Load",
+    apVideosFound: "videos found",
+    apOwnChannel: "Your own channel",
+    apFilter: "Search titles…",
+    apSelectAll: "Select all",
+    apClear: "Clear",
+    apCcLicence: "Creative Commons",
+    apStdLicence: "Standard licence",
+    apWarnTitle: "Serious copyright warning",
+    apWarnBody: "Re-uploading someone else's videos without permission causes copyright strikes. Three strikes in 90 days permanently deletes the channel and every video on it. Downloading other people's videos also breaks YouTube's Terms of Service.",
+    apWarnAccept: "I own this content or have written permission from the rights holder.",
+    apPrivacy: "Privacy",
+    apPrivate: "Private",
+    apUnlisted: "Unlisted",
+    apPublic: "Public",
+    apTitleTemplate: "Title template",
+    apAddToQueue: "Add to queue",
+    apQueued: "videos added to the queue",
+    apSelectSomething: "Select at least one video first",
+    apQueue: "Queue",
+    apJobs: "jobs",
+    apPause: "Pause",
+    apResume: "Resume",
+    apDryRun: "Dry run (no upload)",
+    apDryRunDone: "Dry run finished; nothing was uploaded",
+    apUploadDone: "Upload complete",
+    apRun: "Run",
+    apRetry: "Retry",
+    apSelfTest: "Self-test",
+    apNoYtDlp: "yt-dlp is missing. Reinstall EasyClip Desktop.",
+    pending: "Pending",
+    downloading: "Downloading",
+    clipping: "Clipping",
+    uploading: "Uploading",
+    done: "Done",
+    failed: "Failed",
+    skipped: "Skipped",
     phase: "Local AI · v0.2",
     phaseText: "Bundled FFmpeg, multilingual Whisper, and Persian/English caption rendering are ready offline.",
     lang: "فا",
@@ -243,6 +368,22 @@ export default function App() {
     setPage("editor");
   };
 
+  // Map the ap-prefixed translation keys onto the plain names Autopilot expects,
+  // and pass the job-state labels through unchanged.
+  const apCopy = useMemo(() => {
+    const source = t as unknown as Record<string, string>;
+    const out: Record<string, string> = {};
+    for (const [key, value] of Object.entries(source)) {
+      if (key.startsWith("ap") && key.length > 2 && key[2] === key[2].toUpperCase()) {
+        out[key[2].toLowerCase() + key.slice(3)] = value;
+      }
+    }
+    for (const key of ["pending", "downloading", "clipping", "uploading", "done", "failed", "skipped"]) {
+      if (source[key]) out[key] = source[key];
+    }
+    return out;
+  }, [t]);
+
   const nav = useMemo(() => [
     { id: "home" as Page, label: t.home, icon: LayoutDashboard },
     { id: "projects" as Page, label: t.projects, icon: Clapperboard },
@@ -267,7 +408,8 @@ export default function App() {
         {page === "home" && <Home t={t} chooseVideo={chooseVideo} setPage={setPage} profile={profile} projects={projects} />}
         {page === "projects" && <Projects t={t} projects={projects} chooseVideo={chooseVideo} openProject={openProject} />}
         {page === "editor" && selectedProject && <Editor t={t} project={selectedProject} profile={profile} goBack={() => setPage("projects")} />}
-        {page !== "home" && page !== "projects" && page !== "editor" && <ComingSoon page={page} t={t} profile={profile} />}
+        {page === "youtube" && <Autopilot t={apCopy} dir={language === "fa" ? "rtl" : "ltr"} />}
+        {page !== "home" && page !== "projects" && page !== "editor" && page !== "youtube" && <ComingSoon page={page} t={t} profile={profile} />}
       </main>
       <input ref={fileInput} hidden type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) void addProject(file.name, file); }} />
     </div>

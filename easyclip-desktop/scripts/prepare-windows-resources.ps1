@@ -35,6 +35,60 @@ $Artifacts = @{
     }
 }
 
+# yt-dlp publishes a signed SHA2-256SUMS file with every release. The version is
+# pinned here and the binary is verified against the checksum file from that same
+# tag, so an upstream rebuild cannot silently change what we ship.
+$YtDlpVersion = "2026.07.04"
+
+function Get-YtDlp {
+    param([string]$Destination)
+
+    $base = "https://github.com/yt-dlp/yt-dlp/releases/download/$YtDlpVersion"
+    $sumsPath = Join-Path ([System.IO.Path]::GetTempPath()) "yt-dlp-$YtDlpVersion-SHA2-256SUMS"
+
+    if (-not (Test-Path -LiteralPath $sumsPath)) {
+        Invoke-WebRequest -Uri "$base/SHA2-256SUMS" -OutFile $sumsPath -MaximumRedirection 10 -UseBasicParsing
+    }
+
+    $expected = $null
+    foreach ($line in Get-Content -LiteralPath $sumsPath) {
+        $parts = $line -split '\s+', 2
+        if ($parts.Count -eq 2 -and $parts[1].Trim() -eq "yt-dlp.exe") {
+            $expected = $parts[0].Trim().ToLowerInvariant()
+            break
+        }
+    }
+    if (-not $expected) { throw "yt-dlp.exe is not listed in the $YtDlpVersion checksum file" }
+
+    if (Test-Path -LiteralPath $Destination) {
+        $current = (Get-FileHash -LiteralPath $Destination -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($current -eq $expected -and -not $Force) {
+            Write-Host "Using verified cache: yt-dlp.exe"
+            return
+        }
+        Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+    }
+
+    Write-Host "Downloading yt-dlp.exe $YtDlpVersion..."
+    $lastError = $null
+    foreach ($attempt in 1..3) {
+        try {
+            Invoke-WebRequest -Uri "$base/yt-dlp.exe" -OutFile $Destination -MaximumRedirection 10 -UseBasicParsing
+            $actual = (Get-FileHash -LiteralPath $Destination -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($actual -ne $expected) {
+                throw "SHA-256 verification failed for yt-dlp.exe (expected $expected, got $actual)"
+            }
+            return
+        }
+        catch {
+            $lastError = $_
+            Remove-Item -LiteralPath $Destination -Force -ErrorAction SilentlyContinue
+            if ($attempt -lt 3) { Start-Sleep -Seconds (2 * $attempt) }
+        }
+    }
+    throw $lastError
+}
+
 function Test-VerifiedFile {
     param([string]$Path, [hashtable]$Artifact)
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $false }
@@ -110,6 +164,8 @@ try {
         Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $binDirectory $_.Name) -Force
     }
 
+    Get-YtDlp -Destination (Join-Path $binDirectory "yt-dlp.exe")
+
     Copy-Item -LiteralPath $downloads.Model -Destination (Join-Path $modelDirectory "ggml-base.bin") -Force
     Copy-Item -LiteralPath $downloads.Font -Destination (Join-Path $fontDirectory "NotoSansArabic.ttf") -Force
 
@@ -121,6 +177,7 @@ try {
             whisperCpp = [ordered]@{ version = "1.9.2"; sha256 = $Artifacts.Whisper.Sha256 }
             whisperModel = [ordered]@{ name = "ggml-base"; sha256 = $Artifacts.Model.Sha256 }
             captionFont = [ordered]@{ name = "Noto Sans Arabic"; sha256 = $Artifacts.Font.Sha256 }
+            ytDlp = [ordered]@{ version = $YtDlpVersion }
         }
     }
     $manifest | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $resolvedOutput "runtime-manifest.json") -Encoding utf8
