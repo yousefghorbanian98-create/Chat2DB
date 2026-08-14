@@ -1,0 +1,120 @@
+name: EasyClip Windows Setup
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "easyclip-desktop/**"
+      - ".github/workflows/easyclip-windows.yml"
+  push:
+    branches: [main]
+    paths:
+      - "easyclip-desktop/**"
+      - ".github/workflows/easyclip-windows.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: easyclip-windows-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  setup-exe:
+    name: Build unsigned NSIS Setup.exe
+    runs-on: windows-2025
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: easyclip-desktop
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: easyclip-desktop/package-lock.json
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@258712b0b7b1ddf8bddc9fc3b0faca682b2736c3 # v2
+        with:
+          workspaces: easyclip-desktop/src-tauri
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Download and verify local media engines
+        shell: pwsh
+        run: ./scripts/prepare-windows-resources.ps1
+
+      - name: Verify packaged engines and model
+        shell: pwsh
+        run: |
+          $ffmpeg = Resolve-Path "src-tauri/resources/bin/ffmpeg.exe"
+          $whisper = Resolve-Path "src-tauri/resources/bin/whisper-cli.exe"
+          $model = Resolve-Path "src-tauri/resources/models/ggml-base.bin"
+          $filters = (& $ffmpeg -hide_banner -filters 2>&1 | Out-String)
+          $encoders = (& $ffmpeg -hide_banner -encoders 2>&1 | Out-String)
+          if ($filters -notmatch "subtitles") { throw "FFmpeg build does not contain the libass subtitles filter" }
+          if ($encoders -notmatch "libx264") { throw "FFmpeg build does not contain the CPU H.264 encoder" }
+          & $whisper --version
+          if ($LASTEXITCODE -ne 0) { throw "whisper-cli failed its version check" }
+          if ((Get-Item $model).Length -ne 147951465) { throw "Whisper model size is invalid" }
+
+      - name: Smoke test transcription and Persian subtitle rendering
+        shell: pwsh
+        run: |
+          $ffmpeg = Resolve-Path "src-tauri/resources/bin/ffmpeg.exe"
+          $whisper = Resolve-Path "src-tauri/resources/bin/whisper-cli.exe"
+          $model = Resolve-Path "src-tauri/resources/models/ggml-base.bin"
+          & $ffmpeg -hide_banner -loglevel error -y -f lavfi -i "sine=frequency=440:duration=2" -ar 16000 -ac 1 -c:a pcm_s16le smoke.wav
+          if ($LASTEXITCODE -ne 0) { throw "FFmpeg audio extraction smoke test failed" }
+          & $whisper -m $model -f smoke.wav -l en -t 2 -otxt -np -of smoke-transcript
+          if ($LASTEXITCODE -ne 0) { throw "Whisper model-load smoke test failed" }
+          @("1", "00:00:00,000 --> 00:00:01,800", "سلام EasyClip", "") | Set-Content smoke.srt -Encoding utf8
+          & $ffmpeg -hide_banner -loglevel error -y -f lavfi -i "color=c=black:s=1080x1920:d=2" -vf "subtitles=filename='smoke.srt':fontsdir='src-tauri/resources/fonts':force_style='FontName=Noto Sans Arabic,FontSize=18'" -c:v libx264 -pix_fmt yuv420p smoke-captioned.mp4
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path smoke-captioned.mp4)) { throw "Persian libass rendering smoke test failed" }
+          Remove-Item smoke.wav, smoke.srt, smoke-transcript.txt, smoke-captioned.mp4 -Force -ErrorAction SilentlyContinue
+
+      - name: Build and test frontend
+        run: npm run build
+
+      - name: Run Rust unit tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+
+      - name: Build NSIS installer
+        run: npm run tauri -- build --bundles nsis --target x86_64-pc-windows-msvc
+
+      - name: Stage Setup.exe and checksum
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe" | Select-Object -First 1
+          if ($null -eq $setup) { throw "Tauri did not produce an NSIS Setup.exe" }
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $name = "EasyClip-Desktop-0.2.0-Setup.exe"
+          Copy-Item $setup.FullName (Join-Path artifacts $name)
+          $hash = (Get-FileHash (Join-Path artifacts $name) -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  $name" | Set-Content artifacts/SHA256SUMS.txt -Encoding ascii
+
+      - name: Upload unsigned Windows installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: EasyClip-Desktop-0.2.0-Windows-x64
+          path: |
+            easyclip-desktop/artifacts/EasyClip-Desktop-0.2.0-Setup.exe
+            easyclip-desktop/artifacts/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
