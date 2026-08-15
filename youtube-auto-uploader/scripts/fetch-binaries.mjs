@@ -78,8 +78,16 @@ function extractZip(zip, destination) {
   rmSync(destination, { recursive: true, force: true })
   mkdirSync(destination, { recursive: true })
   if (process.platform === 'win32') {
-    execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command',
-      'Expand-Archive -LiteralPath $args[0] -DestinationPath $args[1] -Force', zip, destination], { stdio: 'inherit' })
+    try {
+      // Windows 10+/Server 2019+ ship bsdtar as tar.exe, which extracts zip archives.
+      execFileSync('tar', ['-x', '-f', zip, '-C', destination], { stdio: 'inherit' })
+    } catch {
+      // Fallback: Expand-Archive with paths passed via environment variables
+      // (previously "-Command ... $args[0]" received null because -Command does not populate $args).
+      execFileSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command',
+        'Expand-Archive -LiteralPath $env:FB_ZIP -DestinationPath $env:FB_DEST -Force'],
+      { stdio: 'inherit', env: { ...process.env, FB_ZIP: zip, FB_DEST: destination } })
+    }
   } else {
     execFileSync('unzip', ['-q', zip, '-d', destination], { stdio: 'inherit' })
   }
