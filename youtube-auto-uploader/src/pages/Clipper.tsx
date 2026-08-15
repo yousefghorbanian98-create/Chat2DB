@@ -23,6 +23,7 @@ export function Clipper(): JSX.Element {
   const [pull, setPull] = useState<{ percent: number; status: string }>();
   const [progress, setProgress] = useState<{ phase: string; percent: number; message?: string }>();
   const [clips, setClips] = useState<ClipRow[]>([]);
+  const [jobId, setJobId] = useState<string>();
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
   const checkOllama = useCallback(async (): Promise<void> => {
@@ -48,12 +49,19 @@ export function Clipper(): JSX.Element {
     if (!url && !file) { toast.error('Choose a YouTube URL or local video'); return; }
     try {
       setRunning(true);
-      await window.api.clipper.start({ url: url || undefined, localPath: file, model, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      setJobId(handle.jobId);
       toast.success('Clipping pipeline started');
     } catch (error: unknown) {
       setRunning(false);
       toast.error(error instanceof Error ? error.message : String(error));
     }
+  };
+
+  const cancel = async (): Promise<void> => {
+    if (!jobId) return;
+    await window.api.clipper.cancel(jobId);
+    toast.info('Cancelling…');
   };
 
   const pullModel = async (): Promise<void> => {
@@ -103,7 +111,7 @@ export function Clipper(): JSX.Element {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <Toggle label="Auto captions" value={captions} set={setCaptions}/><Toggle label="Smart zoom" value={smartZoom} set={setSmartZoom}/><Toggle label="Background music" value={music} set={setMusic}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/>
         </div>
-        <button disabled={running} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>
+        <div className="flex gap-2"><button disabled={running} className="btn btn-primary flex-1 flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>{running && <button className="btn" onClick={() => void cancel()}>Cancel</button>}</div>
       </div>
     </div>
 

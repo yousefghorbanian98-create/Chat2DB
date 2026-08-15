@@ -1,13 +1,13 @@
 import type { AppSettings, AuthState, Channel, JobHandle, VideoMetadata } from '../../electron/types';
 import type { ClipRow } from '../global';
 
-const settings: AppSettings = { language: 'en', theme: 'dark', defaultPrivacy: 'unlisted', downloadConcurrency: 2, uploadConcurrency: 1, keepDownloads: false, autoStartMonitor: true, minimizeToTray: true, ollamaEndpoint: 'http://127.0.0.1:11434', defaultModel: 'qwen2.5:7b-instruct-q4_0', acceptedCopyright: true, onboardingComplete: true, devtools: false };
+const settings: AppSettings = { language: 'en', theme: 'dark', defaultPrivacy: 'unlisted', downloadConcurrency: 2, uploadConcurrency: 1, keepDownloads: false, autoStartMonitor: true, minimizeToTray: true, ollamaEndpoint: 'http://127.0.0.1:11434', defaultModel: 'qwen2.5:7b-instruct-q4_0', acceptedCopyright: true, onboardingComplete: true, devtools: false, whisperExecutablePath: '', whisperModelPath: '' };
 const auth: AuthState = { authenticated: true, hasCredentials: true, account: { email: 'preview@example.com', name: 'Preview Creator', channelName: 'Preview Channel' } };
 const jobs: Array<Record<string, unknown>> = [
   { id: 1, source_title: 'Product launch highlight', status: 'success', upload_type: 'clipper', created_at: new Date().toISOString(), uploaded_url: 'https://youtube.com' },
   { id: 2, source_title: 'Weekly tutorial', status: 'pending', upload_type: 'auto_sync', created_at: new Date().toISOString() }
 ];
-const channels: Channel[] = [{ id: 1, youtube_channel_id: 'UCpreview', channel_name: 'Example Source', channel_handle: '@example', thumbnail_url: null, interval_hours: 6, auto_upload: 0, privacy: 'unlisted', is_active: 1, last_checked_at: new Date().toISOString(), last_error: null }];
+const channels: Channel[] = [{ id: 1, youtube_channel_id: 'UCpreview', channel_name: 'Example Source', channel_handle: '@example', thumbnail_url: null, interval_hours: 6, auto_upload: 0, privacy: 'unlisted', is_active: 1, last_checked_at: new Date().toISOString(), last_error: null, custom_cron: null, etag: null, next_retry_at: null, consecutive_failures: 0 }];
 const clips: ClipRow[] = [];
 const handle = (): JobHandle => ({ jobId: crypto.randomUUID() });
 
@@ -21,10 +21,10 @@ export function installBrowserMock(): void {
       playlist: async () => []
     },
     upload: { single: async () => handle(), batch: async (inputs) => inputs.map(handle), list: async (filter) => filter ? jobs.filter((job) => job.status === filter) : jobs, exportHistory: async () => null, cancel: async () => undefined, approve: async () => handle(), reject: async () => undefined, retry: async () => handle(), pause: async () => undefined, resume: async () => undefined },
-    clipper: { start: async () => handle(), clips: async () => clips, update: async () => undefined, export: async () => null, upload: async () => handle() },
+    clipper: { start: async () => handle(), cancel: async () => undefined, clips: async () => clips, update: async () => undefined, export: async () => null, upload: async () => handle() },
     quota: { state: async () => ({ used: 3200, remaining: 6800, limit: 10000 }) },
     ollama: { status: async () => ({ running: true, models: ['qwen2.5:7b-instruct-q4_0'] }), pull: async () => undefined },
-    settings: { getAll: async () => settings, set: async (patch) => Object.assign(settings, patch), pickDir: async () => null, pickFile: async () => null, pickImage: async () => null },
+    settings: { getAll: async () => settings, set: async (patch) => Object.assign(settings, patch), pickDir: async () => null, pickFile: async () => null, pickImage: async () => null, pickExe: async () => null, pickModel: async () => null },
     openExternal: async () => undefined,
     on: () => () => undefined
   };
