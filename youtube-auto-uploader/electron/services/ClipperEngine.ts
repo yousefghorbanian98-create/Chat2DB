@@ -8,6 +8,7 @@ import type { ClipInput, JobHandle, JobProgress } from '../types';
 import type { DownloadService } from './DownloadService';
 import type { FFmpegService, MediaAnalysis } from './FFmpegService';
 import type { OllamaService } from './OllamaService';
+import type { WhisperService } from './WhisperService';
 
 interface Cue { start: number; end: number; text: string }
 interface Candidate { start: number; end: number; score: number; transcript: string }
@@ -108,28 +109,40 @@ export class ClipperEngine {
     private readonly temp: string,
     private readonly musicPath: string | undefined,
     private readonly fontsDirectory: string,
-    private readonly emit: (channel: string, value: unknown) => void
+    private readonly emit: (channel: string, value: unknown) => void,
+    private readonly whisper?: WhisperService
   ) {}
+
+  private readonly controllers = new Map<string, AbortController>();
 
   start(input: ClipInput): JobHandle {
     const jobId = crypto.randomUUID();
-    void this.process(jobId, input);
+    const controller = new AbortController();
+    this.controllers.set(jobId, controller);
+    void this.process(jobId, input, controller.signal).finally(() => this.controllers.delete(jobId));
     return { jobId };
   }
+
+  /** Aborts an active clipping pipeline; the running yt-dlp/ffmpeg/whisper child is killed. */
+  cancel(jobId: string): void { this.controllers.get(jobId)?.abort(); }
+
+  /** Aborts every active pipeline (used during app shutdown). */
+  shutdown(): void { for (const controller of this.controllers.values()) controller.abort(); }
 
   private progress(jobId: string, phase: string, percent: number, message?: string): void {
     const value: JobProgress = { jobId, phase, percent, message };
     this.emit('job:progress', value);
   }
 
-  private async process(jobId: string, input: ClipInput): Promise<void> {
+  private async process(jobId: string, input: ClipInput, signal?: AbortSignal): Promise<void> {
     try {
       const directory = path.join(this.temp, jobId);
       await mkdir(directory, { recursive: true });
       this.progress(jobId, 'download', 2);
       let source = input.localPath;
-      if (!source && input.url) source = await this.downloads.download(input.url, directory, 'bestvideo[height<=1080]+bestaudio/best', (percent) => this.progress(jobId, 'download', percent));
+      if (!source && input.url) source = await this.downloads.download(input.url, directory, 'bestvideo[height<=1080]+bestaudio/best', (percent) => this.progress(jobId, 'download', percent), signal);
       if (!source) throw new Error('Choose a URL or local video');
+      if (signal?.aborted) throw new Error('Cancelled');
       const probe = await this.ffmpeg.probe(source);
       this.progress(jobId, 'audio-scenes', 20, 'Analyzing audio, silence, and scene changes');
       const analysis = await this.ffmpeg.analyze(source);
@@ -137,10 +150,15 @@ export class ClipperEngine {
       let cues: Cue[] = [];
       if (input.url) {
         try {
-          const captionsPath = await this.downloads.captions(input.url, directory);
+          const captionsPath = await this.downloads.captions(input.url, directory, signal);
           if (captionsPath) cues = parseVtt(await readFile(captionsPath, 'utf8'));
         } catch { cues = []; }
       }
+      if (!cues.length && this.whisper?.available()) {
+        this.progress(jobId, 'transcript', 36, 'No captions found; transcribing locally with Whisper');
+        try { cues = await this.whisper.transcribe(source, directory, signal); } catch { cues = []; }
+      }
+      if (signal?.aborted) throw new Error('Cancelled');
       const ranked = candidates(probe.duration, input.maxLength, cues, analysis).slice(0, input.count * 3);
       const prompt = `You are an expert short-form video editor. Given candidate segments, pick EXACTLY ${String(input.count)} most viral clips for YouTube Shorts. Prioritize emotional spikes, surprise, controversy, punchlines, game-winning moments, revelations, calls to action, and funny moments. Category: ${input.category}. Maximum duration ${String(input.maxLength)} seconds. Candidates: ${JSON.stringify(ranked)}. For each clip return start, end, score 1-10, title no more than 70 characters, hook, 3-5 hashtags, and reason. Return ONLY JSON {"clips":[...]}; no prose or markdown.`;
       this.progress(jobId, 'llm', 45);
@@ -154,6 +172,7 @@ export class ClipperEngine {
       }
       if (!parsed) throw new Error('Model returned invalid clips');
       for (const [index, suggested] of parsed.clips.entries()) {
+        if (signal?.aborted) throw new Error('Cancelled');
         const start = Math.max(0, snap(suggested.start, analysis.silences));
         const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end, analysis.silences));
         if (end <= start + 1) continue;

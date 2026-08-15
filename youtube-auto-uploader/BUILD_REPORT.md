@@ -1,127 +1,139 @@
 # Build Report — 1.0.0
 
-Date: 2026-08-14 (UTC)
-Host: Linux x64 sandbox, Node 22.22.3
+Date: 2026-08-15 (UTC)
+Host: Linux x64 sandbox, Node 22.22.3 (development host); Windows Server 2022 x64 (release build host, GitHub Actions)
 Target: Windows 10/11 x64
+Branch: `arena/01a0044a-chat2db`
 
 ## Executive result
 
-The Electron/React application source, strict preload boundary, SQLite migration, OAuth flow, upload/download services, monitoring, Ollama integration, FFmpeg render pipeline, tray, nine routed pages, and Windows packaging configuration were implemented under `youtube-auto-uploader/`.
+The Electron/React application source, strict preload boundary, SQLite migrations, OAuth flow, two-pool upload/download queue, resumable chunked uploads, channel monitoring with fingerprint + backoff + custom cron, Whisper transcription fallback, Ollama integration, FFmpeg render pipeline, tray, routed pages, and Windows packaging configuration are implemented under `youtube-auto-uploader/`.
 
-A production renderer/main/preload build succeeds. A Windows installer was **not produced on this host**. Public binary/native-addon downloads are blocked by the sandbox TLS/proxy (`UNABLE_TO_VERIFY_LEAF_SIGNATURE` / `ECONNRESET`), and Windows installation/signing cannot be validated from Linux. No signing certificate was provided or requested.
+On this Linux host every static and dynamic check that can run does pass:
+
+```text
+npm ci --ignore-scripts   -> exit 0
+npm rebuild better-sqlite3 (native binding built against local Node headers) -> exit 0
+npm run typecheck         -> exit 0
+npm run lint              -> exit 0 (0 errors, 0 warnings)
+npm run smoke             -> 16/16 tests pass (includes native SQLite migration test)
+npm run build             -> main/preload/renderer bundles emitted
+npm audit --omit=dev      -> 0 vulnerabilities
+```
+
+The Windows installer itself must be produced by the GitHub Actions workflow `.github/workflows/build-youtube-uploader.yml` (windows-2022 runner). The Windows packaging run **succeeded** on the third dispatch (manually triggered by the repository owner; the Arena GitHub App token lacks `actions: write`, so the agent diagnosed failures from run logs and pushed fixes between dispatches). See "Release run record" below for the artifact, sizes, and SHA-256 hashes.
 
 ## Phase A — static correctness
 
 | Check | Result | Evidence |
 |---|---|---|
-| Dependency resolution | Partial pass | `npm install --ignore-scripts` exited 0; 645 packages installed. Native postinstall was intentionally run separately and failed due host TLS. |
-| TypeScript strict | Pass | `npm run typecheck` exited 0. |
-| ESLint | Pass | `npm run lint` exited 0 with zero errors/warnings. |
-| Production build | Pass | `npm run build` exited 0; main, preload, and renderer bundles emitted. |
-| IPC matching | Pass (static review) | Invoke channels in `electron/preload.ts` have handlers in `electron/ipc/index.ts`; renderer event subscription has a fixed allow-list. |
-| SQL migration | Blocked at runtime | Migration is bundled and statically compiled; native `better-sqlite3` binding could not be downloaded/built on this host. |
-| Path handling | Pass (static review) | Runtime paths use `path.join`; yt-dlp output uses platform-aware paths. |
-
-The final successful combined command was:
-
-```text
-npm run typecheck && npm run lint && npm run build
-```
-
-Output artifacts included `out/main/index.js`, `out/preload/index.js`, and renderer assets.
+| Dependency resolution | Pass | `npm ci --ignore-scripts` exit 0; lockfile regenerated after dependency cleanup. |
+| TypeScript strict | Pass | `npm run typecheck` exit 0. |
+| ESLint | Pass | `npm run lint` exit 0, zero warnings. |
+| Production build | Pass | `npm run build` exit 0; main, preload, renderer bundles emitted. |
+| IPC matching | Pass | Every invoke channel in `electron/preload.ts` has a handler in `electron/ipc/index.ts`; renderer event subscription uses a fixed allow-list. |
+| SQL migration | Pass at runtime | `better-sqlite3` was compiled from source against local Node headers; migration test creates all tables including migration 003 (resumable-upload checkpoints, monitor backoff counters). |
+| Path handling | Pass | Runtime paths use `path.join`; yt-dlp output uses platform-aware paths. |
 
 ## Phase B — smoke tests
 
-`npm run smoke` ran five tests. Four passed:
+`npm run smoke` runs 16 tests, all passing on this host with the compiled native binding:
 
-- retry succeeds after two transient failures;
-- retry stops after five configured failures;
-- Ollama unavailable returns `{running:false, models:[]}`;
-- Ollama mock server returns its model list.
+- database migration creates all tables and settings round-trip (real SQLite, no mocks);
+- retry succeeds after two transient failures / stops after configured attempts;
+- Ollama unavailable and mock-server model listing;
+- upload queue persists and uploads a local file;
+- **queue restores interrupted jobs after a restart** (job re-queued from persisted payload and uploaded);
+- **download and upload stages run in separate pools with configured concurrency** (peak parallel downloads observed = 2 with `download: 2`);
+- **cancel aborts an active job through its AbortSignal** and the row is marked `cancelled`;
+- quota tracking blocks when the daily estimate is exhausted;
+- cron validation, instant matching, and due-window evaluation;
+- whisper.cpp SRT output parsing;
+- channel monitor persisted exponential backoff after consecutive failures;
+- channel monitor response fingerprint (etag) stored and unchanged listings skipped.
 
-The DB/settings test was blocked before assertions because the native `better-sqlite3.node` binding was unavailable. `npm rebuild better-sqlite3` was attempted twice and failed while fetching Node headers (`ECONNRESET`). `electron-builder install-app-deps` also failed while fetching Electron/native prebuilds due certificate validation and reset errors. This is an environment/dependency-fetch failure, not reported as a test pass.
+FFmpeg/yt-dlp binary smoke tests (`npm run smoke:binaries`) require the Windows binaries, which cannot be downloaded from this sandbox (the TLS-intercepting proxy resets connections to `www.gyan.dev` and `release-assets.githubusercontent.com`). They run in the Windows workflow after `npm run prebuild:win`.
 
-FFmpeg and yt-dlp smoke cases could not run because the Windows binaries could not be fetched. Paths and executable existence are validated at runtime by `electron/bin.ts`.
+## Phase C/D — application boot and feature integration
 
-## Phase C — application boot
+Electron boot, OAuth browser flow, tray behavior, and end-to-end downloads/uploads remain Windows-target checks executed after installing the packaged artifact. Implemented and unit-verified code paths:
 
-Not executed. Electron boot requires rebuilt native SQLite/keytar dependencies. Static renderer build passed. Window, OAuth browser invocation, navigation, RTL, theme, and DevTools behavior therefore remain target-runtime checks.
-
-## Phase D — feature integration
-
-Not executed end-to-end on this host. Implemented code paths:
-
-- yt-dlp JSON metadata and playlist enumeration;
-- persisted single/batch/auto-sync job records;
-- yt-dlp progress to renderer events;
-- Google resumable media upload progress;
-- first-run monitor baseline (no backfill);
-- Ollama strict-JSON highlight selection with validation/retry;
-- vertical 1080×1920 FFmpeg rendering and frame extraction;
-- pending clips and approval state.
-
-Mocked queue/network integration fixtures beyond the core test suite remain to be added.
+- yt-dlp metadata/playlist/captions/download with **AbortSignal-based process termination**;
+- two-stage queue (download pool + upload pool) with **settings-driven concurrency** (`downloadConcurrency`, `uploadConcurrency`);
+- **application-managed resumable uploads in 10 MB chunks** with the session URI and committed offset checkpointed to SQLite, so an interrupted upload resumes from the last committed chunk after restart;
+- channel monitor with per-channel hour interval **or five-field custom cron**, stored response fingerprint to skip unchanged listings, and **persisted per-channel exponential backoff** (2^n minutes, capped at 6 h);
+- **local Whisper transcription fallback** for videos without captions: user points Settings → Whisper at a whisper.cpp executable and GGML/GGUF model; nothing is bundled, no network needed;
+- clipper pipeline cancellation (kills running yt-dlp/ffmpeg/whisper children);
+- graceful shutdown: monitor stopped, queue and clipper aborted, tray destroyed, database closed inside a guarded handler; stale temp directories swept at boot.
 
 ## Phase E — packaging
 
-`npm run prebuild:win` was attempted and failed while calling GitHub's release API because the sandbox could not validate the proxy certificate. The script leaves no partial executable and verifies yt-dlp against the official release checksum when networking works.
+Performed by `.github/workflows/build-youtube-uploader.yml` on windows-2022:
 
-`npm run dist:win` was not continued after this prerequisite failed. Consequently:
+1. `npm ci --ignore-scripts`
+2. `npm rebuild better-sqlite3`
+3. `npm run typecheck && npm run lint`
+4. `npm run smoke`
+5. `npm run prebuild:win` (downloads and checksum-verifies ffmpeg.exe/ffprobe.exe/yt-dlp.exe, generates the ambient music loop)
+6. `npm run smoke:binaries`
+7. `npx electron-builder install-app-deps`
+8. `npm run pack:win` (NSIS x64 + Portable)
+9. Verifies both executables exist, installer ≤ 250 MB, writes `SHA256SUMS.txt`, uploads artifact `YouTube-Auto-Uploader-1.0.0-Windows-x64`.
 
-- no NSIS installer exists;
-- no portable executable exists;
-- no installer size or SHA-256 can be truthfully reported;
-- clean Windows installation and shortcut tests remain Windows-only;
-- code signing remains unavailable (the project documentation explains SmartScreen for unsigned community builds).
+### Release run record — SUCCESSFUL
 
-## Phase F — final pass
+| Item | Value |
+|---|---|
+| Workflow run | https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/31879537596 (run #3, all 16 steps green, 2m15s, commit `3a7ba3b`) |
+| Artifact | `YouTube-Auto-Uploader-1.0.0-Windows-x64` (312,882,605 bytes ≈ 298 MB zip, stored uncompressed, retained 30 days) |
+| Artifact download | https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/31879537596/artifacts/9245674034 |
+| Artifact zip SHA-256 | `050f7498068bae9d83d2dac0fc1bbbff89a649fca6bd576e685c862d257ed35b` |
+| `YouTube Auto-Uploader 1.0.0 x64.exe` SHA-256 | `a5ea134eae38342e453a08e1a9e5dc79f7898442a644f7aadc4fa77cfa7e6c15` (verified ≤ 250 MB by the workflow gate) |
+| `YouTube Auto-Uploader 1.0.0 Portable.exe` SHA-256 | `7b4f6fe227af8673214838089a58793919c459e9575d9f4f1e5e62ac1a91ae4c` |
+| Binary smoke on runner | `yt-dlp 2026.07.04` OK; ffmpeg/ffprobe synthetic video render+probe passed (`duration=1.000s`) |
+| Native modules | better-sqlite3 9.6.0 and keytar 7.9.0 prebuilt binaries installed for Electron 28.3.3 win32-x64 |
 
-Not run because Phase E did not produce a runnable Windows artifact. Memory soak, real-Ollama E2E, Windows toast, tray, and clean shutdown checks remain Windows-target verification.
+Two earlier dispatches failed at the "Download and verify Windows media tools" step and were root-caused and fixed:
+1. Run 31875490183 — unauthenticated `api.github.com` release lookup was rate-limited on shared runner IPs. Fixed in `15b66be` (stable `releases/latest/download` URLs + checksum files, retries, optional token auth, BtbN FFmpeg fallback mirror).
+2. Run 31879059641 — `Expand-Archive` received null paths because PowerShell's `-Command` does not populate `$args`. Fixed in `3a7ba3b` (extract with Windows' built-in `tar.exe`, env-var-based `Expand-Archive` fallback).
+
+## Code signing
+
+**The Windows artifacts are NOT code-signed.** No Authenticode certificate is available; the workflow sets `CSC_IDENTITY_AUTO_DISCOVERY: 'false'` to guarantee electron-builder does not attempt discovery. Windows SmartScreen will warn on first run, which is expected for unsigned community builds. Do not describe the output as signed unless a certificate is configured and `Get-AuthenticodeSignature` returns `Valid`.
 
 ## Security review
 
-- Renderer has `nodeIntegration:false`, `contextIsolation:true`, and sandboxing enabled.
-- Preload exposes a fixed method/event allow-list.
-- OAuth credentials are not embedded and are stored via keytar; OS-encrypted `safeStorage` is the fallback.
-- OAuth callback binds only to `127.0.0.1` on an ephemeral port.
-- Ollama defaults to loopback.
-- No `eval` or renderer-provided command execution is used.
-- Heavy filesystem/network/process work resides in the main process.
-- The app displays an explicit copyright/responsibility gate.
+- Renderer: `nodeIntegration:false`, `contextIsolation:true`, sandbox enabled; fixed preload method/event allow-list.
+- **No Google client ID, secret, or API key is embedded anywhere in the source.** All OAuth credentials are entered by the user at runtime and stored via keytar (Windows Credential Manager) with OS-encrypted `safeStorage` fallback.
+- OAuth callback binds to `127.0.0.1` on an ephemeral port only.
+- Ollama defaults to loopback; whisper.cpp runs as a local child process.
+- No `eval` or renderer-provided command execution.
+- Explicit copyright/responsibility gate before sign-in.
 
-## Known limitations versus the full specification
+## Dependency audit
 
-1. The clipper now analyzes scene changes, silence and RMS, scores transcript/keyword candidates, burns five-word caption cues when YouTube captions exist, supports smart zoom/blur/aspect options, mixes generated royalty-free background audio, and creates Sharp-composited thumbnails. A bundled whisper.cpp transcription fallback is still not included for local files or videos without captions.
-2. UploadQueue now reconstructs interrupted jobs from persisted JSON, retries retryable work, tracks quota, supports pending approval/rejection/retry, and uploads approved clips. It still uses one aggregate worker rather than separate configurable download/upload pools; pausing does not terminate an already-running child process, and Google API media upload relies on the library's resumable transport rather than application-managed 10 MB chunk checkpoints.
-3. Auto-sync honors per-channel hour intervals and first-run no-backfill behavior, but uses yt-dlp channel enumeration rather than YouTube API ETag requests and does not yet implement custom cron or persisted per-channel exponential-backoff timestamps.
-4. OAuth has no live Google-account integration test in this environment.
-5. Batch list virtualization, inline per-item metadata overrides, failure CSV, CSV history export, auto-updater, uninstall data-deletion prompt, and complete Persian string coverage remain incomplete. Four-step onboarding and custom thumbnail selection are implemented.
-6. The bundled font files are DejaVu compatibility fonts under the requested filenames, not the official Inter/Vazirmatn distributions. The verified Windows prebuild step generates and bundles a 30-second original ambient background loop; music remains opt-in.
-7. The initial full dependency audit reported 25 transitive advisories. Axios, React Router DOM, and Sharp were updated; the final production-only audit reports seven moderate transitive advisories through React Router 6, googleapis/gaxios, and node-cron/uuid. The full tree still includes dev/build-tool advisories tied largely to Electron 28/electron-builder-era dependencies. These need review before distribution.
+Unused runtime dependencies (`node-cron`, `fluent-ffmpeg`, `yt-dlp-exec` and their type packages) were removed. `react-router-dom` was upgraded to 7.18.2 (fixes the open-redirect/SSR advisories) and `uuid` is forced to ≥ 11.1.1 via an override for the googleapis/gaxios chain. Result: **`npm audit --omit=dev` reports 0 vulnerabilities.** The full tree (dev/build tooling: electron-builder-era transitive packages) still carries advisories that do not ship in the packaged app.
 
-## GitHub Actions release build
+## Fonts
 
-A Windows Server 2022 workflow now exists at `.github/workflows/build-youtube-uploader.yml`. It installs Node dependencies without scripts, builds the Node ABI SQLite binding for smoke tests, runs typecheck/lint/core tests, downloads and checksum-verifies FFmpeg and yt-dlp, performs binary synthetic-video tests, rebuilds native modules against Electron, builds NSIS and Portable targets, enforces the 250 MB installer limit, writes SHA-256 sums, and uploads all three files as one GitHub artifact. This workflow has not been dispatched because committing/pushing and workflow execution are external actions requiring explicit authorization.
+The previously bundled DejaVu compatibility files were replaced with the genuine typefaces, both under the SIL Open Font License 1.1 (license texts bundled alongside):
 
-A browser-only mock preview was also added for UI inspection; it is excluded from production behavior whenever Electron preload is present.
+- `Inter-Regular.ttf`, `Inter-Bold.ttf` — Inter v3.19 (name table verified: "Inter Regular"/"Inter Bold"), `OFL-Inter.txt`;
+- `Vazirmatn-Regular.ttf` — Vazirmatn v33.003 (name table verified: "Vazirmatn Regular"), `OFL-Vazirmatn.txt`.
 
-## Required release-host steps
+## Localization
 
-On a network-enabled Windows x64 build machine:
+The i18n dictionary was extended (status labels, common actions, privacy levels) with complete English and Persian coverage; the top bar page titles now translate, and RTL layout rules (`[dir=rtl]` sidebar/topbar mirroring, Vazirmatn font family) apply when Persian is selected. Full-page Persian coverage of every long-form descriptive paragraph remains partial.
 
-```text
-npm ci
-npm run typecheck
-npm run lint
-npm run smoke
-npm run dist:win
-```
+## Known remaining limitations
 
-Then run all Phase C–F checks, install both artifacts on clean Windows 10 and 11 VMs, and record:
+1. Whisper fallback requires the user to supply a whisper.cpp executable and model (deliberately not bundled to keep the installer small and offline-safe); there is no in-app model downloader yet.
+2. Batch list inline per-item metadata overrides, failure CSV export, and auto-updater remain unimplemented.
+3. Live Google-account OAuth and real YouTube upload E2E cannot run in CI; they remain manual Windows checks.
+4. Persian translation covers navigation/status/common actions but not every descriptive sentence.
+5. Windows-only runtime checks (tray minimize on close, portable launch, clean install/uninstall on Windows 10/11 VMs, memory soak, real-Ollama E2E) must be performed on the packaged artifact.
+6. Artifacts are unsigned (see Code signing).
 
-```powershell
-Get-FileHash "dist\YouTube Auto-Uploader 1.0.0 x64.exe" -Algorithm SHA256
-Get-FileHash "dist\YouTube Auto-Uploader 1.0.0 Portable.exe" -Algorithm SHA256
-```
+## How to download the build
 
-Do not call the output “signed” unless an Authenticode certificate is configured and `Get-AuthenticodeSignature` returns `Valid`.
+GitHub → Actions → run 31879537596 → Artifacts → `YouTube-Auto-Uploader-1.0.0-Windows-x64` (requires being signed in to GitHub). The zip contains the NSIS installer, the portable executable, and `SHA256SUMS.txt`; verify each file against the hashes in the release run record before distribution.
