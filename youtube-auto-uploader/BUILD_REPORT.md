@@ -21,7 +21,7 @@ npm run build             -> main/preload/renderer bundles emitted
 npm audit --omit=dev      -> 0 vulnerabilities
 ```
 
-The Windows installer itself must be produced by the GitHub Actions workflow `.github/workflows/build-youtube-uploader.yml` (windows-2022 runner). **Dispatching that workflow from this environment is currently blocked**: the Arena GitHub App token returns `HTTP 403: Resource not accessible by integration` for `workflow_dispatch`, run re-runs, and any push that modifies a workflow file (missing `actions: write` / `workflows` permissions). The workflow file is present on this branch and supports manual dispatch — a repository maintainer needs to run it once from the Actions tab with branch `arena/01a0044a-chat2db` selected (or grant the app the `actions`/`workflows` permissions). Once the run succeeds, the sizes and SHA-256 hashes below must be filled in from the run's `SHA256SUMS.txt`.
+The Windows installer itself must be produced by the GitHub Actions workflow `.github/workflows/build-youtube-uploader.yml` (windows-2022 runner). The Windows packaging run **succeeded** on the third dispatch (manually triggered by the repository owner; the Arena GitHub App token lacks `actions: write`, so the agent diagnosed failures from run logs and pushed fixes between dispatches). See "Release run record" below for the artifact, sizes, and SHA-256 hashes.
 
 ## Phase A — static correctness
 
@@ -80,13 +80,22 @@ Performed by `.github/workflows/build-youtube-uploader.yml` on windows-2022:
 8. `npm run pack:win` (NSIS x64 + Portable)
 9. Verifies both executables exist, installer ≤ 250 MB, writes `SHA256SUMS.txt`, uploads artifact `YouTube-Auto-Uploader-1.0.0-Windows-x64`.
 
-### Release run record (to be filled from the successful Actions run)
+### Release run record — SUCCESSFUL
 
 | Item | Value |
 |---|---|
-| Workflow run URL | _pending — dispatch requires maintainer (see Executive result)_ |
-| `YouTube Auto-Uploader 1.0.0 x64.exe` size / SHA-256 | _pending_ |
-| `YouTube Auto-Uploader 1.0.0 Portable.exe` size / SHA-256 | _pending_ |
+| Workflow run | https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/31879537596 (run #3, all 16 steps green, 2m15s, commit `3a7ba3b`) |
+| Artifact | `YouTube-Auto-Uploader-1.0.0-Windows-x64` (312,882,605 bytes ≈ 298 MB zip, stored uncompressed, retained 30 days) |
+| Artifact download | https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/31879537596/artifacts/9245674034 |
+| Artifact zip SHA-256 | `050f7498068bae9d83d2dac0fc1bbbff89a649fca6bd576e685c862d257ed35b` |
+| `YouTube Auto-Uploader 1.0.0 x64.exe` SHA-256 | `a5ea134eae38342e453a08e1a9e5dc79f7898442a644f7aadc4fa77cfa7e6c15` (verified ≤ 250 MB by the workflow gate) |
+| `YouTube Auto-Uploader 1.0.0 Portable.exe` SHA-256 | `7b4f6fe227af8673214838089a58793919c459e9575d9f4f1e5e62ac1a91ae4c` |
+| Binary smoke on runner | `yt-dlp 2026.07.04` OK; ffmpeg/ffprobe synthetic video render+probe passed (`duration=1.000s`) |
+| Native modules | better-sqlite3 9.6.0 and keytar 7.9.0 prebuilt binaries installed for Electron 28.3.3 win32-x64 |
+
+Two earlier dispatches failed at the "Download and verify Windows media tools" step and were root-caused and fixed:
+1. Run 31875490183 — unauthenticated `api.github.com` release lookup was rate-limited on shared runner IPs. Fixed in `15b66be` (stable `releases/latest/download` URLs + checksum files, retries, optional token auth, BtbN FFmpeg fallback mirror).
+2. Run 31879059641 — `Expand-Archive` received null paths because PowerShell's `-Command` does not populate `$args`. Fixed in `3a7ba3b` (extract with Windows' built-in `tar.exe`, env-var-based `Expand-Archive` fallback).
 
 ## Code signing
 
@@ -125,6 +134,6 @@ The i18n dictionary was extended (status labels, common actions, privacy levels)
 5. Windows-only runtime checks (tray minimize on close, portable launch, clean install/uninstall on Windows 10/11 VMs, memory soak, real-Ollama E2E) must be performed on the packaged artifact.
 6. Artifacts are unsigned (see Code signing).
 
-## Required maintainer step
+## How to download the build
 
-Open GitHub → Actions → “Build YouTube Auto-Uploader” → Run workflow → select branch `arena/01a0044a-chat2db` → Run. Alternatively grant the Arena GitHub App `actions: write` (and `workflows`) permission so the agent can dispatch and monitor the run itself. After a green run, download artifact `YouTube-Auto-Uploader-1.0.0-Windows-x64` and record the sizes/hashes in the table above.
+GitHub → Actions → run 31879537596 → Artifacts → `YouTube-Auto-Uploader-1.0.0-Windows-x64` (requires being signed in to GitHub). The zip contains the NSIS installer, the portable executable, and `SHA256SUMS.txt`; verify each file against the hashes in the release run record before distribution.
