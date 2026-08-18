@@ -15,12 +15,31 @@ function cleanup() {
 process.once('SIGINT', () => { cleanup(); process.exit(130) })
 process.once('SIGTERM', () => { cleanup(); process.exit(143) })
 
+async function request(url, attempts = 4) {
+  let lastError
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const response = await fetch(url, {
+        redirect: 'follow',
+        headers: { 'User-Agent': 'youtube-auto-uploader-build/1.1' }
+      })
+      if (response.ok) return response
+      lastError = new Error(`Download failed (${response.status}): ${url}`)
+      if (response.status < 500 && response.status !== 429) throw lastError
+    } catch (error) {
+      lastError = error
+    }
+    if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, attempt * 2_000))
+  }
+  throw lastError
+}
+
 async function download(url, file) {
   const partial = `${file}.partial`
   partials.add(partial)
   rmSync(partial, { force: true })
-  const response = await fetch(url, { redirect: 'follow', headers: { 'User-Agent': 'youtube-auto-uploader-build/1.0' } })
-  if (!response.ok || !response.body) throw new Error(`Download failed (${response.status}): ${url}`)
+  const response = await request(url)
+  if (!response.body) throw new Error(`Download returned an empty body: ${url}`)
   await pipeline(Readable.fromWeb(response.body), createWriteStream(partial))
   renameSync(partial, file)
   partials.delete(partial)
@@ -41,19 +60,13 @@ function verify(file, expected, label) {
 async function fetchYtDlp() {
   const exe = path.join(root, 'yt-dlp.exe')
   if (existsSync(exe)) return
-  const response = await fetch('https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest', {
-    headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'youtube-auto-uploader-build/1.0' }
-  })
-  if (!response.ok) throw new Error(`Unable to resolve yt-dlp release (${response.status})`)
-  const release = await response.json()
-  const executable = release.assets.find((asset) => asset.name === 'yt-dlp.exe')
-  const checksums = release.assets.find((asset) => asset.name === 'SHA2-256SUMS')
-  if (!executable || !checksums) throw new Error('Official yt-dlp release assets are incomplete')
-  const sumsResponse = await fetch(checksums.browser_download_url, { headers: { 'User-Agent': 'youtube-auto-uploader-build/1.0' } })
-  if (!sumsResponse.ok) throw new Error('Unable to download yt-dlp checksums')
+  // Fixed "latest/download" URLs avoid unauthenticated GitHub API rate limits
+  // on shared Actions runner addresses.
+  const base = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download'
+  const sumsResponse = await request(`${base}/SHA2-256SUMS`)
   const expected = (await sumsResponse.text()).split('\n').find((line) => /\syt-dlp\.exe\s*$/.test(line))?.trim().split(/\s+/)[0]
   if (!expected) throw new Error('yt-dlp.exe is absent from SHA2-256SUMS')
-  await download(executable.browser_download_url, exe)
+  await download(`${base}/yt-dlp.exe`, exe)
   verify(exe, expected, 'yt-dlp')
 }
 
@@ -74,8 +87,7 @@ async function fetchFfmpeg() {
   if (existsSync(ffmpeg) && existsSync(ffprobe)) return
   const base = 'https://www.gyan.dev/ffmpeg/builds'
   const zip = path.resolve('resources/ffmpeg-release-essentials.zip')
-  const checksumResponse = await fetch(`${base}/ffmpeg-release-essentials.zip.sha256`)
-  if (!checksumResponse.ok) throw new Error('Unable to download FFmpeg checksum')
+  const checksumResponse = await request(`${base}/ffmpeg-release-essentials.zip.sha256`)
   const expected = (await checksumResponse.text()).trim().split(/\s+/)[0]
   await download(`${base}/ffmpeg-release-essentials.zip`, zip)
   verify(zip, expected, 'FFmpeg archive')
