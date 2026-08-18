@@ -4,7 +4,7 @@ export interface AuthState {authenticated:boolean;hasCredentials:boolean;account
 export interface Channel {id:number;youtube_channel_id:string;channel_name:string|null;channel_handle:string|null;thumbnail_url:string|null;interval_hours:number;auto_upload:number;privacy:Privacy;is_active:number;last_checked_at:string|null;last_error:string|null}
 export interface UploadInput {url?:string;localPath?:string;sourceTitle?:string;title?:string;description?:string;tags?:string[];privacy?:Privacy;quality?:string;madeForKids?:boolean;categoryId?:string;thumbnailPath?:string;clipId?:number;uploadType?:'single'|'batch'|'auto_sync'|'clipper'}
 export type AnalysisMode='local'|'hybrid'|'ollama'
-export interface ClipInput {url?:string;localPath?:string;model:string;whisperModel:string;language:'auto'|'fa'|'en';analysisMode:AnalysisMode;count:number;maxLength:number;category:string;aspect:string;captions:boolean;smartZoom:boolean;music:boolean;blurBackground:boolean}
+export interface ClipInput {url?:string;localPath?:string;model:string;whisperModel:string;language:'auto'|'fa'|'en';analysisMode:AnalysisMode;processingProfile?:'fast'|'balanced'|'professional';count:number;maxLength:number;category:string;aspect:string;captions:boolean;smartZoom:boolean;music:boolean;blurBackground:boolean}
 export interface JobProgress {jobId:string;phase:string;percent:number;speed?:string;eta?:string;message?:string}
 export interface ClipperJobState extends JobProgress {status:'running'|'completed'|'failed';startedAt:string;updatedAt:string;error?:string}
 export interface JobHandle {jobId:string}

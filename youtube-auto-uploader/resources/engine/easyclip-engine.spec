@@ -3,13 +3,14 @@ from PyInstaller.utils.hooks import collect_all
 
 ct_datas, ct_bins, ct_hidden = collect_all('ctranslate2')
 fw_datas, fw_bins, fw_hidden = collect_all('faster_whisper')
+pa_datas, pa_bins, pa_hidden = collect_all('pyannote.audio')
 
 a = Analysis(
     ['easyclip_engine.py'],
     pathex=[],
-    binaries=ct_bins + fw_bins,
-    datas=ct_datas + fw_datas,
-    hiddenimports=ct_hidden + fw_hidden + ['yt_dlp'],
+    binaries=ct_bins + fw_bins + pa_bins,
+    datas=ct_datas + fw_datas + pa_datas,
+    hiddenimports=ct_hidden + fw_hidden + pa_hidden + ['yt_dlp', 'torch', 'torchaudio'],
     hookspath=[],
     runtime_hooks=[],
     excludes=[],

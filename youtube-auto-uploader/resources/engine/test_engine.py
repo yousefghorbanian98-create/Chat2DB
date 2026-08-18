@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from easyclip_engine import Word, build_format_selector, caption_groups, pick_highlights, write_srt
+from easyclip_engine import SpeakerTurn, Word, build_format_selector, caption_groups, merge_speaker_turns, pick_highlights, write_srt
 
 
 class EngineTests(unittest.TestCase):
@@ -26,6 +26,13 @@ class EngineTests(unittest.TestCase):
         words = [Word(w.text, i * 1.1, i * 1.1 + 0.9) for i, w in enumerate(words)]
         clips = pick_highlights(words, 20, 3)
         self.assertGreaterEqual(len(clips), 2)
+
+    def test_adjacent_speaker_turns_are_merged(self):
+        turns = [SpeakerTurn("SPEAKER_00", 0, 2), SpeakerTurn("SPEAKER_00", 2.2, 4), SpeakerTurn("SPEAKER_01", 4.1, 6)]
+        merged = merge_speaker_turns(turns)
+        self.assertEqual(len(merged), 2)
+        self.assertEqual(merged[0].end_seconds, 4)
+        self.assertEqual(merged[1].speaker, "SPEAKER_01")
 
     def test_srt_is_relative_to_clip(self):
         words = [Word("Hello", 10, 10.5), Word("world.", 10.6, 11)]

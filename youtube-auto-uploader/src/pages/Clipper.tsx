@@ -31,6 +31,7 @@ export function Clipper(): JSX.Element {
   const [pull, setPull] = useState<{ percent: number; status: string }>();
   const [progress, setProgress] = useState<{ phase: string; percent: number; message?: string }>();
   const [clips, setClips] = useState<ClipRow[]>([]);
+  const [speakerTimeline, setSpeakerTimeline] = useState<{speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}>();
   const activeJobId = useRef<string | undefined>(undefined);
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
@@ -58,6 +59,7 @@ export function Clipper(): JSX.Element {
       setProgress(update);
     });
     const clipUnsubscribe = window.api.on('clip:ready', load);
+    const speakerUnsubscribe = window.api.on('speaker:timeline', (value) => setSpeakerTimeline(value as {speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}));
     const pullUnsubscribe = window.api.on('ollama:pull-progress', (value) => setPull(value as { percent: number; status: string }));
     const doneUnsubscribe = window.api.on('job:done', (value) => {
       const result = value as { jobId: string; error?: string };
@@ -66,7 +68,7 @@ export function Clipper(): JSX.Element {
       setRunning(false); load();
       if (result.error) toast.error(result.error); else toast.success('Highlight clips are ready');
     });
-    return () => { progressUnsubscribe(); clipUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
+    return () => { progressUnsubscribe(); clipUnsubscribe(); speakerUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
   }, [checkEngines, load]);
 
   const applyProfile = (next: 'fast'|'balanced'|'professional'): void => {
@@ -103,7 +105,7 @@ export function Clipper(): JSX.Element {
     if (!url && !file) { toast.error('Choose a YouTube URL or local video'); return; }
     try {
       setRunning(true);
-      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, processingProfile: profile, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
       activeJobId.current = handle.jobId;
       toast.success('Clipping continues in the background when you change pages');
     } catch (error: unknown) {
@@ -168,7 +170,7 @@ export function Clipper(): JSX.Element {
 
     {progress&&<div className="editor-progress"><div className="flex justify-between mb-2"><span className="flex gap-2"><Loader2 className="animate-spin text-violet-400" size={13}/>{progress.phase} · {progress.message}</span><b>{progress.percent}%</b></div><div className="progress"><div style={{width:`${progress.percent}%`}}/></div></div>}
 
-    <div className="editor-timeline"><div className="timeline-tools"><b>Timeline</b><div className="tool-row"><button><Scissors size={13}/></button><button><Trash2 size={13}/></button><button><ZoomOut size={13}/></button><button><ZoomIn size={13}/></button></div><span className="block text-[8px] text-zinc-600 mt-4">{clips.length} generated clips</span></div><div className="timeline-area"><div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div><div className="playhead"/><div className="track"><span className="track-label">VIDEO 1</span><div className="track-clip">{file?.split(/[\\/]/).pop()??'Source video'}</div></div><div className="track audio"><span className="track-label">AUDIO 1</span><div className="track-clip">Speech waveform</div></div><div className="track caption"><span className="track-label">CAPTIONS</span><div className="track-clip">Word-synced captions</div></div></div></div>
+    <div className="editor-timeline"><div className="timeline-tools"><b>Timeline</b><div className="tool-row"><button><Scissors size={13}/></button><button><Trash2 size={13}/></button><button><ZoomOut size={13}/></button><button><ZoomIn size={13}/></button></div><span className="block text-[8px] text-zinc-600 mt-4">{clips.length} generated clips</span></div><div className="timeline-area"><div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div><div className="playhead"/><div className="track"><span className="track-label">VIDEO 1</span><div className="track-clip">{file?.split(/[\\/]/).pop()??'Source video'}</div></div><div className="track audio"><span className="track-label">AUDIO 1</span><div className="track-clip">Speech waveform</div></div><div className="track caption"><span className="track-label">CAPTIONS</span><div className="track-clip">Word-synced captions</div></div>{speakerTimeline?.speakers.slice(0,3).map((speaker,index)=><div className="track" key={speaker}><span className="track-label">{speaker}</span><div className="track-clip" style={{marginLeft:`${index*40}px`,width:`${Math.max(120,speakerTimeline.turns.filter(turn=>turn.speaker===speaker).reduce((sum,turn)=>sum+turn.end_seconds-turn.start_seconds,0)*4)}px`}}>Active speaker</div></div>)}</div></div>
 
     {clips.length>0&&<div className="results-drawer"><div className="panel-heading"><span>Generated highlights</span><div className="flex gap-1"><button className="btn !p-1" onClick={()=>void approveAll()}><Check size={12}/></button><button className="btn !p-1" onClick={()=>void uploadApproved()}><Upload size={12}/></button></div></div>{clips.slice(0,8).map(clip=><div className="result-mini" key={clip.id}><video src={`media://file?path=${encodeURIComponent(clip.local_path)}`}/><div className="min-w-0 flex-1"><span className="badge text-violet-300">{clip.score}/10</span><input className="input mt-2" defaultValue={clip.suggested_title} onBlur={(e)=>void window.api.clipper.update(clip.id,{suggested_title:e.target.value})}/><div className="flex gap-1 mt-1"><button className="btn !p-1" onClick={()=>void window.api.clipper.export(clip.id)}><Download size={11}/></button><button className="btn !p-1" onClick={()=>void window.api.clipper.update(clip.id,{status:'approved'}).then(load)}><Check size={11}/></button></div></div></div>)}</div>}
   </div>;

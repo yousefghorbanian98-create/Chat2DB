@@ -22,6 +22,8 @@ export interface LocalEngineStatus {
 }
 
 export interface LocalModelInfo { name: string; installed: boolean; sizeBytes: number }
+export interface SpeakerTurn { speaker: string; start_seconds: number; end_seconds: number }
+export interface SpeakerTimeline { speakers: string[]; turns: SpeakerTurn[] }
 
 interface EngineResult {
   ok: boolean;
@@ -31,6 +33,8 @@ interface EngineResult {
   cudaAvailable?: boolean;
   recommendedModels?: string[];
   models?: LocalModelInfo[];
+  speakers?: string[];
+  turns?: SpeakerTurn[];
 }
 
 interface EngineProgress {
@@ -68,7 +72,7 @@ export class LocalAIService {
     throw new Error(`Local AI engine is missing: ${executable}`);
   }
 
-  private run(args: string[], onProgress?: (event: EngineProgress) => void, jobId?: string): Promise<EngineResult> {
+  private run(args: string[], onProgress?: (event: EngineProgress) => void, jobId?: string, secretEnv?: Record<string, string>): Promise<EngineResult> {
     const executable = this.executable();
     return new Promise((resolve, reject) => {
       const child = spawn(executable.command, [...executable.prefix, ...args], {
@@ -77,7 +81,8 @@ export class LocalAIService {
           ...process.env,
           PATH: `${this.binaryDirectory}${path.delimiter}${process.env.PATH ?? ''}`,
           PYTHONUTF8: '1',
-          HF_HOME: path.join(this.cacheDirectory, 'models')
+          HF_HOME: path.join(this.cacheDirectory, 'models'),
+          ...secretEnv
         }
       });
       if (jobId) this.children.set(jobId, child);
@@ -167,6 +172,23 @@ export class LocalAIService {
     const child = this.children.get(jobId);
     if (!child) return false;
     return child.kill();
+  }
+
+  async diarize(
+    input: string,
+    outputDirectory: string,
+    token: string,
+    options: { minSpeakers?: number; maxSpeakers?: number; jobId?: string },
+    onProgress?: (event: EngineProgress) => void
+  ): Promise<SpeakerTimeline> {
+    if (!token.startsWith('hf_')) throw new Error('Professional speaker-model access is not configured');
+    const result = await this.run([
+      'diarize', '--input', input, '--output-dir', outputDirectory,
+      '--cache-dir', this.cacheDirectory,
+      '--min-speakers', String(options.minSpeakers ?? 1),
+      '--max-speakers', String(options.maxSpeakers ?? 4)
+    ], onProgress, options.jobId, { HF_TOKEN: token });
+    return { speakers: result.speakers ?? [], turns: result.turns ?? [] };
   }
 
   async analyze(

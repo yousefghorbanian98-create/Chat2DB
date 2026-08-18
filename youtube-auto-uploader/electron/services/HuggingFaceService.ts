@@ -30,6 +30,7 @@ export class HuggingFaceService {
   constructor(private readonly vault: CredentialVault) {}
 
   private async token(): Promise<string | null> { return this.vault.get(SERVICE, ACCOUNT); }
+  async accessToken(): Promise<string | null> { return this.token(); }
 
   private async verifyToken(token: string): Promise<HuggingFaceState> {
     if (!/^hf_[A-Za-z0-9]{20,}$/.test(token.trim())) throw new Error('The access token format is invalid');

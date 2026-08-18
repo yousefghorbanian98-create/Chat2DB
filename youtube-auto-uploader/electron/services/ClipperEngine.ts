@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { z } from 'zod';
@@ -8,7 +8,8 @@ import type Database from 'better-sqlite3';
 import type { ClipperJobState, ClipInput, JobHandle, JobProgress } from '../types';
 import type { DownloadService } from './DownloadService';
 import type { FFmpegService, MediaAnalysis } from './FFmpegService';
-import type { LocalAIService, LocalHighlight } from './LocalAIService';
+import type { LocalAIService, LocalHighlight, SpeakerTimeline } from './LocalAIService';
+import type { HuggingFaceService } from './HuggingFaceService';
 import type { OllamaService } from './OllamaService';
 
 interface FinalHighlight extends LocalHighlight {
@@ -65,6 +66,7 @@ export class ClipperEngine {
     private readonly downloads: DownloadService,
     private readonly ffmpeg: FFmpegService,
     private readonly localAI: LocalAIService,
+    private readonly huggingFace: HuggingFaceService,
     private readonly ollama: OllamaService,
     private readonly temp: string,
     private readonly musicPath: string | undefined,
@@ -160,6 +162,20 @@ export class ClipperEngine {
       this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
       const analysis = await this.ffmpeg.analyze(source);
       this.progress(jobId, 'media-analysis', 55, 'Media analysis complete');
+
+      let speakerTimeline: SpeakerTimeline | undefined;
+      if (input.processingProfile === 'professional') {
+        const token = await this.huggingFace.accessToken();
+        if (!token) throw new Error('Configure professional speaker-model access in Settings before using Professional mode');
+        this.progress(jobId, 'speaker-diarization', 56, 'Identifying active speakers');
+        speakerTimeline = await this.localAI.diarize(source, path.join(directory, 'speakers'), token, { minSpeakers: 1, maxSpeakers: 4, jobId }, (event) => {
+          const percent = typeof event.percent === 'number' ? event.percent : 0;
+          this.progress(jobId, event.stage ?? 'speaker-diarization', 56 + Math.round(percent * 0.08), event.detail);
+        });
+        await writeFile(path.join(directory, 'speaker-timeline.json'), JSON.stringify(speakerTimeline, null, 2), 'utf8');
+        this.emit('speaker:timeline', { jobId, ...speakerTimeline });
+        this.progress(jobId, 'speaker-diarization', 64, `${String(speakerTimeline.speakers.length)} speakers identified`);
+      }
 
       let selected = localCandidates
         .map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))

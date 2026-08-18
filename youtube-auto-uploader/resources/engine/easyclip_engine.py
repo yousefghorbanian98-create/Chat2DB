@@ -19,6 +19,7 @@ import math
 import os
 import re
 import shutil
+import subprocess
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -41,6 +42,13 @@ class Highlight:
     title: str
     transcript: str
     caption_path: str
+
+
+@dataclass
+class SpeakerTurn:
+    speaker: str
+    start_seconds: float
+    end_seconds: float
 
 
 def emit(event: str, **payload: object) -> None:
@@ -313,6 +321,66 @@ def analyze(video: Path, output_dir: Path, model: str, language: str, target: in
     return highlights
 
 
+def merge_speaker_turns(turns: list[SpeakerTurn], gap: float = 0.35) -> list[SpeakerTurn]:
+    merged: list[SpeakerTurn] = []
+    for turn in sorted(turns, key=lambda item: item.start_seconds):
+        if merged and merged[-1].speaker == turn.speaker and turn.start_seconds - merged[-1].end_seconds <= gap:
+            merged[-1].end_seconds = max(merged[-1].end_seconds, turn.end_seconds)
+        else:
+            merged.append(turn)
+    return merged
+
+
+def diarization_cache_path(video: Path, cache_dir: Path) -> Path:
+    stat = video.stat()
+    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|speaker-diarization-3.1"
+    directory = cache_dir / "diarization"
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory / f"{hashlib.sha256(identity.encode('utf-8')).hexdigest()}.json"
+
+
+def diarize_video(video: Path, output_dir: Path, cache_dir: Path, min_speakers: int, max_speakers: int) -> list[SpeakerTurn]:
+    token = os.environ.get("HF_TOKEN", "").strip()
+    if not token:
+        raise RuntimeError("Professional speaker-model access is not configured")
+    cached = diarization_cache_path(video, cache_dir)
+    if cached.is_file():
+        emit("progress", stage="diarization-cache", percent=100, detail="Reusing cached speaker timeline")
+        return [SpeakerTurn(**item) for item in json.loads(cached.read_text(encoding="utf-8"))]
+    output_dir.mkdir(parents=True, exist_ok=True)
+    audio = output_dir / "speaker-analysis.wav"
+    emit("progress", stage="diarization-audio", percent=5, detail="Preparing speech audio")
+    subprocess.run([
+        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video),
+        "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", str(audio)
+    ], check=True)
+    emit("progress", stage="diarization-model", percent=15, detail="Loading encrypted speaker model access")
+    from pyannote.audio import Pipeline
+    try:
+        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", token=token)
+    except TypeError:
+        pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=token)
+    if pipeline is None:
+        raise RuntimeError("Speaker model could not be loaded; verify accepted model terms")
+    try:
+        import torch
+        if torch.cuda.is_available():
+            pipeline.to(torch.device("cuda"))
+            emit("progress", stage="diarization-model", percent=30, detail="Speaker model loaded on NVIDIA GPU")
+        else:
+            emit("progress", stage="diarization-model", percent=30, detail="Speaker model loaded on CPU")
+        result = pipeline(str(audio), min_speakers=min_speakers, max_speakers=max_speakers)
+        annotation = getattr(result, "speaker_diarization", result)
+        turns = [SpeakerTurn(str(label), round(float(segment.start), 3), round(float(segment.end), 3))
+                 for segment, _, label in annotation.itertracks(yield_label=True)]
+        turns = merge_speaker_turns(turns)
+        cached.write_text(json.dumps([asdict(turn) for turn in turns], ensure_ascii=False, indent=2), encoding="utf-8")
+        emit("progress", stage="diarization", percent=100, detail=f"Detected {len(set(turn.speaker for turn in turns))} speakers")
+        return turns
+    finally:
+        audio.unlink(missing_ok=True)
+
+
 def model_cache_path(model: str) -> Path:
     root = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")) / "hub"
     return root / f"models--Systran--faster-whisper-{model}"
@@ -345,6 +413,12 @@ def parser() -> argparse.ArgumentParser:
     prepare.add_argument("--model", required=True)
     remove = sub.add_parser("delete-model")
     remove.add_argument("--model", required=True)
+    diarize = sub.add_parser("diarize")
+    diarize.add_argument("--input", required=True, type=Path)
+    diarize.add_argument("--output-dir", required=True, type=Path)
+    diarize.add_argument("--cache-dir", required=True, type=Path)
+    diarize.add_argument("--min-speakers", type=int, default=1)
+    diarize.add_argument("--max-speakers", type=int, default=4)
     get = sub.add_parser("download")
     get.add_argument("--url", required=True)
     get.add_argument("--output-dir", required=True, type=Path)
@@ -381,6 +455,9 @@ def main() -> int:
             if directory.is_dir():
                 shutil.rmtree(directory)
             output_result(ok=True, models=model_inventory())
+        elif args.command == "diarize":
+            turns = diarize_video(args.input, args.output_dir, args.cache_dir, max(1, args.min_speakers), max(args.min_speakers, args.max_speakers))
+            output_result(ok=True, speakers=sorted(set(turn.speaker for turn in turns)), turns=[asdict(turn) for turn in turns])
         elif args.command == "download":
             path = download(args.url, args.output_dir, args.height)
             output_result(ok=True, path=str(path))
