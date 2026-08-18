@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Bot, Check, Cpu, Download, ExternalLink, FileVideo, Loader2, Trash2, Upload, Zap } from 'lucide-react';
+import { Bot, Captions, Check, ChevronDown, Download, FileAudio, FileVideo, Layers3, Loader2, Pause, Play, Plus, Scissors, SlidersHorizontal, Sparkles, Trash2, Upload, WandSparkles, ZoomIn, ZoomOut } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AnalysisMode } from '../../electron/types';
 import type { ClipRow } from '../global';
@@ -15,6 +15,7 @@ export function Clipper(): JSX.Element {
   const [model, setModel] = useState(recommended[0] ?? '');
   const [localEngine, setLocalEngine] = useState<{ available: boolean; cudaAvailable: boolean; error?: string }>({ available: false, cudaAvailable: false });
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('hybrid');
+  const [profile, setProfile] = useState<'fast'|'balanced'|'professional'>('balanced');
   const [whisperModel, setWhisperModel] = useState('base');
   const [localModels, setLocalModels] = useState<Array<{name:string;installed:boolean;sizeBytes:number}>>([]);
   const [modelBusy, setModelBusy] = useState(false);
@@ -67,6 +68,13 @@ export function Clipper(): JSX.Element {
     });
     return () => { progressUnsubscribe(); clipUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
   }, [checkEngines, load]);
+
+  const applyProfile = (next: 'fast'|'balanced'|'professional'): void => {
+    setProfile(next);
+    if (next === 'fast') { setWhisperModel('tiny'); setAnalysisMode('local'); setSmartZoom(false); setMaxLength(30); }
+    if (next === 'balanced') { setWhisperModel('base'); setAnalysisMode('hybrid'); setSmartZoom(true); setMaxLength(60); }
+    if (next === 'professional') { setWhisperModel('large-v3'); setAnalysisMode('hybrid'); setSmartZoom(true); setCaptions(true); setBlurBackground(true); setMaxLength(90); }
+  };
 
   const toggleWhisperModel = async (): Promise<void> => {
     const current = localModels.find((item) => item.name === whisperModel);
@@ -121,59 +129,50 @@ export function Clipper(): JSX.Element {
     load();
   };
 
-  return <div className="page">
-    <div className="flex justify-between items-start">
-      <div><h1 className="text-2xl font-bold">Local AI Clipper</h1><p className="muted mt-1">Faster-Whisper finds highlights locally; Ollama can optionally refine titles and ranking.</p></div>
-      <button className="btn flex gap-2" onClick={() => void window.api.openExternal('https://ollama.com/download/windows')}><ExternalLink size={17}/> Get Ollama</button>
+  const preview = clips[0];
+  const formatSize = (bytes: number): string => bytes ? `${(bytes / 1_048_576).toFixed(0)} MB` : 'Not installed';
+  return <div className="editor-page">
+    <div className="editor-commandbar">
+      <div className="project-title"><b>{file?.split(/[\\/]/).pop() ?? 'Untitled AI project'}</b><span>{file ? 'Local media · autosaved' : 'Import media to begin'}</span></div>
+      <div className="profile-switch">{(['fast','balanced','professional'] as const).map((name)=><button key={name} className={profile===name?'active':''} onClick={()=>applyProfile(name)}>{{fast:'Fast',balanced:'Balanced',professional:'Professional'}[name]}</button>)}</div>
+      <button className="btn !py-2 flex items-center gap-2"><SlidersHorizontal size={14}/> Project <ChevronDown size={12}/></button>
+      <button className="btn btn-primary !py-2 flex items-center gap-2" disabled={!clips.length} onClick={()=>void uploadApproved()}><Upload size={14}/> Export</button>
     </div>
 
-    <div className="grid grid-cols-2 gap-4 mt-6">
-      <div className={`card p-4 flex items-center justify-between ${localEngine.available ? 'border-green-800' : 'border-red-800'}`}><div className="flex items-center gap-3"><Cpu size={22}/><div><b>{localEngine.available ? 'Faster-Whisper engine is ready' : 'Local engine is missing'}</b><p className="muted text-sm">{localEngine.available ? `${localEngine.cudaAvailable ? 'CUDA GPU' : 'CPU'} transcription · Persian and English` : localEngine.error}</p></div></div><button className="btn" onClick={() => void checkEngines()}>Retry</button></div>
-      <div className={`card p-4 flex items-center justify-between ${ollamaRunning ? 'border-green-800' : 'border-amber-700'}`}><div className="flex items-center gap-3"><Zap size={22}/><div><b>{ollamaRunning ? 'Ollama refinement is ready' : 'Ollama is optional'}</b><p className="muted text-sm">{models.length ? `${String(models.length)} model(s) installed` : 'Local mode works without Ollama.'}</p></div></div><button className="btn" onClick={() => void checkEngines()}>Retry</button></div>
+    <div className="editor-workspace">
+      <aside className="asset-panel">
+        <div className="asset-tabs"><button><FileVideo size={15}/><span>Media</span></button><button><FileAudio size={15}/><span>Audio</span></button><button><Captions size={15}/><span>Text</span></button><button><Sparkles size={15}/><span>AI</span></button></div>
+        <div className="panel-heading"><span>Project media</span><Plus size={14}/></div>
+        <button className="import-zone w-[calc(100%-24px)]" onClick={()=>void window.api.settings.pickFile().then((value)=>value&&setFile(value))}><div><Plus className="mx-auto text-violet-400" size={24}/><b className="block text-zinc-300 text-[11px] mt-2">Import video</b><span className="text-[9px]">or drop media here</span></div></button>
+        <label className="block px-3"><span className="label">Online source</span><input className="input text-[10px]" value={url} onChange={(event)=>setUrl(event.target.value)} placeholder="Paste video URL"/></label>
+        {(file||url)&&<div className="source-card"><div className="aspect-video rounded bg-gradient-to-br from-violet-950 to-slate-900 grid place-items-center"><FileVideo className="text-violet-400" size={24}/></div><b className="mt-2">{file?.split(/[\\/]/).pop()??'Online video'}</b><span>Ready for analysis</span></div>}
+        <div className="panel-heading mt-3"><span>AI engines</span><span className="engine-dot"/></div>
+        <div className="engine-strip"><span className="engine-dot"/><span className="text-[9px] text-zinc-400">Speech · {localEngine.cudaAvailable?'GPU':'CPU'}</span></div>
+        <div className="engine-strip"><span className={`engine-dot ${ollamaRunning?'':'!bg-amber-500'}`}/><span className="text-[9px] text-zinc-400">Language model · {ollamaRunning?'Ready':'Optional'}</span></div>
+      </aside>
+
+      <section className="viewer-column">
+        <div className="viewer-stage"><div className="viewer-canvas">{preview?<video src={`media://file?path=${encodeURIComponent(preview.local_path)}`} poster={`media://file?path=${encodeURIComponent(preview.thumbnail_path)}`}/>:<div className="viewer-empty"><WandSparkles className="mx-auto" size={37}/><b>Your preview appears here</b><span className="text-[9px]">AI framing · {aspect}</span></div>}<div className="safe-zone"/></div></div>
+        <div className="viewer-controls"><button><ZoomOut size={14}/></button><span className="text-[9px]">42%</span><button><ZoomIn size={14}/></button><time>00:00:00</time><button className="play">{running?<Pause size={13}/>:<Play size={13} fill="currentColor"/>}</button><time>{preview?`${Math.round(preview.end_time-preview.start_time)} sec`:'00:00:00'}</time><button><Layers3 size={14}/></button></div>
+      </section>
+
+      <aside className="inspector-panel">
+        <div className="panel-heading"><span>AI inspector</span><WandSparkles className="text-violet-400" size={15}/></div>
+        <div className="inspector-section"><h3>Processing</h3><div className="compact-grid"><label><span className="label">Analysis</span><select className="input" value={analysisMode} onChange={(e)=>setAnalysisMode(e.target.value as AnalysisMode)}><option value="local">Local</option><option value="hybrid">Hybrid</option><option value="ollama">Ollama</option></select></label><label><span className="label">Language</span><select className="input" value={language} onChange={(e)=>setLanguage(e.target.value as 'auto'|'fa'|'en')}><option value="auto">Auto</option><option value="fa">Persian</option><option value="en">English</option></select></label></div>{analysisMode!=='local'&&<div className="mt-3"><span className="label">Local language model</span><div className="flex gap-1"><select className="input text-[10px]" value={model} onChange={(e)=>setModel(e.target.value)}>{[...new Set([...models,...recommended])].map(name=><option key={name}>{models.includes(name)?'★ ':''}{name}</option>)}</select>{!models.includes(model)&&<button className="btn !px-2 text-[9px]" onClick={()=>void pullModel()}>Install</button>}</div>{pull&&<div className="progress mt-2"><div style={{width:`${pull.percent}%`}}/></div>}</div>}</div>
+        <div className="inspector-section"><h3>Speech model</h3><select className="input text-xs" value={whisperModel} onChange={(e)=>setWhisperModel(e.target.value)}>{['tiny','base','small','medium','large-v3'].map(name=><option key={name}>{localModels.find(item=>item.name===name)?.installed?'★ ':''}{name}</option>)}</select><div className="flex justify-between mt-2 text-[9px] text-zinc-500"><span>{localModels.find(item=>item.name===whisperModel)?.installed?'Installed':'Download required'}</span><span>{formatSize(localModels.find(item=>item.name===whisperModel)?.sizeBytes??0)}</span></div><button className="btn w-full mt-2 !py-2 text-[10px]" disabled={modelBusy||running} onClick={()=>void toggleWhisperModel()}>{modelBusy?'Preparing…':localModels.find(item=>item.name===whisperModel)?.installed?'Remove model':'Install model'}</button></div>
+        <div className="inspector-section"><h3>Clip generation</h3><label><span className="label flex justify-between">Highlights <b>{count}</b></span><input type="range" min="3" max="20" value={count} onChange={(e)=>setCount(Number(e.target.value))} className="w-full accent-violet-500"/></label><div className="compact-grid mt-3"><label><span className="label">Duration</span><select className="input" value={maxLength} onChange={(e)=>setMaxLength(Number(e.target.value))}>{[15,30,60,90].map(v=><option key={v} value={v}>{v}s</option>)}</select></label><label><span className="label">Canvas</span><select className="input" value={aspect} onChange={(e)=>setAspect(e.target.value)}>{['9:16','1:1','16:9','4:5'].map(v=><option key={v}>{v}</option>)}</select></label></div><label className="block mt-3"><span className="label">Content category</span><select className="input text-[10px]" value={category} onChange={(e)=>setCategory(e.target.value)}>{['Auto','Sports','Gaming','Educational','Vlog','Comedy','News','Challenge'].map(value=><option key={value}>{value}</option>)}</select></label></div>
+        <div className="inspector-section"><h3>Enhancements</h3><div className="space-y-2"><Toggle label="Dynamic captions" value={captions} set={setCaptions}/><Toggle label="Smart reframing" value={smartZoom} set={setSmartZoom}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/><Toggle label="Background music" value={music} set={setMusic}/></div></div>
+        <div className="p-3 sticky bottom-0 bg-[#111218] border-t border-[#292b38]"><button disabled={running||!localEngine.available||(!file&&!url)} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-40" onClick={()=>void start()}>{running?<Loader2 className="animate-spin" size={16}/>:<Bot size={16}/>} {running?'Analyzing…':'Find highlight moments'}</button>{running&&<button className="btn w-full mt-2 !py-2 text-red-300" onClick={()=>void cancel()}>Cancel job</button>}</div>
+      </aside>
     </div>
 
-    <div className="card p-6 mt-5 grid grid-cols-2 gap-6">
-      <div>
-        <label className="label">YouTube URL</label>
-        <input className="input" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://youtube.com/watch?v=..."/>
-        <div className="text-center muted my-3">or</div>
-        <button className="btn w-full flex justify-center gap-2" onClick={() => void window.api.settings.pickFile().then((value) => value && setFile(value))}><FileVideo size={18}/><span className="truncate">{file ?? 'Choose local video'}</span></button>
-      </div>
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-          <label><span className="label">Analysis</span><select className="input" value={analysisMode} onChange={(event) => setAnalysisMode(event.target.value as AnalysisMode)}><option value="local">Whisper only</option><option value="hybrid">Whisper + optional Ollama</option><option value="ollama">Require Ollama refinement</option></select></label>
-          <div><span className="label">Whisper model</span><select className="input" value={whisperModel} onChange={(event) => setWhisperModel(event.target.value)}>{['tiny','base','small','medium','large-v3'].map((name) => <option key={name}>{localModels.find((item) => item.name === name)?.installed ? '★ ' : ''}{name}</option>)}</select><button type="button" disabled={modelBusy || running} className="btn w-full mt-2" onClick={() => void toggleWhisperModel()}>{modelBusy ? 'Please wait…' : localModels.find((item) => item.name === whisperModel)?.installed ? 'Remove model' : 'Install before processing'}</button></div>
-          <label><span className="label">Speech language</span><select className="input" value={language} onChange={(event) => setLanguage(event.target.value as 'auto'|'fa'|'en')}><option value="auto">Auto detect</option><option value="fa">Persian</option><option value="en">English</option></select></label>
-        </div>
-        {analysisMode !== 'local' && <div><label className="label">Ollama model</label><div className="flex gap-2"><select className="input" value={model} onChange={(event) => setModel(event.target.value)}>{[...new Set([...models, ...recommended])].map((name) => <option key={name} value={name}>{models.includes(name) ? '★ ' : ''}{name}</option>)}</select>{!models.includes(model) && <button className="btn" onClick={() => void pullModel()}>Install</button>}</div></div>}
-        {pull && <div><div className="flex justify-between text-xs muted"><span>{pull.status}</span><span>{pull.percent}%</span></div><div className="progress mt-1"><div style={{ width: `${String(pull.percent)}%` }}/></div></div>}
-        <div><label className="label">Clip count: {count}</label><input type="range" min="3" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} className="w-full accent-red-600"/></div>
-        <div className="grid grid-cols-3 gap-2">
-          <label><span className="label">Max length</span><select className="input" value={maxLength} onChange={(event) => setMaxLength(Number(event.target.value))}>{[15,30,60,90].map((seconds) => <option key={seconds} value={seconds}>{seconds}s</option>)}</select></label>
-          <label><span className="label">Category</span><select className="input" value={category} onChange={(event) => setCategory(event.target.value)}>{['Auto','Sports','Gaming','Educational','Vlog','Comedy','News','Challenge'].map((value) => <option key={value}>{value}</option>)}</select></label>
-          <label><span className="label">Aspect</span><select className="input" value={aspect} onChange={(event) => setAspect(event.target.value)}>{['9:16','1:1','16:9'].map((value) => <option key={value}>{value}</option>)}</select></label>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <Toggle label="Auto captions" value={captions} set={setCaptions}/><Toggle label="Smart zoom" value={smartZoom} set={setSmartZoom}/><Toggle label="Background music" value={music} set={setMusic}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/>
-        </div>
-        <p className="muted text-xs">The selected Whisper model downloads once on first use. Afterward, transcription, ranking, captions, and rendering work offline.</p>
-        <div className="flex gap-2"><button disabled={running || !localEngine.available} className="btn btn-primary flex-1 flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>{running && <button className="btn border-red-700 text-red-300" onClick={() => void cancel()}>Cancel</button>}</div>
-      </div>
-    </div>
+    {progress&&<div className="editor-progress"><div className="flex justify-between mb-2"><span className="flex gap-2"><Loader2 className="animate-spin text-violet-400" size={13}/>{progress.phase} · {progress.message}</span><b>{progress.percent}%</b></div><div className="progress"><div style={{width:`${progress.percent}%`}}/></div></div>}
 
-    {progress && <div className="card p-5 mt-5">
-      <div className="flex justify-between mb-3"><span className="capitalize flex gap-2"><Loader2 className="animate-spin" size={18}/>{progress.phase}: {progress.message}</span><span>{progress.percent}%</span></div>
-      <div className="progress"><div style={{ width: `${String(progress.percent)}%` }}/></div>
-    </div>}
+    <div className="editor-timeline"><div className="timeline-tools"><b>Timeline</b><div className="tool-row"><button><Scissors size={13}/></button><button><Trash2 size={13}/></button><button><ZoomOut size={13}/></button><button><ZoomIn size={13}/></button></div><span className="block text-[8px] text-zinc-600 mt-4">{clips.length} generated clips</span></div><div className="timeline-area"><div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div><div className="playhead"/><div className="track"><span className="track-label">VIDEO 1</span><div className="track-clip">{file?.split(/[\\/]/).pop()??'Source video'}</div></div><div className="track audio"><span className="track-label">AUDIO 1</span><div className="track-clip">Speech waveform</div></div><div className="track caption"><span className="track-label">CAPTIONS</span><div className="track-clip">Word-synced captions</div></div></div></div>
 
-    {clips.length > 0 && <div className="flex justify-end gap-2 mt-6"><button className="btn" onClick={() => void approveAll()}><Check className="inline" size={16}/> Approve all</button><button className="btn btn-primary" onClick={() => void uploadApproved()}><Upload className="inline" size={16}/> Upload approved</button></div>}
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5 mt-4">{clips.map((clip) => <article className="card overflow-hidden" key={clip.id}>
-      <video src={`media://file?path=${encodeURIComponent(clip.local_path)}`} poster={`media://file?path=${encodeURIComponent(clip.thumbnail_path)}`} controls className="w-full aspect-[9/16] max-h-[420px] bg-black"/>
-      <div className="p-4"><div className="flex justify-between"><span className="badge bg-red-950 text-red-300">Score {clip.score}/10</span><span className="badge">{clip.status}</span></div><input className="input mt-3" defaultValue={clip.suggested_title} onBlur={(event) => void window.api.clipper.update(clip.id, { suggested_title: event.target.value })}/><div className="flex gap-2 mt-3"><button className="btn btn-primary flex-1" onClick={() => void window.api.clipper.update(clip.id, { status: 'approved' }).then(load)}><Check className="inline" size={16}/> Approve</button><button className="btn !p-2" aria-label="Export clip" onClick={() => void window.api.clipper.export(clip.id).then((value) => value && toast.success(`Saved to ${value}`))}><Download size={16}/></button><button className="btn !p-2" aria-label="Discard clip" onClick={() => void window.api.clipper.update(clip.id, { status: 'discarded' }).then(load)}><Trash2 size={16}/></button></div></div>
-    </article>)}</div>
+    {clips.length>0&&<div className="results-drawer"><div className="panel-heading"><span>Generated highlights</span><div className="flex gap-1"><button className="btn !p-1" onClick={()=>void approveAll()}><Check size={12}/></button><button className="btn !p-1" onClick={()=>void uploadApproved()}><Upload size={12}/></button></div></div>{clips.slice(0,8).map(clip=><div className="result-mini" key={clip.id}><video src={`media://file?path=${encodeURIComponent(clip.local_path)}`}/><div className="min-w-0 flex-1"><span className="badge text-violet-300">{clip.score}/10</span><input className="input mt-2" defaultValue={clip.suggested_title} onBlur={(e)=>void window.api.clipper.update(clip.id,{suggested_title:e.target.value})}/><div className="flex gap-1 mt-1"><button className="btn !p-1" onClick={()=>void window.api.clipper.export(clip.id)}><Download size={11}/></button><button className="btn !p-1" onClick={()=>void window.api.clipper.update(clip.id,{status:'approved'}).then(load)}><Check size={11}/></button></div></div></div>)}</div>}
   </div>;
 }
-
 function Toggle({ label, value, set }: { label: string; value: boolean; set: (value: boolean) => void }): JSX.Element {
   return <label className="flex items-center gap-2 rounded border border-border p-2"><input type="checkbox" className="accent-red-600" checked={value} onChange={(event) => set(event.target.checked)}/>{label}</label>;
 }
