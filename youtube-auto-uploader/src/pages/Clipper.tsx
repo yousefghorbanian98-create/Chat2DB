@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Bot, Check, Download, ExternalLink, FileVideo, Loader2, Trash2, Upload } from 'lucide-react';
+import { Bot, Check, Cpu, Download, ExternalLink, FileVideo, Loader2, Trash2, Upload, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import type { AnalysisMode } from '../../electron/types';
 import type { ClipRow } from '../global';
 
 const recommended = ['qwen2.5:7b-instruct-q4_0', 'llama3.1:8b-instruct', 'gemma2:9b-instruct'];
@@ -12,6 +13,10 @@ export function Clipper(): JSX.Element {
   const [models, setModels] = useState<string[]>([]);
   const [ollamaRunning, setOllamaRunning] = useState(false);
   const [model, setModel] = useState(recommended[0] ?? '');
+  const [localEngine, setLocalEngine] = useState<{ available: boolean; cudaAvailable: boolean; error?: string }>({ available: false, cudaAvailable: false });
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('hybrid');
+  const [whisperModel, setWhisperModel] = useState('small');
+  const [language, setLanguage] = useState<'auto' | 'fa' | 'en'>('auto');
   const [count, setCount] = useState(5);
   const [maxLength, setMaxLength] = useState(60);
   const [category, setCategory] = useState('Auto');
@@ -25,30 +30,36 @@ export function Clipper(): JSX.Element {
   const [clips, setClips] = useState<ClipRow[]>([]);
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
-  const checkOllama = useCallback(async (): Promise<void> => {
-    const status = await window.api.ollama.status();
-    setOllamaRunning(status.running);
-    setModels(status.models);
-    if (status.models[0] && !status.models.includes(model)) setModel(status.models[0]);
+  const checkEngines = useCallback(async (): Promise<void> => {
+    const [ollama, local] = await Promise.all([window.api.ollama.status(), window.api.localAI.status()]);
+    setOllamaRunning(ollama.running);
+    setModels(ollama.models);
+    setLocalEngine(local);
+    if (ollama.models[0] && !ollama.models.includes(model)) setModel(ollama.models[0]);
   }, [model]);
 
   useEffect(() => {
-    void checkOllama();
+    void checkEngines();
     load();
     const progressUnsubscribe = window.api.on('job:progress', (value) => setProgress(value as { phase: string; percent: number; message?: string }));
     const clipUnsubscribe = window.api.on('clip:ready', load);
     const pullUnsubscribe = window.api.on('ollama:pull-progress', (value) => setPull(value as { percent: number; status: string }));
-    const doneUnsubscribe = window.api.on('job:done', () => { setRunning(false); load(); });
+    const doneUnsubscribe = window.api.on('job:done', (value) => {
+      const result = value as { error?: string };
+      setRunning(false); load();
+      if (result.error) toast.error(result.error); else toast.success('Highlight clips are ready');
+    });
     return () => { progressUnsubscribe(); clipUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
-  }, [checkOllama, load]);
+  }, [checkEngines, load]);
 
   const start = async (): Promise<void> => {
-    if (!ollamaRunning) { toast.error('Start Ollama before clipping'); return; }
-    if (!models.includes(model)) { toast.error('Install the selected model first'); return; }
+    if (!localEngine.available) { toast.error(localEngine.error || 'The local Whisper engine is not installed'); return; }
+    if (analysisMode === 'ollama' && !ollamaRunning) { toast.error('Start Ollama before clipping'); return; }
+    if (analysisMode === 'ollama' && !models.includes(model)) { toast.error('Install the selected Ollama model first'); return; }
     if (!url && !file) { toast.error('Choose a YouTube URL or local video'); return; }
     try {
       setRunning(true);
-      await window.api.clipper.start({ url: url || undefined, localPath: file, model, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
       toast.success('Clipping pipeline started');
     } catch (error: unknown) {
       setRunning(false);
@@ -57,7 +68,7 @@ export function Clipper(): JSX.Element {
   };
 
   const pullModel = async (): Promise<void> => {
-    try { await window.api.ollama.pull(model); await checkOllama(); toast.success('Model installed'); }
+    try { await window.api.ollama.pull(model); await checkEngines(); toast.success('Model installed'); }
     catch (error: unknown) { toast.error(error instanceof Error ? error.message : String(error)); }
   };
 
@@ -75,13 +86,13 @@ export function Clipper(): JSX.Element {
 
   return <div className="page">
     <div className="flex justify-between items-start">
-      <div><h1 className="text-2xl font-bold">Local AI Clipper</h1><p className="muted mt-1">Highlights are analyzed locally through Ollama and rendered with FFmpeg.</p></div>
+      <div><h1 className="text-2xl font-bold">Local AI Clipper</h1><p className="muted mt-1">Faster-Whisper finds highlights locally; Ollama can optionally refine titles and ranking.</p></div>
       <button className="btn flex gap-2" onClick={() => void window.api.openExternal('https://ollama.com/download/windows')}><ExternalLink size={17}/> Get Ollama</button>
     </div>
 
-    <div className={`card p-4 mt-6 flex items-center justify-between ${ollamaRunning ? 'border-green-800' : 'border-amber-700'}`}>
-      <div><b>{ollamaRunning ? 'Ollama is ready' : 'Ollama is not running'}</b><p className="muted text-sm">{models.length ? `${String(models.length)} model(s) installed` : 'Start Ollama and install a recommended model.'}</p></div>
-      <button className="btn" onClick={() => void checkOllama()}>Retry</button>
+    <div className="grid grid-cols-2 gap-4 mt-6">
+      <div className={`card p-4 flex items-center justify-between ${localEngine.available ? 'border-green-800' : 'border-red-800'}`}><div className="flex items-center gap-3"><Cpu size={22}/><div><b>{localEngine.available ? 'Faster-Whisper engine is ready' : 'Local engine is missing'}</b><p className="muted text-sm">{localEngine.available ? `${localEngine.cudaAvailable ? 'CUDA GPU' : 'CPU'} transcription · Persian and English` : localEngine.error}</p></div></div><button className="btn" onClick={() => void checkEngines()}>Retry</button></div>
+      <div className={`card p-4 flex items-center justify-between ${ollamaRunning ? 'border-green-800' : 'border-amber-700'}`}><div className="flex items-center gap-3"><Zap size={22}/><div><b>{ollamaRunning ? 'Ollama refinement is ready' : 'Ollama is optional'}</b><p className="muted text-sm">{models.length ? `${String(models.length)} model(s) installed` : 'Local mode works without Ollama.'}</p></div></div><button className="btn" onClick={() => void checkEngines()}>Retry</button></div>
     </div>
 
     <div className="card p-6 mt-5 grid grid-cols-2 gap-6">
@@ -92,7 +103,12 @@ export function Clipper(): JSX.Element {
         <button className="btn w-full flex justify-center gap-2" onClick={() => void window.api.settings.pickFile().then((value) => value && setFile(value))}><FileVideo size={18}/><span className="truncate">{file ?? 'Choose local video'}</span></button>
       </div>
       <div className="space-y-4">
-        <div><label className="label">Ollama model</label><div className="flex gap-2"><select className="input" value={model} onChange={(event) => setModel(event.target.value)}>{[...new Set([...models, ...recommended])].map((name) => <option key={name} value={name}>{models.includes(name) ? '★ ' : ''}{name}</option>)}</select>{!models.includes(model) && <button className="btn" onClick={() => void pullModel()}>Install</button>}</div></div>
+        <div className="grid grid-cols-3 gap-2">
+          <label><span className="label">Analysis</span><select className="input" value={analysisMode} onChange={(event) => setAnalysisMode(event.target.value as AnalysisMode)}><option value="local">Whisper only</option><option value="hybrid">Whisper + optional Ollama</option><option value="ollama">Require Ollama refinement</option></select></label>
+          <label><span className="label">Whisper model</span><select className="input" value={whisperModel} onChange={(event) => setWhisperModel(event.target.value)}>{['tiny','base','small','medium','large-v3'].map((name) => <option key={name}>{name}</option>)}</select></label>
+          <label><span className="label">Speech language</span><select className="input" value={language} onChange={(event) => setLanguage(event.target.value as 'auto'|'fa'|'en')}><option value="auto">Auto detect</option><option value="fa">Persian</option><option value="en">English</option></select></label>
+        </div>
+        {analysisMode !== 'local' && <div><label className="label">Ollama model</label><div className="flex gap-2"><select className="input" value={model} onChange={(event) => setModel(event.target.value)}>{[...new Set([...models, ...recommended])].map((name) => <option key={name} value={name}>{models.includes(name) ? '★ ' : ''}{name}</option>)}</select>{!models.includes(model) && <button className="btn" onClick={() => void pullModel()}>Install</button>}</div></div>}
         {pull && <div><div className="flex justify-between text-xs muted"><span>{pull.status}</span><span>{pull.percent}%</span></div><div className="progress mt-1"><div style={{ width: `${String(pull.percent)}%` }}/></div></div>}
         <div><label className="label">Clip count: {count}</label><input type="range" min="3" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} className="w-full accent-red-600"/></div>
         <div className="grid grid-cols-3 gap-2">
@@ -103,7 +119,8 @@ export function Clipper(): JSX.Element {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <Toggle label="Auto captions" value={captions} set={setCaptions}/><Toggle label="Smart zoom" value={smartZoom} set={setSmartZoom}/><Toggle label="Background music" value={music} set={setMusic}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/>
         </div>
-        <button disabled={running} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>
+        <p className="muted text-xs">The selected Whisper model downloads once on first use. Afterward, transcription, ranking, captions, and rendering work offline.</p>
+        <button disabled={running || !localEngine.available} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>
       </div>
     </div>
 

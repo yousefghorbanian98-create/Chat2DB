@@ -45,6 +45,25 @@ struct RenderResult {
     duration_seconds: f64,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AnalyzeRequest {
+    input_path: String,
+    output_dir: String,
+    model: String,
+    language: String,
+    target_duration: u32,
+    clip_count: u32,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DownloadRequest {
+    url: String,
+    output_dir: String,
+    height: String,
+}
+
 fn bundled_tool(app: &AppHandle, name: &str) -> PathBuf {
     let executable = if cfg!(target_os = "windows") {
         format!("{name}.exe")
@@ -58,6 +77,40 @@ fn bundled_tool(app: &AppHandle, name: &str) -> PathBuf {
         .map(|directory| directory.join("bin").join(&executable))
         .filter(|path| path.exists())
         .unwrap_or_else(|| PathBuf::from(executable))
+}
+
+fn engine_command(app: &AppHandle) -> Result<Command, String> {
+    let bundled = bundled_tool(app, "easyclip-engine");
+    if bundled.exists() {
+        return Ok(Command::new(bundled));
+    }
+
+    // Development fallback. Production bundles the PyInstaller executable.
+    let script = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("engine")
+        .join("easyclip_engine.py");
+    if script.is_file() {
+        let mut command = Command::new("python");
+        command.arg(script);
+        return Ok(command);
+    }
+    Err("EasyClip local engine is not installed".to_owned())
+}
+
+fn parse_engine_output(output: std::process::Output) -> Result<serde_json::Value, String> {
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let value: serde_json::Value = stdout
+        .lines()
+        .rev()
+        .find(|line| !line.trim().is_empty())
+        .ok_or_else(|| format!("The local engine returned no result: {}", String::from_utf8_lossy(&output.stderr)))?
+        .parse()
+        .map_err(|error| format!("Invalid local engine response ({error}): {stdout}"))?;
+    if !output.status.success() || value.get("ok").and_then(|item| item.as_bool()) != Some(true) {
+        return Err(value.get("error").and_then(|item| item.as_str()).unwrap_or("Local engine failed").to_owned());
+    }
+    Ok(value)
 }
 
 fn command_available(executable: &Path) -> bool {
@@ -219,11 +272,60 @@ async fn render_vertical_clip(app: AppHandle, request: RenderRequest) -> Result<
     })
 }
 
+#[tauri::command]
+async fn download_video(app: AppHandle, request: DownloadRequest) -> Result<serde_json::Value, String> {
+    if !request.url.starts_with("https://") && !request.url.starts_with("http://") {
+        return Err("Enter a valid http/https video URL".to_owned());
+    }
+    std::fs::create_dir_all(&request.output_dir)
+        .map_err(|error| format!("Cannot create download folder: {error}"))?;
+    let mut command = engine_command(&app)?;
+    command.args([
+        "download", "--url", &request.url, "--output-dir", &request.output_dir,
+        "--height", &request.height,
+    ]);
+    let result = tauri::async_runtime::spawn_blocking(move || command.output())
+        .await
+        .map_err(|error| format!("Download task failed: {error}"))?
+        .map_err(|error| format!("Cannot start local engine: {error}"))?;
+    parse_engine_output(result)
+}
+
+#[tauri::command]
+async fn analyze_video(app: AppHandle, request: AnalyzeRequest) -> Result<serde_json::Value, String> {
+    if !Path::new(&request.input_path).is_file() {
+        return Err("Input video does not exist".to_owned());
+    }
+    if !(15..=180).contains(&request.target_duration) || !(1..=30).contains(&request.clip_count) {
+        return Err("Invalid highlight settings".to_owned());
+    }
+    std::fs::create_dir_all(&request.output_dir)
+        .map_err(|error| format!("Cannot create analysis folder: {error}"))?;
+    let mut command = engine_command(&app)?;
+    command.args([
+        "analyze", "--input", &request.input_path, "--output-dir", &request.output_dir,
+        "--model", &request.model, "--language", &request.language,
+        "--target-duration", &request.target_duration.to_string(),
+        "--clip-count", &request.clip_count.to_string(),
+    ]);
+    let result = tauri::async_runtime::spawn_blocking(move || command.output())
+        .await
+        .map_err(|error| format!("Analysis task failed: {error}"))?
+        .map_err(|error| format!("Cannot start local engine: {error}"))?;
+    parse_engine_output(result)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![system_profile, inspect_video, render_vertical_clip])
+        .invoke_handler(tauri::generate_handler![
+            system_profile,
+            inspect_video,
+            render_vertical_clip,
+            download_video,
+            analyze_video
+        ])
         .run(tauri::generate_context!())
         .expect("error while running EasyClip Desktop");
 }

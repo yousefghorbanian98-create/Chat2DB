@@ -6,3 +6,6 @@ resources/binaries/*.exe
 resources/*.zip
 *.partial
 *.log
+__pycache__/
+*.py[cod]
+resources/engine/build/

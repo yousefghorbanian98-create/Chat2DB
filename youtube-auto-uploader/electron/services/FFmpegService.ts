@@ -16,6 +16,7 @@ export interface RenderOptions {
   blurBackground: boolean;
   musicPath?: string;
   musicVolume?: number;
+  encoder?: 'h264_nvenc' | 'libx264';
 }
 
 function subtitlePath(file: string): string {
@@ -23,6 +24,29 @@ function subtitlePath(file: string): string {
 }
 
 export class FFmpegService {
+  private encoderCheck?: Promise<'h264_nvenc' | 'libx264'>;
+
+  private capture(command: string, args: string[]): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const child = spawn(command, args, { windowsHide: true });
+      let output = '';
+      child.stdout.setEncoding('utf8'); child.stderr.setEncoding('utf8');
+      child.stdout.on('data', (value: string) => { output += value; });
+      child.stderr.on('data', (value: string) => { output += value; });
+      child.once('error', reject);
+      child.once('close', (code) => code === 0 ? resolve(output) : reject(new Error(`${command} exited with code ${String(code)}`)));
+    });
+  }
+
+  preferredEncoder(): Promise<'h264_nvenc' | 'libx264'> {
+    this.encoderCheck ??= Promise.all([
+      this.capture('nvidia-smi', ['--query-gpu=name', '--format=csv,noheader']),
+      this.capture(binaryPath('ffmpeg'), ['-hide_banner', '-encoders'])
+    ]).then(([, encoders]) => encoders.includes('h264_nvenc') ? 'h264_nvenc' as const : 'libx264' as const)
+      .catch(() => 'libx264' as const);
+    return this.encoderCheck;
+  }
+
   async run(args: string[], onLine?: (line: string) => void): Promise<void> {
     await new Promise<void>((resolve, reject) => {
       const child = spawn(binaryPath('ffmpeg'), ['-hide_banner', '-y', ...args], { windowsHide: true });
@@ -83,8 +107,19 @@ export class FFmpegService {
       ? `${filter};[1:a]volume=${String(options.musicVolume ?? 0.12)},asplit=2[musicduck][musicmix];[0:a][musicduck]sidechaincompress=threshold=0.1:ratio=4[ducked];[ducked][musicmix]amix=inputs=2:duration=first:weights='1 0.15'[audio]`
       : filter, '-map', '[video]');
     if (options.musicPath) args.push('-map', '[audio]'); else args.push('-map', '0:a?');
-    args.push('-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-c:a', 'aac', '-b:a', '192k', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', output);
-    await this.run(args);
+    const encoder = options.encoder ?? await this.preferredEncoder();
+    const encoding = encoder === 'h264_nvenc'
+      ? ['-c:v', 'h264_nvenc', '-preset', 'p5', '-cq', '21']
+      : ['-c:v', 'libx264', '-preset', 'medium', '-crf', '20'];
+    args.push(...encoding, '-c:a', 'aac', '-b:a', '192k', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', output);
+    try {
+      await this.run(args);
+    } catch (error: unknown) {
+      if (encoder !== 'h264_nvenc') throw error;
+      const codecIndex = args.indexOf('-c:v');
+      args.splice(codecIndex, 6, '-c:v', 'libx264', '-preset', 'medium', '-crf', '20');
+      await this.run(args);
+    }
   }
 
   async frame(source: string, time: number, output: string): Promise<void> {

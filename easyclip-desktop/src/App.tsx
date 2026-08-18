@@ -33,6 +33,7 @@ type Page = "home" | "projects" | "editor" | "youtube" | "analytics" | "settings
 type SystemProfile = { os: string; arch: string; nvidia_available: boolean; gpu_name?: string; ffmpeg_available: boolean };
 type VideoInfo = { name: string; path: string; size_bytes: number; extension: string; duration_seconds: number; width: number; height: number; codec: string };
 type Project = { id: number; name: string; path: string; status: "ready" | "draft"; createdAt: string; duration: number; width: number; height: number; codec: string };
+type Highlight = { id: string; start_seconds: number; end_seconds: number; score: number; title: string; transcript: string; caption_path: string };
 
 const copy = {
   fa: {
@@ -72,8 +73,8 @@ const copy = {
     nvidia: "شتاب‌دهی NVIDIA",
     detected: "فعال و آماده",
     notDetected: "شناسایی نشد؛ حالت CPU استفاده می‌شود",
-    phase: "نسخه اولیه",
-    phaseText: "پوسته ویندوز و واردکردن ویدیو آماده است. موتور Whisper و FFmpeg در مرحله بعد متصل می‌شود.",
+    phase: "موتور محلی آماده",
+    phaseText: "Whisper، انتخاب هوشمند لحظه‌ها، زیرنویس و خروجی FFmpeg به‌صورت محلی فعال هستند.",
     lang: "EN",
     local: "LOCAL",
     editor: "ویرایش و خروجی",
@@ -87,6 +88,14 @@ const copy = {
     renderError: "ساخت کلیپ ناموفق بود",
     videoInfo: "مشخصات ویدیو",
     back: "بازگشت به پروژه‌ها",
+    analyze: "یافتن لحظه‌های برتر با AI محلی",
+    analyzing: "در حال رونویسی و تحلیل محلی…",
+    highlights: "لحظه‌های پیشنهادی",
+    downloadUrl: "دریافت ویدیو از لینک",
+    urlHint: "لینک YouTube، TikTok یا Instagram را وارد کنید",
+    downloadNow: "دانلود و افزودن به پروژه‌ها",
+    chooseFolder: "انتخاب پوشه خروجی",
+    firstModel: "در اجرای اول، مدل Whisper یک‌بار دانلود می‌شود؛ پس از آن تحلیل آفلاین است.",
   },
   en: {
     appName: "EasyClip",
@@ -125,8 +134,8 @@ const copy = {
     nvidia: "NVIDIA acceleration",
     detected: "Active and ready",
     notDetected: "Not detected; CPU mode will be used",
-    phase: "Foundation build",
-    phaseText: "The Windows shell and video import are ready. Whisper and FFmpeg engines are connected next.",
+    phase: "Local engine ready",
+    phaseText: "Whisper, smart highlight selection, captions, and FFmpeg export now run locally.",
     lang: "فا",
     local: "LOCAL",
     editor: "Edit & export",
@@ -140,6 +149,14 @@ const copy = {
     renderError: "Clip rendering failed",
     videoInfo: "Video details",
     back: "Back to projects",
+    analyze: "Find highlights with local AI",
+    analyzing: "Transcribing and analyzing locally…",
+    highlights: "Suggested highlights",
+    downloadUrl: "Get video from a link",
+    urlHint: "Paste a YouTube, TikTok or Instagram link",
+    downloadNow: "Download and add to projects",
+    chooseFolder: "Choose output folder",
+    firstModel: "Whisper is downloaded once on first use; analysis is offline afterward.",
   },
 };
 
@@ -225,7 +242,8 @@ export default function App() {
         {page === "home" && <Home t={t} chooseVideo={chooseVideo} setPage={setPage} profile={profile} projects={projects} />}
         {page === "projects" && <Projects t={t} projects={projects} chooseVideo={chooseVideo} openProject={openProject} />}
         {page === "editor" && selectedProject && <Editor t={t} project={selectedProject} profile={profile} goBack={() => setPage("projects")} />}
-        {page !== "home" && page !== "projects" && page !== "editor" && <ComingSoon page={page} t={t} profile={profile} />}
+        {page === "youtube" && <UrlImport t={t} addProject={addProject} />}
+        {page !== "home" && page !== "projects" && page !== "editor" && page !== "youtube" && <ComingSoon page={page} t={t} profile={profile} />}
       </main>
       <input ref={fileInput} hidden type="file" accept="video/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) void addProject(file.name, file); }} />
     </div>
@@ -257,12 +275,55 @@ function Projects({ t, projects, chooseVideo, openProject }: { t: Translation; p
   return <div className="content page"><div className="page-title"><div><span>LIBRARY</span><h1>{t.projects}</h1></div><button className="primary" onClick={chooseVideo}><Plus size={19}/>{t.import}</button></div>{projects.length === 0 ? <button className="large-empty" onClick={chooseVideo}><div><Scissors size={34}/></div><h2>{t.empty}</h2><p>{t.emptySub}</p></button> : <div className="project-grid">{projects.map(p => <article className="project-card" key={p.id}><div className="project-preview"><FileVideo size={35}/><span>9:16</span></div><div className="project-info"><h3>{p.name}</h3><p>{p.path}</p><div><span className="ready">{t.ready}</span><button onClick={() => openProject(p)}>{t.open}<ChevronLeft size={15}/></button></div></div></article>)}</div>}</div>;
 }
 
+function UrlImport({ t, addProject }: { t: Translation; addProject: (path: string) => Promise<void> }) {
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  const downloadFromUrl = async () => {
+    if (!isTauri()) { setError("Link downloads are available in the Windows app."); return; }
+    const outputDir = await open({ directory: true, multiple: false, title: t.chooseFolder });
+    if (typeof outputDir !== "string") return;
+    setBusy(true); setError("");
+    try {
+      const result = await invoke<{ path: string }>("download_video", { request: { url, outputDir, height: "1080" } });
+      await addProject(result.path);
+    } catch (reason) { setError(String(reason)); }
+    finally { setBusy(false); }
+  };
+
+  return <div className="content page"><div className="coming url-import"><div><Youtube size={36}/></div><span>YT-DLP · LOCAL IMPORT</span><h1>{t.downloadUrl}</h1><p>{t.urlHint}</p><div className="url-box"><input dir="ltr" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://www.youtube.com/watch?v=…"/><button className="primary" disabled={busy || !/^https?:\/\//i.test(url)} onClick={downloadFromUrl}>{busy ? <span className="spinner"/> : <Download size={19}/>} {busy ? t.checking : t.downloadNow}</button></div>{error && <div className="render-message error"><span>!</span><p>{error}</p></div>}</div></div>;
+}
+
 function Editor({ t, project, profile, goBack }: { t: Translation; project: Project; profile: SystemProfile | null; goBack: () => void }) {
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(Math.min(project.duration || 60, 60));
   const [captionPath, setCaptionPath] = useState<string | null>(null);
   const [rendering, setRendering] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const analyze = async () => {
+    if (!isTauri()) { setMessage({ ok: false, text: "Local analysis is available in the Windows app." }); return; }
+    const outputDir = await open({ directory: true, multiple: false, title: t.chooseFolder });
+    if (typeof outputDir !== "string") return;
+    setAnalyzing(true); setMessage(null);
+    try {
+      const result = await invoke<{ highlights: Highlight[] }>("analyze_video", {
+        request: { inputPath: project.path, outputDir, model: "small", language: "auto", targetDuration: 60, clipCount: 5 },
+      });
+      setHighlights(result.highlights);
+      if (result.highlights[0]) {
+        setStart(result.highlights[0].start_seconds); setEnd(result.highlights[0].end_seconds); setCaptionPath(result.highlights[0].caption_path);
+      }
+    } catch (error) { setMessage({ ok: false, text: String(error) }); }
+    finally { setAnalyzing(false); }
+  };
+
+  const selectHighlight = (highlight: Highlight) => {
+    setStart(highlight.start_seconds); setEnd(highlight.end_seconds); setCaptionPath(highlight.caption_path);
+  };
 
   const chooseCaptions = async () => {
     if (!isTauri()) return;
@@ -296,6 +357,9 @@ function Editor({ t, project, profile, goBack }: { t: Translation; project: Proj
       <section className="editor-preview"><div className="preview-phone"><FileVideo size={50}/><b>{project.name}</b><span>1080 × 1920</span></div></section>
       <section className="editor-controls">
         <div className="info-panel"><h3>{t.videoInfo}</h3><div><span>{project.width} × {project.height}</span><span>{project.codec.toUpperCase()}</span><span>{Math.round(project.duration)}s</span></div></div>
+        <button className="primary analyze-button" disabled={analyzing} onClick={analyze}>{analyzing ? <><span className="spinner"/>{t.analyzing}</> : <><Sparkles size={19}/>{t.analyze}</>}</button>
+        <small className="model-note">{t.firstModel}</small>
+        {highlights.length > 0 && <div className="highlight-list"><h3>{t.highlights}</h3>{highlights.map((highlight) => <button key={highlight.id} className={start === highlight.start_seconds ? "selected" : ""} onClick={() => selectHighlight(highlight)}><span className="highlight-score">{highlight.score}</span><div><b>{highlight.title}</b><small>{Math.round(highlight.start_seconds)}s – {Math.round(highlight.end_seconds)}s</small></div></button>)}</div>}
         <div className="range-row"><label>{t.start}<input type="number" min="0" max={end - 1} step="0.5" value={start} onChange={(e) => setStart(Number(e.target.value))}/></label><label>{t.end}<input type="number" min={start + 1} max={project.duration || 180} step="0.5" value={end} onChange={(e) => setEnd(Number(e.target.value))}/></label></div>
         <div className="duration-bar"><span style={{ width: `${Math.min(100, ((end - start) / Math.max(project.duration, 1)) * 100)}%` }}/></div>
         <button className="caption-picker" onClick={chooseCaptions}><Captions size={19}/><div><b>{t.captionsFile}</b><span>{captionPath || t.chooseCaptions}</span></div></button>

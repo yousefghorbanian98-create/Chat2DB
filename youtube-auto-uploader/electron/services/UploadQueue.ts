@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
@@ -46,7 +47,7 @@ export class UploadQueue extends EventEmitter {
 
   enqueue(input: UploadInput, type: QueuedJob['type'] = 'single', channelId: number | null = null): JobHandle {
     if (!input.url && !input.localPath) throw new Error('A source URL or local file is required');
-    const id = crypto.randomUUID();
+    const id = randomUUID();
     const sourceId = input.localPath ? `local:${id}` : id;
     const result = this.db.prepare("INSERT INTO synced_videos(channel_id,source_video_id,source_url,source_title,upload_type,privacy,status,payload_json) VALUES(?,?,?,?,?,?,'queued',?)")
       .run(channelId, sourceId, input.url ?? null, input.sourceTitle ?? null, type, input.privacy ?? 'unlisted', JSON.stringify(input));
@@ -91,7 +92,7 @@ export class UploadQueue extends EventEmitter {
       input = { url: stored.source_url ?? undefined, sourceTitle: stored.source_title ?? undefined, privacy: stored.privacy };
     }
     if (!input.url && !input.localPath) throw new Error(`Stored job ${String(stored.id)} has no source`);
-    const handle = { jobId: crypto.randomUUID() };
+    const handle = { jobId: randomUUID() };
     this.push({ id: handle.jobId, input, priority: this.priority(stored.upload_type), dbId: stored.id, type: stored.upload_type, cancelled: false });
     return handle;
   }

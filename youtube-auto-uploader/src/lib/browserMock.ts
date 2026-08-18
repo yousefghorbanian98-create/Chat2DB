@@ -23,6 +23,7 @@ export function installBrowserMock(): void {
     upload: { single: async () => handle(), batch: async (inputs) => inputs.map(handle), list: async (filter) => filter ? jobs.filter((job) => job.status === filter) : jobs, exportHistory: async () => null, cancel: async () => undefined, approve: async () => handle(), reject: async () => undefined, retry: async () => handle(), pause: async () => undefined, resume: async () => undefined },
     clipper: { start: async () => handle(), clips: async () => clips, update: async () => undefined, export: async () => null, upload: async () => handle() },
     quota: { state: async () => ({ used: 3200, remaining: 6800, limit: 10000 }) },
+    localAI: { status: async () => ({ available: true, engineVersion: '1.0.0', cudaAvailable: true, recommendedModels: ['tiny', 'base', 'small', 'medium', 'large-v3'] }) },
     ollama: { status: async () => ({ running: true, models: ['qwen2.5:7b-instruct-q4_0'] }), pull: async () => undefined },
     settings: { getAll: async () => settings, set: async (patch) => Object.assign(settings, patch), pickDir: async () => null, pickFile: async () => null, pickImage: async () => null },
     openExternal: async () => undefined,

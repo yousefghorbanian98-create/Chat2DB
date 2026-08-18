@@ -1,46 +1,63 @@
 # EasyClip Desktop
 
-A Windows-first, local AI video clipping studio. The app is being built as a lightweight Tauri desktop application with a React interface and a Rust host.
+A Windows-first desktop application that turns long local or online videos into
+captioned vertical highlights. The interface is React + Tauri; the local media
+engine is Python, Faster-Whisper, yt-dlp, and FFmpeg.
 
-## Current foundation (0.1.0)
+## Current features
 
-- Persian/English RTL/LTR desktop interface
-- Local video file picker (MP4, MOV, MKV, WebM, AVI)
-- Local project library
-- Windows/NVIDIA capability detection through `nvidia-smi`
-- Tauri security capability and CSP configuration
-- NSIS installer configuration for Windows 11 x64
-- Windows GitHub Actions build that uploads the unsigned installer as an artifact
+- Persian/English RTL/LTR interface
+- Import MP4, MOV, MKV, WebM, AVI, and M4V files
+- Download a public YouTube, TikTok, or Instagram URL through yt-dlp
+- Fully local Faster-Whisper transcription with word timestamps
+- Local sliding-window highlight ranking (no cloud AI/API key)
+- Suggested clips with score, title, time range, and generated SRT captions
+- Review or manually adjust clip times and captions
+- Export 1080×1920 H.264/AAC MP4 with FFmpeg
+- NVIDIA NVENC rendering when an NVIDIA GPU is available, with CPU fallback
+- Windows NSIS installer and portable ZIP builds
 
-The current build is a functional desktop foundation, not yet the complete video processor. It does not claim to generate clips yet.
+The first analysis downloads the selected `small` Whisper model into the user's
+model cache. After that model and the source video are present, analysis and
+rendering work offline. URL import naturally requires internet access.
 
-## Planned pipeline
+## Open-source foundation
 
-1. Bundle and verify FFmpeg/FFprobe
-2. Extract audio and generate Persian/English captions with Faster-Whisper (CUDA)
-3. Score transcript segments using a local language model
-4. Track faces/speakers and automatically crop to 9:16
-5. Render MP4 clips with animated captions using NVIDIA NVENC
-6. Add clip review, trim and caption editing
-7. Add Google OAuth and official YouTube Shorts upload
-8. Add optional watched-folder and automatic publishing mode
+This application combines adapted parts of two MIT-licensed projects:
+
+- [opensource-clipping](https://github.com/NaufalRizqullah/opensource-clipping):
+  source download/format selection and Faster-Whisper transcription flow.
+- [ai-highlight-clip](https://github.com/toki-plus/ai-highlight-clip): overlapping
+  candidate windows and timestamp-aware subtitle grouping.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for copyright and license
+notices. EasyClip's combined engine is in `engine/easyclip_engine.py`.
 
 ## Development
 
 ```bash
 npm install
-npm run dev
 npm run build
+python -m unittest discover -s engine -p "test_*.py"
 ```
 
-A native desktop development build additionally requires Rust and the Tauri prerequisites:
+Native development additionally requires Rust, Tauri prerequisites, Python
+3.11 with `engine/requirements.txt`, and FFmpeg/FFprobe on `PATH`:
 
 ```bash
 npm run tauri dev
 ```
 
-## Windows installer
+## Windows builds
 
-The workflow `.github/workflows/easyclip-windows.yml` runs on a Windows runner and builds an NSIS `Setup.exe`. The installer is unsigned during development, so Windows SmartScreen may warn until a code-signing certificate is configured.
+The `EasyClip Windows` GitHub Actions workflow:
 
-No API keys, OAuth credentials, models, videos, or generated installers belong in Git.
+1. packages the Python engine with PyInstaller;
+2. downloads an FFmpeg essentials build;
+3. builds an unsigned NSIS `Setup.exe`;
+4. creates `EasyClip-Windows-x64-Portable.zip`; and
+5. uploads both as a workflow artifact.
+
+Development builds are unsigned, so Windows SmartScreen may warn until a
+code-signing certificate is configured. API keys, models, downloaded videos,
+and generated installers must not be committed.

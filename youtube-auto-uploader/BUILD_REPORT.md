@@ -1,4 +1,15 @@
-# Build Report — 1.0.0
+# Build Report — 1.1.0
+
+## 1.1.0 integration update — 2026-08-18
+
+- Integrated the MIT-licensed `opensource-clipping` Faster-Whisper/download flow and `ai-highlight-clip` sliding-window/subtitle approach into a PyInstaller sidecar.
+- Added Persian/English word-level transcription, local highlight scoring, generated SRT captions, optional Ollama metadata refinement, and safe local fallback.
+- Added NVIDIA CUDA detection for transcription and NVENC rendering with automatic libx264 fallback.
+- Fixed the Electron runtime error `crypto is not defined` by importing `randomUUID` from `node:crypto` in both `ClipperEngine` and `UploadQueue`; a focused regression test passes.
+- Updated Windows CI to test and package `easyclip-engine.exe` and produce installer/portable 1.1.0 artifacts.
+- Local verification: TypeScript strict check, ESLint, Electron production build, four Python engine unit tests, and the focused crypto regression test pass. The complete SQLite smoke suite remains blocked on this Linux sandbox because the native `better-sqlite3` binding download cannot pass the environment TLS proxy.
+
+The remainder below records the original 1.0.0 host verification and its historical limitations.
 
 Date: 2026-08-14 (UTC)
 Host: Linux x64 sandbox, Node 22.22.3
