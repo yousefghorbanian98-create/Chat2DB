@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Bot, Check, Cpu, Download, ExternalLink, FileVideo, Loader2, Trash2, Upload, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AnalysisMode } from '../../electron/types';
@@ -15,7 +15,7 @@ export function Clipper(): JSX.Element {
   const [model, setModel] = useState(recommended[0] ?? '');
   const [localEngine, setLocalEngine] = useState<{ available: boolean; cudaAvailable: boolean; error?: string }>({ available: false, cudaAvailable: false });
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('hybrid');
-  const [whisperModel, setWhisperModel] = useState('small');
+  const [whisperModel, setWhisperModel] = useState('base');
   const [language, setLanguage] = useState<'auto' | 'fa' | 'en'>('auto');
   const [count, setCount] = useState(5);
   const [maxLength, setMaxLength] = useState(60);
@@ -28,6 +28,7 @@ export function Clipper(): JSX.Element {
   const [pull, setPull] = useState<{ percent: number; status: string }>();
   const [progress, setProgress] = useState<{ phase: string; percent: number; message?: string }>();
   const [clips, setClips] = useState<ClipRow[]>([]);
+  const activeJobId = useRef<string | undefined>(undefined);
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
   const checkEngines = useCallback(async (): Promise<void> => {
@@ -41,11 +42,23 @@ export function Clipper(): JSX.Element {
   useEffect(() => {
     void checkEngines();
     load();
-    const progressUnsubscribe = window.api.on('job:progress', (value) => setProgress(value as { phase: string; percent: number; message?: string }));
+    void window.api.clipper.job().then((job) => {
+      if (!job || job.status !== 'running') return;
+      activeJobId.current = job.jobId;
+      setRunning(true);
+      setProgress({ phase: job.phase, percent: job.percent, message: job.message });
+    });
+    const progressUnsubscribe = window.api.on('job:progress', (value) => {
+      const update = value as { jobId: string; phase: string; percent: number; message?: string };
+      if (activeJobId.current && update.jobId !== activeJobId.current) return;
+      setProgress(update);
+    });
     const clipUnsubscribe = window.api.on('clip:ready', load);
     const pullUnsubscribe = window.api.on('ollama:pull-progress', (value) => setPull(value as { percent: number; status: string }));
     const doneUnsubscribe = window.api.on('job:done', (value) => {
-      const result = value as { error?: string };
+      const result = value as { jobId: string; error?: string };
+      if (activeJobId.current && result.jobId !== activeJobId.current) return;
+      activeJobId.current = undefined;
       setRunning(false); load();
       if (result.error) toast.error(result.error); else toast.success('Highlight clips are ready');
     });
@@ -59,8 +72,9 @@ export function Clipper(): JSX.Element {
     if (!url && !file) { toast.error('Choose a YouTube URL or local video'); return; }
     try {
       setRunning(true);
-      await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
-      toast.success('Clipping pipeline started');
+      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      activeJobId.current = handle.jobId;
+      toast.success('Clipping continues in the background when you change pages');
     } catch (error: unknown) {
       setRunning(false);
       toast.error(error instanceof Error ? error.message : String(error));

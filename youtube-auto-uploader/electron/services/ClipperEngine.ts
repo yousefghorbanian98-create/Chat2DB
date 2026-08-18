@@ -5,7 +5,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { z } from 'zod';
 import type Database from 'better-sqlite3';
-import type { ClipInput, JobHandle, JobProgress } from '../types';
+import type { ClipperJobState, ClipInput, JobHandle, JobProgress } from '../types';
 import type { DownloadService } from './DownloadService';
 import type { FFmpegService, MediaAnalysis } from './FFmpegService';
 import type { LocalAIService, LocalHighlight } from './LocalAIService';
@@ -57,6 +57,8 @@ function defaultMetadata(clip: LocalHighlight, category: string, evidence: numbe
 }
 
 export class ClipperEngine {
+  private readonly jobs = new Map<string, ClipperJobState>();
+
   constructor(
     private readonly db: Database.Database,
     private readonly downloads: DownloadService,
@@ -73,12 +75,20 @@ export class ClipperEngine {
     // Explicit Node import fixes `crypto is not defined` in Electron's main
     // process (the DOM type made the accidental global reference compile).
     const jobId = randomUUID();
+    const now = new Date().toISOString();
+    this.jobs.set(jobId, { jobId, phase: 'queued', percent: 0, status: 'running', startedAt: now, updatedAt: now });
     void this.process(jobId, input);
     return { jobId };
   }
 
+  latestJob(): ClipperJobState | null {
+    return [...this.jobs.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt))[0] ?? null;
+  }
+
   private progress(jobId: string, phase: string, percent: number, message?: string): void {
     const value: JobProgress = { jobId, phase, percent, message };
+    const previous = this.jobs.get(jobId);
+    if (previous) this.jobs.set(jobId, { ...previous, ...value, status: 'running', updatedAt: new Date().toISOString() });
     this.emit('job:progress', value);
   }
 
@@ -117,21 +127,23 @@ export class ClipperEngine {
 
       const probe = await this.ffmpeg.probe(source);
       this.progress(jobId, 'local-ai', 18, 'Starting Faster-Whisper');
-      const [localCandidates, analysis] = await Promise.all([
-        this.localAI.analyze(source, path.join(directory, 'analysis'), {
-          model: input.whisperModel,
-          language: input.language,
-          targetDuration: input.maxLength,
-          clipCount: Math.min(30, Math.max(input.count * 3, input.count))
-        }, (event) => {
-          const stageBase: Record<string, number> = { model: 18, transcription: 22 };
-          const base = stageBase[event.stage ?? ''] ?? 18;
-          const span = event.stage === 'transcription' ? 28 : 4;
-          const percent = typeof event.percent === 'number' ? event.percent : 0;
-          this.progress(jobId, event.stage ?? 'local-ai', base + Math.round(percent * span / 100), event.detail);
-        }),
-        this.ffmpeg.analyze(source)
-      ]);
+      // Do not run FFmpeg's two full media-analysis passes beside CPU Whisper.
+      // Competing decoders made transcription dramatically slower on laptops.
+      const localCandidates = await this.localAI.analyze(source, path.join(directory, 'analysis'), {
+        model: input.whisperModel,
+        language: input.language,
+        targetDuration: input.maxLength,
+        clipCount: Math.min(30, Math.max(input.count * 3, input.count))
+      }, (event) => {
+        const stageBase: Record<string, number> = { model: 18, transcription: 26 };
+        const base = stageBase[event.stage ?? ''] ?? 18;
+        const span = event.stage === 'transcription' ? 22 : 7;
+        const percent = typeof event.percent === 'number' ? event.percent : 0;
+        this.progress(jobId, event.stage ?? 'local-ai', base + Math.round(percent * span / 100), event.detail);
+      });
+      this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
+      const analysis = await this.ffmpeg.analyze(source);
+      this.progress(jobId, 'media-analysis', 55, 'Media analysis complete');
 
       let selected = localCandidates
         .map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))
@@ -141,11 +153,11 @@ export class ClipperEngine {
       if (input.analysisMode !== 'local') {
         const status = await this.ollama.status();
         if (status.running && status.models.includes(input.model)) {
-          this.progress(jobId, 'ollama', 52, 'Refining local candidates with Ollama');
+          this.progress(jobId, 'ollama', 56, 'Refining local candidates with Ollama');
           try { selected = await this.enrichWithOllama(input, localCandidates.map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))); }
           catch (error: unknown) {
             if (input.analysisMode === 'ollama') throw error;
-            this.progress(jobId, 'ollama-fallback', 55, `Ollama unavailable; using local ranking: ${error instanceof Error ? error.message : String(error)}`);
+            this.progress(jobId, 'ollama-fallback', 60, `Ollama unavailable; using local ranking: ${error instanceof Error ? error.message : String(error)}`);
           }
         } else if (input.analysisMode === 'ollama') {
           throw new Error('The selected Ollama model is not running or installed');
@@ -153,12 +165,12 @@ export class ClipperEngine {
       }
 
       const encoder = await this.ffmpeg.preferredEncoder();
-      this.progress(jobId, 'rendering', 58, encoder === 'h264_nvenc' ? 'NVIDIA NVENC enabled' : 'CPU encoder enabled');
+      this.progress(jobId, 'rendering', 62, encoder === 'h264_nvenc' ? 'NVIDIA NVENC enabled' : 'CPU encoder enabled');
       for (const [index, suggested] of selected.slice(0, input.count).entries()) {
         const start = Math.max(0, snap(suggested.start_seconds, analysis.silences));
         const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end_seconds, analysis.silences));
         if (end <= start + 1) continue;
-        this.progress(jobId, 'rendering', 58 + Math.round(index / selected.length * 38), `Rendering clip ${String(index + 1)}`);
+        this.progress(jobId, 'rendering', 62 + Math.round(index / selected.length * 36), `Rendering clip ${String(index + 1)}`);
         const video = path.join(directory, `final_clip_${String(index + 1)}.mp4`);
         const rawThumb = path.join(directory, `thumb_raw_${String(index + 1)}.jpg`);
         const thumb = path.join(directory, `thumb_${String(index + 1)}.jpg`);
@@ -182,9 +194,13 @@ export class ClipperEngine {
         this.emit('clip:ready', { ...suggested, databaseId: Number(row.lastInsertRowid), start, end, localPath: video, thumbnailPath: thumb });
       }
       this.progress(jobId, 'done', 100, `${String(selected.length)} clips created`);
+      const completed = this.jobs.get(jobId);
+      if (completed) this.jobs.set(jobId, { ...completed, status: 'completed', updatedAt: new Date().toISOString() });
       this.emit('job:done', { jobId });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
+      const failed = this.jobs.get(jobId);
+      if (failed) this.jobs.set(jobId, { ...failed, status: 'failed', error: message, updatedAt: new Date().toISOString() });
       this.emit('job:done', { jobId, error: message });
     }
   }

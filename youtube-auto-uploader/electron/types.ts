@@ -6,6 +6,7 @@ export interface UploadInput {url?:string;localPath?:string;sourceTitle?:string;
 export type AnalysisMode='local'|'hybrid'|'ollama'
 export interface ClipInput {url?:string;localPath?:string;model:string;whisperModel:string;language:'auto'|'fa'|'en';analysisMode:AnalysisMode;count:number;maxLength:number;category:string;aspect:string;captions:boolean;smartZoom:boolean;music:boolean;blurBackground:boolean}
 export interface JobProgress {jobId:string;phase:string;percent:number;speed?:string;eta?:string;message?:string}
+export interface ClipperJobState extends JobProgress {status:'running'|'completed'|'failed';startedAt:string;updatedAt:string;error?:string}
 export interface JobHandle {jobId:string}
 export interface VideoMetadata {id:string;title:string;description:string;thumbnail:string;channel:string;duration:number;viewCount:number;uploadDate?:string;url:string}
 export interface AppSettings {language:'en'|'fa';theme:'dark'|'light';defaultPrivacy:Privacy;downloadConcurrency:number;uploadConcurrency:number;keepDownloads:boolean;autoStartMonitor:boolean;minimizeToTray:boolean;ollamaEndpoint:string;defaultModel:string;acceptedCopyright:boolean;onboardingComplete:boolean;devtools:boolean}

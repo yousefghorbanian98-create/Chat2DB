@@ -115,18 +115,28 @@ def transcribe(video: Path, model_name: str, language: str | None) -> list[Word]
     cuda_available = ctranslate2.get_cuda_device_count() > 0
     device = "cuda" if requested_device in {"auto", "cuda"} and cuda_available else "cpu"
     compute = "float16" if device == "cuda" else "int8"
-    emit("progress", stage="model", percent=0, detail=model_name)
+    emit("progress", stage="model", percent=0, detail=f"Loading {model_name}; first use downloads the model once")
+    model_options = {
+        "device": device,
+        "compute_type": compute,
+        "cpu_threads": max(2, (os.cpu_count() or 4) - 1),
+        "num_workers": 1,
+    }
     try:
-        model = WhisperModel(model_name, device=device, compute_type=compute)
+        model = WhisperModel(model_name, **model_options)
     except Exception:
         if requested_device == "cuda":
             raise
         device, compute = "cpu", "int8"
-        model = WhisperModel(model_name, device=device, compute_type=compute)
-    emit("progress", stage="transcription", percent=0, detail=device)
+        model_options.update(device=device, compute_type=compute)
+        model = WhisperModel(model_name, **model_options)
+    emit("progress", stage="model", percent=100, detail=f"{model_name} ready on {device}")
+    emit("progress", stage="transcription", percent=0, detail=f"Fast transcription on {device}")
     segments, info = model.transcribe(
         str(video), language=None if language in {None, "auto"} else language,
-        beam_size=5, vad_filter=True, word_timestamps=True,
+        beam_size=1, best_of=1, vad_filter=True, word_timestamps=True,
+        condition_on_previous_text=False,
+        vad_parameters={"min_silence_duration_ms": 500},
     )
     duration = max(float(info.duration or 1), 1)
     words: list[Word] = []

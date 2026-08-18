@@ -75,6 +75,18 @@ export class LocalAIService {
       });
       let stdout = '';
       let stderr = '';
+      let currentStage = '';
+      let modelWaitSeconds = 0;
+      const heartbeat = setInterval(() => {
+        if (currentStage !== 'model') return;
+        modelWaitSeconds += 5;
+        onProgress?.({
+          event: 'progress',
+          stage: 'model',
+          percent: Math.min(95, 5 + modelWaitSeconds / 3),
+          detail: `Loading the speech model (${String(modelWaitSeconds)}s). The first run also downloads it.`
+        });
+      }, 5_000);
       child.stdout.setEncoding('utf8');
       child.stderr.setEncoding('utf8');
       child.stdout.on('data', (value: string) => { stdout += value; });
@@ -82,12 +94,19 @@ export class LocalAIService {
         stderr += value;
         for (const line of value.split(/\r?\n/)) {
           if (!line.trim()) continue;
-          try { onProgress?.(JSON.parse(line) as EngineProgress); }
-          catch { /* Native libraries can write diagnostics to stderr. */ }
+          try {
+            const event = JSON.parse(line) as EngineProgress;
+            if (event.stage) currentStage = event.stage;
+            onProgress?.(event);
+          } catch { /* Native libraries can write diagnostics to stderr. */ }
         }
       });
-      child.once('error', (error) => reject(new Error(`Unable to start local AI engine: ${error.message}`)));
+      child.once('error', (error) => {
+        clearInterval(heartbeat);
+        reject(new Error(`Unable to start local AI engine: ${error.message}`));
+      });
       child.once('close', (code) => {
+        clearInterval(heartbeat);
         const line = stdout.trim().split(/\r?\n/).filter(Boolean).at(-1);
         if (!line) { reject(new Error(`Local AI engine returned no result${stderr ? `: ${stderr.trim()}` : ''}`)); return; }
         try {
