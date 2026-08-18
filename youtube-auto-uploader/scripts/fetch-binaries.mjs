@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
@@ -103,6 +103,33 @@ async function fetchFfmpeg() {
   rmSync(unpack, { recursive: true, force: true })
 }
 
+function findFile(directory, target, depth = 0) {
+  if (depth > 8 || !existsSync(directory)) return undefined
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const item = path.join(directory, entry.name)
+    if (entry.isFile() && entry.name.toLowerCase() === target.toLowerCase()) return item
+    if (entry.isDirectory()) {
+      const found = findFile(item, target, depth + 1)
+      if (found) return found
+    }
+  }
+  return undefined
+}
+
+function installWithChocolatey() {
+  if (process.platform !== 'win32') throw new Error('Chocolatey fallback is Windows-only')
+  console.warn('Direct media-tool download failed; using the Chocolatey fallback.')
+  execFileSync('choco.exe', ['install', 'ffmpeg', 'yt-dlp', '-y', '--no-progress'], { stdio: 'inherit' })
+  const chocolatey = process.env.ChocolateyInstall || 'C:\\ProgramData\\chocolatey'
+  const ffmpeg = findFile(path.join(chocolatey, 'lib', 'ffmpeg'), 'ffmpeg.exe')
+  const ffprobe = findFile(path.join(chocolatey, 'lib', 'ffmpeg'), 'ffprobe.exe')
+  const ytdlp = findFile(path.join(chocolatey, 'lib', 'yt-dlp'), 'yt-dlp.exe')
+  if (!ffmpeg || !ffprobe || !ytdlp) throw new Error('Chocolatey installed media tools but their executable paths were not found')
+  for (const [source, name] of [[ffmpeg, 'ffmpeg.exe'], [ffprobe, 'ffprobe.exe'], [ytdlp, 'yt-dlp.exe']]) {
+    copyFileSync(source, path.join(root, name))
+  }
+}
+
 function createBackgroundMusic() {
   const output = path.resolve('resources/music/background_lofi.mp3')
   if (existsSync(output)) return
@@ -111,7 +138,13 @@ function createBackgroundMusic() {
 }
 
 try {
-  await Promise.all([fetchYtDlp(), fetchFfmpeg()])
+  try {
+    await Promise.all([fetchYtDlp(), fetchFfmpeg()])
+  } catch (error) {
+    console.error(error)
+    cleanup()
+    installWithChocolatey()
+  }
   createBackgroundMusic()
   for (const name of ['yt-dlp.exe', 'ffmpeg.exe', 'ffprobe.exe']) {
     const file = path.join(root, name)
