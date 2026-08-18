@@ -13,10 +13,12 @@ Whisper model are present, analysis and rendering are local.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
 import re
+import shutil
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -259,11 +261,39 @@ def write_srt(words: Sequence[Word], path: Path, offset: float) -> None:
     path.write_text("\n".join(blocks), encoding="utf-8")
 
 
-def analyze(video: Path, output_dir: Path, model: str, language: str, target: int, count: int) -> list[Highlight]:
+def transcript_cache_key(video: Path, model: str, language: str) -> str:
+    stat = video.stat()
+    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|{model}|{language}"
+    return hashlib.sha256(identity.encode("utf-8")).hexdigest()
+
+
+def cached_transcript(video: Path, model: str, language: str, cache_dir: Path | None) -> list[Word] | None:
+    if not cache_dir:
+        return None
+    path = cache_dir / "transcripts" / f"{transcript_cache_key(video, model, language)}.json"
+    if not path.is_file():
+        return None
+    emit("progress", stage="cache", percent=100, detail="Reusing cached transcript")
+    return [Word(**item) for item in json.loads(path.read_text(encoding="utf-8"))]
+
+
+def save_transcript_cache(video: Path, model: str, language: str, cache_dir: Path | None, words: list[Word]) -> None:
+    if not cache_dir:
+        return
+    directory = cache_dir / "transcripts"
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{transcript_cache_key(video, model, language)}.json"
+    path.write_text(json.dumps([asdict(word) for word in words], ensure_ascii=False), encoding="utf-8")
+
+
+def analyze(video: Path, output_dir: Path, model: str, language: str, target: int, count: int, cache_dir: Path | None = None) -> list[Highlight]:
     if not video.is_file():
         raise FileNotFoundError(f"Video does not exist: {video}")
     output_dir.mkdir(parents=True, exist_ok=True)
-    words = transcribe(video, model, language)
+    words = cached_transcript(video, model, language, cache_dir)
+    if words is None:
+        words = transcribe(video, model, language)
+        save_transcript_cache(video, model, language, cache_dir, words)
     (output_dir / "transcript.json").write_text(
         json.dumps([asdict(word) for word in words], ensure_ascii=False, indent=2), encoding="utf-8"
     )
@@ -283,10 +313,38 @@ def analyze(video: Path, output_dir: Path, model: str, language: str, target: in
     return highlights
 
 
+def model_cache_path(model: str) -> Path:
+    root = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")) / "hub"
+    return root / f"models--Systran--faster-whisper-{model}"
+
+
+def model_inventory() -> list[dict]:
+    result = []
+    for name in ["tiny", "base", "small", "medium", "large-v3"]:
+        directory = model_cache_path(name)
+        size = sum(item.stat().st_size for item in directory.rglob("*") if item.is_file()) if directory.is_dir() else 0
+        result.append({"name": name, "installed": directory.is_dir(), "sizeBytes": size})
+    return result
+
+
+def prepare_model(model: str) -> None:
+    if model not in {"tiny", "base", "small", "medium", "large-v3"}:
+        raise ValueError("Unsupported Whisper model")
+    emit("progress", stage="model-download", percent=1, detail=f"Downloading or verifying {model}")
+    WhisperModel = __import__("faster_whisper", fromlist=["WhisperModel"]).WhisperModel
+    WhisperModel(model, device="cpu", compute_type="int8", cpu_threads=2, num_workers=1)
+    emit("progress", stage="model-download", percent=100, detail=f"{model} is ready")
+
+
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="easyclip-engine")
     sub = root.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
+    sub.add_parser("models")
+    prepare = sub.add_parser("prepare-model")
+    prepare.add_argument("--model", required=True)
+    remove = sub.add_parser("delete-model")
+    remove.add_argument("--model", required=True)
     get = sub.add_parser("download")
     get.add_argument("--url", required=True)
     get.add_argument("--output-dir", required=True, type=Path)
@@ -298,6 +356,7 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--language", default="auto")
     run.add_argument("--target-duration", type=int, default=60)
     run.add_argument("--clip-count", type=int, default=5)
+    run.add_argument("--cache-dir", type=Path)
     return root
 
 
@@ -312,11 +371,21 @@ def main() -> int:
                 cudaAvailable=ctranslate2.get_cuda_device_count() > 0,
                 recommendedModels=["tiny", "base", "small", "medium", "large-v3"],
             )
+        elif args.command == "models":
+            output_result(ok=True, models=model_inventory())
+        elif args.command == "prepare-model":
+            prepare_model(args.model)
+            output_result(ok=True, models=model_inventory())
+        elif args.command == "delete-model":
+            directory = model_cache_path(args.model)
+            if directory.is_dir():
+                shutil.rmtree(directory)
+            output_result(ok=True, models=model_inventory())
         elif args.command == "download":
             path = download(args.url, args.output_dir, args.height)
             output_result(ok=True, path=str(path))
         else:
-            highlights = analyze(args.input, args.output_dir, args.model, args.language, args.target_duration, args.clip_count)
+            highlights = analyze(args.input, args.output_dir, args.model, args.language, args.target_duration, args.clip_count, args.cache_dir)
             output_result(ok=True, highlights=[asdict(item) for item in highlights])
         return 0
     except Exception as exc:

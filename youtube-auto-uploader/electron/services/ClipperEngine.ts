@@ -58,6 +58,7 @@ function defaultMetadata(clip: LocalHighlight, category: string, evidence: numbe
 
 export class ClipperEngine {
   private readonly jobs = new Map<string, ClipperJobState>();
+  private readonly cancelled = new Set<string>();
 
   constructor(
     private readonly db: Database.Database,
@@ -83,6 +84,19 @@ export class ClipperEngine {
 
   latestJob(): ClipperJobState | null {
     return [...this.jobs.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt))[0] ?? null;
+  }
+
+  cancel(jobId: string): boolean {
+    const job = this.jobs.get(jobId);
+    if (!job || job.status !== 'running') return false;
+    this.cancelled.add(jobId);
+    this.localAI.cancel(jobId);
+    this.jobs.set(jobId, { ...job, status: 'failed', phase: 'cancelled', error: 'Cancelled by user', updatedAt: new Date().toISOString() });
+    return true;
+  }
+
+  private ensureActive(jobId: string): void {
+    if (this.cancelled.has(jobId)) throw new Error('Cancelled by user');
   }
 
   private progress(jobId: string, phase: string, percent: number, message?: string): void {
@@ -133,7 +147,8 @@ export class ClipperEngine {
         model: input.whisperModel,
         language: input.language,
         targetDuration: input.maxLength,
-        clipCount: Math.min(30, Math.max(input.count * 3, input.count))
+        clipCount: Math.min(30, Math.max(input.count * 3, input.count)),
+        jobId
       }, (event) => {
         const stageBase: Record<string, number> = { model: 18, transcription: 26 };
         const base = stageBase[event.stage ?? ''] ?? 18;
@@ -141,6 +156,7 @@ export class ClipperEngine {
         const percent = typeof event.percent === 'number' ? event.percent : 0;
         this.progress(jobId, event.stage ?? 'local-ai', base + Math.round(percent * span / 100), event.detail);
       });
+      this.ensureActive(jobId);
       this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
       const analysis = await this.ffmpeg.analyze(source);
       this.progress(jobId, 'media-analysis', 55, 'Media analysis complete');
@@ -167,6 +183,7 @@ export class ClipperEngine {
       const encoder = await this.ffmpeg.preferredEncoder();
       this.progress(jobId, 'rendering', 62, encoder === 'h264_nvenc' ? 'NVIDIA NVENC enabled' : 'CPU encoder enabled');
       for (const [index, suggested] of selected.slice(0, input.count).entries()) {
+        this.ensureActive(jobId);
         const start = Math.max(0, snap(suggested.start_seconds, analysis.silences));
         const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end_seconds, analysis.silences));
         if (end <= start + 1) continue;

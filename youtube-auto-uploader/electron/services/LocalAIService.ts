@@ -21,6 +21,8 @@ export interface LocalEngineStatus {
   error?: string;
 }
 
+export interface LocalModelInfo { name: string; installed: boolean; sizeBytes: number }
+
 interface EngineResult {
   ok: boolean;
   error?: string;
@@ -28,6 +30,7 @@ interface EngineResult {
   engineVersion?: string;
   cudaAvailable?: boolean;
   recommendedModels?: string[];
+  models?: LocalModelInfo[];
 }
 
 interface EngineProgress {
@@ -43,8 +46,11 @@ const allowedModels = new Set(['tiny', 'base', 'small', 'medium', 'large-v3']);
 export class LocalAIService {
   private readonly binaryDirectory: string;
   private readonly script: string;
+  private readonly cacheDirectory: string;
+  private readonly children = new Map<string, ReturnType<typeof spawn>>();
 
   constructor() {
+    this.cacheDirectory = path.join(app.getPath('userData'), 'cache', 'local-ai');
     this.binaryDirectory = app.isPackaged
       ? path.join(process.resourcesPath, 'binaries')
       : path.join(process.cwd(), 'resources', 'binaries');
@@ -62,7 +68,7 @@ export class LocalAIService {
     throw new Error(`Local AI engine is missing: ${executable}`);
   }
 
-  private run(args: string[], onProgress?: (event: EngineProgress) => void): Promise<EngineResult> {
+  private run(args: string[], onProgress?: (event: EngineProgress) => void, jobId?: string): Promise<EngineResult> {
     const executable = this.executable();
     return new Promise((resolve, reject) => {
       const child = spawn(executable.command, [...executable.prefix, ...args], {
@@ -70,9 +76,11 @@ export class LocalAIService {
         env: {
           ...process.env,
           PATH: `${this.binaryDirectory}${path.delimiter}${process.env.PATH ?? ''}`,
-          PYTHONUTF8: '1'
+          PYTHONUTF8: '1',
+          HF_HOME: path.join(this.cacheDirectory, 'models')
         }
       });
+      if (jobId) this.children.set(jobId, child);
       let stdout = '';
       let stderr = '';
       let currentStage = '';
@@ -103,10 +111,12 @@ export class LocalAIService {
       });
       child.once('error', (error) => {
         clearInterval(heartbeat);
+        if (jobId) this.children.delete(jobId);
         reject(new Error(`Unable to start local AI engine: ${error.message}`));
       });
       child.once('close', (code) => {
         clearInterval(heartbeat);
+        if (jobId) this.children.delete(jobId);
         const line = stdout.trim().split(/\r?\n/).filter(Boolean).at(-1);
         if (!line) { reject(new Error(`Local AI engine returned no result${stderr ? `: ${stderr.trim()}` : ''}`)); return; }
         try {
@@ -139,10 +149,30 @@ export class LocalAIService {
     }
   }
 
+  async models(): Promise<LocalModelInfo[]> {
+    return (await this.run(['models'])).models ?? [];
+  }
+
+  async prepareModel(model: string, onProgress?: (event: EngineProgress) => void): Promise<LocalModelInfo[]> {
+    if (!allowedModels.has(model)) throw new Error(`Unsupported Whisper model: ${model}`);
+    return (await this.run(['prepare-model', '--model', model], onProgress)).models ?? [];
+  }
+
+  async deleteModel(model: string): Promise<LocalModelInfo[]> {
+    if (!allowedModels.has(model)) throw new Error(`Unsupported Whisper model: ${model}`);
+    return (await this.run(['delete-model', '--model', model])).models ?? [];
+  }
+
+  cancel(jobId: string): boolean {
+    const child = this.children.get(jobId);
+    if (!child) return false;
+    return child.kill();
+  }
+
   async analyze(
     input: string,
     outputDirectory: string,
-    options: { model: string; language: string; targetDuration: number; clipCount: number },
+    options: { model: string; language: string; targetDuration: number; clipCount: number; jobId?: string },
     onProgress?: (event: EngineProgress) => void
   ): Promise<LocalHighlight[]> {
     if (!allowedModels.has(options.model)) throw new Error(`Unsupported Whisper model: ${options.model}`);
@@ -150,8 +180,9 @@ export class LocalAIService {
       'analyze', '--input', input, '--output-dir', outputDirectory,
       '--model', options.model, '--language', options.language,
       '--target-duration', String(Math.max(15, Math.min(180, options.targetDuration))),
-      '--clip-count', String(Math.max(1, Math.min(30, options.clipCount)))
-    ], onProgress);
+      '--clip-count', String(Math.max(1, Math.min(30, options.clipCount))),
+      '--cache-dir', this.cacheDirectory
+    ], onProgress, options.jobId);
     if (!result.highlights?.length) throw new Error('Local AI did not find any highlight candidates');
     return result.highlights;
   }

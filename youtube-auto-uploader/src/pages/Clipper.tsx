@@ -16,6 +16,8 @@ export function Clipper(): JSX.Element {
   const [localEngine, setLocalEngine] = useState<{ available: boolean; cudaAvailable: boolean; error?: string }>({ available: false, cudaAvailable: false });
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('hybrid');
   const [whisperModel, setWhisperModel] = useState('base');
+  const [localModels, setLocalModels] = useState<Array<{name:string;installed:boolean;sizeBytes:number}>>([]);
+  const [modelBusy, setModelBusy] = useState(false);
   const [language, setLanguage] = useState<'auto' | 'fa' | 'en'>('auto');
   const [count, setCount] = useState(5);
   const [maxLength, setMaxLength] = useState(60);
@@ -32,10 +34,11 @@ export function Clipper(): JSX.Element {
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
   const checkEngines = useCallback(async (): Promise<void> => {
-    const [ollama, local] = await Promise.all([window.api.ollama.status(), window.api.localAI.status()]);
+    const [ollama, local, inventory] = await Promise.all([window.api.ollama.status(), window.api.localAI.status(), window.api.localAI.models().catch(() => [])]);
     setOllamaRunning(ollama.running);
     setModels(ollama.models);
     setLocalEngine(local);
+    setLocalModels(inventory);
     if (ollama.models[0] && !ollama.models.includes(model)) setModel(ollama.models[0]);
   }, [model]);
 
@@ -64,6 +67,26 @@ export function Clipper(): JSX.Element {
     });
     return () => { progressUnsubscribe(); clipUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
   }, [checkEngines, load]);
+
+  const toggleWhisperModel = async (): Promise<void> => {
+    const current = localModels.find((item) => item.name === whisperModel);
+    setModelBusy(true);
+    try {
+      const inventory = current?.installed
+        ? await window.api.localAI.deleteModel(whisperModel)
+        : await window.api.localAI.prepareModel(whisperModel);
+      setLocalModels(inventory);
+      toast.success(current?.installed ? 'Speech model removed' : 'Speech model is ready');
+    } catch (error: unknown) { toast.error(error instanceof Error ? error.message : String(error)); }
+    finally { setModelBusy(false); }
+  };
+
+  const cancel = async (): Promise<void> => {
+    if (!activeJobId.current) return;
+    await window.api.clipper.cancel(activeJobId.current);
+    setRunning(false);
+    toast.info('Cancellation requested');
+  };
 
   const start = async (): Promise<void> => {
     if (!localEngine.available) { toast.error(localEngine.error || 'The local Whisper engine is not installed'); return; }
@@ -119,7 +142,7 @@ export function Clipper(): JSX.Element {
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-2">
           <label><span className="label">Analysis</span><select className="input" value={analysisMode} onChange={(event) => setAnalysisMode(event.target.value as AnalysisMode)}><option value="local">Whisper only</option><option value="hybrid">Whisper + optional Ollama</option><option value="ollama">Require Ollama refinement</option></select></label>
-          <label><span className="label">Whisper model</span><select className="input" value={whisperModel} onChange={(event) => setWhisperModel(event.target.value)}>{['tiny','base','small','medium','large-v3'].map((name) => <option key={name}>{name}</option>)}</select></label>
+          <div><span className="label">Whisper model</span><select className="input" value={whisperModel} onChange={(event) => setWhisperModel(event.target.value)}>{['tiny','base','small','medium','large-v3'].map((name) => <option key={name}>{localModels.find((item) => item.name === name)?.installed ? '★ ' : ''}{name}</option>)}</select><button type="button" disabled={modelBusy || running} className="btn w-full mt-2" onClick={() => void toggleWhisperModel()}>{modelBusy ? 'Please wait…' : localModels.find((item) => item.name === whisperModel)?.installed ? 'Remove model' : 'Install before processing'}</button></div>
           <label><span className="label">Speech language</span><select className="input" value={language} onChange={(event) => setLanguage(event.target.value as 'auto'|'fa'|'en')}><option value="auto">Auto detect</option><option value="fa">Persian</option><option value="en">English</option></select></label>
         </div>
         {analysisMode !== 'local' && <div><label className="label">Ollama model</label><div className="flex gap-2"><select className="input" value={model} onChange={(event) => setModel(event.target.value)}>{[...new Set([...models, ...recommended])].map((name) => <option key={name} value={name}>{models.includes(name) ? '★ ' : ''}{name}</option>)}</select>{!models.includes(model) && <button className="btn" onClick={() => void pullModel()}>Install</button>}</div></div>}
@@ -134,7 +157,7 @@ export function Clipper(): JSX.Element {
           <Toggle label="Auto captions" value={captions} set={setCaptions}/><Toggle label="Smart zoom" value={smartZoom} set={setSmartZoom}/><Toggle label="Background music" value={music} set={setMusic}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/>
         </div>
         <p className="muted text-xs">The selected Whisper model downloads once on first use. Afterward, transcription, ranking, captions, and rendering work offline.</p>
-        <button disabled={running || !localEngine.available} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>
+        <div className="flex gap-2"><button disabled={running || !localEngine.available} className="btn btn-primary flex-1 flex justify-center gap-2 disabled:opacity-50" onClick={() => void start()}>{running ? <Loader2 className="animate-spin" size={18}/> : <Bot size={18}/>} Find viral moments</button>{running && <button className="btn border-red-700 text-red-300" onClick={() => void cancel()}>Cancel</button>}</div>
       </div>
     </div>
 
