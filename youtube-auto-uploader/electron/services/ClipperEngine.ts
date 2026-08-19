@@ -320,8 +320,15 @@ export class ClipperEngine {
   get(id: number): { id: number; suggested_title: string; hashtags: string; local_path: string; thumbnail_path: string; status: string } | undefined {
     return this.db.prepare('SELECT id,suggested_title,hashtags,local_path,thumbnail_path,status FROM clips WHERE id=?').get(id) as { id: number; suggested_title: string; hashtags: string; local_path: string; thumbnail_path: string; status: string } | undefined;
   }
-  update(id: number, patch: { status?: string; suggested_title?: string; hashtags?: string }): void {
-    const fields = Object.entries(patch);
-    if (fields.length) this.db.prepare(`UPDATE clips SET ${fields.map(([key]) => `${key}=?`).join(',')} WHERE id=?`).run(...fields.map(([, value]) => value), id);
+  update(id: number, patch: { status?: string; suggested_title?: string; hashtags?: string; start_time?: number; end_time?: number }): void {
+    const allowed = new Set(['status','suggested_title','hashtags','start_time','end_time']);
+    const fields = Object.entries(patch).filter(([key, value]) => allowed.has(key) && value !== undefined);
+    if (!fields.length) return;
+    const current = this.db.prepare('SELECT start_time,end_time FROM clips WHERE id=?').get(id) as {start_time:number;end_time:number}|undefined;
+    if (!current) throw new Error('Clip not found');
+    const start = Number(patch.start_time ?? current.start_time);
+    const end = Number(patch.end_time ?? current.end_time);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start || end-start > 180) throw new Error('Invalid clip time range');
+    this.db.prepare(`UPDATE clips SET ${fields.map(([key]) => `${key}=?`).join(',')} WHERE id=?`).run(...fields.map(([, value]) => value), id);
   }
 }
