@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from easyclip_engine import SpeakerTurn, Word, build_format_selector, caption_groups, merge_speaker_turns, pick_highlights, write_srt
+from easyclip_engine import SpeakerTurn, Word, build_format_selector, caption_groups, merge_speaker_turns, pick_highlights, write_karaoke_ass, write_srt
 
 
 class EngineTests(unittest.TestCase):
@@ -33,6 +33,16 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(merged), 2)
         self.assertEqual(merged[0].end_seconds, 4)
         self.assertEqual(merged[1].speaker, "SPEAKER_01")
+
+    def test_karaoke_ass_contains_word_timing(self):
+        words = [Word("سلام", 5, 5.4), Word("دنیا", 5.4, 6)]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "caption.ass"
+            write_karaoke_ass(words, path, 5)
+            text = path.read_text(encoding="utf-8-sig")
+            self.assertIn("Style: Karaoke,Vazirmatn", text)
+            self.assertIn("{\\k40}سلام", text)
+            self.assertIn("{\\k60}دنیا", text)
 
     def test_srt_is_relative_to_clip(self):
         words = [Word("Hello", 10, 10.5), Word("world.", 10.6, 11)]

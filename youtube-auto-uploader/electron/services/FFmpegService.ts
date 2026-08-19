@@ -123,7 +123,11 @@ export class FFmpegService {
         : `[0:v]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=decrease,pad=${String(width)}:${String(height)}:(ow-iw)/2:(oh-ih)/2:black[composite]`;
     const effects: string[] = [];
     if (options.smartZoom && !faceCrop) effects.push(`scale=w='iw*(1+0.10*t/${String(duration)})':h='ih*(1+0.10*t/${String(duration)})':eval=frame,crop=${String(width)}:${String(height)}`);
-    if (options.captionsPath) effects.push(`subtitles='${subtitlePath(options.captionsPath)}'${options.fontsDirectory?`:fontsdir='${subtitlePath(options.fontsDirectory)}'`:''}:force_style='FontName=Inter,FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,MarginV=110,Alignment=2'`);
+    if (options.captionsPath) {
+      const fonts = options.fontsDirectory ? `:fontsdir='${subtitlePath(options.fontsDirectory)}'` : '';
+      const style = options.captionsPath.toLowerCase().endsWith('.ass') ? '' : ":force_style='FontName=Vazirmatn,FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,MarginV=110,Alignment=2'";
+      effects.push(`subtitles='${subtitlePath(options.captionsPath)}'${fonts}${style}`);
+    }
     const filter = `${background};[composite]${effects.length ? effects.join(',') : 'null'}[video]`;
     const args = ['-ss', String(Math.max(0, start - 0.3)), '-i', source];
     if (options.musicPath) args.push('-stream_loop', '-1', '-i', options.musicPath);

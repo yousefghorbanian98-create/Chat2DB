@@ -280,6 +280,34 @@ def write_srt(words: Sequence[Word], path: Path, offset: float) -> None:
     path.write_text("\n".join(blocks), encoding="utf-8")
 
 
+def write_karaoke_ass(words: Sequence[Word], path: Path, offset: float) -> None:
+    header = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
+Style: Karaoke,Vazirmatn,68,&H00FFFFFF,&H006C63FF,&H00100D18,&H80000000,-1,0,0,0,100,100,0,0,1,4,1,2,70,70,150,1
+
+[Events]
+Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
+"""
+    dialogues: list[str] = []
+    for group in caption_groups(words, max_chars=30, max_words=6):
+        karaoke = []
+        for word in group:
+            duration = max(1, round((word.end - word.start) * 100))
+            text = word.text.replace("{", "(").replace("}", ")")
+            karaoke.append(f"{{\\k{duration}}}{text}")
+        start = srt_time(group[0].start - offset).replace(",", ".")[:-1]
+        end = srt_time(group[-1].end - offset).replace(",", ".")[:-1]
+        dialogues.append(f"Dialogue: 0,{start},{end},Karaoke,,0,0,0,,{' '.join(karaoke)}")
+    path.write_text(header + "\n".join(dialogues) + "\n", encoding="utf-8-sig")
+
+
 def transcript_cache_key(video: Path, model: str, language: str) -> str:
     stat = video.stat()
     identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|{model}|{language}"
@@ -319,8 +347,9 @@ def analyze(video: Path, output_dir: Path, model: str, language: str, target: in
     selected = pick_highlights(words, max(15, min(target, 180)), max(1, min(count, 30)))
     highlights = []
     for index, (window, score, title) in enumerate(selected, 1):
-        caption = output_dir / f"highlight-{index:02}.srt"
-        write_srt(window, caption, window[0].start)
+        caption = output_dir / f"highlight-{index:02}.ass"
+        write_karaoke_ass(window, caption, window[0].start)
+        write_srt(window, output_dir / f"highlight-{index:02}.srt", window[0].start)
         highlights.append(Highlight(
             id=f"highlight-{index:02}", start_seconds=round(window[0].start, 3),
             end_seconds=round(window[-1].end, 3), score=round(score), title=title,
