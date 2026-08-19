@@ -1,6 +1,6 @@
 {
   "name": "youtube-auto-uploader",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "description": "YouTube Auto-Uploader & local AI Clipper",
   "main": "out/main/index.js",
@@ -69,6 +69,7 @@
     "appId": "com.claudebuilt.youtubeuploader",
     "productName": "YouTube Auto-Uploader & AI Clipper",
     "asar": true,
+    "compression": "maximum",
     "directories": {
       "output": "dist"
     },

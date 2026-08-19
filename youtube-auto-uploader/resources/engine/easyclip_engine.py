@@ -421,16 +421,23 @@ def diarize_video(video: Path, output_dir: Path, cache_dir: Path, min_speakers: 
         audio.unlink(missing_ok=True)
 
 
-def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 4.0) -> list[FaceSample]:
+def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -> list[FaceSample]:
     stat = video.stat()
-    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|haar-face-v1|{samples_per_second}"
+    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|mediapipe-face-v2|{samples_per_second}"
     directory = cache_dir / "face-tracking"
     directory.mkdir(parents=True, exist_ok=True)
     cached = directory / f"{hashlib.sha256(identity.encode('utf-8')).hexdigest()}.json"
     if cached.is_file():
-        emit("progress", stage="face-cache", percent=100, detail="Reusing cached face tracks")
+        emit("progress", stage="face-cache", percent=100, detail="Reusing cached precision face tracks")
         return [FaceSample(**item) for item in json.loads(cached.read_text(encoding="utf-8"))]
     import cv2
+    detector_name = "MediaPipe"
+    media_detector = None
+    try:
+        import mediapipe as mp
+        media_detector = mp.solutions.face_detection.FaceDetection(model_selection=1, min_detection_confidence=0.42)
+    except Exception:
+        detector_name = "OpenCV fallback"
     cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
     capture = cv2.VideoCapture(str(video))
     if not capture.isOpened():
@@ -438,7 +445,8 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 4.0) -
     fps = max(1.0, capture.get(cv2.CAP_PROP_FPS) or 25.0)
     total = max(1, int(capture.get(cv2.CAP_PROP_FRAME_COUNT) or 1))
     stride = max(1, int(fps / max(0.5, samples_per_second)))
-    tracks: dict[int, tuple[float, float, int]] = {}
+    # cx, cy, width, height, vx, vy, last_frame, confidence
+    tracks: dict[int, tuple[float, float, float, float, float, float, int, float]] = {}
     next_id = 1
     samples: list[FaceSample] = []
     frame_index = 0
@@ -451,27 +459,55 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 4.0) -
                 frame_index += 1
                 continue
             height, width = frame.shape[:2]
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            detections = cascade.detectMultiScale(gray, scaleFactor=1.12, minNeighbors=5, minSize=(max(36, width // 30), max(36, height // 30)))
+            found: list[tuple[float, float, float, float, float]] = []
+            if media_detector is not None:
+                result = media_detector.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                for detection in result.detections or []:
+                    box = detection.location_data.relative_bounding_box
+                    x, y = max(0.0, box.xmin), max(0.0, box.ymin)
+                    face_width, face_height = min(1.0 - x, box.width), min(1.0 - y, box.height)
+                    if face_width > 0.015 and face_height > 0.015:
+                        found.append((x, y, face_width, face_height, float(detection.score[0])))
+            else:
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                for x, y, face_width, face_height in cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(max(32, width // 40), max(32, height // 40))):
+                    found.append((x / width, y / height, face_width / width, face_height / height, 0.68))
             available = set(tracks)
-            for x, y, face_width, face_height in sorted(detections, key=lambda item: item[2] * item[3], reverse=True):
-                center_x, center_y = (x + face_width / 2) / width, (y + face_height / 2) / height
-                candidates = [(track_id, (center_x - previous[0]) ** 2 + (center_y - previous[1]) ** 2)
-                              for track_id, previous in tracks.items() if track_id in available and frame_index - previous[2] <= stride * 6]
+            for x, y, face_width, face_height, confidence in sorted(found, key=lambda item: item[2] * item[3], reverse=True):
+                center_x, center_y = x + face_width / 2, y + face_height / 2
+                candidates = []
+                for track_id, old in tracks.items():
+                    if track_id not in available or frame_index - old[6] > stride * 12:
+                        continue
+                    elapsed = max(1, frame_index - old[6]) / stride
+                    predicted_x, predicted_y = old[0] + old[4] * elapsed, old[1] + old[5] * elapsed
+                    distance = (center_x - predicted_x) ** 2 + (center_y - predicted_y) ** 2
+                    size_penalty = abs(face_width * face_height - old[2] * old[3]) * 0.35
+                    candidates.append((track_id, distance + size_penalty))
                 track_id, distance = min(candidates, key=lambda item: item[1]) if candidates else (next_id, 999.0)
-                if distance > 0.08:
+                if distance > 0.065:
                     track_id = next_id
                     next_id += 1
+                    old = (center_x, center_y, face_width, face_height, 0.0, 0.0, frame_index, confidence)
+                else:
+                    old = tracks[track_id]
                 available.discard(track_id)
-                tracks[track_id] = (center_x, center_y, frame_index)
-                samples.append(FaceSample(track_id, round(frame_index / fps, 3), round(x / width, 5), round(y / height, 5), round(face_width / width, 5), round(face_height / height, 5), 0.75))
+                alpha = 0.42
+                smooth_x, smooth_y = old[0] * (1-alpha) + center_x * alpha, old[1] * (1-alpha) + center_y * alpha
+                smooth_w, smooth_h = old[2] * (1-alpha) + face_width * alpha, old[3] * (1-alpha) + face_height * alpha
+                velocity_x = old[4] * 0.65 + (smooth_x - old[0]) * 0.35
+                velocity_y = old[5] * 0.65 + (smooth_y - old[1]) * 0.35
+                tracks[track_id] = (smooth_x, smooth_y, smooth_w, smooth_h, velocity_x, velocity_y, frame_index, confidence)
+                samples.append(FaceSample(track_id, round(frame_index / fps, 3), round(max(0, smooth_x-smooth_w/2), 5), round(max(0, smooth_y-smooth_h/2), 5), round(smooth_w, 5), round(smooth_h, 5), round(confidence, 4)))
             if frame_index % max(stride, int(total / 100) or 1) == 0:
-                emit("progress", stage="face-tracking", percent=min(99, round(frame_index * 100 / total)), detail=f"Tracking {max(0, next_id - 1)} faces")
+                emit("progress", stage="face-tracking", percent=min(99, round(frame_index * 100 / total)), detail=f"{detector_name}: tracking {max(0, next_id - 1)} faces")
             frame_index += 1
     finally:
         capture.release()
+        if media_detector is not None:
+            media_detector.close()
     cached.write_text(json.dumps([asdict(sample) for sample in samples], ensure_ascii=False), encoding="utf-8")
-    emit("progress", stage="face-tracking", percent=100, detail=f"Created {max(0, next_id - 1)} stable face tracks")
+    emit("progress", stage="face-tracking", percent=100, detail=f"{detector_name}: created {max(0, next_id - 1)} stable tracks")
     return samples
 
 

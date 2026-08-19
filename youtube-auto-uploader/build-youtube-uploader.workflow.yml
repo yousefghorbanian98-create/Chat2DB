@@ -30,6 +30,13 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Read application version
+        id: app-version
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          "version=$version" | Add-Content $env:GITHUB_OUTPUT
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -88,8 +95,9 @@ jobs:
       - name: Verify packaged artifacts
         shell: pwsh
         run: |
-          $installer = Get-ChildItem dist -Filter 'YouTube Auto-Uploader 1.1.0 x64.exe' | Select-Object -First 1
-          $portable = Get-ChildItem dist -Filter 'YouTube Auto-Uploader 1.1.0 Portable.exe' | Select-Object -First 1
+          $version = '${{ steps.app-version.outputs.version }}'
+          $installer = Get-ChildItem dist -Filter "YouTube Auto-Uploader $version x64.exe" | Select-Object -First 1
+          $portable = Get-ChildItem dist -Filter "YouTube Auto-Uploader $version Portable.exe" | Select-Object -First 1
 
           if (-not $installer) {
             throw 'NSIS installer was not created'
@@ -113,10 +121,9 @@ jobs:
       - name: Upload Windows applications
         uses: actions/upload-artifact@v4
         with:
-          name: YouTube-Auto-Uploader-1.1.0-Windows-x64
+          name: VioletCut-${{ steps.app-version.outputs.version }}-Windows-x64
           path: |
-            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 x64.exe
-            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 Portable.exe
+            youtube-auto-uploader/dist/YouTube Auto-Uploader *.exe
             youtube-auto-uploader/dist/SHA256SUMS.txt
             youtube-auto-uploader/dist/latest.yml
             youtube-auto-uploader/dist/*.blockmap
@@ -127,8 +134,8 @@ jobs:
       - name: Publish permanent professional release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: violetcut-v1.1.0-professional
-          name: VioletCut Professional 1.1.0
+          tag_name: violetcut-v${{ steps.app-version.outputs.version }}-professional
+          name: VioletCut Professional ${{ steps.app-version.outputs.version }}
           target_commitish: ${{ github.sha }}
           make_latest: true
           generate_release_notes: false
@@ -141,8 +148,7 @@ jobs:
 
             Community builds are unsigned. Windows SmartScreen may display a warning.
           files: |
-            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 x64.exe
-            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 Portable.exe
+            youtube-auto-uploader/dist/YouTube Auto-Uploader *.exe
             youtube-auto-uploader/dist/SHA256SUMS.txt
             youtube-auto-uploader/dist/latest.yml
             youtube-auto-uploader/dist/*.blockmap
