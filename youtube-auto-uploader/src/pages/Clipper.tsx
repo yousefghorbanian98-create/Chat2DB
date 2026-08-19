@@ -34,9 +34,10 @@ export function Clipper(): JSX.Element {
   const [clips, setClips] = useState<ClipRow[]>([]);
   const [speakerTimeline, setSpeakerTimeline] = useState<{speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}>();
   const [faceTrackCount, setFaceTrackCount] = useState(0);
+  const [selectedSuggestions, setSelectedSuggestions] = useState<number[]>([]);
   const activeJobId = useRef<string | undefined>(undefined);
 
-  const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
+  const load = useCallback((): void => { void window.api.clipper.clips().then((rows) => { setClips(rows); setSelectedSuggestions((current) => current.length ? current.filter((id) => rows.some((row) => row.id === id && row.status === 'suggested')) : rows.filter((row) => row.status === 'suggested').map((row) => row.id)); }); }, []);
   const checkEngines = useCallback(async (): Promise<void> => {
     const [ollama, local, inventory] = await Promise.all([window.api.ollama.status(), window.api.localAI.status(), window.api.localAI.models().catch(() => [])]);
     setOllamaRunning(ollama.running);
@@ -103,6 +104,14 @@ export function Clipper(): JSX.Element {
     toast.info('Cancellation requested');
   };
 
+  const renderSelected = async (): Promise<void> => {
+    if (!selectedSuggestions.length) { toast.error('Select at least one suggested clip'); return; }
+    const handle = await window.api.clipper.renderSuggested(selectedSuggestions);
+    activeJobId.current = handle.jobId;
+    setRunning(true);
+    toast.success('Rendering selected suggestions');
+  };
+
   const start = async (): Promise<void> => {
     if (!localEngine.available) { toast.error(localEngine.error || 'The local Whisper engine is not installed'); return; }
     if (analysisMode === 'ollama' && !ollamaRunning) { toast.error('Start Ollama before clipping'); return; }
@@ -118,7 +127,7 @@ export function Clipper(): JSX.Element {
         setModelProgress(undefined);
       }
       setRunning(true);
-      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, processingProfile: profile, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
+      const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, processingProfile: profile, previewOnly: true, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
       activeJobId.current = handle.jobId;
       toast.success('Clipping continues in the background when you change pages');
     } catch (error: unknown) {
@@ -169,7 +178,7 @@ export function Clipper(): JSX.Element {
       </aside>
 
       <section className="viewer-column">
-        <div className="viewer-stage"><div className="viewer-canvas">{preview?<video src={`media://file?path=${encodeURIComponent(preview.local_path)}`} poster={`media://file?path=${encodeURIComponent(preview.thumbnail_path)}`}/>:<div className="viewer-empty"><WandSparkles className="mx-auto" size={37}/><b>Your preview appears here</b><span className="text-[9px]">AI framing · {aspect}</span></div>}<div className="safe-zone"/></div></div>
+        <div className="viewer-stage"><div className="viewer-canvas">{preview?.local_path?<video src={`media://file?path=${encodeURIComponent(preview.local_path)}`} poster={`media://file?path=${encodeURIComponent(preview.thumbnail_path??'')}`}/>:<div className="viewer-empty"><WandSparkles className="mx-auto" size={37}/><b>Your preview appears here</b><span className="text-[9px]">AI framing · {aspect}</span></div>}<div className="safe-zone"/></div></div>
         <div className="viewer-controls"><button><ZoomOut size={14}/></button><span className="text-[9px]">42%</span><button><ZoomIn size={14}/></button><time>00:00:00</time><button className="play">{running?<Pause size={13}/>:<Play size={13} fill="currentColor"/>}</button><time>{preview?`${Math.round(preview.end_time-preview.start_time)} sec`:'00:00:00'}</time><button><Layers3 size={14}/></button></div>
       </section>
 
@@ -187,7 +196,7 @@ export function Clipper(): JSX.Element {
 
     <div className="editor-timeline"><div className="timeline-tools"><b>Timeline</b><div className="tool-row"><button><Scissors size={13}/></button><button><Trash2 size={13}/></button><button><ZoomOut size={13}/></button><button><ZoomIn size={13}/></button></div><span className="block text-[8px] text-zinc-600 mt-4">{clips.length} generated clips</span></div><div className="timeline-area"><div className="timeline-ruler"><span>00:00</span><span>00:15</span><span>00:30</span><span>00:45</span><span>01:00</span></div><div className="playhead"/><div className="track"><span className="track-label">VIDEO 1</span><div className="track-clip">{file?.split(/[\\/]/).pop()??'Source video'}</div></div><div className="track audio"><span className="track-label">AUDIO 1</span><div className="track-clip">Speech waveform</div></div><div className="track caption"><span className="track-label">CAPTIONS</span><div className="track-clip">Word-synced captions</div></div>{speakerTimeline?.speakers.slice(0,3).map((speaker,index)=><div className="track" key={speaker}><span className="track-label">{speaker}</span><div className="track-clip" style={{marginLeft:`${index*40}px`,width:`${Math.max(120,speakerTimeline.turns.filter(turn=>turn.speaker===speaker).reduce((sum,turn)=>sum+turn.end_seconds-turn.start_seconds,0)*4)}px`}}>Active speaker</div></div>)}</div></div>
 
-    {clips.length>0&&<div className="results-drawer"><div className="panel-heading"><span>Generated highlights</span><div className="flex gap-1"><button className="btn !p-1" onClick={()=>void approveAll()}><Check size={12}/></button><button className="btn !p-1" onClick={()=>void uploadApproved()}><Upload size={12}/></button></div></div>{clips.slice(0,8).map(clip=><div className="result-mini" key={clip.id}><video src={`media://file?path=${encodeURIComponent(clip.local_path)}`}/><div className="min-w-0 flex-1"><span className="badge text-violet-300">{clip.score}/10</span><input className="input mt-2" defaultValue={clip.suggested_title} onBlur={(e)=>void window.api.clipper.update(clip.id,{suggested_title:e.target.value})}/><div className="flex gap-1 mt-1"><button className="btn !p-1" onClick={()=>void window.api.clipper.export(clip.id)}><Download size={11}/></button><button className="btn !p-1" onClick={()=>void window.api.clipper.update(clip.id,{status:'approved'}).then(load)}><Check size={11}/></button></div></div></div>)}</div>}
+    {clips.length>0&&<div className="results-drawer"><div className="panel-heading"><span>{clips.some(clip=>clip.status==='suggested')?'Review suggestions':'Generated highlights'}</span><div className="flex gap-1">{clips.some(clip=>clip.status==='suggested')?<button className="btn !p-1 px-2 text-[9px]" disabled={!selectedSuggestions.length||running} onClick={()=>void renderSelected()}>Render {selectedSuggestions.length}</button>:<><button className="btn !p-1" onClick={()=>void approveAll()}><Check size={12}/></button><button className="btn !p-1" onClick={()=>void uploadApproved()}><Upload size={12}/></button></>}</div></div>{clips.slice(0,8).map(clip=><div className={`result-mini ${selectedSuggestions.includes(clip.id)?'bg-violet-950/20':''}`} key={clip.id}>{clip.local_path?<video src={`media://file?path=${encodeURIComponent(clip.local_path)}`}/>:<button className="w-[52px] h-[78px] rounded bg-[#211633] grid place-items-center" onClick={()=>setSelectedSuggestions(current=>current.includes(clip.id)?current.filter(id=>id!==clip.id):[...current,clip.id])}>{selectedSuggestions.includes(clip.id)?<Check size={18}/>:<Plus size={18}/>}</button>}<div className="min-w-0 flex-1"><span className="badge text-violet-300">{clip.score}/10</span><input className="input mt-2" defaultValue={clip.suggested_title} onBlur={(e)=>void window.api.clipper.update(clip.id,{suggested_title:e.target.value})}/><div className="flex gap-1 mt-1">{clip.status==='suggested'?<span className="text-[8px] text-zinc-500">{Math.round(clip.start_time)}s – {Math.round(clip.end_time)}s · select to render</span>:<><button className="btn !p-1" onClick={()=>void window.api.clipper.export(clip.id)}><Download size={11}/></button><button className="btn !p-1" onClick={()=>void window.api.clipper.update(clip.id,{status:'approved'}).then(load)}><Check size={11}/></button></>}</div></div></div>)}</div>}
   </div>;
 }
 function Toggle({ label, value, set }: { label: string; value: boolean; set: (value: boolean) => void }): JSX.Element {

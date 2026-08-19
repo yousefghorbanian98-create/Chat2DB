@@ -84,6 +84,16 @@ export class ClipperEngine {
     return { jobId };
   }
 
+  renderSuggested(ids: number[]): JobHandle {
+    const unique = [...new Set(ids)].filter((id) => Number.isInteger(id) && id > 0).slice(0, 30);
+    if (!unique.length) throw new Error('Select at least one suggested clip');
+    const jobId = randomUUID();
+    const now = new Date().toISOString();
+    this.jobs.set(jobId, { jobId, phase: 'render-queued', percent: 0, status: 'running', startedAt: now, updatedAt: now });
+    void this.processSuggestedRender(jobId, unique);
+    return { jobId };
+  }
+
   latestJob(): ClipperJobState | null {
     return [...this.jobs.values()].sort((left, right) => right.startedAt.localeCompare(left.startedAt))[0] ?? null;
   }
@@ -128,6 +138,43 @@ export class ClipperEngine {
     }
     if (!selected.length) throw new Error('Ollama did not select a valid local candidate id');
     return selected;
+  }
+
+  private async processSuggestedRender(jobId: string, ids: number[]): Promise<void> {
+    try {
+      const placeholders = ids.map(() => '?').join(',');
+      const rows = this.db.prepare(`SELECT id,source_path,start_time,end_time,score,suggested_title,hook,hashtags,reason,caption_path,render_options_json FROM clips WHERE id IN (${placeholders}) AND status IN ('suggested','approved')`).all(...ids) as Array<{id:number;source_path:string;start_time:number;end_time:number;score:number;suggested_title:string;hook:string;hashtags:string;reason:string;caption_path?:string;render_options_json:string}>;
+      if (!rows.length) throw new Error('The selected suggestions are no longer available');
+      const directory = path.join(this.temp, jobId);
+      await mkdir(directory, { recursive: true });
+      const encoder = await this.ffmpeg.preferredEncoder();
+      for (const [index, row] of rows.entries()) {
+        this.ensureActive(jobId);
+        const options = JSON.parse(row.render_options_json) as ClipInput;
+        let faces: FaceTimeline | undefined;
+        if (options.processingProfile === 'professional') faces = await this.localAI.trackFaces(row.source_path, { samplesPerSecond: 4, jobId });
+        this.progress(jobId, 'rendering-approved', 5 + Math.round(index / rows.length * 90), `Rendering approved clip ${String(index + 1)} of ${String(rows.length)}`);
+        const video = path.join(directory, `approved_clip_${String(row.id)}.mp4`);
+        const rawThumb = path.join(directory, `thumb_raw_${String(row.id)}.jpg`);
+        const thumb = path.join(directory, `thumb_${String(row.id)}.jpg`);
+        await this.ffmpeg.render(row.source_path, row.start_time, row.end_time, video, {
+          aspect: options.aspect, captionsPath: options.captions ? row.caption_path : undefined, fontsDirectory: this.fontsDirectory,
+          smartZoom: options.smartZoom, blurBackground: options.blurBackground,
+          musicPath: options.music && this.musicPath && existsSync(this.musicPath) ? this.musicPath : undefined,
+          musicVolume: 0.12, encoder, sourceStart: row.start_time, faceSamples: faces?.samples
+        });
+        await this.ffmpeg.frame(row.source_path, row.start_time + Math.min(3, (row.end_time-row.start_time)/3), rawThumb);
+        const overlay = Buffer.from(`<svg width="1080" height="1920"><rect y="1380" width="1080" height="540" fill="#080612" fill-opacity=".72"/><foreignObject x="70" y="1450" width="940" height="340"><div xmlns="http://www.w3.org/1999/xhtml" style="font:700 68px Arial;color:white;text-align:center">${escapeSvg(row.suggested_title)}</div></foreignObject></svg>`);
+        await sharp(rawThumb).resize(1080,1920,{fit:'cover'}).composite([{input:overlay}]).jpeg({quality:90}).toFile(thumb);
+        this.db.prepare("UPDATE clips SET local_path=?,thumbnail_path=?,status='pending' WHERE id=?").run(video,thumb,row.id);
+        this.emit('clip:ready',{id:row.id,localPath:video,thumbnailPath:thumb});
+      }
+      this.progress(jobId,'done',100,`${String(rows.length)} approved clips rendered`);
+      const complete=this.jobs.get(jobId);if(complete)this.jobs.set(jobId,{...complete,status:'completed',updatedAt:new Date().toISOString()});
+      this.emit('job:done',{jobId});
+    } catch(error:unknown) {
+      const message=error instanceof Error?error.message:String(error);const failed=this.jobs.get(jobId);if(failed)this.jobs.set(jobId,{...failed,status:'failed',error:message,updatedAt:new Date().toISOString()});this.emit('job:done',{jobId,error:message});
+    }
   }
 
   private async process(jobId: string, input: ClipInput): Promise<void> {
@@ -204,6 +251,23 @@ export class ClipperEngine {
         } else if (input.analysisMode === 'ollama') {
           throw new Error('The selected Ollama model is not running or installed');
         }
+      }
+
+      if (input.previewOnly) {
+        this.db.prepare("DELETE FROM clips WHERE source_path=? AND status='suggested'").run(source);
+        const insert = this.db.prepare("INSERT INTO clips(source_path,start_time,end_time,score,suggested_title,hook,hashtags,reason,caption_path,transcript,render_options_json,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,'suggested')");
+        const rows = this.db.transaction(() => selected.slice(0, input.count).map((suggested) => {
+          const start = Math.max(0, snap(suggested.start_seconds, analysis.silences));
+          const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end_seconds, analysis.silences));
+          const result = insert.run(source, start, end, Math.round(suggested.finalScore), suggested.title, suggested.hook, JSON.stringify(suggested.hashtags), suggested.reason, suggested.caption_path, suggested.transcript, JSON.stringify({ ...input, localPath: source, url: undefined, previewOnly: false }));
+          return { ...suggested, id: Number(result.lastInsertRowid), start, end };
+        }))();
+        for (const row of rows) this.emit('clip:ready', row);
+        this.progress(jobId, 'preview-ready', 100, `${String(rows.length)} suggestions ready for review`);
+        const completed = this.jobs.get(jobId);
+        if (completed) this.jobs.set(jobId, { ...completed, status: 'completed', updatedAt: new Date().toISOString() });
+        this.emit('job:done', { jobId, preview: true });
+        return;
       }
 
       const encoder = await this.ffmpeg.preferredEncoder();
