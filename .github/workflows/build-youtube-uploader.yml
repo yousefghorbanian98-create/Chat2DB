@@ -10,7 +10,7 @@ on:
       - '.github/workflows/build-youtube-uploader.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: youtube-uploader-${{ github.ref }}
@@ -121,3 +121,25 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
+
+      - name: Publish permanent professional release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: violetcut-v1.1.0-professional
+          name: VioletCut Professional 1.1.0
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          generate_release_notes: false
+          body: |
+            VioletCut Professional for Windows 10/11 x64.
+
+            Includes local speech recognition, speaker diarization, face tracking,
+            dynamic vertical framing, karaoke captions, review-before-render,
+            persistent batch processing, hardware management, and private diagnostics.
+
+            Community builds are unsigned. Windows SmartScreen may display a warning.
+          files: |
+            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 x64.exe
+            youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 Portable.exe
+            youtube-auto-uploader/dist/SHA256SUMS.txt
+          fail_on_unmatched_files: true
