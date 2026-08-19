@@ -99,8 +99,8 @@ jobs:
             throw 'Portable executable was not created'
           }
 
-          if ($installer.Length -gt 250MB) {
-            throw "Installer exceeds 250 MB: $($installer.Length)"
+          if ($installer.Length -gt 4GB) {
+            throw "Professional installer exceeds 4 GB: $($installer.Length)"
           }
 
           @($installer, $portable) | ForEach-Object {

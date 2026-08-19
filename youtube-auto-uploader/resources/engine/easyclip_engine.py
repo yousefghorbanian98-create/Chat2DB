@@ -51,6 +51,17 @@ class SpeakerTurn:
     end_seconds: float
 
 
+@dataclass
+class FaceSample:
+    track_id: int
+    time_seconds: float
+    x: float
+    y: float
+    width: float
+    height: float
+    confidence: float
+
+
 def emit(event: str, **payload: object) -> None:
     print(json.dumps({"event": event, **payload}, ensure_ascii=False), file=sys.stderr, flush=True)
 
@@ -381,6 +392,60 @@ def diarize_video(video: Path, output_dir: Path, cache_dir: Path, min_speakers: 
         audio.unlink(missing_ok=True)
 
 
+def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 4.0) -> list[FaceSample]:
+    stat = video.stat()
+    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|haar-face-v1|{samples_per_second}"
+    directory = cache_dir / "face-tracking"
+    directory.mkdir(parents=True, exist_ok=True)
+    cached = directory / f"{hashlib.sha256(identity.encode('utf-8')).hexdigest()}.json"
+    if cached.is_file():
+        emit("progress", stage="face-cache", percent=100, detail="Reusing cached face tracks")
+        return [FaceSample(**item) for item in json.loads(cached.read_text(encoding="utf-8"))]
+    import cv2
+    cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    capture = cv2.VideoCapture(str(video))
+    if not capture.isOpened():
+        raise RuntimeError("Video could not be opened for face tracking")
+    fps = max(1.0, capture.get(cv2.CAP_PROP_FPS) or 25.0)
+    total = max(1, int(capture.get(cv2.CAP_PROP_FRAME_COUNT) or 1))
+    stride = max(1, int(fps / max(0.5, samples_per_second)))
+    tracks: dict[int, tuple[float, float, int]] = {}
+    next_id = 1
+    samples: list[FaceSample] = []
+    frame_index = 0
+    try:
+        while True:
+            ok, frame = capture.read()
+            if not ok:
+                break
+            if frame_index % stride:
+                frame_index += 1
+                continue
+            height, width = frame.shape[:2]
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            detections = cascade.detectMultiScale(gray, scaleFactor=1.12, minNeighbors=5, minSize=(max(36, width // 30), max(36, height // 30)))
+            available = set(tracks)
+            for x, y, face_width, face_height in sorted(detections, key=lambda item: item[2] * item[3], reverse=True):
+                center_x, center_y = (x + face_width / 2) / width, (y + face_height / 2) / height
+                candidates = [(track_id, (center_x - previous[0]) ** 2 + (center_y - previous[1]) ** 2)
+                              for track_id, previous in tracks.items() if track_id in available and frame_index - previous[2] <= stride * 6]
+                track_id, distance = min(candidates, key=lambda item: item[1]) if candidates else (next_id, 999.0)
+                if distance > 0.08:
+                    track_id = next_id
+                    next_id += 1
+                available.discard(track_id)
+                tracks[track_id] = (center_x, center_y, frame_index)
+                samples.append(FaceSample(track_id, round(frame_index / fps, 3), round(x / width, 5), round(y / height, 5), round(face_width / width, 5), round(face_height / height, 5), 0.75))
+            if frame_index % max(stride, int(total / 100) or 1) == 0:
+                emit("progress", stage="face-tracking", percent=min(99, round(frame_index * 100 / total)), detail=f"Tracking {max(0, next_id - 1)} faces")
+            frame_index += 1
+    finally:
+        capture.release()
+    cached.write_text(json.dumps([asdict(sample) for sample in samples], ensure_ascii=False), encoding="utf-8")
+    emit("progress", stage="face-tracking", percent=100, detail=f"Created {max(0, next_id - 1)} stable face tracks")
+    return samples
+
+
 def model_cache_path(model: str) -> Path:
     root = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")) / "hub"
     return root / f"models--Systran--faster-whisper-{model}"
@@ -419,6 +484,10 @@ def parser() -> argparse.ArgumentParser:
     diarize.add_argument("--cache-dir", required=True, type=Path)
     diarize.add_argument("--min-speakers", type=int, default=1)
     diarize.add_argument("--max-speakers", type=int, default=4)
+    faces = sub.add_parser("track-faces")
+    faces.add_argument("--input", required=True, type=Path)
+    faces.add_argument("--cache-dir", required=True, type=Path)
+    faces.add_argument("--samples-per-second", type=float, default=4.0)
     get = sub.add_parser("download")
     get.add_argument("--url", required=True)
     get.add_argument("--output-dir", required=True, type=Path)
@@ -458,6 +527,9 @@ def main() -> int:
         elif args.command == "diarize":
             turns = diarize_video(args.input, args.output_dir, args.cache_dir, max(1, args.min_speakers), max(args.min_speakers, args.max_speakers))
             output_result(ok=True, speakers=sorted(set(turn.speaker for turn in turns)), turns=[asdict(turn) for turn in turns])
+        elif args.command == "track-faces":
+            samples = track_faces(args.input, args.cache_dir, args.samples_per_second)
+            output_result(ok=True, trackCount=len(set(sample.track_id for sample in samples)), samples=[asdict(sample) for sample in samples])
         elif args.command == "download":
             path = download(args.url, args.output_dir, args.height)
             output_result(ok=True, path=str(path))

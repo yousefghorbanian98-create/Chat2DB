@@ -8,7 +8,7 @@ import type Database from 'better-sqlite3';
 import type { ClipperJobState, ClipInput, JobHandle, JobProgress } from '../types';
 import type { DownloadService } from './DownloadService';
 import type { FFmpegService, MediaAnalysis } from './FFmpegService';
-import type { LocalAIService, LocalHighlight, SpeakerTimeline } from './LocalAIService';
+import type { FaceTimeline, LocalAIService, LocalHighlight, SpeakerTimeline } from './LocalAIService';
 import type { HuggingFaceService } from './HuggingFaceService';
 import type { OllamaService } from './OllamaService';
 
@@ -175,6 +175,14 @@ export class ClipperEngine {
         await writeFile(path.join(directory, 'speaker-timeline.json'), JSON.stringify(speakerTimeline, null, 2), 'utf8');
         this.emit('speaker:timeline', { jobId, ...speakerTimeline });
         this.progress(jobId, 'speaker-diarization', 64, `${String(speakerTimeline.speakers.length)} speakers identified`);
+        this.progress(jobId, 'face-tracking', 65, 'Creating stable face identities');
+        const faceTimeline: FaceTimeline = await this.localAI.trackFaces(source, { samplesPerSecond: 4, jobId }, (event) => {
+          const percent = typeof event.percent === 'number' ? event.percent : 0;
+          this.progress(jobId, event.stage ?? 'face-tracking', 65 + Math.round(percent * 0.09), event.detail);
+        });
+        await writeFile(path.join(directory, 'face-timeline.json'), JSON.stringify(faceTimeline, null, 2), 'utf8');
+        this.emit('face:timeline', { jobId, ...faceTimeline });
+        this.progress(jobId, 'face-tracking', 74, `${String(faceTimeline.trackCount)} face tracks created`);
       }
 
       let selected = localCandidates

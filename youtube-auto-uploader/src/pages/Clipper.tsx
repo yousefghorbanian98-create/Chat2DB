@@ -32,6 +32,7 @@ export function Clipper(): JSX.Element {
   const [progress, setProgress] = useState<{ phase: string; percent: number; message?: string }>();
   const [clips, setClips] = useState<ClipRow[]>([]);
   const [speakerTimeline, setSpeakerTimeline] = useState<{speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}>();
+  const [faceTrackCount, setFaceTrackCount] = useState(0);
   const activeJobId = useRef<string | undefined>(undefined);
 
   const load = useCallback((): void => { void window.api.clipper.clips().then(setClips); }, []);
@@ -60,6 +61,7 @@ export function Clipper(): JSX.Element {
     });
     const clipUnsubscribe = window.api.on('clip:ready', load);
     const speakerUnsubscribe = window.api.on('speaker:timeline', (value) => setSpeakerTimeline(value as {speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}));
+    const faceUnsubscribe = window.api.on('face:timeline', (value) => setFaceTrackCount((value as {trackCount:number}).trackCount));
     const pullUnsubscribe = window.api.on('ollama:pull-progress', (value) => setPull(value as { percent: number; status: string }));
     const doneUnsubscribe = window.api.on('job:done', (value) => {
       const result = value as { jobId: string; error?: string };
@@ -68,7 +70,7 @@ export function Clipper(): JSX.Element {
       setRunning(false); load();
       if (result.error) toast.error(result.error); else toast.success('Highlight clips are ready');
     });
-    return () => { progressUnsubscribe(); clipUnsubscribe(); speakerUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
+    return () => { progressUnsubscribe(); clipUnsubscribe(); speakerUnsubscribe(); faceUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
   }, [checkEngines, load]);
 
   const applyProfile = (next: 'fast'|'balanced'|'professional'): void => {
@@ -150,7 +152,7 @@ export function Clipper(): JSX.Element {
         {(file||url)&&<div className="source-card"><div className="aspect-video rounded bg-gradient-to-br from-violet-950 to-slate-900 grid place-items-center"><FileVideo className="text-violet-400" size={24}/></div><b className="mt-2">{file?.split(/[\\/]/).pop()??'Online video'}</b><span>Ready for analysis</span></div>}
         <div className="panel-heading mt-3"><span>AI engines</span><span className="engine-dot"/></div>
         <div className="engine-strip"><span className="engine-dot"/><span className="text-[9px] text-zinc-400">Speech · {localEngine.cudaAvailable?'GPU':'CPU'}</span></div>
-        <div className="engine-strip"><span className={`engine-dot ${ollamaRunning?'':'!bg-amber-500'}`}/><span className="text-[9px] text-zinc-400">Language model · {ollamaRunning?'Ready':'Optional'}</span></div>
+        <div className="engine-strip"><span className={`engine-dot ${ollamaRunning?'':'!bg-amber-500'}`}/><span className="text-[9px] text-zinc-400">Language model · {ollamaRunning?'Ready':'Optional'}</span></div><div className="engine-strip"><span className={`engine-dot ${faceTrackCount?'':'!bg-violet-500'}`}/><span className="text-[9px] text-zinc-400">Face tracks · {faceTrackCount||'Professional'}</span></div>
       </aside>
 
       <section className="viewer-column">

@@ -24,6 +24,8 @@ export interface LocalEngineStatus {
 export interface LocalModelInfo { name: string; installed: boolean; sizeBytes: number }
 export interface SpeakerTurn { speaker: string; start_seconds: number; end_seconds: number }
 export interface SpeakerTimeline { speakers: string[]; turns: SpeakerTurn[] }
+export interface FaceSample { track_id: number; time_seconds: number; x: number; y: number; width: number; height: number; confidence: number }
+export interface FaceTimeline { trackCount: number; samples: FaceSample[] }
 
 interface EngineResult {
   ok: boolean;
@@ -35,6 +37,8 @@ interface EngineResult {
   models?: LocalModelInfo[];
   speakers?: string[];
   turns?: SpeakerTurn[];
+  trackCount?: number;
+  samples?: FaceSample[];
 }
 
 interface EngineProgress {
@@ -172,6 +176,14 @@ export class LocalAIService {
     const child = this.children.get(jobId);
     if (!child) return false;
     return child.kill();
+  }
+
+  async trackFaces(input: string, options: { samplesPerSecond?: number; jobId?: string }, onProgress?: (event: EngineProgress) => void): Promise<FaceTimeline> {
+    const result = await this.run([
+      'track-faces', '--input', input, '--cache-dir', this.cacheDirectory,
+      '--samples-per-second', String(options.samplesPerSecond ?? 4)
+    ], onProgress, options.jobId);
+    return { trackCount: result.trackCount ?? 0, samples: result.samples ?? [] };
   }
 
   async diarize(
