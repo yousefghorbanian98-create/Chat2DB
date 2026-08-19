@@ -164,6 +164,7 @@ export class ClipperEngine {
       this.progress(jobId, 'media-analysis', 55, 'Media analysis complete');
 
       let speakerTimeline: SpeakerTimeline | undefined;
+      let faceTimeline: FaceTimeline | undefined;
       if (input.processingProfile === 'professional') {
         const token = await this.huggingFace.accessToken();
         if (!token) throw new Error('Configure professional speaker-model access in Settings before using Professional mode');
@@ -176,7 +177,7 @@ export class ClipperEngine {
         this.emit('speaker:timeline', { jobId, ...speakerTimeline });
         this.progress(jobId, 'speaker-diarization', 64, `${String(speakerTimeline.speakers.length)} speakers identified`);
         this.progress(jobId, 'face-tracking', 65, 'Creating stable face identities');
-        const faceTimeline: FaceTimeline = await this.localAI.trackFaces(source, { samplesPerSecond: 4, jobId }, (event) => {
+        faceTimeline = await this.localAI.trackFaces(source, { samplesPerSecond: 4, jobId }, (event) => {
           const percent = typeof event.percent === 'number' ? event.percent : 0;
           this.progress(jobId, event.stage ?? 'face-tracking', 65 + Math.round(percent * 0.09), event.detail);
         });
@@ -223,7 +224,9 @@ export class ClipperEngine {
           blurBackground: input.blurBackground,
           musicPath: input.music && this.musicPath && existsSync(this.musicPath) ? this.musicPath : undefined,
           musicVolume: 0.12,
-          encoder
+          encoder,
+          sourceStart: start,
+          faceSamples: faceTimeline?.samples
         });
         const scene = analysis.scenes.filter((time) => time >= start && time <= end)
           .sort((left, right) => Math.abs(left - (start + (end - start) * 0.3)) - Math.abs(right - (start + (end - start) * 0.3)))[0];

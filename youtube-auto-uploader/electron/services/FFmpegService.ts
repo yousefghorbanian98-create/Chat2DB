@@ -17,10 +17,31 @@ export interface RenderOptions {
   musicPath?: string;
   musicVolume?: number;
   encoder?: 'h264_nvenc' | 'libx264';
+  sourceStart?: number;
+  faceSamples?: Array<{ track_id: number; time_seconds: number; x: number; width: number }>;
 }
 
 function subtitlePath(file: string): string {
   return file.replaceAll('\\', '/').replace(/^([A-Za-z]):/, '$1\\:').replaceAll("'", "\\'");
+}
+
+function dynamicFaceCrop(samples: NonNullable<RenderOptions['faceSamples']>, start: number, duration: number): string | undefined {
+  const relevant = samples.filter((sample) => sample.time_seconds >= start && sample.time_seconds <= start + duration);
+  if (!relevant.length) return undefined;
+  const counts = new Map<number, number>();
+  for (const sample of relevant) counts.set(sample.track_id, (counts.get(sample.track_id) ?? 0) + 1);
+  const primary = [...counts].sort((left, right) => right[1] - left[1])[0]?.[0];
+  const track = relevant.filter((sample) => sample.track_id === primary).filter((_, index) => index % 4 === 0).slice(0, 40);
+  if (!track.length) return undefined;
+  const position = (sample: typeof track[number]): string => `max(0\\,min(iw-ih*9/16\\,${String(Math.max(0, Math.min(1, sample.x + sample.width / 2)))}*iw-ih*9/32))`;
+  let expression = position(track.at(-1) as typeof track[number]);
+  for (let index = track.length - 2; index >= 0; index--) {
+    const sample = track[index];
+    if (!sample) continue;
+    const relative = Math.max(0, sample.time_seconds - start + 0.3);
+    expression = `if(lt(t\\,${relative.toFixed(3)})\\,${position(sample)}\\,${expression})`;
+  }
+  return expression;
 }
 
 export class FFmpegService {
@@ -94,11 +115,14 @@ export class FFmpegService {
     const width = landscape ? 1920 : 1080;
     const height = square ? 1080 : landscape ? 1080 : 1920;
     const foregroundWidth = landscape ? 1920 : square ? 1080 : 900;
-    const background = options.blurBackground
-      ? `[0:v]split[orig][bg];[bg]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=increase,crop=${String(width)}:${String(height)},boxblur=20:1[base];[orig]scale=${String(foregroundWidth)}:-2[fg];[base][fg]overlay=(W-w)/2:(H-h)/2[composite]`
-      : `[0:v]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=decrease,pad=${String(width)}:${String(height)}:(ow-iw)/2:(oh-ih)/2:black[composite]`;
+    const faceCrop = !landscape && !square && options.faceSamples ? dynamicFaceCrop(options.faceSamples, options.sourceStart ?? start, duration) : undefined;
+    const background = faceCrop
+      ? `[0:v]crop=w='ih*9/16':h='ih':x='${faceCrop}':y=0,scale=${String(width)}:${String(height)}[composite]`
+      : options.blurBackground
+        ? `[0:v]split[orig][bg];[bg]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=increase,crop=${String(width)}:${String(height)},boxblur=20:1[base];[orig]scale=${String(foregroundWidth)}:-2[fg];[base][fg]overlay=(W-w)/2:(H-h)/2[composite]`
+        : `[0:v]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=decrease,pad=${String(width)}:${String(height)}:(ow-iw)/2:(oh-ih)/2:black[composite]`;
     const effects: string[] = [];
-    if (options.smartZoom) effects.push(`scale=w='iw*(1+0.10*t/${String(duration)})':h='ih*(1+0.10*t/${String(duration)})':eval=frame,crop=${String(width)}:${String(height)}`);
+    if (options.smartZoom && !faceCrop) effects.push(`scale=w='iw*(1+0.10*t/${String(duration)})':h='ih*(1+0.10*t/${String(duration)})':eval=frame,crop=${String(width)}:${String(height)}`);
     if (options.captionsPath) effects.push(`subtitles='${subtitlePath(options.captionsPath)}'${options.fontsDirectory?`:fontsdir='${subtitlePath(options.fontsDirectory)}'`:''}:force_style='FontName=Inter,FontSize=22,PrimaryColour=&H00FFFFFF,OutlineColour=&H00000000,BorderStyle=1,Outline=3,Shadow=1,MarginV=110,Alignment=2'`);
     const filter = `${background};[composite]${effects.length ? effects.join(',') : 'null'}[video]`;
     const args = ['-ss', String(Math.max(0, start - 0.3)), '-i', source];
