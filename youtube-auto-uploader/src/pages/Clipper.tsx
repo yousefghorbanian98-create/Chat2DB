@@ -104,6 +104,12 @@ export function Clipper(): JSX.Element {
     toast.info('Cancellation requested');
   };
 
+  const startFolder = async (): Promise<void> => {
+    if (!localEngine.available) { toast.error('The local engine is not ready'); return; }
+    const handles=await window.api.clipper.startFolder({model,whisperModel,language,analysisMode,processingProfile:profile,previewOnly:true,count,maxLength,category,aspect,captions,smartZoom,music,blurBackground});
+    if(handles.length)toast.success(`${String(handles.length)} videos added to the persistent queue`);else toast.info('No supported videos were selected');
+  };
+
   const renderSelected = async (): Promise<void> => {
     if (!selectedSuggestions.length) { toast.error('Select at least one suggested clip'); return; }
     const handle = await window.api.clipper.renderSuggested(selectedSuggestions);
@@ -169,7 +175,7 @@ export function Clipper(): JSX.Element {
       <aside className="asset-panel">
         <div className="asset-tabs"><button><FileVideo size={15}/><span>Media</span></button><button><FileAudio size={15}/><span>Audio</span></button><button><Captions size={15}/><span>Text</span></button><button><Sparkles size={15}/><span>AI</span></button></div>
         <div className="panel-heading"><span>Project media</span><Plus size={14}/></div>
-        <button className="import-zone w-[calc(100%-24px)]" onClick={()=>void window.api.settings.pickFile().then((value)=>value&&setFile(value))}><div><Plus className="mx-auto text-violet-400" size={24}/><b className="block text-zinc-300 text-[11px] mt-2">Import video</b><span className="text-[9px]">or drop media here</span></div></button>
+        <button className="import-zone w-[calc(100%-24px)]" onClick={()=>void window.api.settings.pickFile().then((value)=>value&&setFile(value))}><div><Plus className="mx-auto text-violet-400" size={24}/><b className="block text-zinc-300 text-[11px] mt-2">Import video</b><span className="text-[9px]">or drop media here</span></div></button><button className="btn mx-3 mb-3 w-[calc(100%-24px)] text-[10px]" disabled={running} onClick={()=>void startFolder()}><Layers3 className="inline mr-2" size={13}/>Add a folder to queue</button>
         <label className="block px-3"><span className="label">Online source</span><input className="input text-[10px]" value={url} onChange={(event)=>setUrl(event.target.value)} placeholder="Paste video URL"/></label>
         {(file||url)&&<div className="source-card"><div className="aspect-video rounded bg-gradient-to-br from-violet-950 to-slate-900 grid place-items-center"><FileVideo className="text-violet-400" size={24}/></div><b className="mt-2">{file?.split(/[\\/]/).pop()??'Online video'}</b><span>Ready for analysis</span></div>}
         <div className="panel-heading mt-3"><span>AI engines</span><span className="engine-dot"/></div>

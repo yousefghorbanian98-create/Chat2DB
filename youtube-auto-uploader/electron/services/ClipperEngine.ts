@@ -60,6 +60,8 @@ function defaultMetadata(clip: LocalHighlight, category: string, evidence: numbe
 export class ClipperEngine {
   private readonly jobs = new Map<string, ClipperJobState>();
   private readonly cancelled = new Set<string>();
+  private readonly pending: Array<()=>Promise<void>> = [];
+  private activeCount = 0;
 
   constructor(
     private readonly db: Database.Database,
@@ -72,7 +74,23 @@ export class ClipperEngine {
     private readonly musicPath: string | undefined,
     private readonly fontsDirectory: string,
     private readonly emit: (channel: string, value: unknown) => void
-  ) {}
+  ) {
+    const interrupted = this.db.prepare("SELECT job_id,payload_json FROM clipper_jobs WHERE status IN ('queued','running') ORDER BY created_at").all() as Array<{job_id:string;payload_json:string}>;
+    for (const row of interrupted) {
+      try {
+        const payload = JSON.parse(row.payload_json) as ClipInput | {kind:'render';ids:number[]};
+        const now = new Date().toISOString();
+        this.jobs.set(row.job_id,{jobId:row.job_id,phase:'resuming',percent:0,status:'running',startedAt:now,updatedAt:now});
+        this.db.prepare("UPDATE clipper_jobs SET status='queued',phase='resuming',percent=0,error=NULL,updated_at=datetime('now') WHERE job_id=?").run(row.job_id);
+        queueMicrotask(()=>this.enqueue(()=>((payload as {kind?:string}).kind==='render'?this.processSuggestedRender(row.job_id,(payload as {kind:'render';ids:number[]}).ids):this.process(row.job_id,payload as ClipInput))));
+      } catch {
+        this.db.prepare("UPDATE clipper_jobs SET status='failed',error='Stored job payload is invalid',updated_at=datetime('now') WHERE job_id=?").run(row.job_id);
+      }
+    }
+  }
+
+  private enqueue(task:()=>Promise<void>):void{this.pending.push(task);this.pump()}
+  private pump():void{if(this.activeCount>=1)return;const task=this.pending.shift();if(!task)return;this.activeCount++;void task().finally(()=>{this.activeCount--;this.pump()})}
 
   start(input: ClipInput): JobHandle {
     // Explicit Node import fixes `crypto is not defined` in Electron's main
@@ -80,7 +98,8 @@ export class ClipperEngine {
     const jobId = randomUUID();
     const now = new Date().toISOString();
     this.jobs.set(jobId, { jobId, phase: 'queued', percent: 0, status: 'running', startedAt: now, updatedAt: now });
-    void this.process(jobId, input);
+    this.db.prepare("INSERT INTO clipper_jobs(job_id,payload_json,status,phase,percent) VALUES(?,?,'queued','queued',0)").run(jobId,JSON.stringify(input));
+    this.enqueue(()=>this.process(jobId,input));
     return { jobId };
   }
 
@@ -90,7 +109,8 @@ export class ClipperEngine {
     const jobId = randomUUID();
     const now = new Date().toISOString();
     this.jobs.set(jobId, { jobId, phase: 'render-queued', percent: 0, status: 'running', startedAt: now, updatedAt: now });
-    void this.processSuggestedRender(jobId, unique);
+    this.db.prepare("INSERT INTO clipper_jobs(job_id,payload_json,status,phase,percent) VALUES(?,?,'queued','render-queued',0)").run(jobId,JSON.stringify({kind:'render',ids:unique}));
+    this.enqueue(()=>this.processSuggestedRender(jobId,unique));
     return { jobId };
   }
 
@@ -104,6 +124,7 @@ export class ClipperEngine {
     this.cancelled.add(jobId);
     this.localAI.cancel(jobId);
     this.jobs.set(jobId, { ...job, status: 'failed', phase: 'cancelled', error: 'Cancelled by user', updatedAt: new Date().toISOString() });
+    this.db.prepare("UPDATE clipper_jobs SET status='cancelled',phase='cancelled',error='Cancelled by user',updated_at=datetime('now') WHERE job_id=?").run(jobId);
     return true;
   }
 
@@ -116,6 +137,7 @@ export class ClipperEngine {
     const monotonicPercent = Math.max(previous?.percent ?? 0, Math.min(100, Math.round(percent)));
     const value: JobProgress = { jobId, phase, percent: monotonicPercent, message };
     if (previous) this.jobs.set(jobId, { ...previous, ...value, status: 'running', updatedAt: new Date().toISOString() });
+    this.db.prepare("UPDATE clipper_jobs SET status='running',phase=?,percent=?,updated_at=datetime('now') WHERE job_id=?").run(phase,monotonicPercent,jobId);
     this.emit('job:progress', value);
   }
 
@@ -171,9 +193,10 @@ export class ClipperEngine {
       }
       this.progress(jobId,'done',100,`${String(rows.length)} approved clips rendered`);
       const complete=this.jobs.get(jobId);if(complete)this.jobs.set(jobId,{...complete,status:'completed',updatedAt:new Date().toISOString()});
+      this.db.prepare("UPDATE clipper_jobs SET status='completed',phase='done',percent=100,error=NULL,updated_at=datetime('now') WHERE job_id=?").run(jobId);
       this.emit('job:done',{jobId});
     } catch(error:unknown) {
-      const message=error instanceof Error?error.message:String(error);const failed=this.jobs.get(jobId);if(failed)this.jobs.set(jobId,{...failed,status:'failed',error:message,updatedAt:new Date().toISOString()});this.emit('job:done',{jobId,error:message});
+      const message=error instanceof Error?error.message:String(error);const failed=this.jobs.get(jobId);if(failed)this.jobs.set(jobId,{...failed,status:'failed',error:message,updatedAt:new Date().toISOString()});this.db.prepare("UPDATE clipper_jobs SET status='failed',error=?,updated_at=datetime('now') WHERE job_id=?").run(message,jobId);this.emit('job:done',{jobId,error:message});
     }
   }
 
@@ -266,6 +289,7 @@ export class ClipperEngine {
         this.progress(jobId, 'preview-ready', 100, `${String(rows.length)} suggestions ready for review`);
         const completed = this.jobs.get(jobId);
         if (completed) this.jobs.set(jobId, { ...completed, status: 'completed', updatedAt: new Date().toISOString() });
+        this.db.prepare("UPDATE clipper_jobs SET status='completed',phase='preview-ready',percent=100,error=NULL,updated_at=datetime('now') WHERE job_id=?").run(jobId);
         this.emit('job:done', { jobId, preview: true });
         return;
       }
@@ -307,11 +331,13 @@ export class ClipperEngine {
       this.progress(jobId, 'done', 100, `${String(selected.length)} clips created`);
       const completed = this.jobs.get(jobId);
       if (completed) this.jobs.set(jobId, { ...completed, status: 'completed', updatedAt: new Date().toISOString() });
+      this.db.prepare("UPDATE clipper_jobs SET status='completed',phase='done',percent=100,error=NULL,updated_at=datetime('now') WHERE job_id=?").run(jobId);
       this.emit('job:done', { jobId });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       const failed = this.jobs.get(jobId);
       if (failed) this.jobs.set(jobId, { ...failed, status: 'failed', error: message, updatedAt: new Date().toISOString() });
+      this.db.prepare("UPDATE clipper_jobs SET status='failed',error=?,updated_at=datetime('now') WHERE job_id=?").run(message,jobId);
       this.emit('job:done', { jobId, error: message });
     }
   }
