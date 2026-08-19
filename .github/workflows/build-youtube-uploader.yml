@@ -118,6 +118,8 @@ jobs:
             youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 x64.exe
             youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 Portable.exe
             youtube-auto-uploader/dist/SHA256SUMS.txt
+            youtube-auto-uploader/dist/latest.yml
+            youtube-auto-uploader/dist/*.blockmap
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
@@ -142,4 +144,6 @@ jobs:
             youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 x64.exe
             youtube-auto-uploader/dist/YouTube Auto-Uploader 1.1.0 Portable.exe
             youtube-auto-uploader/dist/SHA256SUMS.txt
+            youtube-auto-uploader/dist/latest.yml
+            youtube-auto-uploader/dist/*.blockmap
           fail_on_unmatched_files: true
