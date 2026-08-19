@@ -102,8 +102,9 @@ export class ClipperEngine {
   }
 
   private progress(jobId: string, phase: string, percent: number, message?: string): void {
-    const value: JobProgress = { jobId, phase, percent, message };
     const previous = this.jobs.get(jobId);
+    const monotonicPercent = Math.max(previous?.percent ?? 0, Math.min(100, Math.round(percent)));
+    const value: JobProgress = { jobId, phase, percent: monotonicPercent, message };
     if (previous) this.jobs.set(jobId, { ...previous, ...value, status: 'running', updatedAt: new Date().toISOString() });
     this.emit('job:progress', value);
   }
@@ -194,11 +195,11 @@ export class ClipperEngine {
       if (input.analysisMode !== 'local') {
         const status = await this.ollama.status();
         if (status.running && status.models.includes(input.model)) {
-          this.progress(jobId, 'ollama', 56, 'Refining local candidates with Ollama');
+          this.progress(jobId, 'ollama', input.processingProfile === 'professional' ? 75 : 56, 'Refining local candidates with Ollama');
           try { selected = await this.enrichWithOllama(input, localCandidates.map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))); }
           catch (error: unknown) {
             if (input.analysisMode === 'ollama') throw error;
-            this.progress(jobId, 'ollama-fallback', 60, `Ollama unavailable; using local ranking: ${error instanceof Error ? error.message : String(error)}`);
+            this.progress(jobId, 'ollama-fallback', input.processingProfile === 'professional' ? 80 : 60, `Ollama unavailable; using local ranking: ${error instanceof Error ? error.message : String(error)}`);
           }
         } else if (input.analysisMode === 'ollama') {
           throw new Error('The selected Ollama model is not running or installed');
@@ -206,13 +207,15 @@ export class ClipperEngine {
       }
 
       const encoder = await this.ffmpeg.preferredEncoder();
-      this.progress(jobId, 'rendering', 62, encoder === 'h264_nvenc' ? 'NVIDIA NVENC enabled' : 'CPU encoder enabled');
+      const renderBase = input.processingProfile === 'professional' ? 82 : 62;
+      const renderSpan = input.processingProfile === 'professional' ? 16 : 36;
+      this.progress(jobId, 'rendering', renderBase, encoder === 'h264_nvenc' ? 'NVIDIA NVENC enabled' : 'CPU encoder enabled');
       for (const [index, suggested] of selected.slice(0, input.count).entries()) {
         this.ensureActive(jobId);
         const start = Math.max(0, snap(suggested.start_seconds, analysis.silences));
         const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end_seconds, analysis.silences));
         if (end <= start + 1) continue;
-        this.progress(jobId, 'rendering', 62 + Math.round(index / selected.length * 36), `Rendering clip ${String(index + 1)}`);
+        this.progress(jobId, 'rendering', renderBase + Math.round(index / selected.length * renderSpan), `Rendering clip ${String(index + 1)}`);
         const video = path.join(directory, `final_clip_${String(index + 1)}.mp4`);
         const rawThumb = path.join(directory, `thumb_raw_${String(index + 1)}.jpg`);
         const thumb = path.join(directory, `thumb_${String(index + 1)}.jpg`);

@@ -19,6 +19,7 @@ export function Clipper(): JSX.Element {
   const [whisperModel, setWhisperModel] = useState('base');
   const [localModels, setLocalModels] = useState<Array<{name:string;installed:boolean;sizeBytes:number}>>([]);
   const [modelBusy, setModelBusy] = useState(false);
+  const [modelProgress, setModelProgress] = useState<{percent:number;detail?:string}>();
   const [language, setLanguage] = useState<'auto' | 'fa' | 'en'>('auto');
   const [count, setCount] = useState(5);
   const [maxLength, setMaxLength] = useState(60);
@@ -63,6 +64,7 @@ export function Clipper(): JSX.Element {
     const speakerUnsubscribe = window.api.on('speaker:timeline', (value) => setSpeakerTimeline(value as {speakers:string[];turns:Array<{speaker:string;start_seconds:number;end_seconds:number}>}));
     const faceUnsubscribe = window.api.on('face:timeline', (value) => setFaceTrackCount((value as {trackCount:number}).trackCount));
     const pullUnsubscribe = window.api.on('ollama:pull-progress', (value) => setPull(value as { percent: number; status: string }));
+    const modelUnsubscribe = window.api.on('local-ai:model-progress', (value) => { const update=value as {percent?:number;detail?:string};setModelProgress({percent:update.percent??0,detail:update.detail}); });
     const doneUnsubscribe = window.api.on('job:done', (value) => {
       const result = value as { jobId: string; error?: string };
       if (activeJobId.current && result.jobId !== activeJobId.current) return;
@@ -70,7 +72,7 @@ export function Clipper(): JSX.Element {
       setRunning(false); load();
       if (result.error) toast.error(result.error); else toast.success('Highlight clips are ready');
     });
-    return () => { progressUnsubscribe(); clipUnsubscribe(); speakerUnsubscribe(); faceUnsubscribe(); pullUnsubscribe(); doneUnsubscribe(); };
+    return () => { progressUnsubscribe(); clipUnsubscribe(); speakerUnsubscribe(); faceUnsubscribe(); pullUnsubscribe(); modelUnsubscribe(); doneUnsubscribe(); };
   }, [checkEngines, load]);
 
   const applyProfile = (next: 'fast'|'balanced'|'professional'): void => {
@@ -83,6 +85,7 @@ export function Clipper(): JSX.Element {
   const toggleWhisperModel = async (): Promise<void> => {
     const current = localModels.find((item) => item.name === whisperModel);
     setModelBusy(true);
+    setModelProgress({percent:0,detail:'Preparing speech model'});
     try {
       const inventory = current?.installed
         ? await window.api.localAI.deleteModel(whisperModel)
@@ -90,7 +93,7 @@ export function Clipper(): JSX.Element {
       setLocalModels(inventory);
       toast.success(current?.installed ? 'Speech model removed' : 'Speech model is ready');
     } catch (error: unknown) { toast.error(error instanceof Error ? error.message : String(error)); }
-    finally { setModelBusy(false); }
+    finally { setModelBusy(false); setModelProgress(undefined); }
   };
 
   const cancel = async (): Promise<void> => {
@@ -106,12 +109,22 @@ export function Clipper(): JSX.Element {
     if (analysisMode === 'ollama' && !models.includes(model)) { toast.error('Install the selected Ollama model first'); return; }
     if (!url && !file) { toast.error('Choose a YouTube URL or local video'); return; }
     try {
+      if (!localModels.find((item) => item.name === whisperModel)?.installed) {
+        setModelBusy(true);
+        setModelProgress({percent:0,detail:'Installing the selected speech model before processing'});
+        const inventory = await window.api.localAI.prepareModel(whisperModel);
+        setLocalModels(inventory);
+        setModelBusy(false);
+        setModelProgress(undefined);
+      }
       setRunning(true);
       const handle = await window.api.clipper.start({ url: url || undefined, localPath: file, model, whisperModel, language, analysisMode, processingProfile: profile, count, maxLength, category, aspect, captions, smartZoom, music, blurBackground });
       activeJobId.current = handle.jobId;
       toast.success('Clipping continues in the background when you change pages');
     } catch (error: unknown) {
       setRunning(false);
+      setModelBusy(false);
+      setModelProgress(undefined);
       toast.error(error instanceof Error ? error.message : String(error));
     }
   };
@@ -163,7 +176,7 @@ export function Clipper(): JSX.Element {
       <aside className="inspector-panel">
         <div className="panel-heading"><span>AI inspector</span><WandSparkles className="text-violet-400" size={15}/></div>
         <div className="inspector-section"><h3>Processing</h3><div className="compact-grid"><label><span className="label">Analysis</span><select className="input" value={analysisMode} onChange={(e)=>setAnalysisMode(e.target.value as AnalysisMode)}><option value="local">Local</option><option value="hybrid">Hybrid</option><option value="ollama">Ollama</option></select></label><label><span className="label">Language</span><select className="input" value={language} onChange={(e)=>setLanguage(e.target.value as 'auto'|'fa'|'en')}><option value="auto">Auto</option><option value="fa">Persian</option><option value="en">English</option></select></label></div>{analysisMode!=='local'&&<div className="mt-3"><span className="label">Local language model</span><div className="flex gap-1"><select className="input text-[10px]" value={model} onChange={(e)=>setModel(e.target.value)}>{[...new Set([...models,...recommended])].map(name=><option key={name}>{models.includes(name)?'★ ':''}{name}</option>)}</select>{!models.includes(model)&&<button className="btn !px-2 text-[9px]" onClick={()=>void pullModel()}>Install</button>}</div>{pull&&<div className="progress mt-2"><div style={{width:`${pull.percent}%`}}/></div>}</div>}</div>
-        <div className="inspector-section"><h3>Speech model</h3><select className="input text-xs" value={whisperModel} onChange={(e)=>setWhisperModel(e.target.value)}>{['tiny','base','small','medium','large-v3'].map(name=><option key={name}>{localModels.find(item=>item.name===name)?.installed?'★ ':''}{name}</option>)}</select><div className="flex justify-between mt-2 text-[9px] text-zinc-500"><span>{localModels.find(item=>item.name===whisperModel)?.installed?'Installed':'Download required'}</span><span>{formatSize(localModels.find(item=>item.name===whisperModel)?.sizeBytes??0)}</span></div><button className="btn w-full mt-2 !py-2 text-[10px]" disabled={modelBusy||running} onClick={()=>void toggleWhisperModel()}>{modelBusy?'Preparing…':localModels.find(item=>item.name===whisperModel)?.installed?'Remove model':'Install model'}</button></div>
+        <div className="inspector-section"><h3>Speech model</h3><select className="input text-xs" value={whisperModel} onChange={(e)=>setWhisperModel(e.target.value)}>{['tiny','base','small','medium','large-v3'].map(name=><option key={name}>{localModels.find(item=>item.name===name)?.installed?'★ ':''}{name}</option>)}</select><div className="flex justify-between mt-2 text-[9px] text-zinc-500"><span>{localModels.find(item=>item.name===whisperModel)?.installed?'Installed':'Download required'}</span><span>{formatSize(localModels.find(item=>item.name===whisperModel)?.sizeBytes??0)}</span></div><button className="btn w-full mt-2 !py-2 text-[10px]" disabled={modelBusy||running} onClick={()=>void toggleWhisperModel()}>{modelBusy?'Preparing…':localModels.find(item=>item.name===whisperModel)?.installed?'Remove model':'Install model'}</button>{modelProgress&&<div className="mt-2"><div className="flex justify-between text-[9px] text-zinc-500"><span>{modelProgress.detail}</span><b>{Math.round(modelProgress.percent)}%</b></div><div className="progress mt-1"><div style={{width:`${modelProgress.percent}%`}}/></div></div>}</div>
         <div className="inspector-section"><h3>Clip generation</h3><label><span className="label flex justify-between">Highlights <b>{count}</b></span><input type="range" min="3" max="20" value={count} onChange={(e)=>setCount(Number(e.target.value))} className="w-full accent-violet-500"/></label><div className="compact-grid mt-3"><label><span className="label">Duration</span><select className="input" value={maxLength} onChange={(e)=>setMaxLength(Number(e.target.value))}>{[15,30,60,90].map(v=><option key={v} value={v}>{v}s</option>)}</select></label><label><span className="label">Canvas</span><select className="input" value={aspect} onChange={(e)=>setAspect(e.target.value)}>{['9:16','1:1','16:9','4:5'].map(v=><option key={v}>{v}</option>)}</select></label></div><label className="block mt-3"><span className="label">Content category</span><select className="input text-[10px]" value={category} onChange={(e)=>setCategory(e.target.value)}>{['Auto','Sports','Gaming','Educational','Vlog','Comedy','News','Challenge'].map(value=><option key={value}>{value}</option>)}</select></label></div>
         <div className="inspector-section"><h3>Enhancements</h3><div className="space-y-2"><Toggle label="Dynamic captions" value={captions} set={setCaptions}/><Toggle label="Smart reframing" value={smartZoom} set={setSmartZoom}/><Toggle label="Blur background" value={blurBackground} set={setBlurBackground}/><Toggle label="Background music" value={music} set={setMusic}/></div></div>
         <div className="p-3 sticky bottom-0 bg-[#111218] border-t border-[#292b38]"><button disabled={running||!localEngine.available||(!file&&!url)} className="btn btn-primary w-full flex justify-center gap-2 disabled:opacity-40" onClick={()=>void start()}>{running?<Loader2 className="animate-spin" size={16}/>:<Bot size={16}/>} {running?'Analyzing…':'Find highlight moments'}</button>{running&&<button className="btn w-full mt-2 !py-2 text-red-300" onClick={()=>void cancel()}>Cancel job</button>}</div>

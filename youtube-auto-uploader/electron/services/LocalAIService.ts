@@ -95,7 +95,7 @@ export class LocalAIService {
       let currentStage = '';
       let modelWaitSeconds = 0;
       const heartbeat = setInterval(() => {
-        if (currentStage !== 'model') return;
+        if (!['model', 'model-download', 'diarization-model'].includes(currentStage)) return;
         modelWaitSeconds += 5;
         onProgress?.({
           event: 'progress',
