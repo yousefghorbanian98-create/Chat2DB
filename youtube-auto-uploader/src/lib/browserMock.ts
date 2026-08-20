@@ -21,7 +21,7 @@ export function installBrowserMock(): void {
       playlist: async () => []
     },
     upload: { single: async () => handle(), batch: async (inputs) => inputs.map(handle), list: async (filter) => filter ? jobs.filter((job) => job.status === filter) : jobs, exportHistory: async () => null, cancel: async () => undefined, approve: async () => handle(), reject: async () => undefined, retry: async () => handle(), pause: async () => undefined, resume: async () => undefined },
-    clipper: { start: async () => handle(), startFolder: async () => [handle(),handle()], renderSuggested: async () => handle(), cancel: async () => true, job: async () => null, clips: async () => clips, update: async () => undefined, export: async () => null, upload: async () => handle() },
+    clipper: { start: async () => handle(), startFolder: async () => [handle(),handle()], renderSuggested: async () => handle(), cancel: async () => true, job: async () => null, clips: async () => clips, editSuggestions: async () => [], decideEdit: async () => undefined, update: async () => undefined, export: async () => null, upload: async () => handle() },
     quota: { state: async () => ({ used: 3200, remaining: 6800, limit: 10000 }) },
     system: { profile: async () => ({os:'Windows 11',cpu:'Preview 8-Core CPU',logicalCores:16,totalMemory:32*1024**3,freeMemory:19*1024**3,gpu:'NVIDIA RTX Preview',gpuMemory:12*1024**3,cudaAvailable:true,diskTotal:1024**4,diskFree:620*1024**3,modelBytes:3.2*1024**3,temporaryBytes:1.1*1024**3,recommendedProfile:'professional'}), cleanup: async () => ({removed:3,temporaryBytes:0}) },
     diagnostics: { export: async () => 'VioletCut-Diagnostics.json' },

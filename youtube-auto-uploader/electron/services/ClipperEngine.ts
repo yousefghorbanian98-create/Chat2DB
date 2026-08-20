@@ -279,7 +279,7 @@ export class ClipperEngine {
       });
       const profanityRanges=await loadProfanityRanges(path.join(directory,'analysis','transcript.json'));
       try{const speechStats=JSON.parse(await readFile(path.join(directory,'analysis','speech-stats.json'),'utf8')) as Record<string,unknown>;this.emit('speech:stats',{jobId,...speechStats})}catch{/* statistics are non-critical */}
-      try{const suggestions=JSON.parse(await readFile(path.join(directory,'analysis','edit-suggestions.json'),'utf8')) as Record<string,unknown>;this.emit('edit:suggestions',{jobId,...suggestions})}catch{/* edit suggestions are optional */}
+      try{const suggestions=JSON.parse(await readFile(path.join(directory,'analysis','edit-suggestions.json'),'utf8')) as {fillers:Array<{text:string;start:number;end:number;confidence:number;reason:string}>;silences:Array<{start:number;end:number;confidence:number;reason:string}>};this.db.prepare('DELETE FROM edit_suggestions WHERE source_path=? AND status=\'pending\'').run(source);const insert=this.db.prepare("INSERT INTO edit_suggestions(job_id,source_path,type,text,start_time,end_time,confidence,reason) VALUES(?,?,?,?,?,?,?,?)");this.db.transaction(()=>{for(const item of suggestions.fillers)insert.run(jobId,source,'filler',item.text,item.start,item.end,item.confidence,item.reason);for(const item of suggestions.silences)insert.run(jobId,source,'silence',null,item.start,item.end,item.confidence,item.reason)})();this.emit('edit:suggestions',{jobId,...suggestions})}catch{/* edit suggestions are optional */}
       this.ensureActive(jobId);
       this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
       const analysis = await this.ffmpeg.analyze(source);
@@ -399,6 +399,9 @@ export class ClipperEngine {
       this.emit('job:done', { jobId, error: message });
     }
   }
+
+  listEditSuggestions(sourcePath?:string):unknown[]{return sourcePath?this.db.prepare('SELECT * FROM edit_suggestions WHERE source_path=? ORDER BY start_time').all(sourcePath):this.db.prepare('SELECT * FROM edit_suggestions ORDER BY created_at DESC,start_time').all()}
+  decideEditSuggestion(id:number,status:'approved'|'rejected'):void{if(!Number.isInteger(id)||id<=0)throw new Error('Invalid suggestion id');const result=this.db.prepare("UPDATE edit_suggestions SET status=? WHERE id=? AND status='pending'").run(status,id);if(result.changes===0)throw new Error('Pending edit suggestion not found')}
 
   list(): unknown[] { return this.db.prepare('SELECT * FROM clips ORDER BY created_at DESC').all(); }
   get(id: number): { id: number; suggested_title: string; hashtags: string; local_path: string; thumbnail_path: string; status: string } | undefined {
