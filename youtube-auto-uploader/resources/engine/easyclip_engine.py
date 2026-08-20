@@ -25,6 +25,18 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
 
+# PyInstaller applications do not inherit a browser certificate store. Point
+# Python networking explicitly at the bundled CA bundle so first-run model
+# downloads work on a clean Windows installation.
+try:
+    import certifi
+    os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    os.environ.setdefault("REQUESTS_CA_BUNDLE", certifi.where())
+except ImportError:
+    pass
+os.environ.setdefault("HF_HUB_DOWNLOAD_TIMEOUT", "180")
+os.environ.setdefault("HF_HUB_ETAG_TIMEOUT", "30")
+
 
 @dataclass
 class Word:
@@ -628,22 +640,46 @@ def model_cache_path(model: str) -> Path:
     return root / f"models--Systran--faster-whisper-{model}"
 
 
+def complete_model_snapshot(model: str) -> Path | None:
+    snapshots = model_cache_path(model) / "snapshots"
+    if not snapshots.is_dir():
+        return None
+    for snapshot in sorted(snapshots.iterdir(), key=lambda item: item.stat().st_mtime, reverse=True):
+        if snapshot.is_dir() and (snapshot / "config.json").is_file() and ((snapshot / "model.bin").is_file() or (snapshot / "model.safetensors").is_file()):
+            return snapshot
+    return None
+
+
 def model_inventory() -> list[dict]:
     result = []
     for name in ["tiny", "base", "small", "medium", "large-v3"]:
         directory = model_cache_path(name)
         size = sum(item.stat().st_size for item in directory.rglob("*") if item.is_file()) if directory.is_dir() else 0
-        result.append({"name": name, "installed": directory.is_dir(), "sizeBytes": size})
+        result.append({"name": name, "installed": complete_model_snapshot(name) is not None, "sizeBytes": size})
     return result
 
 
 def prepare_model(model: str) -> None:
     if model not in {"tiny", "base", "small", "medium", "large-v3"}:
         raise ValueError("Unsupported Whisper model")
-    emit("progress", stage="model-download", percent=1, detail=f"Downloading or verifying {model}")
+    emit("progress", stage="model-download", percent=1, detail=f"Connecting to the model repository for {model}")
+    try:
+        from huggingface_hub import snapshot_download
+        snapshot_download(
+            repo_id=f"Systran/faster-whisper-{model}",
+            allow_patterns=["config.json", "model.bin", "model.safetensors", "tokenizer.json", "vocabulary.*", "preprocessor_config.json"],
+            resume_download=True,
+            local_files_only=False,
+        )
+    except Exception as error:
+        raise RuntimeError(f"Model download failed. Check internet, firewall, date/time, and free disk space: {type(error).__name__}: {error}") from error
+    snapshot = complete_model_snapshot(model)
+    if snapshot is None:
+        raise RuntimeError("Model download ended without a complete config and weight file")
+    emit("progress", stage="model-download", percent=92, detail=f"Verifying {model} with the local inference engine")
     WhisperModel = __import__("faster_whisper", fromlist=["WhisperModel"]).WhisperModel
-    WhisperModel(model, device="cpu", compute_type="int8", cpu_threads=2, num_workers=1)
-    emit("progress", stage="model-download", percent=100, detail=f"{model} is ready")
+    WhisperModel(str(snapshot), device="cpu", compute_type="int8", cpu_threads=2, num_workers=1, local_files_only=True)
+    emit("progress", stage="model-download", percent=100, detail=f"{model} is installed and verified")
 
 
 def parser() -> argparse.ArgumentParser:

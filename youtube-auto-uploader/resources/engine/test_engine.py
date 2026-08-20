@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from easyclip_engine import FaceSample, SpeakerTurn, Word, build_format_selector, caption_groups, censor_word, merge_speaker_turns, pick_highlights, smooth_face_tracks, write_karaoke_ass, write_srt
+from easyclip_engine import FaceSample, SpeakerTurn, Word, build_format_selector, caption_groups, censor_word, complete_model_snapshot, merge_speaker_turns, pick_highlights, smooth_face_tracks, write_karaoke_ass, write_srt
 
 
 class EngineTests(unittest.TestCase):
@@ -20,6 +20,20 @@ class EngineTests(unittest.TestCase):
         groups = list(caption_groups(words, max_chars=18, max_words=4))
         self.assertGreater(len(groups), 1)
         self.assertEqual([w.text for g in groups for w in g], [w.text for w in words])
+
+    def test_partial_model_cache_is_not_reported_as_installed(self):
+        import os
+        with tempfile.TemporaryDirectory() as directory:
+            previous=os.environ.get("HF_HOME")
+            os.environ["HF_HOME"]=directory
+            snapshot=Path(directory)/"hub"/"models--Systran--faster-whisper-tiny"/"snapshots"/"partial"
+            snapshot.mkdir(parents=True)
+            (snapshot/"config.json").write_text("{}")
+            self.assertIsNone(complete_model_snapshot("tiny"))
+            (snapshot/"model.bin").write_bytes(b"weights")
+            self.assertEqual(complete_model_snapshot("tiny"),snapshot)
+            if previous is None:os.environ.pop("HF_HOME",None)
+            else:os.environ["HF_HOME"]=previous
 
     def test_user_intent_boosts_matching_highlight(self):
         words=[Word(text,index,index+.8) for index,text in enumerate("ordinary introduction then renewable energy battery breakthrough explained clearly".split())]
