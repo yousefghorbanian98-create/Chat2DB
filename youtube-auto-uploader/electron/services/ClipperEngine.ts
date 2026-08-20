@@ -279,6 +279,7 @@ export class ClipperEngine {
       });
       const profanityRanges=await loadProfanityRanges(path.join(directory,'analysis','transcript.json'));
       try{const speechStats=JSON.parse(await readFile(path.join(directory,'analysis','speech-stats.json'),'utf8')) as Record<string,unknown>;this.emit('speech:stats',{jobId,...speechStats})}catch{/* statistics are non-critical */}
+      try{const suggestions=JSON.parse(await readFile(path.join(directory,'analysis','edit-suggestions.json'),'utf8')) as Record<string,unknown>;this.emit('edit:suggestions',{jobId,...suggestions})}catch{/* edit suggestions are optional */}
       this.ensureActive(jobId);
       this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
       const analysis = await this.ffmpeg.analyze(source);

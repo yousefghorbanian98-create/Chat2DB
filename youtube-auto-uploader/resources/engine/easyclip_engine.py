@@ -415,6 +415,19 @@ def analyze(video: Path, output_dir: Path, model: str, language: str, target: in
     filler_words={"um","uh","like","basically","actually","well","یعنی","مثلا","مثلاً","خب","حالا","درواقع","اِ","اُم"}
     normalized_words=[re.sub(r"[^\w\u0600-\u06ff]","",word.text.lower()) for word in words]
     filler_count=sum(token in filler_words for token in normalized_words)
+    filler_suggestions=[]
+    for index,(word,token) in enumerate(zip(words,normalized_words)):
+        if token not in filler_words: continue
+        previous_gap=word.start-words[index-1].end if index>0 else 9.0
+        next_gap=words[index+1].start-word.end if index+1<len(words) else 9.0
+        isolated=previous_gap>.12 or next_gap>.12
+        confidence=.9 if isolated and word.end-word.start<1.1 else .58
+        filler_suggestions.append({"type":"filler","text":word.text,"start":round(max(0,word.start-.04),3),"end":round(word.end+.06,3),"confidence":confidence,"reason":"isolated filler with surrounding pause" if isolated else "filler candidate inside a phrase; review before removal"})
+    silence_suggestions=[]
+    for left,right in zip(words,words[1:]):
+        gap=right.start-left.end
+        if gap>=1.1:silence_suggestions.append({"type":"silence","start":round(left.end+.18,3),"end":round(right.start-.18,3),"confidence":min(.98,.65+gap/10),"reason":f"{gap:.1f}s pause; keeps 180ms breathing room"})
+    (output_dir / "edit-suggestions.json").write_text(json.dumps({"fillers":filler_suggestions,"silences":silence_suggestions},ensure_ascii=False,indent=2),encoding="utf-8")
     speech_duration=max(.1,words[-1].end-words[0].start)
     stats={"wordCount":len(words),"fillerCount":filler_count,"fillerRatio":round(filler_count/max(1,len(words)),4),"wordsPerMinute":round(len(words)*60/speech_duration,1),"goldenQuotes":[{"title":title,"score":round(score),"start":round(window[0].start,2),"end":round(window[-1].end,2)} for window,score,title in sorted(selected,key=lambda item:item[1],reverse=True)[:10]]}
     (output_dir / "speech-stats.json").write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding="utf-8")
