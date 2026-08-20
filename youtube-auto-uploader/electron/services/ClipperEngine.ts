@@ -401,7 +401,8 @@ export class ClipperEngine {
   }
 
   listEditSuggestions(sourcePath?:string):unknown[]{return sourcePath?this.db.prepare('SELECT * FROM edit_suggestions WHERE source_path=? ORDER BY start_time').all(sourcePath):this.db.prepare('SELECT * FROM edit_suggestions ORDER BY created_at DESC,start_time').all()}
-  decideEditSuggestion(id:number,status:'approved'|'rejected'):void{if(!Number.isInteger(id)||id<=0)throw new Error('Invalid suggestion id');const result=this.db.prepare("UPDATE edit_suggestions SET status=? WHERE id=? AND status='pending'").run(status,id);if(result.changes===0)throw new Error('Pending edit suggestion not found')}
+  decideEditSuggestion(id:number,status:'pending'|'approved'|'rejected'):void{if(!Number.isInteger(id)||id<=0)throw new Error('Invalid suggestion id');const result=this.db.prepare("UPDATE edit_suggestions SET status=? WHERE id=?").run(status,id);if(result.changes===0)throw new Error('Edit suggestion not found')}
+  approvedEditRanges(sourcePath:string):Array<{start:number;end:number;type:string}>{return this.db.prepare("SELECT start_time start,end_time end,type FROM edit_suggestions WHERE source_path=? AND status='approved' ORDER BY start_time").all(sourcePath) as Array<{start:number;end:number;type:string}>}
 
   list(): unknown[] { return this.db.prepare('SELECT * FROM clips ORDER BY created_at DESC').all(); }
   get(id: number): { id: number; suggested_title: string; hashtags: string; local_path: string; thumbnail_path: string; status: string } | undefined {
