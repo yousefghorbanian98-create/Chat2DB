@@ -409,6 +409,8 @@ export class ClipperEngine {
     }
   }
 
+  async exportGif(id:number,output:string):Promise<void>{const row=this.db.prepare('SELECT source_path,start_time,end_time FROM clips WHERE id=?').get(id) as {source_path:string;start_time:number;end_time:number}|undefined;if(!row)throw new Error('Clip not found');await this.ffmpeg.gif(row.source_path,row.start_time,row.end_time,output)}
+
   listEditSuggestions(sourcePath?:string):unknown[]{return sourcePath?this.db.prepare('SELECT * FROM edit_suggestions WHERE source_path=? ORDER BY start_time').all(sourcePath):this.db.prepare('SELECT * FROM edit_suggestions ORDER BY created_at DESC,start_time').all()}
   decideEditSuggestion(id:number,status:'pending'|'approved'|'rejected'):void{if(!Number.isInteger(id)||id<=0)throw new Error('Invalid suggestion id');const result=this.db.prepare("UPDATE edit_suggestions SET status=? WHERE id=?").run(status,id);if(result.changes===0)throw new Error('Edit suggestion not found')}
   approvedEditRanges(sourcePath:string):Array<{start:number;end:number;type:string}>{return this.db.prepare("SELECT start_time start,end_time end,type FROM edit_suggestions WHERE source_path=? AND status='approved' ORDER BY start_time").all(sourcePath) as Array<{start:number;end:number;type:string}>}

@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
+import { rm } from 'node:fs/promises';
 import { binaryPath } from '../bin';
 
 export interface MediaAnalysis {
@@ -164,14 +165,15 @@ export class FFmpegService {
     const filter=`${baseFilter}${brollFilter}`;
     const muteFilters=(options.audioMuteRanges??[]).filter(item=>item.end>=start&&item.start<=end).map(item=>`volume=enable='between(t,${Math.max(0,item.start-start+.3).toFixed(3)},${Math.max(0,item.end-start+.3).toFixed(3)})':volume=0`);
     const speechFilter=muteFilters.length?muteFilters.join(','):'anull';
+    const joinRepair=cutExpression?'adeclick=w=55:o=75:a=2:t=2:b=2,aresample=async=1:first_pts=0,':'';
     const speechInput=cutExpression?'cuta':'0:a';
     const args = ['-ss', String(Math.max(0, start - 0.3)), '-i', source];
     if(options.broll)args.push('-ss',String(options.broll.sourceStart),'-i',source);
     const musicInput=options.broll?2:1;
     if (options.musicPath) args.push('-stream_loop', '-1', '-i', options.musicPath);
     args.push('-t', String(duration + 0.6), '-filter_complex', options.musicPath
-      ? `${filter};[${musicInput}:a]volume=${String(options.musicVolume ?? 0.12)},asplit=2[musicduck][musicmix];[${speechInput}]${speechFilter}[speech];[speech][musicduck]sidechaincompress=threshold=0.1:ratio=4[ducked];[ducked][musicmix]amix=inputs=2:duration=first:weights='1 0.15'[mixed];[mixed]loudnorm=I=-14:TP=-1.5:LRA=11[audio]`
-      : cutExpression?`${filter};[cuta]${speechFilter},loudnorm=I=-14:TP=-1.5:LRA=11[audio]`:filter, '-map', '[video]');
+      ? `${filter};[${musicInput}:a]volume=${String(options.musicVolume ?? 0.12)},asplit=2[musicduck][musicmix];[${speechInput}]${speechFilter},${joinRepair}anull[speech];[speech][musicduck]sidechaincompress=threshold=0.1:ratio=4[ducked];[ducked][musicmix]amix=inputs=2:duration=first:weights='1 0.15'[mixed];[mixed]loudnorm=I=-14:TP=-1.5:LRA=11[audio]`
+      : cutExpression?`${filter};[cuta]${speechFilter},${joinRepair}loudnorm=I=-14:TP=-1.5:LRA=11[audio]`:filter, '-map', '[video]');
     if (options.musicPath||cutExpression) args.push('-map', '[audio]'); else args.push('-map', '0:a?', '-af', `${speechFilter},loudnorm=I=-14:TP=-1.5:LRA=11`);
     const encoder = options.encoder ?? await this.preferredEncoder();
     const encoding = encoder === 'h264_nvenc'
@@ -181,13 +183,15 @@ export class FFmpegService {
     try {
       await this.run(args,undefined,options.jobId);
     } catch (error: unknown) {
-      if(options.jobId&&this.cancelled.has(options.jobId))throw new Error('Rendering cancelled by user');
+      if(options.jobId&&this.cancelled.has(options.jobId)){await rm(output,{force:true});throw new Error('Rendering cancelled by user')}
       if (encoder !== 'h264_nvenc') throw error;
       const codecIndex = args.indexOf('-c:v');
       args.splice(codecIndex, 6, '-c:v', 'libx264', '-preset', 'medium', '-crf', '20');
       await this.run(args,undefined,options.jobId);
     }
   }
+
+  async gif(source:string,start:number,end:number,output:string):Promise<void>{const duration=Math.max(.5,Math.min(12,end-start));await this.run(['-ss',String(Math.max(0,start)),'-i',source,'-t',String(duration),'-filter_complex','[0:v]fps=12,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=3','-loop','0',output])}
 
   async frame(source: string, time: number, output: string): Promise<void> {
     await this.run(['-ss', String(time), '-i', source, '-frames:v', '1', '-q:v', '2', output]);
