@@ -83,6 +83,11 @@ const responseSchema = z.object({
 function snap(value:number,silences:MediaAnalysis['silences']):number{const points=silences.flatMap(item=>[item.start,item.end]).filter(point=>Math.abs(point-value)<=1.5);return points.sort((left,right)=>Math.abs(left-value)-Math.abs(right-value))[0]??value}
 function planLocalBroll(start:number,end:number,analysis:MediaAnalysis):{at:number;duration:number;sourceStart:number}|undefined{const source=analysis.scenes.filter(time=>time<start-4||time>end+4)[0];if(source===undefined||end-start<12)return undefined;const insertion=Math.min(end-start-3,Math.max(3,(end-start)*.58));return{at:Math.round(insertion*100)/100,duration:2.2,sourceStart:Math.max(0,source-.5)}}
 
+function remapFaceSamplesForCuts(faces:FaceTimeline|undefined,cuts:Array<{start:number;end:number}>):FaceTimeline|undefined{if(!faces||!cuts.length)return faces;const samples=faces.samples.filter(sample=>!cuts.some(cut=>sample.time_seconds>=cut.start&&sample.time_seconds<=cut.end)).map(sample=>({...sample,time_seconds:sample.time_seconds-cuts.reduce((sum,cut)=>sum+(sample.time_seconds>=cut.end?cut.end-cut.start:0),0)}));return{trackCount:faces.trackCount,samples}}
+function assSeconds(value:string):number{const [h,m,s]=value.split(':');return Number(h)*3600+Number(m)*60+Number(s)}
+function assTimestamp(seconds:number):string{const safe=Math.max(0,seconds),h=Math.floor(safe/3600),m=Math.floor(safe%3600/60),s=(safe%60).toFixed(2).padStart(5,'0');return`${h}:${String(m).padStart(2,'0')}:${s}`}
+async function remapCaptionForCuts(file:string|undefined,cuts:Array<{start:number;end:number}>,clipStart:number,output:string):Promise<string|undefined>{if(!file||!cuts.length||!file.toLowerCase().endsWith('.ass'))return file;const relative=cuts.map(item=>({start:Math.max(0,item.start-clipStart),end:Math.max(0,item.end-clipStart)}));const map=(time:number)=>time-relative.reduce((sum,item)=>sum+(time>=item.end?item.end-item.start:time>item.start?time-item.start:0),0);const lines=(await readFile(file,'utf8')).split(/\r?\n/).filter(line=>{if(!line.startsWith('Dialogue:'))return true;const fields=line.split(',');const start=assSeconds(fields[1]??'0:00:00.00'),end=assSeconds(fields[2]??'0:00:00.00');return!relative.some(item=>start>=item.start&&end<=item.end)}).map(line=>{if(!line.startsWith('Dialogue:'))return line;const fields=line.split(',');fields[1]=assTimestamp(map(assSeconds(fields[1]??'0:00:00.00')));fields[2]=assTimestamp(map(assSeconds(fields[2]??'0:00:00.00')));return fields.join(',')});await writeFile(output,lines.join('\n'),'utf8');return output}
+
 function escapeSvg(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
@@ -223,14 +228,18 @@ export class ClipperEngine {
         let faces: FaceTimeline | undefined;let active:ActiveSpeakerFace[]|undefined;
         if(options.processingProfile==='professional'){faces=await this.localAI.trackFaces(row.source_path,{samplesPerSecond:5,jobId});const token=await this.huggingFace.accessToken();if(token){const speakers=await this.localAI.diarize(row.source_path,path.join(directory,'speakers'),token,{minSpeakers:1,maxSpeakers:4,jobId});active=associateSpeakersWithFaces(speakers,faces)}}
         this.progress(jobId, 'rendering-approved', 5 + Math.round(index / rows.length * 90), `Rendering approved clip ${String(index + 1)} of ${String(rows.length)}`);
+        const approvedCuts=this.approvedEditRanges(row.source_path).filter(item=>item.end>row.start_time&&item.start<row.end_time).map(item=>({start:item.start,end:item.end}));
+        const remappedFaces=remapFaceSamplesForCuts(faces,approvedCuts);
+        const remappedActive=active?.map(segment=>({...segment,start_seconds:segment.start_seconds-approvedCuts.reduce((sum,cut)=>sum+(segment.start_seconds>=cut.end?cut.end-cut.start:0),0),end_seconds:segment.end_seconds-approvedCuts.reduce((sum,cut)=>sum+(segment.end_seconds>=cut.end?cut.end-cut.start:0),0)}));
+        const remappedCaption=await remapCaptionForCuts(row.caption_path,approvedCuts,row.start_time,path.join(directory,`caption_${String(row.id)}.ass`));
         const video = path.join(directory, `approved_clip_${String(row.id)}.mp4`);
         const rawThumb = path.join(directory, `thumb_raw_${String(row.id)}.jpg`);
         const thumb = path.join(directory, `thumb_${String(row.id)}.jpg`);
         await this.ffmpeg.render(row.source_path, row.start_time, row.end_time, video, {
-          aspect: options.aspect, captionsPath: options.captions ? row.caption_path : undefined, fontsDirectory: this.fontsDirectory,
+          aspect: options.aspect, captionsPath: options.captions ? remappedCaption : undefined, fontsDirectory: this.fontsDirectory,
           smartZoom: options.smartZoom, blurBackground: options.blurBackground,
           musicPath: options.music && this.musicPath && existsSync(this.musicPath) ? this.musicPath : undefined,
-          musicVolume: 0.12, encoder, sourceStart: row.start_time, faceSamples: faces?.samples, activeFaces:active, multiFaceTrackIds:overlappingFaceTracks(active,row.start_time,row.end_time),audioMuteRanges:options.audioMuteRanges,broll:options.brollPlan,jobId
+          musicVolume: 0.12, encoder, sourceStart: row.start_time, faceSamples: remappedFaces?.samples, activeFaces:remappedActive, multiFaceTrackIds:overlappingFaceTracks(remappedActive,row.start_time,row.end_time),audioMuteRanges:options.audioMuteRanges,broll:options.brollPlan,cutRanges:approvedCuts,jobId
         });
         await this.ffmpeg.frame(row.source_path, row.start_time + Math.min(3, (row.end_time-row.start_time)/3), rawThumb);
         const overlay = Buffer.from(`<svg width="1080" height="1920"><rect y="1380" width="1080" height="540" fill="#080612" fill-opacity=".72"/><foreignObject x="70" y="1450" width="940" height="340"><div xmlns="http://www.w3.org/1999/xhtml" style="font:700 68px Arial;color:white;text-align:center">${escapeSvg(row.suggested_title)}</div></foreignObject></svg>`);
@@ -375,7 +384,7 @@ export class ClipperEngine {
           sourceStart: start,
           faceSamples: faceTimeline?.samples,
           activeFaces,
-          multiFaceTrackIds:overlappingFaceTracks(activeFaces,start,end),audioMuteRanges:profanityRanges,broll:input.processingProfile==='professional'?planLocalBroll(start,end,analysis):undefined,jobId
+          multiFaceTrackIds:overlappingFaceTracks(activeFaces,start,end),audioMuteRanges:profanityRanges,broll:input.processingProfile==='professional'?planLocalBroll(start,end,analysis):undefined,cutRanges:this.approvedEditRanges(source).filter(item=>item.end>start&&item.start<end),jobId
         });
         const scene = analysis.scenes.filter((time) => time >= start && time <= end)
           .sort((left, right) => Math.abs(left - (start + (end - start) * 0.3)) - Math.abs(right - (start + (end - start) * 0.3)))[0];

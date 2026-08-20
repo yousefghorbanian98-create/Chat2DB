@@ -22,6 +22,7 @@ export interface RenderOptions {
   activeFaces?: Array<{start_seconds:number;end_seconds:number;track_id:number|null;confidence:number}>;
   audioMuteRanges?: Array<{start:number;end:number}>;
   broll?: {at:number;duration:number;sourceStart:number};
+  cutRanges?: Array<{start:number;end:number}>;
   multiFaceTrackIds?: number[];
   jobId?: string;
 }
@@ -141,11 +142,15 @@ export class FFmpegService {
     const foregroundWidth = landscape ? 1920 : square ? 1080 : 900;
     const splitLayout=!landscape&&!square&&options.faceSamples&&options.multiFaceTrackIds?multiFaceFilter(options.faceSamples,options.multiFaceTrackIds,width,height):undefined;
     const faceCrop = !splitLayout&&!landscape && !square && options.faceSamples ? dynamicFaceCrop(options.faceSamples, options.sourceStart ?? start, duration, options.activeFaces) : undefined;
-    const background = splitLayout??(faceCrop
+    let background = splitLayout??(faceCrop
       ? `[0:v]crop=w='ih*9/16':h='ih':x='${faceCrop}':y=0,scale=${String(width)}:${String(height)}[composite]`
       : options.blurBackground
         ? `[0:v]split[orig][bg];[bg]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=increase,crop=${String(width)}:${String(height)},boxblur=20:1[base];[orig]scale=${String(foregroundWidth)}:-2[fg];[base][fg]overlay=(W-w)/2:(H-h)/2[composite]`
         : `[0:v]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=decrease,pad=${String(width)}:${String(height)}:(ow-iw)/2:(oh-ih)/2:black[composite]`);
+    const cuts=(options.cutRanges??[]).filter(item=>item.end>start&&item.start<end).map(item=>({start:Math.max(0,item.start-start+.3),end:Math.max(0,item.end-start+.3)})).filter(item=>item.end>item.start);
+    const cutExpression=cuts.map(item=>`between(t\\,${item.start.toFixed(3)}\\,${item.end.toFixed(3)})`).join('+');
+    const cutPrefix=cutExpression?`[0:v]select='not(${cutExpression})',setpts=N/FRAME_RATE/TB[cutv];[0:a]aselect='not(${cutExpression})',asetpts=N/SR/TB[cuta];`:'';
+    if(cutExpression)background=background.replaceAll('[0:v]','[cutv]');
     const effects: string[] = [];
     if (options.smartZoom && !faceCrop && !splitLayout) effects.push(`scale=w='iw*(1+0.10*t/${String(duration)})':h='ih*(1+0.10*t/${String(duration)})':eval=frame,crop=${String(width)}:${String(height)}`);
     if (options.captionsPath) {
@@ -154,19 +159,20 @@ export class FFmpegService {
       effects.push(`subtitles='${subtitlePath(options.captionsPath)}'${fonts}${style}`);
     }
     const mainLabel=options.broll?'main':'video';
-    const baseFilter=`${background};[composite]${effects.length ? effects.join(',') : 'null'}[${mainLabel}]`;
+    const baseFilter=`${cutPrefix}${background};[composite]${effects.length ? effects.join(',') : 'null'}[${mainLabel}]`;
     const brollFilter=options.broll?`;[1:v]scale=${String(width)}:${String(height)}:force_original_aspect_ratio=increase,crop=${String(width)}:${String(height)}[broll];[main][broll]overlay=enable='between(t,${options.broll.at.toFixed(3)},${(options.broll.at+options.broll.duration).toFixed(3)})'[video]`:'';
     const filter=`${baseFilter}${brollFilter}`;
     const muteFilters=(options.audioMuteRanges??[]).filter(item=>item.end>=start&&item.start<=end).map(item=>`volume=enable='between(t,${Math.max(0,item.start-start+.3).toFixed(3)},${Math.max(0,item.end-start+.3).toFixed(3)})':volume=0`);
     const speechFilter=muteFilters.length?muteFilters.join(','):'anull';
+    const speechInput=cutExpression?'cuta':'0:a';
     const args = ['-ss', String(Math.max(0, start - 0.3)), '-i', source];
     if(options.broll)args.push('-ss',String(options.broll.sourceStart),'-i',source);
     const musicInput=options.broll?2:1;
     if (options.musicPath) args.push('-stream_loop', '-1', '-i', options.musicPath);
     args.push('-t', String(duration + 0.6), '-filter_complex', options.musicPath
-      ? `${filter};[${musicInput}:a]volume=${String(options.musicVolume ?? 0.12)},asplit=2[musicduck][musicmix];[0:a]${speechFilter}[speech];[speech][musicduck]sidechaincompress=threshold=0.1:ratio=4[ducked];[ducked][musicmix]amix=inputs=2:duration=first:weights='1 0.15'[mixed];[mixed]loudnorm=I=-14:TP=-1.5:LRA=11[audio]`
-      : filter, '-map', '[video]');
-    if (options.musicPath) args.push('-map', '[audio]'); else args.push('-map', '0:a?', '-af', `${speechFilter},loudnorm=I=-14:TP=-1.5:LRA=11`);
+      ? `${filter};[${musicInput}:a]volume=${String(options.musicVolume ?? 0.12)},asplit=2[musicduck][musicmix];[${speechInput}]${speechFilter}[speech];[speech][musicduck]sidechaincompress=threshold=0.1:ratio=4[ducked];[ducked][musicmix]amix=inputs=2:duration=first:weights='1 0.15'[mixed];[mixed]loudnorm=I=-14:TP=-1.5:LRA=11[audio]`
+      : cutExpression?`${filter};[cuta]${speechFilter},loudnorm=I=-14:TP=-1.5:LRA=11[audio]`:filter, '-map', '[video]');
+    if (options.musicPath||cutExpression) args.push('-map', '[audio]'); else args.push('-map', '0:a?', '-af', `${speechFilter},loudnorm=I=-14:TP=-1.5:LRA=11`);
     const encoder = options.encoder ?? await this.preferredEncoder();
     const encoding = encoder === 'h264_nvenc'
       ? ['-c:v', 'h264_nvenc', '-preset', 'p5', '-cq', '21']
