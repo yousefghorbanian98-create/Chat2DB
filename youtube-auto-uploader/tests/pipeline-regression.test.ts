@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { ClipperEngine } from '../electron/services/ClipperEngine';
+import { associateSpeakersWithFaces, ClipperEngine, multimodalMetadata } from '../electron/services/ClipperEngine';
 import type { ClipInput, JobProgress } from '../electron/types';
 
 const input: ClipInput = { model:'mock',whisperModel:'tiny',language:'auto',analysisMode:'local',processingProfile:'fast',previewOnly:true,count:1,maxLength:30,category:'Auto',aspect:'9:16',captions:true,smartZoom:false,music:false,blurBackground:true };
@@ -16,6 +16,14 @@ function fixture(): { engine: ClipperEngine; sql: string[]; progress: JobProgres
 }
 
 describe('pipeline regressions',()=>{
+  it('explains multimodal highlight scores from active signals',()=>{
+    const result=multimodalMetadata({id:'h1',start_seconds:0,end_seconds:20,score:80,title:'Moment',transcript:'A complete useful moment',caption_path:'x.ass'},'Auto',{scenes:[4,9],silences:[],audioPeaks:[{time:5,score:.9}]},{trackCount:1,samples:[{track_id:1,time_seconds:5,x:.2,y:.2,width:.3,height:.3,confidence:.9,mouth_activity:.8}]},[{time:6,text:'wow amazing',sentiment:1}]);
+    expect(result.finalScore).toBeGreaterThan(5);expect(result.reason).toContain('Multimodal:');expect(result.reason).toContain('Hook');
+  });
+  it('keeps recurring speakers associated with stable face tracks',()=>{
+    const result=associateSpeakersWithFaces({speakers:['A','B'],turns:[{speaker:'A',start_seconds:0,end_seconds:2},{speaker:'B',start_seconds:2,end_seconds:4},{speaker:'A',start_seconds:4,end_seconds:6}]},{trackCount:2,samples:[{track_id:1,time_seconds:1,x:.1,y:.1,width:.3,height:.3,confidence:.9},{track_id:2,time_seconds:1,x:.6,y:.1,width:.2,height:.2,confidence:.9},{track_id:2,time_seconds:3,x:.6,y:.1,width:.3,height:.3,confidence:.9},{track_id:1,time_seconds:5,x:.1,y:.1,width:.3,height:.3,confidence:.9}]});
+    expect(result.map(item=>item.track_id)).toEqual([1,2,1]);
+  });
   it('never allows a later engine to move progress backwards',()=>{
     const {engine,progress,root}=fixture();
     const handle=engine.start(input);

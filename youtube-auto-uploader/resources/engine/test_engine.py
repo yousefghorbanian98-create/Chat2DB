@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from easyclip_engine import SpeakerTurn, Word, build_format_selector, caption_groups, merge_speaker_turns, pick_highlights, write_karaoke_ass, write_srt
+from easyclip_engine import FaceSample, SpeakerTurn, Word, build_format_selector, caption_groups, censor_word, merge_speaker_turns, pick_highlights, smooth_face_tracks, write_karaoke_ass, write_srt
 
 
 class EngineTests(unittest.TestCase):
@@ -21,6 +21,13 @@ class EngineTests(unittest.TestCase):
         self.assertGreater(len(groups), 1)
         self.assertEqual([w.text for g in groups for w in g], [w.text for w in words])
 
+    def test_user_intent_boosts_matching_highlight(self):
+        words=[Word(text,index,index+.8) for index,text in enumerate("ordinary introduction then renewable energy battery breakthrough explained clearly".split())]
+        from easyclip_engine import score_window
+        generic=score_window(words,20)[0]
+        focused=score_window(words,20,"renewable energy battery")[0]
+        self.assertGreater(focused,generic)
+
     def test_highlights_are_non_overlapping(self):
         words = self.sample() * 8
         words = [Word(w.text, i * 1.1, i * 1.1 + 0.9) for i, w in enumerate(words)]
@@ -33,6 +40,20 @@ class EngineTests(unittest.TestCase):
         self.assertEqual(len(merged), 2)
         self.assertEqual(merged[0].end_seconds, 4)
         self.assertEqual(merged[1].speaker, "SPEAKER_01")
+
+    def test_face_smoothing_removes_jitter_and_clamps_velocity(self):
+        samples = [
+            FaceSample(1, 0.0, .300, .2, .2, .2, .9, 0),
+            FaceSample(1, 0.2, .304, .2, .2, .2, .9, 0),
+            FaceSample(1, 0.4, .700, .2, .2, .2, .9, 0),
+        ]
+        smoothed = smooth_face_tracks(samples)
+        self.assertAlmostEqual(smoothed[1].x, smoothed[0].x, places=3)
+        self.assertLessEqual(smoothed[2].x - smoothed[1].x, .28 * .2 + .001)
+
+    def test_profanity_is_masked_without_changing_word_length(self):
+        self.assertEqual(censor_word("shit"), "s•••")
+        self.assertEqual(censor_word("آموزش"), "آموزش")
 
     def test_karaoke_ass_contains_word_timing(self):
         words = [Word("سلام", 5, 5.4), Word("دنیا", 5.4, 6)]

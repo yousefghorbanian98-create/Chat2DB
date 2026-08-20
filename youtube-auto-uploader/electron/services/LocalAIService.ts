@@ -24,7 +24,7 @@ export interface LocalEngineStatus {
 export interface LocalModelInfo { name: string; installed: boolean; sizeBytes: number }
 export interface SpeakerTurn { speaker: string; start_seconds: number; end_seconds: number }
 export interface SpeakerTimeline { speakers: string[]; turns: SpeakerTurn[] }
-export interface FaceSample { track_id: number; time_seconds: number; x: number; y: number; width: number; height: number; confidence: number }
+export interface FaceSample { track_id: number; time_seconds: number; x: number; y: number; width: number; height: number; confidence: number; mouth_activity?: number }
 export interface FaceTimeline { trackCount: number; samples: FaceSample[] }
 
 interface EngineResult {
@@ -206,17 +206,13 @@ export class LocalAIService {
   async analyze(
     input: string,
     outputDirectory: string,
-    options: { model: string; language: string; targetDuration: number; clipCount: number; jobId?: string },
+    options: { model: string; language: string; targetDuration: number; clipCount: number; userIntent?:string; jobId?: string },
     onProgress?: (event: EngineProgress) => void
   ): Promise<LocalHighlight[]> {
     if (!allowedModels.has(options.model)) throw new Error(`Unsupported Whisper model: ${options.model}`);
-    const result = await this.run([
-      'analyze', '--input', input, '--output-dir', outputDirectory,
-      '--model', options.model, '--language', options.language,
-      '--target-duration', String(Math.max(15, Math.min(180, options.targetDuration))),
-      '--clip-count', String(Math.max(1, Math.min(30, options.clipCount))),
-      '--cache-dir', this.cacheDirectory
-    ], onProgress, options.jobId);
+    const args=['analyze','--input',input,'--output-dir',outputDirectory,'--model',options.model,'--language',options.language,'--target-duration',String(Math.max(15,Math.min(180,options.targetDuration))),'--clip-count',String(Math.max(1,Math.min(30,options.clipCount))),'--cache-dir',this.cacheDirectory];
+    if(options.userIntent?.trim())args.push('--user-intent',options.userIntent.trim().slice(0,500));
+    const result = await this.run(args, onProgress, options.jobId);
     if (!result.highlights?.length) throw new Error('Local AI did not find any highlight candidates');
     return result.highlights;
   }

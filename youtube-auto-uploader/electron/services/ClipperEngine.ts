@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { z } from 'zod';
@@ -11,6 +11,56 @@ import type { FFmpegService, MediaAnalysis } from './FFmpegService';
 import type { FaceTimeline, LocalAIService, LocalHighlight, SpeakerTimeline } from './LocalAIService';
 import type { HuggingFaceService } from './HuggingFaceService';
 import type { OllamaService } from './OllamaService';
+
+export interface ActiveSpeakerFace { speaker:string; start_seconds:number; end_seconds:number; track_id:number|null; confidence:number }
+
+export function associateSpeakersWithFaces(speakers:SpeakerTimeline,faces:FaceTimeline):ActiveSpeakerFace[]{
+  const remembered=new Map<string,number>();
+  const raw=speakers.turns.map(turn=>{
+    const scores=new Map<number,number>();
+    for(const sample of faces.samples){
+      if(sample.time_seconds<turn.start_seconds||sample.time_seconds>turn.end_seconds)continue;
+      const area=Math.sqrt(sample.width*sample.height);const continuity=remembered.get(turn.speaker)===sample.track_id?1.35:1;const lipMotion=.3+(sample.mouth_activity??0)*3.2;
+      scores.set(sample.track_id,(scores.get(sample.track_id)??0)+area*sample.confidence*continuity*lipMotion);
+    }
+    const ranked=[...scores].sort((left,right)=>right[1]-left[1]);const total=ranked.reduce((sum,item)=>sum+item[1],0);const winner=ranked[0];const confidence=winner&&total?winner[1]/total:0;const track_id=winner&&confidence>=0.42?winner[0]:null;
+    if(track_id!==null)remembered.set(turn.speaker,track_id);
+    return{speaker:turn.speaker,start_seconds:turn.start_seconds,end_seconds:turn.end_seconds,track_id,confidence:Math.round(confidence*1000)/1000};
+  }).sort((left,right)=>left.start_seconds-right.start_seconds);
+  let heldTrack:number|null=null;let lastSwitch=-Infinity;
+  for(let index=0;index<raw.length;index++){
+    const segment=raw[index];if(!segment)continue;
+    if(segment.track_id===null&&heldTrack!==null){segment.track_id=heldTrack;segment.confidence=Math.min(segment.confidence,.35)}
+    if(heldTrack!==null&&segment.track_id!==null&&segment.track_id!==heldTrack&&segment.start_seconds-lastSwitch<1.2&&segment.confidence<.72)segment.track_id=heldTrack;
+    if(segment.track_id!==null&&segment.track_id!==heldTrack){heldTrack=segment.track_id;lastSwitch=segment.start_seconds}
+    const next=raw[index+1];if(next&&next.start_seconds-segment.end_seconds<=1)segment.end_seconds=next.start_seconds;
+  }
+  return raw;
+}
+
+function overlappingFaceTracks(active:ActiveSpeakerFace[]|undefined,start:number,end:number):number[]|undefined{
+  const segments=(active??[]).filter(item=>item.track_id!==null&&item.end_seconds>=start&&item.start_seconds<=end);
+  const boundaries=[...new Set(segments.flatMap(item=>[Math.max(start,item.start_seconds),Math.min(end,item.end_seconds)]))].sort((a,b)=>a-b);
+  for(let index=0;index<boundaries.length-1;index++){const from=boundaries[index],to=boundaries[index+1];if(from===undefined||to===undefined||to-from<.45)continue;const midpoint=(from+to)/2;const ids=[...new Set(segments.filter(item=>midpoint>=item.start_seconds&&midpoint<=item.end_seconds&&item.track_id!==null).map(item=>item.track_id as number))];if(ids.length>=2)return ids.slice(0,3)}
+  return undefined;
+}
+
+interface ChatMessage{time:number;text:string;sentiment:number}
+const positiveChat=/\b(wow|amazing|great|love|win|insane|best|fire|lol)\b|عالی|خوب|باحال|برد|خنده|فوق.?العاده/gi;
+const negativeChat=/\b(bad|boring|hate|fail|worst|angry)\b|بد|خسته|شکست|افتضاح|عصبانی/gi;
+
+async function loadChatSidecar(source:string):Promise<ChatMessage[]>{
+  const base=source.replace(/\.[^.]+$/,'');const paths=[`${base}.chat.jsonl`,`${base}_chat.jsonl`,`${base}.chat.json`,`${base}.chat.csv`];
+  const file=paths.find(candidate=>existsSync(candidate));if(!file)return[];
+  try{const raw=await readFile(file,'utf8');const records:Array<Record<string,unknown>>=file.endsWith('.jsonl')?raw.split(/\r?\n/).filter(Boolean).map(line=>JSON.parse(line) as Record<string,unknown>):file.endsWith('.json')?(JSON.parse(raw) as Array<Record<string,unknown>>):raw.split(/\r?\n/).slice(1).map(line=>{const [time,...text]=line.split(',');return{time,text:text.join(',')}});
+    return records.map(record=>{let time=Number(record.time??record.t??record.timestamp??0);if(time>100000)time/=1000;const text=String(record.text??record.message??record.content??'');const sentiment=Math.max(-1,Math.min(1,((text.match(positiveChat)?.length??0)-(text.match(negativeChat)?.length??0))/2));return{time,text,sentiment}}).filter(item=>Number.isFinite(item.time)&&item.time>=0&&item.text);
+  }catch{return[]}
+}
+
+async function loadProfanityRanges(transcriptPath:string):Promise<Array<{start:number;end:number}>>{
+  const blocked=/^(fuck|fucking|shit|bitch|asshole|لعنتی|کثافت|احمق|حرومزاده)$/i;
+  try{const words=JSON.parse(await readFile(transcriptPath,'utf8')) as Array<{text:string;start:number;end:number}>;return words.filter(item=>blocked.test(item.text.replace(/[^\p{L}]/gu,''))).map(item=>({start:Math.max(0,item.start-.08),end:item.end+.12}))}catch{return[]}
+}
 
 interface FinalHighlight extends LocalHighlight {
   finalScore: number;
@@ -30,31 +80,27 @@ const responseSchema = z.object({
   }))
 });
 
+function snap(value:number,silences:MediaAnalysis['silences']):number{const points=silences.flatMap(item=>[item.start,item.end]).filter(point=>Math.abs(point-value)<=1.5);return points.sort((left,right)=>Math.abs(left-value)-Math.abs(right-value))[0]??value}
+function planLocalBroll(start:number,end:number,analysis:MediaAnalysis):{at:number;duration:number;sourceStart:number}|undefined{const source=analysis.scenes.filter(time=>time<start-4||time>end+4)[0];if(source===undefined||end-start<12)return undefined;const insertion=Math.min(end-start-3,Math.max(3,(end-start)*.58));return{at:Math.round(insertion*100)/100,duration:2.2,sourceStart:Math.max(0,source-.5)}}
+
 function escapeSvg(value: string): string {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 }
 
-function mediaEvidence(clip: LocalHighlight, analysis: MediaAnalysis): number {
-  const scenes = analysis.scenes.filter((time) => time >= clip.start_seconds && time <= clip.end_seconds).length;
-  const peaks = analysis.audioPeaks.filter((peak) => peak.time >= clip.start_seconds && peak.time <= clip.end_seconds);
-  const audio = peaks.length ? Math.max(...peaks.map((peak) => peak.score)) : 0.35;
-  const sceneDensity = Math.min(1, scenes / 4);
-  return audio * 0.6 + sceneDensity * 0.4;
-}
-
-function snap(value: number, silences: MediaAnalysis['silences']): number {
-  const points = silences.flatMap((item) => [item.start, item.end]).filter((point) => Math.abs(point - value) <= 1.5);
-  return points.sort((left, right) => Math.abs(left - value) - Math.abs(right - value))[0] ?? value;
-}
-
-function defaultMetadata(clip: LocalHighlight, category: string, evidence: number): FinalHighlight {
-  return {
-    ...clip,
-    finalScore: Math.max(1, Math.min(10, Math.round((clip.score * 0.075 + evidence * 2.5) * 10) / 10)),
-    hook: clip.transcript.slice(0, 150),
-    hashtags: ['#Shorts', category === 'Auto' ? '#Highlights' : `#${category.replace(/\s+/g, '')}`],
-    reason: 'Selected locally from transcript quality, hook words, speech pace, audio energy, and scene changes.'
-  };
+export function multimodalMetadata(clip:LocalHighlight,category:string,analysis:MediaAnalysis,faces?:FaceTimeline,chat:ChatMessage[]=[]):FinalHighlight{
+  const audioPeaks=analysis.audioPeaks.filter(item=>item.time>=clip.start_seconds&&item.time<=clip.end_seconds);const audio=audioPeaks.length?Math.max(...audioPeaks.map(item=>item.score)):0;
+  const sceneTimes=analysis.scenes.filter(time=>time>=clip.start_seconds&&time<=clip.end_seconds);const scene=Math.min(1,sceneTimes.length/4);
+  const faceSamples=(faces?.samples??[]).filter(item=>item.time_seconds>=clip.start_seconds&&item.time_seconds<=clip.end_seconds);const lip=faceSamples.length?faceSamples.reduce((sum,item)=>sum+(item.mouth_activity??0),0)/faceSamples.length:0;
+  const faceReaction=faceSamples.length?Math.min(1,Math.max(...faceSamples.map(item=>item.width*item.height))*5):0;
+  const chatItems=chat.filter(item=>item.time>=clip.start_seconds&&item.time<=clip.end_seconds);const chatVolume=Math.min(1,chatItems.length/12);const chatSentiment=chatItems.length?Math.min(1,Math.abs(chatItems.reduce((sum,item)=>sum+item.sentiment,0)/chatItems.length)):0;
+  const transcript=Math.min(1,clip.score/100);const active:[string,number,number][]=[['transcript',transcript,1.3],['audio',audio,1],['scene',scene,.65]];
+  if(faceSamples.length)active.push(['lip-motion',lip,.8],['face-reaction',faceReaction,.75]);if(chatItems.length)active.push(['chat-volume',chatVolume,1.05],['chat-sentiment',chatSentiment,.8]);
+  const weight=active.reduce((sum,item)=>sum+item[2],0);const fused=active.reduce((sum,item)=>sum+item[1]*item[2],0)/Math.max(weight,.001);
+  const events=[...audioPeaks.map(item=>({time:item.time,value:item.score*.65})),...faceSamples.map(item=>({time:item.time_seconds,value:((item.mouth_activity??0)*.6+item.width*item.height*1.5)})),...chatItems.map(item=>({time:item.time,value:(Math.abs(item.sentiment)*.4+chatVolume*.5)}))];
+  const payoff=events.sort((left,right)=>right.value-left.value)[0]?.time??(clip.start_seconds+clip.end_seconds)/2;const payoffPosition=(payoff-clip.start_seconds)/Math.max(1,clip.end_seconds-clip.start_seconds);
+  const hook=Math.min(99,Math.round((transcript*.5+audio*.25+Math.max(chatVolume,scene)*.25)*99));const emotion=Math.min(99,Math.round((audio*.35+lip*.25+faceReaction*.2+chatSentiment*.2)*99));const value=Math.min(99,Math.round((transcript*.7+scene*.3)*99));const trend=Math.min(99,Math.round((fused*.55+Math.max(audio,faceReaction,chatVolume)*.45)*99));
+  const dominant=active.sort((a,b)=>b[1]*b[2]-a[1]*a[2]).slice(0,3).map(item=>item[0]).join(' + ');
+  return{...clip,finalScore:Math.max(1,Math.min(10,Math.round((fused*8.5+1)*10)/10)),hook:clip.transcript.slice(0,150),hashtags:['#Shorts',category==='Auto'?'#Highlights':`#${category.replace(/\s+/g,'')}`],reason:`Multimodal: ${dominant}. Hook ${hook}, emotion ${emotion}, value ${value}, trend ${trend}. Narrative payoff ${payoff.toFixed(1)}s (${Math.round(payoffPosition*100)}%).`};
 }
 
 export class ClipperEngine {
@@ -123,6 +169,7 @@ export class ClipperEngine {
     if (!job || job.status !== 'running') return false;
     this.cancelled.add(jobId);
     this.localAI.cancel(jobId);
+    this.ffmpeg.cancel(jobId);
     this.jobs.set(jobId, { ...job, status: 'failed', phase: 'cancelled', error: 'Cancelled by user', updatedAt: new Date().toISOString() });
     this.db.prepare("UPDATE clipper_jobs SET status='cancelled',phase='cancelled',error='Cancelled by user',updated_at=datetime('now') WHERE job_id=?").run(jobId);
     return true;
@@ -142,7 +189,7 @@ export class ClipperEngine {
   }
 
   private async enrichWithOllama(input: ClipInput, candidates: FinalHighlight[]): Promise<FinalHighlight[]> {
-    const prompt = `You are a Persian/English short-form video editor. Rank and label the supplied LOCAL candidates. Do not invent timestamps and do not change candidate ids. Category: ${input.category}. Return exactly ${String(Math.min(input.count, candidates.length))} unique clips. Return ONLY JSON {"clips":[{"id":"highlight-01","score":8.5,"title":"max 70 chars","hook":"short hook","hashtags":["#Shorts"],"reason":"why"}]}. Candidates: ${JSON.stringify(candidates.map((clip) => ({ id: clip.id, localScore: clip.finalScore, transcript: clip.transcript.slice(0, 1800) })))}`;
+    const prompt = `You are a Persian/English short-form video editor. Rank and label the supplied LOCAL candidates. Do not invent timestamps and do not change candidate ids. Category: ${input.category}. User focus: ${input.userIntent?.trim()||'automatic broad appeal'}. Return exactly ${String(Math.min(input.count, candidates.length))} unique clips. Return ONLY JSON {"clips":[{"id":"highlight-01","score":8.5,"title":"max 70 chars","hook":"short hook","hashtags":["#Shorts"],"reason":"why"}]}. Candidates: ${JSON.stringify(candidates.map((clip) => ({ id: clip.id, localScore: clip.finalScore, transcript: clip.transcript.slice(0, 1800) })))}`;
     let parsed: z.infer<typeof responseSchema> | undefined;
     let lastError: unknown;
     for (let attempt = 0; attempt < 3 && !parsed; attempt++) {
@@ -173,8 +220,8 @@ export class ClipperEngine {
       for (const [index, row] of rows.entries()) {
         this.ensureActive(jobId);
         const options = JSON.parse(row.render_options_json) as ClipInput;
-        let faces: FaceTimeline | undefined;
-        if (options.processingProfile === 'professional') faces = await this.localAI.trackFaces(row.source_path, { samplesPerSecond: 4, jobId });
+        let faces: FaceTimeline | undefined;let active:ActiveSpeakerFace[]|undefined;
+        if(options.processingProfile==='professional'){faces=await this.localAI.trackFaces(row.source_path,{samplesPerSecond:5,jobId});const token=await this.huggingFace.accessToken();if(token){const speakers=await this.localAI.diarize(row.source_path,path.join(directory,'speakers'),token,{minSpeakers:1,maxSpeakers:4,jobId});active=associateSpeakersWithFaces(speakers,faces)}}
         this.progress(jobId, 'rendering-approved', 5 + Math.round(index / rows.length * 90), `Rendering approved clip ${String(index + 1)} of ${String(rows.length)}`);
         const video = path.join(directory, `approved_clip_${String(row.id)}.mp4`);
         const rawThumb = path.join(directory, `thumb_raw_${String(row.id)}.jpg`);
@@ -183,7 +230,7 @@ export class ClipperEngine {
           aspect: options.aspect, captionsPath: options.captions ? row.caption_path : undefined, fontsDirectory: this.fontsDirectory,
           smartZoom: options.smartZoom, blurBackground: options.blurBackground,
           musicPath: options.music && this.musicPath && existsSync(this.musicPath) ? this.musicPath : undefined,
-          musicVolume: 0.12, encoder, sourceStart: row.start_time, faceSamples: faces?.samples
+          musicVolume: 0.12, encoder, sourceStart: row.start_time, faceSamples: faces?.samples, activeFaces:active, multiFaceTrackIds:overlappingFaceTracks(active,row.start_time,row.end_time),audioMuteRanges:options.audioMuteRanges,broll:options.brollPlan,jobId
         });
         await this.ffmpeg.frame(row.source_path, row.start_time + Math.min(3, (row.end_time-row.start_time)/3), rawThumb);
         const overlay = Buffer.from(`<svg width="1080" height="1920"><rect y="1380" width="1080" height="540" fill="#080612" fill-opacity=".72"/><foreignObject x="70" y="1450" width="940" height="340"><div xmlns="http://www.w3.org/1999/xhtml" style="font:700 68px Arial;color:white;text-align:center">${escapeSvg(row.suggested_title)}</div></foreignObject></svg>`);
@@ -221,6 +268,7 @@ export class ClipperEngine {
         language: input.language,
         targetDuration: input.maxLength,
         clipCount: Math.min(30, Math.max(input.count * 3, input.count)),
+        userIntent:input.userIntent,
         jobId
       }, (event) => {
         const stageBase: Record<string, number> = { model: 18, transcription: 26 };
@@ -229,13 +277,17 @@ export class ClipperEngine {
         const percent = typeof event.percent === 'number' ? event.percent : 0;
         this.progress(jobId, event.stage ?? 'local-ai', base + Math.round(percent * span / 100), event.detail);
       });
+      const profanityRanges=await loadProfanityRanges(path.join(directory,'analysis','transcript.json'));
+      try{const speechStats=JSON.parse(await readFile(path.join(directory,'analysis','speech-stats.json'),'utf8')) as Record<string,unknown>;this.emit('speech:stats',{jobId,...speechStats})}catch{/* statistics are non-critical */}
       this.ensureActive(jobId);
       this.progress(jobId, 'media-analysis', 49, 'Analyzing scenes, silence, and audio energy');
       const analysis = await this.ffmpeg.analyze(source);
-      this.progress(jobId, 'media-analysis', 55, 'Media analysis complete');
+      const chat=await loadChatSidecar(source);
+      this.progress(jobId, 'media-analysis', 55, chat.length?`Media analysis complete · ${String(chat.length)} chat messages loaded`:'Media analysis complete');
 
       let speakerTimeline: SpeakerTimeline | undefined;
       let faceTimeline: FaceTimeline | undefined;
+      let activeFaces: ActiveSpeakerFace[] | undefined;
       if (input.processingProfile === 'professional') {
         const token = await this.huggingFace.accessToken();
         if (!token) throw new Error('Configure professional speaker-model access in Settings before using Professional mode');
@@ -254,11 +306,14 @@ export class ClipperEngine {
         });
         await writeFile(path.join(directory, 'face-timeline.json'), JSON.stringify(faceTimeline, null, 2), 'utf8');
         this.emit('face:timeline', { jobId, ...faceTimeline });
-        this.progress(jobId, 'face-tracking', 74, `${String(faceTimeline.trackCount)} face tracks created`);
+        activeFaces=associateSpeakersWithFaces(speakerTimeline,faceTimeline);
+        await writeFile(path.join(directory,'active-speaker-faces.json'),JSON.stringify(activeFaces,null,2),'utf8');
+        this.emit('active-speaker:timeline',{jobId,segments:activeFaces});
+        this.progress(jobId, 'face-tracking', 74, `${String(faceTimeline.trackCount)} face tracks synchronized with speakers`);
       }
 
       let selected = localCandidates
-        .map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))
+        .map((clip) => multimodalMetadata(clip,input.category,analysis,faceTimeline,chat))
         .sort((left, right) => right.finalScore - left.finalScore)
         .slice(0, Math.max(input.count, 1));
 
@@ -266,7 +321,7 @@ export class ClipperEngine {
         const status = await this.ollama.status();
         if (status.running && status.models.includes(input.model)) {
           this.progress(jobId, 'ollama', input.processingProfile === 'professional' ? 75 : 56, 'Refining local candidates with Ollama');
-          try { selected = await this.enrichWithOllama(input, localCandidates.map((clip) => defaultMetadata(clip, input.category, mediaEvidence(clip, analysis)))); }
+          try { selected = await this.enrichWithOllama(input, localCandidates.map((clip) => multimodalMetadata(clip,input.category,analysis,faceTimeline,chat))); }
           catch (error: unknown) {
             if (input.analysisMode === 'ollama') throw error;
             this.progress(jobId, 'ollama-fallback', input.processingProfile === 'professional' ? 80 : 60, `Ollama unavailable; using local ranking: ${error instanceof Error ? error.message : String(error)}`);
@@ -282,7 +337,7 @@ export class ClipperEngine {
         const rows = this.db.transaction(() => selected.slice(0, input.count).map((suggested) => {
           const start = Math.max(0, snap(suggested.start_seconds, analysis.silences));
           const end = Math.min(probe.duration, start + input.maxLength, snap(suggested.end_seconds, analysis.silences));
-          const result = insert.run(source, start, end, Math.round(suggested.finalScore), suggested.title, suggested.hook, JSON.stringify(suggested.hashtags), suggested.reason, suggested.caption_path, suggested.transcript, JSON.stringify({ ...input, localPath: source, url: undefined, previewOnly: false }));
+          const result = insert.run(source, start, end, Math.round(suggested.finalScore), suggested.title, suggested.hook, JSON.stringify(suggested.hashtags), suggested.reason, suggested.caption_path, suggested.transcript, JSON.stringify({ ...input, localPath: source, url: undefined, previewOnly: false, audioMuteRanges:profanityRanges, brollPlan:input.processingProfile==='professional'?planLocalBroll(start,end,analysis):undefined }));
           return { ...suggested, id: Number(result.lastInsertRowid), start, end };
         }))();
         for (const row of rows) this.emit('clip:ready', row);
@@ -317,7 +372,9 @@ export class ClipperEngine {
           musicVolume: 0.12,
           encoder,
           sourceStart: start,
-          faceSamples: faceTimeline?.samples
+          faceSamples: faceTimeline?.samples,
+          activeFaces,
+          multiFaceTrackIds:overlappingFaceTracks(activeFaces,start,end),audioMuteRanges:profanityRanges,broll:input.processingProfile==='professional'?planLocalBroll(start,end,analysis):undefined,jobId
         });
         const scene = analysis.scenes.filter((time) => time >= start && time <= end)
           .sort((left, right) => Math.abs(left - (start + (end - start) * 0.3)) - Math.abs(right - (start + (end - start) * 0.3)))[0];

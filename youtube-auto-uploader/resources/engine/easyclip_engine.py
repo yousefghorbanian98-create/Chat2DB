@@ -60,6 +60,56 @@ class FaceSample:
     width: float
     height: float
     confidence: float
+    mouth_activity: float
+
+
+class AdaptiveLowPass:
+    """One-Euro adaptive low-pass filter (Casiez, Roussel & Vogel, CHI 2012)."""
+    def __init__(self, min_cutoff: float = 0.6, beta: float = 0.02):
+        self.min_cutoff, self.beta = min_cutoff, beta
+        self.value: float | None = None
+        self.derivative = 0.0
+        self.last_raw: float | None = None
+        self.last_time: float | None = None
+
+    def update(self, raw: float, timestamp: float) -> float:
+        if self.value is None or self.last_time is None or timestamp <= self.last_time:
+            self.value, self.last_raw, self.last_time = raw, raw, timestamp
+            return raw
+        dt = timestamp - self.last_time
+        derivative = (raw - (self.last_raw if self.last_raw is not None else raw)) / dt
+        derivative_alpha = 1.0 / (1.0 + 1.0 / (2 * math.pi * 1.0 * dt))
+        self.derivative = derivative_alpha * derivative + (1 - derivative_alpha) * self.derivative
+        cutoff = self.min_cutoff + self.beta * abs(self.derivative)
+        alpha = 1.0 / (1.0 + 1.0 / (2 * math.pi * cutoff * dt))
+        self.value = alpha * raw + (1 - alpha) * self.value
+        self.last_raw, self.last_time = raw, timestamp
+        return self.value
+
+
+def smooth_face_tracks(samples: list[FaceSample], dead_zone: float = 0.007, max_velocity: float = 0.28) -> list[FaceSample]:
+    """Remove detector jitter while retaining deliberate fast subject motion."""
+    output: list[FaceSample] = []
+    for track_id in sorted(set(item.track_id for item in samples)):
+        track = sorted((item for item in samples if item.track_id == track_id), key=lambda item: item.time_seconds)
+        filters = [AdaptiveLowPass(), AdaptiveLowPass(), AdaptiveLowPass(0.5, 0.01), AdaptiveLowPass(0.5, 0.01)]
+        held: list[float] | None = None
+        previous_time: float | None = None
+        for item in track:
+            raw = [item.x, item.y, item.width, item.height]
+            filtered = [flt.update(value, item.time_seconds) for flt, value in zip(filters, raw)]
+            if held is None:
+                held = filtered
+            else:
+                dt = max(1e-3, item.time_seconds - (previous_time if previous_time is not None else item.time_seconds))
+                for index, target in enumerate(filtered):
+                    delta = target - held[index]
+                    if abs(delta) < dead_zone:
+                        continue
+                    held[index] += max(-max_velocity * dt, min(max_velocity * dt, delta))
+            output.append(FaceSample(item.track_id, item.time_seconds, round(held[0], 5), round(held[1], 5), round(held[2], 5), round(held[3], 5), item.confidence, item.mouth_activity))
+            previous_time = item.time_seconds
+    return sorted(output, key=lambda item: (item.time_seconds, item.track_id))
 
 
 def emit(event: str, **payload: object) -> None:
@@ -188,7 +238,14 @@ def candidate_windows(words: Sequence[Word], target: int, tolerance: float = 0.3
     windows: list[list[Word]] = []
     cursor = words[0].start
     while cursor < end_time:
-        chunk = [word for word in words if word.end >= cursor and word.start <= cursor + maximum]
+        first=next((index for index,word in enumerate(words) if word.end>=cursor),len(words)-1)
+        # Deep boundary optimization: walk back to the nearest completed sentence,
+        # but never add more than six seconds of unrelated lead-in.
+        for index in range(first-1,max(-1,first-18),-1):
+            if re.search(r"[.!?؟]$",words[index].text) and cursor-words[index].end<=6:
+                first=index+1
+                break
+        chunk = [word for word in words[first:] if word.start <= cursor + maximum]
         if chunk:
             # Prefer punctuation near the target end, while respecting minimum duration.
             eligible = [i for i, word in enumerate(chunk) if word.end - chunk[0].start >= minimum]
@@ -208,7 +265,7 @@ ENGAGING = {
 }
 
 
-def score_window(words: Sequence[Word], media_end: float) -> tuple[float, str]:
+def score_window(words: Sequence[Word], media_end: float, user_intent: str = "") -> tuple[float, str]:
     text = sentence_text(words)
     normalized = re.findall(r"[\w\u0600-\u06ff]+", text.lower())
     duration = max(words[-1].end - words[0].start, 1)
@@ -220,7 +277,9 @@ def score_window(words: Sequence[Word], media_end: float) -> tuple[float, str]:
     # Small center bias avoids intros/outros without suppressing strong edge content.
     midpoint = (words[0].start + words[-1].end) / 2
     center = 1 - abs(midpoint / max(media_end, 1) - 0.5) * 0.35
-    raw = 45 + density * 500 + pace * 18 + completeness * 8 + question * 8 + center * 10
+    intent_tokens=set(re.findall(r"[\w\u0600-\u06ff]+",user_intent.lower()))
+    intent_match=len(intent_tokens.intersection(normalized))/max(1,len(intent_tokens)) if intent_tokens else 0
+    raw = 45 + density * 500 + pace * 18 + completeness * 8 + question * 8 + center * 10 + intent_match * 25
     title_words = normalized[:8]
     title = " ".join(title_words).strip() or "Highlight"
     return min(99.0, raw), title[:72]
@@ -232,9 +291,9 @@ def overlaps(a: Sequence[Word], b: Sequence[Word]) -> float:
     return intersection / max(shortest, 0.001)
 
 
-def pick_highlights(words: Sequence[Word], target: int, count: int) -> list[tuple[list[Word], float, str]]:
+def pick_highlights(words: Sequence[Word], target: int, count: int, user_intent: str = "") -> list[tuple[list[Word], float, str]]:
     ranked = sorted(
-        ((window, *score_window(window, words[-1].end)) for window in candidate_windows(words, target)),
+        ((window, *score_window(window, words[-1].end, user_intent)) for window in candidate_windows(words, target)),
         key=lambda row: row[1], reverse=True,
     )
     selected: list[tuple[list[Word], float, str]] = []
@@ -270,12 +329,20 @@ def caption_groups(words: Sequence[Word], max_chars: int = 32, max_words: int = 
         yield group
 
 
+def censor_word(text: str) -> str:
+    clean = re.sub(r"[^\w\u0600-\u06ff]", "", text.lower())
+    blocked = {"fuck", "fucking", "shit", "bitch", "asshole", "لعنتی", "کثافت", "احمق", "حرومزاده"}
+    if clean not in blocked or len(text) < 2:
+        return text
+    return text[0] + "•" * max(2, len(text) - 1)
+
+
 def write_srt(words: Sequence[Word], path: Path, offset: float) -> None:
     blocks = []
     for index, group in enumerate(caption_groups(words), 1):
         blocks.append(
             f"{index}\n{srt_time(group[0].start - offset)} --> {srt_time(group[-1].end - offset)}\n"
-            f"{sentence_text(group)}\n"
+            f"{' '.join(censor_word(word.text) for word in group)}\n"
         )
     path.write_text("\n".join(blocks), encoding="utf-8")
 
@@ -300,7 +367,7 @@ Format: Layer,Start,End,Style,Name,MarginL,MarginR,MarginV,Effect,Text
         karaoke = []
         for word in group:
             duration = max(1, round((word.end - word.start) * 100))
-            text = word.text.replace("{", "(").replace("}", ")")
+            text = censor_word(word.text).replace("{", "(").replace("}", ")")
             karaoke.append(f"{{\\k{duration}}}{text}")
         start = srt_time(group[0].start - offset).replace(",", ".")[:-1]
         end = srt_time(group[-1].end - offset).replace(",", ".")[:-1]
@@ -333,7 +400,7 @@ def save_transcript_cache(video: Path, model: str, language: str, cache_dir: Pat
     path.write_text(json.dumps([asdict(word) for word in words], ensure_ascii=False), encoding="utf-8")
 
 
-def analyze(video: Path, output_dir: Path, model: str, language: str, target: int, count: int, cache_dir: Path | None = None) -> list[Highlight]:
+def analyze(video: Path, output_dir: Path, model: str, language: str, target: int, count: int, cache_dir: Path | None = None, user_intent: str = "") -> list[Highlight]:
     if not video.is_file():
         raise FileNotFoundError(f"Video does not exist: {video}")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -344,7 +411,13 @@ def analyze(video: Path, output_dir: Path, model: str, language: str, target: in
     (output_dir / "transcript.json").write_text(
         json.dumps([asdict(word) for word in words], ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    selected = pick_highlights(words, max(15, min(target, 180)), max(1, min(count, 30)))
+    selected = pick_highlights(words, max(15, min(target, 180)), max(1, min(count, 30)), user_intent)
+    filler_words={"um","uh","like","basically","actually","well","یعنی","مثلا","مثلاً","خب","حالا","درواقع","اِ","اُم"}
+    normalized_words=[re.sub(r"[^\w\u0600-\u06ff]","",word.text.lower()) for word in words]
+    filler_count=sum(token in filler_words for token in normalized_words)
+    speech_duration=max(.1,words[-1].end-words[0].start)
+    stats={"wordCount":len(words),"fillerCount":filler_count,"fillerRatio":round(filler_count/max(1,len(words)),4),"wordsPerMinute":round(len(words)*60/speech_duration,1),"goldenQuotes":[{"title":title,"score":round(score),"start":round(window[0].start,2),"end":round(window[-1].end,2)} for window,score,title in sorted(selected,key=lambda item:item[1],reverse=True)[:10]]}
+    (output_dir / "speech-stats.json").write_text(json.dumps(stats,ensure_ascii=False,indent=2),encoding="utf-8")
     highlights = []
     for index, (window, score, title) in enumerate(selected, 1):
         caption = output_dir / f"highlight-{index:02}.ass"
@@ -423,7 +496,7 @@ def diarize_video(video: Path, output_dir: Path, cache_dir: Path, min_speakers: 
 
 def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -> list[FaceSample]:
     stat = video.stat()
-    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|mediapipe-face-v2|{samples_per_second}"
+    identity = f"{video.resolve()}|{stat.st_size}|{stat.st_mtime_ns}|mediapipe-face-v3-mouth-motion|{samples_per_second}"
     directory = cache_dir / "face-tracking"
     directory.mkdir(parents=True, exist_ok=True)
     cached = directory / f"{hashlib.sha256(identity.encode('utf-8')).hexdigest()}.json"
@@ -449,6 +522,8 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -
     tracks: dict[int, tuple[float, float, float, float, float, float, int, float]] = {}
     next_id = 1
     samples: list[FaceSample] = []
+    mouth_history: dict[int, object] = {}
+    previous_histogram = None
     frame_index = 0
     try:
         while True:
@@ -459,6 +534,15 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -
                 frame_index += 1
                 continue
             height, width = frame.shape[:2]
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            histogram = cv2.calcHist([gray], [0], None, [32], [0, 256])
+            cv2.normalize(histogram, histogram)
+            if previous_histogram is not None and cv2.compareHist(previous_histogram, histogram, cv2.HISTCMP_CORREL) < 0.38:
+                # A hard shot boundary starts a fresh identity domain. Never pan
+                # from a face in one camera shot toward a face in the next shot.
+                tracks.clear()
+                mouth_history.clear()
+            previous_histogram = histogram
             found: list[tuple[float, float, float, float, float]] = []
             if media_detector is not None:
                 result = media_detector.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -498,7 +582,21 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -
                 velocity_x = old[4] * 0.65 + (smooth_x - old[0]) * 0.35
                 velocity_y = old[5] * 0.65 + (smooth_y - old[1]) * 0.35
                 tracks[track_id] = (smooth_x, smooth_y, smooth_w, smooth_h, velocity_x, velocity_y, frame_index, confidence)
-                samples.append(FaceSample(track_id, round(frame_index / fps, 3), round(max(0, smooth_x-smooth_w/2), 5), round(max(0, smooth_y-smooth_h/2), 5), round(smooth_w, 5), round(smooth_h, 5), round(confidence, 4)))
+                # Approximate lip activity from the lower-central face region. This is
+                # deliberately computed after identity assignment so every track has
+                # its own temporal baseline and background motion is not mixed in.
+                left = max(0, int((smooth_x - smooth_w * 0.28) * width))
+                right = min(width, int((smooth_x + smooth_w * 0.28) * width))
+                top = max(0, int((smooth_y + smooth_h * 0.08) * height))
+                bottom = min(height, int((smooth_y + smooth_h * 0.43) * height))
+                mouth_activity = 0.0
+                if right > left and bottom > top:
+                    mouth = cv2.resize(gray[top:bottom, left:right], (40, 24))
+                    previous_mouth = mouth_history.get(track_id)
+                    if previous_mouth is not None:
+                        mouth_activity = min(1.0, float(cv2.absdiff(mouth, previous_mouth).mean()) / 32.0)
+                    mouth_history[track_id] = mouth
+                samples.append(FaceSample(track_id, round(frame_index / fps, 3), round(max(0, smooth_x-smooth_w/2), 5), round(max(0, smooth_y-smooth_h/2), 5), round(smooth_w, 5), round(smooth_h, 5), round(confidence, 4), round(mouth_activity, 4)))
             if frame_index % max(stride, int(total / 100) or 1) == 0:
                 emit("progress", stage="face-tracking", percent=min(99, round(frame_index * 100 / total)), detail=f"{detector_name}: tracking {max(0, next_id - 1)} faces")
             frame_index += 1
@@ -506,8 +604,9 @@ def track_faces(video: Path, cache_dir: Path, samples_per_second: float = 5.0) -
         capture.release()
         if media_detector is not None:
             media_detector.close()
+    samples = smooth_face_tracks(samples)
     cached.write_text(json.dumps([asdict(sample) for sample in samples], ensure_ascii=False), encoding="utf-8")
-    emit("progress", stage="face-tracking", percent=100, detail=f"{detector_name}: created {max(0, next_id - 1)} stable tracks")
+    emit("progress", stage="face-tracking", percent=100, detail=f"{detector_name}: created {max(0, next_id - 1)} stable, smoothed tracks")
     return samples
 
 
@@ -565,6 +664,7 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--target-duration", type=int, default=60)
     run.add_argument("--clip-count", type=int, default=5)
     run.add_argument("--cache-dir", type=Path)
+    run.add_argument("--user-intent", default="")
     return root
 
 
@@ -599,7 +699,7 @@ def main() -> int:
             path = download(args.url, args.output_dir, args.height)
             output_result(ok=True, path=str(path))
         else:
-            highlights = analyze(args.input, args.output_dir, args.model, args.language, args.target_duration, args.clip_count, args.cache_dir)
+            highlights = analyze(args.input, args.output_dir, args.model, args.language, args.target_duration, args.clip_count, args.cache_dir, args.user_intent)
             output_result(ok=True, highlights=[asdict(item) for item in highlights])
         return 0
     except Exception as exc:

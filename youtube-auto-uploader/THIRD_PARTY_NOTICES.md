@@ -11,6 +11,22 @@ Source: https://github.com/NaufalRizqullah/opensource-clipping
 Adapted concepts/code: yt-dlp format selection and the Faster-Whisper word-level
 transcription flow in `resources/engine/easyclip_engine.py`.
 
+## AutoClip
+
+Copyright (c) 2026 Jad Ghazi
+Source: https://github.com/artbyjazi/autoclip
+
+Adapted concepts/code: One Euro crop-path smoothing, dead-zone stabilization,
+velocity clamping, shot-boundary isolation, and social loudness normalization.
+
+## SparkReel
+
+Copyright (c) 2026 SparkReel Team
+Source: https://github.com/mimimaomao1117/sparkreel
+
+Adapted concepts: active-modality weighted fusion, explainable signal
+contributions, and separate hook/emotion/value/trend scoring.
+
 ## ai-highlight-clip
 
 Copyright (c) 2025 Toki  
