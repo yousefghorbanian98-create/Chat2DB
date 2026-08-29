@@ -3,6 +3,17 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.17.0] — 2026-08-30 — Persian demo seed (C12, demoable out of the box)
+
+### Added
+- `app/seed_demo.py` — idempotent CLI that creates one Persian demo member
+  («نسیم رحیمی», code MP-DEMO-1, PIN 1234) with a stored JP7 assessment whose
+  number equals the deterministic core, a package, a payment and a check-in.
+  Re-running creates nothing new (verified).
+
+### Measured (C12)
+- Backend tests **229 → 231** (+2 seed tests); coverage **90.38%**.
+
 ## [0.16.0] — 2026-08-30 — Member self-service PIN login (client shell, §5)
 
 ### Added

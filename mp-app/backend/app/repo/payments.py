@@ -134,3 +134,15 @@ def revenue_in_month(engine: Engine, gym_id: int, month_prefix: str) -> int:
             ).scalar()
             or 0
         )
+
+def has_payment(engine: Engine, gym_id: int, member_id: int) -> bool:
+    """True when this member already has a (non-voided-or-not) payment row."""
+    with engine.connect() as conn:
+        row = conn.execute(
+            text(
+                "SELECT 1 FROM payments WHERE gym_id = :g AND member_id = :m "
+                "AND deleted_at IS NULL LIMIT 1"
+            ),
+            {"g": gym_id, "m": member_id},
+        ).first()
+    return row is not None
