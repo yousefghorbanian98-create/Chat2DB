@@ -8,6 +8,7 @@ import { MotionCard } from './components/MotionCard';
 import { MotionButton } from './components/MotionButton';
 import { Skeleton } from './components/Skeleton';
 import { listVariants, pageVariants } from './motion/presets';
+import { ClientShell } from './pages/ClientShell';
 import { Login } from './pages/Login';
 
 // Route-based code splitting (Performance Watchdog): each surface is its own
@@ -167,6 +168,7 @@ function Shell() {
   const [route, setRoute] = useState<Route>('home');
 
   if (!role) return <Login />;
+  if (role === 'MEMBER') return <ClientShell />;
 
   return (
     <AnimatePresence mode="wait">

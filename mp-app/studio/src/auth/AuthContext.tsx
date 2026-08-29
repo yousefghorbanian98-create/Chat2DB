@@ -31,6 +31,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession({ role: body.role, gymId: body.gym_id });
   }, []);
 
+  const memberLogin = useCallback(async (code: string, pin: string) => {
+    const body: LoginResponse = await api.memberLogin(code, pin);
+    tokenStore.set(body.token);
+    try {
+      localStorage.setItem('mp.session', JSON.stringify({ role: body.role, gym_id: body.gym_id }));
+    } catch {
+      /* private mode: the session simply is not remembered */
+    }
+    setSession({ role: body.role, gymId: body.gym_id });
+  }, []);
+
   const logout = useCallback(() => {
     tokenStore.clear();
     try {
@@ -46,9 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       role: session?.role ?? null,
       gymId: session?.gymId ?? null,
       login,
+      memberLogin,
       logout,
     }),
-    [session, login, logout],
+    [session, login, memberLogin, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

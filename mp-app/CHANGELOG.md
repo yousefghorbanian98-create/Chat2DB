@@ -3,6 +3,24 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.18.0] — 2026-08-30 — Athlete web client shell (§5, dual-shell isolation)
+
+### Added
+- `studio/src/pages/ClientShell.tsx` + `hooks/useClientData.ts` — the athlete
+  shell: Persian profile, masked assessment trend and program list, all read
+  only from `/client/*` (server strips clinician notes, C9). Loading / error /
+  empty / success states.
+- Dual-mode `Login` — a Staff / Athlete toggle; athlete mode signs in with
+  membership code + PIN via `POST /auth/member-pin` (added to the api client).
+- `App` routes a MEMBER token to `<ClientShell>` instead of the coach shell.
+
+### Measured (C12)
+- Live E2E on the running core: `POST /auth/member-pin` (MP-DEMO-1/1234) → MEMBER
+  token; `GET /client/me` → masked profile; wrong PIN → 401; **staff token on
+  `/client` → 403** (isolation holds).
+- Studio tests **90 → 96** (+6: ClientShell render/empty/error, Login dual-mode);
+  `tsc --noEmit` 0, `eslint .` 0.
+
 ## [0.17.0] — 2026-08-30 — Persian demo seed (C12, demoable out of the box)
 
 ### Added

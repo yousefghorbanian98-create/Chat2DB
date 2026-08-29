@@ -103,6 +103,14 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ username, pin }),
     }),
+  memberLogin: (membershipCode: string, pin: string) =>
+    request<LoginResponse>('/api/v1/auth/member-pin', {
+      method: 'POST',
+      body: JSON.stringify({ membership_code: membershipCode, pin }),
+    }),
+  clientMe: () => request<Member>('/api/v1/client/me'),
+  clientAssessments: () => request<Assessment[]>('/api/v1/client/me/assessments'),
+  clientPrograms: () => request<ProgramRow[]>('/api/v1/client/me/programs'),
   listMembers: () => request<Member[]>('/api/v1/members'),
   listAssessments: (memberId: number) =>
     request<Assessment[]>(`/api/v1/members/${memberId}/assessments`),

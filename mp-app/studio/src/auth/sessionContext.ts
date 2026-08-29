@@ -4,6 +4,7 @@ export interface AuthState {
   role: string | null;
   gymId: number | null;
   login: (username: string, pin: string) => Promise<void>;
+  memberLogin: (membershipCode: string, pin: string) => Promise<void>;
   logout: () => void;
 }
 
