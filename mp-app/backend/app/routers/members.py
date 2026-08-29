@@ -8,9 +8,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.deps import PrincipalDep, require_member_read, require_member_write
 from app.auth.scope import ensure_member_visible, scope_trainer_id
-from app.core.security import sign_qr
+from app.core.security import hash_secret, sign_qr
 from app.repo import members as members_repo
-from app.schemas import MemberCreate, MemberOut, MemberUpdate
+from app.schemas import MemberCreate, MemberOut, MemberUpdate, SetMemberPin
 from app.state import get_engine, get_secret_key
 
 router = APIRouter(prefix="/members", tags=["members"])
@@ -61,6 +61,20 @@ def update_member(
         )
     except members_repo.MemberNotFound as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+
+@router.post("/{member_id}/pin", status_code=204, summary="Set member PIN (front desk)")
+def set_member_pin(
+    member_id: int, body: SetMemberPin, principal: WriterPrincipal
+) -> None:
+    """Store a PBKDF2 hash of the member's PIN so they can use the client app.
+
+    Only the hash is written; the plaintext never touches disk (C11).
+    """
+    ensure_member_visible(principal, member_id)
+    members_repo.update_member(
+        get_engine(), principal.gym_id, member_id, {"pin_hash": hash_secret(body.pin)}
+    )
 
 
 @router.delete(

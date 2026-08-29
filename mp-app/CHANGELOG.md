@@ -3,6 +3,19 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.16.0] — 2026-08-30 — Member self-service PIN login (client shell, §5)
+
+### Added
+- Migration `0002_member_pin`: `members.pin_hash` (PBKDF2, never plaintext, never
+  in any read projection).
+- `POST /api/v1/auth/member-pin` — membership code + PIN → MEMBER-scoped token
+  (identical 401 for unknown/unset/wrong: no enumeration).
+- `POST /api/v1/members/{id}/pin` — front-desk writers (OWNER/ADMIN/RECEPTION)
+  set a member's PIN; readers (TRAINER) get 403.
+
+### Measured (C12)
+- Backend tests **225 → 229** (+4 member-PIN tests); coverage **90.66%**.
+
 ## [0.15.0] — 2026-08-30 — Persian cash/card receipt
 
 ### Changed

@@ -10,8 +10,9 @@ from app.core.security import (
     issue_token,
     verify_secret,
 )
+from app.repo import members as members_repo
 from app.repo import staff as staff_repo
-from app.schemas import PinLogin, TokenResponse
+from app.schemas import MemberPinLogin, PinLogin, TokenResponse
 from app.state import get_engine, get_secret_key
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -38,6 +39,34 @@ def login_with_pin(body: PinLogin) -> TokenResponse:
 
     principal = Principal(
         subject=str(row["username"]), role=str(row["role"]), gym_id=gym_id
+    )
+    return TokenResponse(
+        token=issue_token(principal, secret_key=get_secret_key(), ttl_seconds=TOKEN_TTL_SECONDS),
+        role=principal.role,
+        gym_id=principal.gym_id,
+        expires_in=TOKEN_TTL_SECONDS,
+    )
+
+
+@router.post("/member-pin", response_model=TokenResponse, summary="Member PIN login")
+def login_with_member_pin(body: MemberPinLogin) -> TokenResponse:
+    """Exchange a membership code + PIN for a MEMBER-scoped session token.
+
+    Identical 401 for unknown code, unset PIN, and wrong PIN (no enumeration).
+    """
+    engine = get_engine()
+    gym_id = staff_repo.ensure_gym(engine)
+    row = members_repo.find_member_by_code(engine, gym_id, body.membership_code.strip())
+
+    stored = (row or {}).get("pin_hash")
+    if row is None or not stored or not verify_secret(body.pin, stored):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid credentials"
+        )
+
+    principal = Principal(
+        subject=f"member:{row['id']}", role="MEMBER", gym_id=gym_id,
+        member_id=int(row["id"]),
     )
     return TokenResponse(
         token=issue_token(principal, secret_key=get_secret_key(), ttl_seconds=TOKEN_TTL_SECONDS),

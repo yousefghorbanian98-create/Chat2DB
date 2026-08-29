@@ -84,6 +84,19 @@ class TokenResponse(BaseModel):
     expires_in: int
 
 
+class MemberPinLogin(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    membership_code: str = Field(min_length=1, max_length=64)
+    pin: str = Field(min_length=1, max_length=32)
+
+
+class SetMemberPin(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    pin: str = Field(min_length=4, max_length=32)
+
+
 class Sites(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

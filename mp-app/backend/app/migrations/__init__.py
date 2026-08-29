@@ -23,6 +23,7 @@ from app.migrations.base import (
     MigrationError,
 )
 from app.migrations.v001_core import MIGRATION as V001
+from app.migrations.v002_member_pin import MIGRATION as V002
 
 __all__ = [
     "MIGRATIONS",
@@ -35,7 +36,7 @@ __all__ = [
 ]
 
 
-MIGRATIONS: tuple[Migration, ...] = (V001,)
+MIGRATIONS: tuple[Migration, ...] = (V001, V002)
 
 _TRACKING_TABLE = "schema_migrations"
 

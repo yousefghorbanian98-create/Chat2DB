@@ -138,3 +138,28 @@ def soft_delete_member(engine: Engine, gym_id: int, member_id: int) -> None:
         )
         if cur.rowcount == 0:
             raise MemberNotFound(f"member {member_id} not found")
+
+def get_member_pin_hash(engine: Engine, gym_id: int, member_id: int) -> str | None:
+    """The stored PBKDF2 PIN hash for one member, or None (never the plaintext)."""
+    with engine.connect() as conn:
+        row = conn.execute(
+            text(
+                f"SELECT pin_hash FROM members "
+                f"WHERE id = :id AND gym_id = :g AND {_live_filter()}"
+            ),
+            {"id": member_id, "g": gym_id},
+        ).first()
+    return row[0] if row is not None else None
+
+
+def find_member_by_code(engine: Engine, gym_id: int, code: str) -> dict[str, Any] | None:
+    """Resolve a membership code to {id, pin_hash} for PIN login (no enumeration)."""
+    with engine.connect() as conn:
+        row = conn.execute(
+            text(
+                f"SELECT id, pin_hash FROM members "
+                f"WHERE membership_code = :c AND gym_id = :g AND {_live_filter()}"
+            ),
+            {"c": code, "g": gym_id},
+        ).mappings().first()
+    return dict(row) if row is not None else None

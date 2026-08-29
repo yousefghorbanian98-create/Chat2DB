@@ -47,3 +47,58 @@ def test_member_cannot_read_another_members_assessments(
     mine = seeded.get("/api/v1/client/me/assessments", headers=member_auth(member_id))
     assert mine.status_code == 200
     assert mine.json() == []  # no assessment yet, and never another member's
+
+
+# --- Member self-service PIN login (v002, map §5) --------------------------
+
+def test_member_pin_login_flow(seeded, owner_auth, member_id) -> None:
+    # Front desk sets the PIN (hash only, never plaintext).
+    set_res = seeded.post(
+        f"/api/v1/members/{member_id}/pin", headers=owner_auth, json={"pin": "9876"}
+    )
+    assert set_res.status_code == 204, set_res.text
+
+    login = seeded.post(
+        "/api/v1/auth/member-pin",
+        json={"membership_code": "MP-0001", "pin": "9876"},
+    )
+    assert login.status_code == 200, login.text
+    body = login.json()
+    assert body["role"] == "MEMBER"
+
+    # The MEMBER token is force-scoped: /auth/me reports shell=client + member_id.
+    me = seeded.get("/api/v1/auth/me", headers={"authorization": f"Bearer {body['token']}"})
+    assert me.status_code == 200
+    assert me.json()["shell"] == "client"
+    assert me.json()["member_id"] == member_id
+
+    # And it can read the client API.
+    prof = seeded.get("/api/v1/client/me", headers={"authorization": f"Bearer {body['token']}"})
+    assert prof.status_code == 200
+
+
+def test_member_pin_rejects_wrong_and_unset_identically(seeded, member_id) -> None:
+    # No PIN set yet for this fresh member -> 401, same as a wrong PIN later.
+    unset = seeded.post(
+        "/api/v1/auth/member-pin", json={"membership_code": "MP-0001", "pin": "0000"}
+    )
+    assert unset.status_code == 401
+
+    unknown = seeded.post(
+        "/api/v1/auth/member-pin", json={"membership_code": "NOPE", "pin": "0000"}
+    )
+    assert unknown.status_code == 401
+    assert unknown.json()["detail"] == unset.json()["detail"], "no user enumeration"
+
+
+def test_reader_role_cannot_set_member_pin(seeded, trainer_auth, member_id) -> None:
+    res = seeded.post(
+        f"/api/v1/members/{member_id}/pin", headers=trainer_auth, json={"pin": "1234"}
+    )
+    assert res.status_code == 403, "TRAINER is a reader, not a writer"
+
+
+def test_pin_is_never_exposed_in_any_read(seeded, owner_auth, member_id) -> None:
+    seeded.post(f"/api/v1/members/{member_id}/pin", headers=owner_auth, json={"pin": "9876"})
+    got = seeded.get(f"/api/v1/members/{member_id}", headers=owner_auth).json()
+    assert "pin_hash" not in got and "pin" not in got
