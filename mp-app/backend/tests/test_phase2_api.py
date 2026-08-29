@@ -152,6 +152,7 @@ class TestPayments:
             member={"first_name": "Sara", "last_name": "Azad"},
             package_name=None,
             compress=False,
+            persian=False,
         )
         assert b"1,234,567 Rial" in pdf
 

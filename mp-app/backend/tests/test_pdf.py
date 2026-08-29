@@ -201,3 +201,25 @@ def test_default_language_prefers_persian_when_font_present() -> None:
         brozek_pct=21.1, history=[], compress=False,
     )
     assert b"FontFile2" in pdf, "default with a font present must embed it"
+
+
+def test_receipt_persian_and_english_both_render() -> None:
+    from app.core.persian import is_persian_available
+    from app.core.receipt_pdf import build_receipt_pdf
+
+    pay = {"receipt_no": "R-1-000001", "method": "cash",
+           "created_at": "2026-08-30T10:00:00Z", "amount_rial": 1_500_000, "voided": 0}
+    member = {"first_name": "نسیم", "last_name": "رحیمی"}
+
+    en = build_receipt_pdf(gym_name="G", payment=pay, member={"first_name": "S", "last_name": "A"},
+                           package_name=None, compress=False, persian=False)
+    assert b"Receipt no" in en and b"1,500,000 Rial" in en
+
+    if not is_persian_available():
+        import pytest
+        pytest.skip("Persian font/shapers not available")
+    fa_pdf = build_receipt_pdf(gym_name="ماسل پارادایز", payment=pay, member=member,
+                               package_name="ماهانه", compress=False, persian=True)
+    assert fa_pdf[:5] == b"%PDF-"
+    assert b"FontFile2" in fa_pdf, "Persian receipt must embed the font"
+    assert len(fa_pdf) > len(en), "Persian carries the embedded subset"
