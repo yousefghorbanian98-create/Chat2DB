@@ -3,7 +3,7 @@
 ```
 Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: Studio quality gate CLOSED — ESLint 0 warnings, Prettier clean, 90 tests, 82.24% statements, `npm run gate` exit 0. Next = Core Web Vitals in a real browser, Vazirmatn TTF for Persian PDF, then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian demo seed)
+Current Task: Athlete web client shell CLOSED (0.18.0) — Studio 96 tests, tsc 0, eslint 0; live E2E member-login → /client/me with staff-403 isolation. Next = the remaining env-BLOCKED items (Core Web Vitals, Electron binary, native Flutter, Ollama live, runnable Kiosk).
 Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
@@ -157,9 +157,15 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 7. ~~TRAINER member scoping~~ — **CLOSED this iteration**: `app/auth/scope.py`
    now filters member lists and 404s unassigned access across members,
    assessments and injuries routers.
-8. **BLOCKED (env): Flutter client** — no `flutter`/`dart` SDK in the sandbox.
-   The client contract is nevertheless live and tested via `/api/v1/client/*`
-   (MEMBER force-scoping + masking) and member-PIN login.
+8. **Athlete client shell — CLOSED (web)**: `studio/src/pages/ClientShell.tsx`
+   + `hooks/useClientData.ts` render the athlete's masked profile, assessment
+   trend and programs from `/client/*` only; `Login` has a Staff/Athlete toggle
+   (athlete = membership-code + PIN → `POST /auth/member-pin`); `App` routes a
+   MEMBER token to `<ClientShell>`. Live E2E on the running core: MP-DEMO-1/1234
+   → MEMBER token → `GET /client/me` masked; wrong PIN 401; **staff token on
+   `/client` → 403** (isolation holds). Studio 96 tests.
+   The **native Flutter** client remains **BLOCKED (env)** — no `flutter`/`dart`
+   SDK in the sandbox; its contract is the same `/api/v1/client/*` already shipped.
 9. **BLOCKED (env): Ollama live** — no `ollama` binary; the AI brain degrades to
    the deterministic rule engine and reports its status honestly (`/ai/runtime`).
 10. **BLOCKED (env): Kiosk flavour** — a runnable kiosk needs a browser/Electron
@@ -191,7 +197,8 @@ Two real defects surfaced during the pass and were fixed, not papered over:
   (found by diffing old handler bodies; no test covered it).
 
 CLOSED this session: member-PIN login (migration 0002), Persian demo seed,
-Persian assessment + receipt PDFs, backend coverage gate.
+Persian assessment + receipt PDFs, backend coverage gate, athlete web client
+shell (0.18.0).
 BLOCKED by environment (documented above, not hidden): Core Web Vitals, Electron
 binary, Flutter client, Ollama live, Kiosk flavour.
 
