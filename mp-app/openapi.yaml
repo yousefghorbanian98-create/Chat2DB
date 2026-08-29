@@ -1,0 +1,45 @@
+info:
+  description: Local-first Gym OS core API (offline-capable).
+  title: Muscle Paradise Core
+  version: 0.1.0
+  x-generated-by: app.export_openapi
+openapi: 3.1.0
+paths:
+  /api/v1/health:
+    get:
+      description: "Report process, database and schema-migration state.\n\nReturns:\n\
+        \    ``{\"status\": \"ok\"|\"degraded\", \"service\", \"version\", \"db\"\
+        : {...}}``.\n    Never raises: a broken database is reported as ``degraded``\
+        \ so the\n    Studio shell can show a recovery action instead of a blank screen."
+      operationId: health_api_v1_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Health Api V1 Health Get
+                type: object
+          description: Successful Response
+      summary: Core liveness + schema readiness
+      tags:
+      - health
+  /health:
+    get:
+      description: "Report process, database and schema-migration state.\n\nReturns:\n\
+        \    ``{\"status\": \"ok\"|\"degraded\", \"service\", \"version\", \"db\"\
+        : {...}}``.\n    Never raises: a broken database is reported as ``degraded``\
+        \ so the\n    Studio shell can show a recovery action instead of a blank screen."
+      operationId: health_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Health Health Get
+                type: object
+          description: Successful Response
+      summary: Core liveness + schema readiness
+      tags:
+      - health

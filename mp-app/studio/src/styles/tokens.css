@@ -1,0 +1,149 @@
+/* Muscle Paradise design tokens — 1:1 from
+   docs/MuscleParadise/design-system/muscle-paradise/MASTER.md (brand-locked).
+   Do not invent new hex values here; add to MASTER.md first. */
+
+:root {
+  /* Brand-locked palette */
+  --color-primary: #00b86a;
+  --color-primary-rgb: 0, 184, 106;
+  --color-on-primary: #04140c;
+  --color-secondary: #ffd700;
+  --color-on-secondary: #1a1400;
+  --color-accent: #12d98a;
+  --color-on-accent: #04140c;
+  --color-background: #0b0f14;
+  --color-foreground: #f1f5f9;
+  --color-card: rgba(18, 28, 36, 0.72);
+  --color-card-solid: #121c24;
+  --color-card-foreground: #f8fafc;
+  --color-muted: #1c2a33;
+  --color-muted-foreground: #94a3b8;
+  --color-border: rgba(0, 184, 106, 0.35);
+  --color-border-subtle: #243040;
+  --color-destructive: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #22c55e;
+  --color-info: #38bdf8;
+  --color-ring: #00b86a;
+  --color-skeleton: #16222b;
+
+  /* Safety (injury) states */
+  --color-injury-active: #ef4444;
+  --color-injury-recovering: #f59e0b;
+  --color-injury-cleared: #22c55e;
+
+  /* Glass */
+  --blur-amount: 16px;
+  --glass-opacity: 0.14;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.12);
+  --glass-glow:
+    0 0 0 1px rgba(0, 184, 106, 0.25), 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  /* Density 8 — dashboard */
+  --space-xs: 2px;
+  --space-sm: 4px;
+  --space-md: 8px;
+  --space-lg: 12px;
+  --space-xl: 16px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+
+  /* Radius & shadow */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px rgba(0, 184, 106, 0.25);
+
+  /* Typography */
+  --font-display: 'Barlow Condensed', 'Vazirmatn', system-ui, sans-serif;
+  --font-body: 'Barlow', 'Vazirmatn', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Elevation scale (FINN-LOOP layered principle) */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.14);
+  --elevation-3: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* Optional Client day theme (MASTER.md) */
+.mp-light {
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-solid: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-muted: #e2e8f0;
+  --color-muted-foreground: #475569;
+  --color-border-subtle: #cbd5e1;
+  --glass-opacity: 0.6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[lang='fa'],
+.rtl {
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+/* Numeric fields (JP7 mm, rials) stay LTR + tabular even in RTL */
+.numeric,
+input.numeric {
+  direction: ltr;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.glass {
+  background: rgba(18, 28, 36, var(--glass-opacity));
+  backdrop-filter: blur(var(--blur-amount));
+  -webkit-backdrop-filter: blur(var(--blur-amount));
+  border: var(--glass-border);
+  box-shadow: var(--glass-glow);
+  border-radius: 14px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* MASTER.md + FINN-LOOP: always honour reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

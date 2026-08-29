@@ -637,14 +637,21 @@ App update ≠ KB update (separate delta channels).
 # 14. DEVELOPMENT ROADMAP (ORDERED, NO REWORK)
 
 ### Phase 0 — Skeleton (week 1)
-- [ ] Create `mp-app/` monorepo  
-- [ ] FastAPI `/health` on **8751**  
-- [ ] SQLite schema + migrations + `gym_id`  
-- [ ] openapi.yaml stub  
-- [ ] Studio Electron hello + theme tokens from MASTER.md  
-- [ ] STATE.md + this map linked  
-- [ ] License attribution page stub  
-- [ ] **Dev tooling:** install ChunkHound *or* open-codebase-index; index repo; optional Librarian docs (§12.7)  
+- [x] Create `mp-app/` monorepo  ✅ 2026-08-29 (backend + studio + openapi.yaml)
+- [x] FastAPI `/health` on **8751**  ✅ verified live: `status ok`, 25 tables
+- [x] SQLite schema + migrations + `gym_id`  ✅ `0001_core`, 24 tables, checksum drift detection
+- [x] openapi.yaml stub  ✅ generated from the real app via `app.export_openapi`
+- [x] Studio Electron hello + theme tokens from MASTER.md  ✅ tokens 1:1, secure BrowserWindow
+- [x] STATE.md + this map linked  ✅ `mp-app/LOOP_STATE.md`
+- [x] License attribution page stub  ✅ `mp-app/NOTICES.md`
+- [ ] **Dev tooling:** install ChunkHound *or* open-codebase-index; index repo; optional Librarian docs (§12.7)  ⏳ not installed in the build sandbox
+
+**Phase 0 evidence (2026-08-29, branch `arena/01a04e9f-chat2db`):** backend
+`pytest` → **73 passed** (incl. 12 JP7 golden fixtures within ±0.05 %BF);
+studio `tsc --noEmit` clean, `vitest` → **25 passed**, `vite build` →
+**91.73 kB gzip** (< 250 kB budget). JP7 core (`app/core/jp7.py`) was pulled
+forward from Phase 1 because rule C12 requires a measurable number from the
+first release. Open gaps tracked in `mp-app/LOOP_STATE.md`.
 
 ### Phase 1 — Identity & JP7 (weeks 2–3)
 - [ ] Staff auth PIN  

@@ -1,0 +1,8 @@
+# MP local-first core — pinned to the versions verified installed in .venv-mp
+# (python -m pip list, 2026-08-29). Do not bump without re-running the suite.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+pydantic==2.13.5
+httpx==0.28.1
+pytest==9.1.1
