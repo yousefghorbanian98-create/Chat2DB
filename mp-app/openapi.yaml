@@ -512,6 +512,35 @@ components:
           title: Sex
       title: MemberUpdate
       type: object
+    NutritionRequest:
+      additionalProperties: false
+      properties:
+        activity:
+          default: moderate
+          enum:
+          - sedentary
+          - light
+          - moderate
+          - active
+          - athlete
+          title: Activity
+          type: string
+        goal:
+          default: maintain
+          enum:
+          - cut
+          - maintain
+          - bulk
+          title: Goal
+          type: string
+        protein_g_per_kg:
+          default: 1.8
+          exclusiveMinimum: 0.0
+          maximum: 4.0
+          title: Protein G Per Kg
+          type: number
+      title: NutritionRequest
+      type: object
     PackageCreate:
       additionalProperties: false
       properties:
@@ -695,6 +724,37 @@ info:
   x-generated-by: app.export_openapi
 openapi: 3.1.0
 paths:
+  /api/v1/ai/runtime:
+    get:
+      description: Detect Ollama on the configured base URL (env MP_AI_BASE_URL).
+      operationId: runtime_api_v1_ai_runtime_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Runtime Api V1 Ai Runtime Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Is a local LLM (Ollama) available?
+      tags:
+      - ai
   /api/v1/assessments/calculate:
     post:
       description: Stateless math endpoint — used by the assessment form's live preview.
@@ -1685,6 +1745,85 @@ paths:
       summary: Signed short-lived check-in QR payload
       tags:
       - members
+  /api/v1/nutrition/members/{member_id}/plan:
+    get:
+      operationId: get_plan_api_v1_nutrition_members__member_id__plan_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Plan Api V1 Nutrition Members  Member Id  Plan
+                  Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Latest stored nutrition plan
+      tags:
+      - nutrition
+    post:
+      operationId: create_plan_api_v1_nutrition_members__member_id__plan_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NutritionRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Plan Api V1 Nutrition Members  Member Id  Plan
+                  Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Compute + store a nutrition plan from the latest assessment LBM
+      tags:
+      - nutrition
   /api/v1/packages:
     get:
       operationId: list_packages_api_v1_packages_get

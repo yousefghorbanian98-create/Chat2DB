@@ -691,11 +691,17 @@ trap bar the slot is dropped, never invented. Apply of a program whose stored op
 are newly blocked returns 409; `archived` is terminal.
 
 ### Phase 4 — AI (weeks 7–8)
-- [ ] Ollama detect + AiRuntime settings  
-- [ ] RAG over KB pack  
-- [ ] Race rule vs Ollama + judge  
-- [ ] Dry-run UI (mockup 08)  
-- [ ] Nutrition rules + Katch-McArdle from LBM + FA foods subset  
+- [x] Ollama detect + AiRuntime settings  ✅ `GET /api/v1/ai/runtime`; injectable probe, never required (C1/C2)
+- [ ] RAG over KB pack  ⏳ needs a vector store + embeddings (deferred; no Ollama in build env)
+- [x] Race rule vs Ollama + judge  ✅ `core/ai_brain.py` weighted judge; rules win ties/absent/unsafe (C7) — unit-tested with a fake LLM
+- [ ] Dry-run UI (mockup 08)  ⏳ backend dry-run endpoint exists (Phase 3); the AI-flavoured UI is deferred with the LLM
+- [x] Nutrition rules + Katch-McArdle from LBM  ✅ `core/nutrition.py` + `/nutrition/members/{id}/plan`; FA foods subset deferred
+
+**Phase 4 backend evidence (2026-08-29):** `pytest` → **203 passed**. Judge weights
+match map §5 (perfect=14, terrible=0); the race returns `rules` when the LLM is
+absent, ties, or violates limitations, and `ollama` only when strictly safer and
+better. Nutrition: LBM 49.1088 → BMR 1430.8 (Katch–McArdle), reconstructed macro
+calories ≈ target. `/ai/runtime` reports `available: false` in this sandbox.
 
 ### Phase 5 — Client app (weeks 9–10)
 - [ ] Flutter auth scoped API  

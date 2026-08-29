@@ -23,6 +23,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from app import __version__
 from app.config import API_PREFIX, Settings
 from app.routers import (
+    ai,
     assessments,
     attendance,
     auth,
@@ -31,6 +32,7 @@ from app.routers import (
     health,
     injuries,
     members,
+    nutrition,
     payments,
     programs,
     reports,
@@ -137,6 +139,8 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         equipment,
         exercises,
         programs,
+        nutrition,
+        ai,
         reports,
     ):
         app.include_router(module.router, prefix=API_PREFIX)

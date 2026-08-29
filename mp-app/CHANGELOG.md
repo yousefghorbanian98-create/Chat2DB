@@ -3,6 +3,29 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.6.0] — 2026-08-29 — Phase 4 AI (backend slice: nutrition + runtime + race)
+
+### Added
+- `core/nutrition.py` — deterministic Katch–McArdle BMR from LBM, TDEE by activity
+  factor, goal-adjusted target + macro split; golden-tested.
+- `POST /api/v1/nutrition/members/{id}/plan` computes from the member's latest
+  assessment LBM (422 if no assessment) and stores it; `GET .../plan` returns latest.
+- `core/ai_brain.py` — weighted judge (map §5) + `race()` implementing rule C7:
+  rules win when the LLM is absent, on ties, or when the LLM violates limitations;
+  the LLM wins only when strictly better and safe. Injectable Ollama probe.
+- `GET /api/v1/ai/runtime` — Ollama detection from `MP_AI_BASE_URL`; never required.
+
+### Measured
+- Backend: **203 tests passed** (nutrition golden + API, brain race/judge with a
+  fake LLM, runtime detection incl. unreachable/500 paths, RBAC).
+- OpenAPI: 33 paths.
+
+### Deferred (documented, not dropped)
+- RAG over the Knowledge Pack (needs a vector store + embeddings; no Ollama here).
+- The AI-flavoured dry-run UI (mockup 08) — the backend dry-run endpoint already
+  shipped in Phase 3.
+- Iranian FA foods subset (nutrition math shipped; food database later).
+
 ## [0.5.0] — 2026-08-29 — Phase 3 programs without AI
 
 ### Added

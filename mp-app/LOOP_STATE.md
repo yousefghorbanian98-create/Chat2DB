@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 8
+Current Iteration: 9
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Phase 3 COMPLETE; next = Phase 4 "Ollama detect + AiRuntime + race rule-vs-LLM + nutrition"
-Status: PHASE_3_DONE
+Current Task: Phase 4 backend slice COMPLETE; next = Phase 5 "Client app scoped API + field-mask tests" (RAG + AI dry-run UI deferred)
+Status: PHASE_4_BACKEND_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10
@@ -66,11 +66,19 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 - [x] Contraindication graph filter — hard_block DROP → SWAP → equipment DROP → corrective
 - [x] Program JSON v1 + apply/archive — whitelist ops; lifecycle state machine; C8 re-check
 
+## Phase 4 checklist (map §14)
+
+- [x] Ollama detect + AiRuntime — GET /ai/runtime, injectable probe, never required
+- [ ] RAG over KB pack — deferred (needs vector store + embeddings; no Ollama here)
+- [x] Race rule vs Ollama + judge — rules win ties/absent/unsafe (C7)
+- [ ] Dry-run UI (mockup 08) — backend dry-run exists (Phase 3); AI UI deferred
+- [x] Nutrition Katch-McArdle from LBM — golden-tested; FA foods subset deferred
+
 ## Verified evidence (commands actually run)
 
 | Check | Command | Result |
 |-------|---------|--------|
-| Backend suite | `pytest` (mp-app/backend) | **179 passed**, 1 warning |
+| Backend suite | `pytest` (mp-app/backend) | **203 passed**, 2 warnings |
 | JP7 golden | `pytest -m golden` | 32 tests; 12 fixtures within ±0.05 %BF |
 | Schema | `pytest -m schema` | 33 tests; audit columns on all 24 tables |
 | Security | `pytest tests/test_security.py` | 24 tests (tamper/replay/expiry/algo) |
