@@ -680,9 +680,15 @@ returned 402; a tampered QR returned 401; receipt returned a valid %PDF with
 `1,234,567 Rial` in the uncompressed text layer; openapi grew to 26 paths.
 
 ### Phase 3 — Programs without AI (week 6)
-- [ ] Rule templates PPL/UL/FB/corrective  
-- [ ] Contraindication graph filter  
-- [ ] Program JSON v1 + apply/archive  
+- [x] Rule templates PPL/UL/FB/corrective  ✅ `core/program_builder.py` (pure, unit-tested)
+- [x] Contraindication graph filter  ✅ hard_block DROP → SWAP → equipment DROP → corrective block; never emits a blocked op
+- [x] Program JSON v1 + apply/archive  ✅ mp.program/v1 whitelist ops; draft→trainer_approved→(client_ack|needs_review|archived); apply re-checks CURRENT filters (C8)
+
+**Phase 3 evidence (2026-08-29):** `pytest` → **179 passed**. The builder's safety
+invariant is locked by tests: a lumbar `heavy_deadlift` injury drops the
+conventional deadlift and swaps in the trap-bar deadlift when equipped; with no
+trap bar the slot is dropped, never invented. Apply of a program whose stored ops
+are newly blocked returns 409; `archived` is terminal.
 
 ### Phase 4 — AI (weeks 7–8)
 - [ ] Ollama detect + AiRuntime settings  

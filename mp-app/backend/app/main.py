@@ -32,6 +32,7 @@ from app.routers import (
     injuries,
     members,
     payments,
+    programs,
     reports,
 )
 from app.state import AppState, set_state
@@ -135,6 +136,7 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         payments,
         equipment,
         exercises,
+        programs,
         reports,
     ):
         app.include_router(module.router, prefix=API_PREFIX)

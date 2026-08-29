@@ -3,6 +3,32 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.5.0] — 2026-08-29 — Phase 3 programs without AI
+
+### Added
+- `core/program_builder.py` — pure, deterministic rule builder with PPL / UL / FB /
+  corrective templates and per-pattern loading. Pipeline mirrors map §7:
+  hard_block DROP → SWAP → equipment DROP → corrective block. Serialises to
+  `mp.program/v1` whitelist ops only.
+- `repo/programs.py` — lifecycle state machine
+  (draft → trainer_approved → client_ack/needs_review → archived; archived terminal).
+- Endpoints: `POST /members/{id}/programs/generate`, `GET /members/{id}/programs`,
+  `POST /programs/{id}/dry-run`, `POST /programs/{id}/apply`,
+  `POST /programs/{id}/archive`.
+- C8 enforced twice: dry-run re-validates stored ops against the member's CURRENT
+  injury filters, and apply 409s if any stored op is now hard-blocked.
+
+### Measured
+- Backend: **179 tests passed** (8 builder safety unit tests + 9 programs API
+  integration tests incl. swap/drop, corrective block, dry-run-before-apply 409,
+  terminal archive, RBAC 403).
+- OpenAPI: 31 paths.
+
+### Design notes
+- Equipment availability uses the inventory `category` token (barbell/dumbbell/
+  trap_bar/...) to match library equipment tokens; bodyweight always available.
+- Rule C7 holds: the rule planner is the only planner shipped so far.
+
 ## [0.4.0] — 2026-08-29 — Phase 2 Ops (attendance, payments, equipment, seed)
 
 ### Added
