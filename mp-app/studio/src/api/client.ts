@@ -225,7 +225,27 @@ export const api = {
     request<SyncDelta>(
       `/api/v1/sync/delta${since ? `?since=${encodeURIComponent(since)}` : ''}`,
     ),
+  createBackup: (password: string) =>
+    request<BackupBlob>('/api/v1/admin/backup', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    }),
+  restoreBackup: (password: string, blobB64: string) =>
+    request<RestoreResult>('/api/v1/admin/backup/restore', {
+      method: 'POST',
+      body: JSON.stringify({ password, blob_b64: blobB64 }),
+    }),
 } as const;
+
+export interface BackupBlob {
+  blob_b64: string;
+  bytes: number;
+}
+
+export interface RestoreResult {
+  restored: Record<string, number>;
+  rows: number;
+}
 
 export interface AttendanceToday {
   date: string;

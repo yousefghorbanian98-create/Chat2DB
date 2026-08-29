@@ -743,6 +743,10 @@ counts verified; wrong password / bad magic rejected. `/admin/backup` is OWNER-o
 (TRAINER/RECEPTION 403); `/sync/delta` returns a cursor and is staff-gated (KIOSK 403).
 OpenAPI: 39 paths. Added `cryptography` 50.0.1 (Fernet) to the venv.
 
+- [x] Studio UI for sync + backup  ✅ `pages/Sync.tsx`: cursor delta (full snapshot → incremental, idle sync says so), Fernet backup downloaded as `.mpbk`, restore reporting the **verified** row count
+
+**Phase 6 UI evidence (2026-08-29):** studio **83 tests**, `tsc` clean, initial bundle **94.81 kB gzip** (`Sync` split at 2.02 kB gzip). Live: backup 200 (4258 bytes, magic `MPBK1`), no plaintext leak (`members`/`first_name` absent from ciphertext), restore with the right password 200 → **59 rows / 25 tables** counts verified, wrong password 422.
+
 ### Success metrics (examples)
 | Feature | Pass if |
 |---------|---------|

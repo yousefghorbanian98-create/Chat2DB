@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 14
+Current Iteration: 15
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Studio coach surface COMPLETE (Phase 4 UI: nutrition + AI runtime); next = Studio UI for delta sync + backup (Phase 6), then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian seed)
-Status: PHASE_4_UI_DONE
+Current Task: Studio sync + backup surface COMPLETE (Phase 6 UI) — Studio UI now covers Phases 1-4 + 6; next = quality gates (ESLint/Prettier, coverage >=80%, Core Web Vitals, Vazirmatn TTF for Persian PDF), then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian demo seed)
+Status: STUDIO_UI_PHASES_1_6_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10

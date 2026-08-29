@@ -3,6 +3,30 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.12.0] — 2026-08-29 — Studio sync & backup surface (Phase 6 UI)
+
+### Added
+- `pages/Sync.tsx` — delta-sync console plus password-encrypted backup/restore.
+  - Delta: first sync pulls a full snapshot, then the cursor is carried forward;
+    an idle sync says so in words instead of rendering an empty box.
+  - Backup: Fernet blob downloaded client-side as `mp-backup-<date>.mpbk`; the
+    password is never persisted, and a non-OWNER is told why it was refused.
+  - Restore: reports the **verified** row count (the server re-checks every table
+    after reload), and a wrong password surfaces the server's own message.
+- `api/client.ts` — `createBackup` / `restoreBackup` with `BackupBlob` /
+  `RestoreResult` types.
+
+### Measured
+- Studio: **83 tests passed** (was 75) — 8 new covering snapshot wording,
+  per-table changes, cursor storage, idle sync, the password gate, backup size,
+  the 403 path, verified restore, and wrong-password failure.
+- `tsc --noEmit` clean; initial bundle **94.81 kB gzip**; `Sync` code-split at
+  **2.02 kB gzip**.
+- Live E2E on the running core: backup 200 (4258 bytes, magic `MPBK1\x00`),
+  ciphertext leak check passed (`members` and `first_name` absent from the blob),
+  restore with the right password 200 → **59 rows across 25 tables** with counts
+  verified, restore with a wrong password 422.
+
 ## [0.11.0] — 2026-08-29 — Studio coach surface (Phase 4 UI)
 
 ### Added
