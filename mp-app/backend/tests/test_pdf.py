@@ -48,6 +48,7 @@ def test_pdf_contains_the_member_and_key_numbers() -> None:
         brozek_pct=21.1,
         history=[],
         compress=False,
+        persian=False,
     )
     text = pdf.decode("latin-1")
     assert "Sara" in text
@@ -83,6 +84,7 @@ def test_pdf_includes_history_table_when_present() -> None:
             {"created_at": "2026-08-01T10:00:00Z", "body_fat_pct": 22.1, "weight_kg": 63.0},
         ],
         compress=False,
+        persian=False,
     )
     assert pdf[:5] == b"%PDF-"
     assert b"History" in pdf
@@ -100,3 +102,102 @@ def test_compressed_pdf_is_smaller_than_uncompressed() -> None:
     )
     assert zipped[:5] == b"%PDF-"
     assert len(zipped) < len(plain)
+
+
+# --- Persian PDF (map C10: Persian-first UI) -------------------------------
+# The bundled font is DejaVu Sans 2.37 (see app/core/persian.py provenance).
+# Raw PDF bytes store Persian as glyph IDs (TrueType subset), so reading the
+# text layer back requires a PDF reader; we use PyMuPDF when importable and
+# otherwise skip the content assertions while still pinning font embedding.
+
+FA_MEMBER = {"first_name": "نسیم", "last_name": "رحیمی", "sex": "female"}
+
+
+def _extract_text(pdf: bytes) -> str:
+    """Decode the PDF text layer via PyMuPDF (glyph IDs -> unicode)."""
+    import pymupdf
+
+    doc = pymupdf.open(stream=pdf, filetype="pdf")
+    return "".join(page.get_text() for page in doc)
+
+
+def test_fa_shaper_produces_visual_order_and_joined_forms() -> None:
+    from app.core.persian import fa
+
+    shaped = fa("سلام")
+    # Reshaped to visual order, so it is no longer the logical string.
+    assert shaped != "سلام"
+    assert len(shaped) >= 3
+
+
+def test_persian_report_embeds_the_persian_font() -> None:
+    pdf = build_assessment_pdf(
+        gym_name="ماسل پارادایز", member=FA_MEMBER, assessment=ASSESSMENT,
+        brozek_pct=21.1, history=[], compress=False, persian=True,
+    )
+    assert pdf[:5] == b"%PDF-"
+    assert b"FontFile2" in pdf, "the TTF must be embedded"
+    assert b"DejaVuSans" in pdf, "embedded subset must be the bundled face"
+    # Embedding a ~50 KB subset makes the Persian report far larger than the
+    # Helvetica English one — a cheap, dependency-free signal it is NOT Latin.
+    english = build_assessment_pdf(
+        gym_name="G", member=MEMBER, assessment=ASSESSMENT,
+        brozek_pct=21.1, history=[], compress=False, persian=False,
+    )
+    assert len(pdf) > len(english), "Persian must carry the embedded font"
+
+
+def test_persian_report_content_survives_shaping_rule_c6() -> None:
+    pymupdf = __import__("pymupdf") if _has_pymupdf() else None
+    if pymupdf is None:
+        import pytest
+        pytest.skip("pymupdf not installed; raw bytes store glyph IDs")
+
+    pdf = build_assessment_pdf(
+        gym_name="ماسل پارادایز", member=FA_MEMBER, assessment=ASSESSMENT,
+        brozek_pct=21.1, history=[], compress=False, persian=True,
+    )
+    from app.core.persian import fa
+
+    text = _extract_text(pdf)
+    # PyMuPDF re-applies bidi on extraction, so the embedded visual string and
+    # the extracted one carry the SAME glyphs in a different order. Compare as
+    # multisets rather than as substrings.
+    shaped = fa("نتایج")
+    lines = [ln for ln in text.splitlines() if sorted(ln) == sorted(shaped)]
+    assert lines, "Persian 'نتایج' heading must round-trip through shaping+embedding"
+    # Server-computed values are written as Latin numerals and must survive.
+    assert "21.43" in text, "primary Siri BF must appear in the Persian PDF"
+    assert "1.0500" in text
+
+
+def _has_pymupdf() -> bool:
+    try:
+        import pymupdf  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def test_english_fallback_is_still_available() -> None:
+    pdf = build_assessment_pdf(
+        gym_name="Muscle Paradise", member=MEMBER, assessment=ASSESSMENT,
+        brozek_pct=21.1, history=[], compress=False, persian=False,
+    )
+    text = pdf.decode("latin-1")
+    assert "Result" in text
+    assert "Sara" in text
+
+
+def test_default_language_prefers_persian_when_font_present() -> None:
+    from app.core.persian import is_persian_available
+
+    if not is_persian_available():
+        import pytest
+        pytest.skip("Persian font/shapers not available in this environment")
+
+    pdf = build_assessment_pdf(
+        gym_name="ماسل پارادایز", member=FA_MEMBER, assessment=ASSESSMENT,
+        brozek_pct=21.1, history=[], compress=False,
+    )
+    assert b"FontFile2" in pdf, "default with a font present must embed it"

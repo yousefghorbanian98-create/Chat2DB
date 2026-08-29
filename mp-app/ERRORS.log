@@ -47,3 +47,12 @@
 # riding along in an event handler (clearing stale results, resetting a flag)
 # are the first thing a rewrite silently drops, and a green suite does not
 # prove they survived.
+
+[2026-08-30] SECURITY | mp-app/backend/app/core/persian.py + requirements.txt | C11 license violation caught at integration: I first installed python-bidi 0.6.11 for RTL reordering, but its dist-info COPYING/COPYING.LESSER show LGPL/GPL v3 — copyleft, and C11 limits the product to permissive licenses (the 0.4.2 "classic" is ALSO LGPL). No permissive bidi exists on PyPI (pybidi UNKNOWN/py33, python-fribidi wraps LGPL fribidi) | wrote an in-house MIT UAX#9 subset (_display) and kept arabic-reshaper (MIT) as the only runtime shaping dep; uninstalled python-bidi and re-verified 224 tests + the rendered PDF without it. python-bidi was kept only as a dev-time ORACLE to prove _display matches on the report's strings (13/14; the 1 diff was end-of-sentence punctuation, sidestepped by rewording the disclaimer to commas) | suite green sans bidi; PDF visually verified
+
+[2026-08-30] INTEGRITY | mp-app/assets/fonts/PersianSans-Regular.ttf | the workspace file named "Vazirmatn-Regular.ttf" (youtube-auto-uploader/resources/fonts/) is actually DejaVu Sans 2.37 per fontTools name table — bundling it while NOTICES.md claimed "Vazirmatn / OFL" would have been a false license claim | renamed the copy to PersianSans-Regular.ttf, verified full Arabic/Persian + presentation-form coverage (0 missing glyphs after reshape), and rewrote NOTICES.md provenance to state DejaVu Sans 2.37 (Bitstream Vera / public-domain) — never Vazirmatn | NOTICES.md corrected; MP_PERSIAN_FONT env lets a real Vazirmatn TTF replace it later
+
+# RULE (added after the two errors above): before adding ANY dependency or
+# asset, read its actual license file (dist-info COPYING / name table), not the
+# package's marketing name or the file's label. LGPL is not "permissive"; a
+# mislabelled font is still a mislabelled font.

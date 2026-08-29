@@ -3,6 +3,31 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.14.0] — 2026-08-30 — Persian PDF + backend coverage gate
+
+### Added
+- `app/core/persian.py` — Persian font registration + MIT shaping (`arabic-reshaper`
+  for joining, an in-house UAX #9 subset for RTL reordering). No copyleft runtime
+  dependency (see Security note).
+- Assessment PDF now renders in **Persian** by default when a font is present,
+  with English fallback; verified visually (rendered PNG) and by PyMuPDF
+  round-trip. Numbers stay Latin and intact (rule C6).
+- `mp-app/assets/fonts/PersianSans-Regular.ttf` (bundled, honest provenance).
+- Backend coverage gate: `pytest-cov` pinned; `pytest.ini` fails below 80%.
+
+### Security (C11)
+- Rejected `python-bidi` (LGPL-3.0) after catching its COPYING at install time;
+  replaced with the in-house MIT reorderer. `arabic-reshaper` (MIT) is the only
+  runtime shaping dep.
+
+### Fixed
+- NOTICES.md no longer falsely claims the bundled font is "Vazirmatn / OFL"; it
+  is documented as DejaVu Sans 2.37.
+
+### Measured (C12)
+- Backend tests **219 → 224** (+5 Persian-PDF tests); coverage **90.55%**, gate ≥80.
+- Persian PDF embeds a ~53 KB TrueType subset (FontFile2), 100% glyph coverage.
+
 ## [0.13.0] — 2026-08-30 — Studio quality gate closed (lint · format · coverage)
 
 ### Added

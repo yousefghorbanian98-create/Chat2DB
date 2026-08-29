@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 16
+Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
 Current Task: Studio quality gate CLOSED — ESLint 0 warnings, Prettier clean, 90 tests, 82.24% statements, `npm run gate` exit 0. Next = Core Web Vitals in a real browser, Vazirmatn TTF for Persian PDF, then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian demo seed)
-Status: STUDIO_QUALITY_GATE_GREEN
+Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 10/10
@@ -146,7 +146,10 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 3. **Browser Core Web Vitals (FCP/LCP/CLS)** unmeasured — needs a real browser.
 4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
    shell was never launched.
-5. ~~`reportlab` not installed~~ — **CLOSED**: installed 5.0.1, PDF endpoint live (2.7 KB, valid %PDF). Persian PDF needs a Vazirmatn TTF embed — deferred.
+5. ~~Persian PDF needs a Vazirmatn TTF embed~~ — **CLOSED 2026-08-30**:
+   assessment PDF renders Persian by default (font + MIT shaping), English
+   fallback. Honest provenance: bundled face is DejaVu Sans 2.37, not Vazirmatn
+   (NOTICES.md documents it; `MP_PERSIAN_FONT` swaps in a real Vazirmatn later).
 6. ~~Assessment UI + history chart~~ — **CLOSED**: `pages/AssessmentJp7.tsx` with live preview, validation, history chart.
 7. ~~TRAINER member scoping~~ — **CLOSED this iteration**: `app/auth/scope.py`
    now filters member lists and 404s unassigned access across members,
@@ -178,8 +181,11 @@ Two real defects surfaced during the pass and were fixed, not papered over:
 - Moving Coach state into a hook dropped the stale-plan clear on athlete change
   (found by diffing old handler bodies; no test covered it).
 
-Still open: backend `pytest-cov` (219 tests, no coverage number), browser Core Web
-Vitals, Vazirmatn TTF for Persian PDF.
+Still open: browser Core Web Vitals, member-PIN login (needs schema column),
+Flutter client, Kiosk flavour, Electron binary, Ollama live, Persian demo seed.
+
+Security catch this iteration (C11): `python-bidi` is LGPL-3.0 → rejected and
+replaced by an in-house MIT RTL reorderer; see ERRORS.log 2026-08-30.
 
 ## Conflicts resolved
 
