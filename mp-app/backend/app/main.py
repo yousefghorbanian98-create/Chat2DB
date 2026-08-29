@@ -22,7 +22,18 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app import __version__
 from app.config import API_PREFIX, Settings
-from app.routers import assessments, auth, health, injuries, members
+from app.routers import (
+    assessments,
+    attendance,
+    auth,
+    equipment,
+    exercises,
+    health,
+    injuries,
+    members,
+    payments,
+    reports,
+)
 from app.state import AppState, set_state
 
 logger = logging.getLogger("mp.core")
@@ -115,7 +126,17 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
     # Map contract: GET /health at root, everything else under /api/v1.
     app.include_router(health.router)
     app.include_router(health.router, prefix=API_PREFIX)
-    for module in (auth, members, assessments, injuries):
+    for module in (
+        auth,
+        members,
+        assessments,
+        injuries,
+        attendance,
+        payments,
+        equipment,
+        exercises,
+        reports,
+    ):
         app.include_router(module.router, prefix=API_PREFIX)
 
     @app.get("/meta", include_in_schema=False)

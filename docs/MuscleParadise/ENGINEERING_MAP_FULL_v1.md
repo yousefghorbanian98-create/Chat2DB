@@ -668,11 +668,16 @@ found and closed (KIOSK could write members; TRAINER could read all members —
 unassigned access now 404s). See `mp-app/LOOP_STATE.md` for the role matrix.
 
 ### Phase 2 — Ops (weeks 4–5)
-- [ ] Attendance QR signed check-in  
-- [ ] Packages + payments + receipt PDF  
-- [ ] Dashboard KPIs  
-- [ ] Equipment inventory  
-- [ ] Seed exercises from free-exercise-db + 30 FA translations  
+- [x] Attendance QR signed check-in  ✅ signed-60s QR verify; expired-membership denied (402); double check-in 409; check-out; today count
+- [x] Packages + payments + receipt PDF  ✅ integer rials; receipt A5 PDF; void (finance-only, audited); RECEPTION can enter cash but not read full finance
+- [x] Dashboard KPIs  ✅ members/active/injury/check-ins/revenue; finance-gated
+- [x] Equipment inventory  ✅ CRUD + availability; OWNER/ADMIN manage
+- [x] Seed exercises + 30 FA translations  ✅ `packs/exercises_seed.json` (30 ex, 18 with contraindications), idempotent `python -m app.seed_exercises`
+
+**Phase 2 evidence (2026-08-29):** `pytest` → **162 passed**. Live checks: seed
+CLI inserted 30 then 0 on re-run (idempotent); check-in of an expired membership
+returned 402; a tampered QR returned 401; receipt returned a valid %PDF with
+`1,234,567 Rial` in the uncompressed text layer; openapi grew to 26 paths.
 
 ### Phase 3 — Programs without AI (week 6)
 - [ ] Rule templates PPL/UL/FB/corrective  

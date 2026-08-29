@@ -3,6 +3,34 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.4.0] — 2026-08-29 — Phase 2 Ops (attendance, payments, equipment, seed)
+
+### Added
+- Attendance: `POST /attendance/check-in` (signed 60s QR or manual) verifying the
+  HMAC signature and **denying expired memberships (402)**; double check-in is a
+  409; `POST /attendance/check-out/{member_id}`; `GET /attendance/today`.
+- Payments: packages CRUD (finance-only create), `POST /payments` (RECEPTION can
+  enter cash, per map §2.4), `GET /payments/{id}/receipt` (A5 landscape PDF with
+  grouped Rial), `POST /payments/{id}/void` (finance-only, tombstoned not deleted).
+- Equipment inventory CRUD + availability toggle (OWNER/ADMIN manage).
+- `GET /reports/dashboard` — members/active/injury/check-ins/revenue KPIs,
+  finance-gated (TRAINER and RECEPTION get 403).
+- Exercise library: `packs/exercises_seed.json` (30 exercises, all with FA names,
+  18 with contraindications) + idempotent `python -m app.seed_exercises`;
+  `GET /exercises` and `GET /exercises/{key}/contraindications`.
+
+### Measured
+- Backend: **162 tests passed** (attendance incl. expired-membership 402 + tampered
+  QR 401; payments incl. receipt %PDF + void RBAC; equipment; dashboard; seed
+  idempotency + contraindication-integration).
+- Seed CLI: 30 inserted on first run, 0 on re-run.
+- OpenAPI: 26 paths / 19 schemas.
+
+### Notes
+- The seed is a curated, MIT-friendly local JSON (`source: "curated"`); a real
+  free-exercise-db export can be imported later through the same loader.
+- KIOSK remains scan-only: it cannot read the exercise library or member list.
+
 ## [0.3.0] — 2026-08-29 — Phase 1 PDF assessment report
 
 ### Added

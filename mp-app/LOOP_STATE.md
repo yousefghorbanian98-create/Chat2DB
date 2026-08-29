@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 6
+Current Iteration: 7
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Phase 1 COMPLETE; next = Phase 2 "Attendance QR signed check-in"
-Status: PHASE_1_DONE
+Current Task: Phase 2 COMPLETE; next = Phase 3 "Rule templates PPL/UL/FB + contraindication graph filter"
+Status: PHASE_2_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10
@@ -52,11 +52,19 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 - [x] Injury/limitation CRUD + safety card data — dossier, contraindication
       patterns, `GET /members/{id}/filters`, and the Studio-vs-member field mask
 
+## Phase 2 checklist (map §14)
+
+- [x] Attendance QR signed check-in — 60s HMAC QR verify; expired membership 402; double check-in 409; check-out; today count
+- [x] Packages + payments + receipt PDF — integer rials; RECEPTION cash entry; finance-only void (tombstoned)
+- [x] Dashboard KPIs — finance-gated
+- [x] Equipment inventory — OWNER/ADMIN manage
+- [x] Seed exercises + 30 FA — idempotent loader (30 then 0)
+
 ## Verified evidence (commands actually run)
 
 | Check | Command | Result |
 |-------|---------|--------|
-| Backend suite | `pytest` (mp-app/backend) | **140 passed**, 1 warning |
+| Backend suite | `pytest` (mp-app/backend) | **162 passed**, 1 warning |
 | JP7 golden | `pytest -m golden` | 32 tests; 12 fixtures within ±0.05 %BF |
 | Schema | `pytest -m schema` | 33 tests; audit columns on all 24 tables |
 | Security | `pytest tests/test_security.py` | 24 tests (tamper/replay/expiry/algo) |
