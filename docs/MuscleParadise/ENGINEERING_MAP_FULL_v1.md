@@ -715,11 +715,17 @@ reads only its own profile/assessments/programs; an OWNER token on `/client/*` i
 `created_by` for MEMBER but not for staff. OpenAPI: 36 paths.
 
 ### Phase 6 — Sync & harden (weeks 11–12)
-- [ ] Delta sync + backup encrypt/restore test  
-- [ ] electron-updater  
-- [ ] Kiosk flavor  
-- [ ] Demo Persian seed data  
-- [ ] Thesis packaging: docs, screenshots, license screen  
+- [x] Delta sync + backup encrypt/restore test  ✅ `core/backup.py` (Fernet+LZMA, PBKDF2 200k) + `core/sync.py` cursor delta; row-count verify test green
+- [ ] electron-updater  ⏳ Electron binary packaging (Phase 6/7 client)
+- [ ] Kiosk flavor  ⏳ client build flavour
+- [ ] Demo Persian seed data  ⏳ needs the client UI
+- [ ] Thesis packaging: docs, screenshots, license screen  ⏳ final packaging
+
+**Phase 6 backend evidence (2026-08-29):** `pytest` → **219 passed**. Backup blob is
+ciphertext (no table/column names leak); restore round-trips with per-table row
+counts verified; wrong password / bad magic rejected. `/admin/backup` is OWNER-only
+(TRAINER/RECEPTION 403); `/sync/delta` returns a cursor and is staff-gated (KIOSK 403).
+OpenAPI: 39 paths. Added `cryptography` 50.0.1 (Fernet) to the venv.
 
 ### Success metrics (examples)
 | Feature | Pass if |

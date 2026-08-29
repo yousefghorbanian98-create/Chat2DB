@@ -3,6 +3,24 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.8.0] — 2026-08-29 — Phase 6 sync & harden (backend slice)
+
+### Added
+- `core/backup.py` — password-encrypted backup (Fernet + LZMA, PBKDF2-HMAC-SHA256
+  200k iterations) over every business table; `restore_backup` reloads and
+  `verify_row_counts` asserts the restore (success metric: counts match).
+- `core/sync.py` + `GET /api/v1/sync/delta` — cursor-based delta sync (max
+  updated_at), full snapshot on empty cursor, tombstones included.
+- `POST /api/v1/admin/backup` + `/restore` — OWNER-only.
+- Dependency: `cryptography` 50.0.1 (Fernet) installed into `.venv-mp`.
+
+### Measured
+- Backend: **219 tests passed** (backup ciphertext/round-trip/wrong-password/
+  bad-magic, sync cursor + RBAC, 39 OpenAPI paths).
+
+### Deferred
+- electron-updater, Kiosk flavour, Persian demo seed, thesis packaging (client side).
+
 ## [0.7.0] — 2026-08-29 — Phase 5 client API (scoped + masked)
 
 ### Added

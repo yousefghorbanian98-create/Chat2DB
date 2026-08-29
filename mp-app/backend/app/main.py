@@ -27,6 +27,7 @@ from app.routers import (
     assessments,
     attendance,
     auth,
+    backup,
     client,
     equipment,
     exercises,
@@ -37,6 +38,7 @@ from app.routers import (
     payments,
     programs,
     reports,
+    sync,
 )
 from app.state import AppState, set_state
 
@@ -143,6 +145,8 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         nutrition,
         ai,
         client,
+        sync,
+        backup,
         reports,
     ):
         app.include_router(module.router, prefix=API_PREFIX)

@@ -108,6 +108,18 @@ components:
       - available
       title: AvailabilityUpdate
       type: object
+    BackupRequest:
+      additionalProperties: false
+      properties:
+        password:
+          maxLength: 200
+          minLength: 8
+          title: Password
+          type: string
+      required:
+      - password
+      title: BackupRequest
+      type: object
     EquipmentCreate:
       additionalProperties: false
       properties:
@@ -622,6 +634,22 @@ components:
       - payload
       title: QrCheckin
       type: object
+    RestoreRequest:
+      additionalProperties: false
+      properties:
+        blob_b64:
+          title: Blob B64
+          type: string
+        password:
+          maxLength: 200
+          minLength: 8
+          title: Password
+          type: string
+      required:
+      - password
+      - blob_b64
+      title: RestoreRequest
+      type: object
     Sites:
       additionalProperties: false
       properties:
@@ -724,6 +752,78 @@ info:
   x-generated-by: app.export_openapi
 openapi: 3.1.0
 paths:
+  /api/v1/admin/backup:
+    post:
+      operationId: make_backup_api_v1_admin_backup_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Make Backup Api V1 Admin Backup Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Create a password-encrypted backup (OWNER)
+      tags:
+      - admin
+  /api/v1/admin/backup/restore:
+    post:
+      operationId: restore_api_v1_admin_backup_restore_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Restore Api V1 Admin Backup Restore Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Restore from an encrypted backup, verifying row counts (OWNER)
+      tags:
+      - admin
   /api/v1/ai/runtime:
     get:
       description: Detect Ollama on the configured base URL (env MP_AI_BASE_URL).
@@ -2229,6 +2329,44 @@ paths:
       summary: Gym KPIs (finance roles)
       tags:
       - reports
+  /api/v1/sync/delta:
+    get:
+      operationId: delta_api_v1_sync_delta_get
+      parameters:
+      - in: query
+        name: since
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Since
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Delta Api V1 Sync Delta Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Rows changed since a cursor (full snapshot if none)
+      tags:
+      - sync
   /health:
     get:
       description: "Report process, database and schema-migration state.\n\nReturns:\n\
