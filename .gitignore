@@ -92,6 +92,8 @@ mp-app/studio/node_modules/
 mp-app/studio/dist/
 mp-app/studio/coverage/
 mp-app/backend/.pytest_cache/
+mp-app/backend/.coverage
+mp-app/backend/htmlcov/
 mp-app/backend/**/__pycache__/
 .venv-mp/
 *.db
