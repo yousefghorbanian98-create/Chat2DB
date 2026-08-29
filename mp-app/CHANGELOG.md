@@ -3,6 +3,18 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.15.0] — 2026-08-30 — Persian cash/card receipt
+
+### Changed
+- `receipt_pdf.py` renders Persian by default (same `persian` module + font),
+  English fallback; `_rial(value, persian=False)` stays backward compatible.
+- Verified by rendering: title «ماسل پارادایز — رسید», Persian labels, grouped
+  amount in accent green, status «پرداخت شد».
+
+### Measured (C12)
+- Backend tests **224 → 225** (+1 Persian receipt test); suite green with
+  python-bidi (LGPL) uninstalled.
+
 ## [0.14.0] — 2026-08-30 — Persian PDF + backend coverage gate
 
 ### Added
