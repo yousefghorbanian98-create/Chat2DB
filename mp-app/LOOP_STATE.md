@@ -1,16 +1,16 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 15
-Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Studio sync + backup surface COMPLETE (Phase 6 UI) — Studio UI now covers Phases 1-4 + 6; next = quality gates (ESLint/Prettier, coverage >=80%, Core Web Vitals, Vazirmatn TTF for Persian PDF), then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian demo seed)
-Status: STUDIO_UI_PHASES_1_6_DONE
+Current Iteration: 16
+Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
+Current Task: Studio quality gate CLOSED — ESLint 0 warnings, Prettier clean, 90 tests, 82.24% statements, `npm run gate` exit 0. Next = Core Web Vitals in a real browser, Vazirmatn TTF for Persian PDF, then client-side deliverables (Flutter, Kiosk flavour, Electron, Persian demo seed)
+Status: STUDIO_QUALITY_GATE_GREEN
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
-Code Quality Score: 9/10
+Code Quality Score: 10/10
 Completed Tasks: [see checklist below]
-Failed Tasks: [] (8 defects found + fixed, all logged in ERRORS.log)
-Last Updated: 2026-08-29 (Asia/Tehran)
+Failed Tasks: [] (13 defects found + fixed, all logged in ERRORS.log)
+Last Updated: 2026-08-30 (Asia/Tehran)
 ```
 
 ## Routing decisions (Phase 1.1 — OmniRoute pattern)
@@ -134,9 +134,12 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 
 ## Open items (not done, not hidden)
 
-1. **ESLint + Prettier not configured** → gate 3.1 only partially satisfied
-   (`tsc --noEmit` passes; lint/format gates don't exist).
-2. **Coverage not measured** → gate 3.2 needs `pytest-cov` + `@vitest/coverage-v8`.
+1. ~~**ESLint + Prettier not configured**~~ — **CLOSED 2026-08-30**: flat config +
+   Prettier config, both in `npm run gate`. ESLint **21 → 0 problems** at
+   `--max-warnings=0`; Prettier **29 → 0 files**.
+2. ~~**Coverage not measured**~~ — **CLOSED 2026-08-30** (Studio): `@vitest/coverage-v8`
+   installed; statements **63.92% → 82.24%** (branch 79.92%, functions 85.46%).
+   Backend `pytest-cov` still not run — the 219-test suite has no coverage number.
 3. **Browser Core Web Vitals (FCP/LCP/CLS)** unmeasured — needs a real browser.
 4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
    shell was never launched.
@@ -146,6 +149,33 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
    now filters member lists and 404s unassigned access across members,
    assessments and injuries routers.
 8. **Flutter client, Ollama, sync fabric** — Phases 5–6, untouched.
+
+## Quality gate — iteration 16 (2026-08-30), all numbers measured
+
+`npm run gate` = `lint && format:check && typecheck && coverage && build` → **exit 0**.
+
+| Gate | Target | Before | After |
+|------|--------|--------|-------|
+| ESLint (`--max-warnings=0`) | 0 problems | 21 | **0** |
+| Prettier `--check` | 0 files | 29 flagged | **0** |
+| `tsc --noEmit` | exit 0 | exit 0 | **exit 0** |
+| Unit tests | pass | 83 | **90 passed (10 files)** |
+| Statement coverage | ≥ 80% | 63.92% | **82.24%** (branch 79.92%, funcs 85.46%) |
+| Initial bundle | < 250 kB gzip | 94.81 kB | **95.33 kB** |
+
+`max-lines-per-function` ≤ 50 was the last rule standing. Sub-component extraction
+alone did **not** clear it (two extractions still landed at 60–66 lines); the volume
+driver was inline `style={{…}}` literals. The order that worked: hoist styles to
+module constants → extract JSX clusters → move fetching into `src/hooks/*`.
+
+Two real defects surfaced during the pass and were fixed, not papered over:
+- `ResultPanel`'s saved-confirmation lived in an unreachable `else` branch
+  (found by the new page test).
+- Moving Coach state into a hook dropped the stale-plan clear on athlete change
+  (found by diffing old handler bodies; no test covered it).
+
+Still open: backend `pytest-cov` (219 tests, no coverage number), browser Core Web
+Vitals, Vazirmatn TTF for Persian PDF.
 
 ## Conflicts resolved
 

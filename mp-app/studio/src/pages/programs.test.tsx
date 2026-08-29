@@ -56,9 +56,7 @@ function stubFetch(routes: Route[]): void {
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(String(input), 'http://test.local');
       const method = (init?.method ?? 'GET').toUpperCase();
-      const hit = routes.find(
-        (r) => url.pathname === r.match && (r.method ?? 'GET') === method,
-      );
+      const hit = routes.find((r) => url.pathname === r.match && (r.method ?? 'GET') === method);
       if (!hit) throw new Error(`unexpected fetch ${method} ${url.pathname}`);
       const status = hit.status ?? 200;
       return {

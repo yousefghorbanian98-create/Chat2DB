@@ -59,17 +59,33 @@ const isFilled = (raw: string): boolean => raw.trim().length > 0;
 
 export function validateSite(key: SiteKey, raw: string): FieldError | null {
   if (!isFilled(raw)) {
-    return { field: key, messageFa: `${SITE_META[key].fa} خالی است`, messageEn: `${SITE_META[key].en} is empty` };
+    return {
+      field: key,
+      messageFa: `${SITE_META[key].fa} خالی است`,
+      messageEn: `${SITE_META[key].en} is empty`,
+    };
   }
   const value = NUM(raw);
   if (!Number.isFinite(value)) {
-    return { field: key, messageFa: `${SITE_META[key].fa} عدد نیست`, messageEn: `${SITE_META[key].en} is not a number` };
+    return {
+      field: key,
+      messageFa: `${SITE_META[key].fa} عدد نیست`,
+      messageEn: `${SITE_META[key].en} is not a number`,
+    };
   }
   if (value <= 0) {
-    return { field: key, messageFa: `${SITE_META[key].fa} باید بزرگ‌تر از صفر باشد`, messageEn: `${SITE_META[key].en} must be > 0` };
+    return {
+      field: key,
+      messageFa: `${SITE_META[key].fa} باید بزرگ‌تر از صفر باشد`,
+      messageEn: `${SITE_META[key].en} must be > 0`,
+    };
   }
   if (value > 80) {
-    return { field: key, messageFa: `${SITE_META[key].fa} خارج از محدودهٔ کالیپر (۸۰mm)`, messageEn: `${SITE_META[key].en} out of caliper range (80mm)` };
+    return {
+      field: key,
+      messageFa: `${SITE_META[key].fa} خارج از محدودهٔ کالیپر (۸۰mm)`,
+      messageEn: `${SITE_META[key].en} out of caliper range (80mm)`,
+    };
   }
   return null;
 }
@@ -87,9 +103,17 @@ export function validateDraft(draft: Jp7Draft): FieldError[] {
   } else {
     const w = NUM(draft.weightKg);
     if (!Number.isFinite(w) || w <= 0) {
-      errors.push({ field: 'weightKg', messageFa: 'وزن باید بزرگ‌تر از صفر باشد', messageEn: 'Weight must be > 0' });
+      errors.push({
+        field: 'weightKg',
+        messageFa: 'وزن باید بزرگ‌تر از صفر باشد',
+        messageEn: 'Weight must be > 0',
+      });
     } else if (w > 400) {
-      errors.push({ field: 'weightKg', messageFa: 'وزن نامعتبر است', messageEn: 'Weight out of range' });
+      errors.push({
+        field: 'weightKg',
+        messageFa: 'وزن نامعتبر است',
+        messageEn: 'Weight out of range',
+      });
     }
   }
 
@@ -98,7 +122,11 @@ export function validateDraft(draft: Jp7Draft): FieldError[] {
   } else {
     const a = NUM(draft.ageYears);
     if (!Number.isInteger(a) || a < 10 || a > 100) {
-      errors.push({ field: 'ageYears', messageFa: 'سن باید عدد صحیح ۱۰ تا ۱۰۰ باشد', messageEn: 'Age must be an integer 10–100' });
+      errors.push({
+        field: 'ageYears',
+        messageFa: 'سن باید عدد صحیح ۱۰ تا ۱۰۰ باشد',
+        messageEn: 'Age must be an integer 10–100',
+      });
     }
   }
 

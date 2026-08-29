@@ -3,6 +3,49 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.13.0] — 2026-08-30 — Studio quality gate closed (lint · format · coverage)
+
+### Added
+- ESLint flat config + Prettier config, both wired into `npm run gate`
+  (`lint && format:check && typecheck && coverage && build`).
+- `@vitest/coverage-v8` — coverage is now a measured number, not a claim.
+- `pages/assessmentJp7.test.tsx` — 7 tests rendering the whole assessment page:
+  labelled skeleton, member picker, injury banner, blocked-calculate, field-error
+  summary, the golden Siri result, and save-through-the-core.
+- `ResizeObserver` stub in `vitest.setup.ts` (recharts measures its container;
+  jsdom does not implement it, so `BodyFatChart` could not render under test).
+
+### Changed — structure (behaviour preserved)
+- Every surface decomposed to satisfy `max-lines-per-function` ≤ 50. Inline
+  `style={{…}}` literals were hoisted to module constants (`styles/blocks.ts`),
+  which also removes a per-render allocation.
+- New hooks: `useCoreHealth`, `useOpsKpis`, `useCheckin`, `usePayment`,
+  `useSyncOps` (`useSyncOps`/`useBackupCreate`/`useRestore`), `useNutrition`,
+  `useProgramPlanner` + `useProgramActions`.
+- New components: `components/assessment/*` (6 files), `OpsKpis`, and the
+  sub-components each page was split into.
+- `api/client.ts` split into `api/types.ts` (26 declarations) + `client.ts`.
+- `auth/` split into `sessionContext.ts` + `AuthContext.tsx` + `useAuth.ts` so
+  `react-refresh/only-export-components` is satisfied.
+
+### Fixed
+- **Unreachable success state:** `ResultPanel` rendered the "saved"
+  confirmation in an `else` branch after `preview ?`, while save is only enabled
+  once a preview exists — the confirmation could never appear. It now renders
+  alongside the preview. Found by the new test, not by review.
+- **Stale-result regression introduced and reverted in this same pass:** moving
+  Coach's state into a hook dropped the plan-clear on athlete change. `selectMember`
+  now clears plan/error/state; the same pattern guards `useProgramPlanner`.
+
+### Measured (C12 — every release moves a number)
+- ESLint: **21 → 0 problems** with `--max-warnings=0`.
+- Prettier: **29 files → 0**.
+- Tests: **83 → 90 passed** (10 files).
+- Statement coverage: **63.92% → 82.24%** (branch 79.92%, functions 85.46%).
+- `tsc --noEmit` exit 0; `npm run gate` exit 0.
+- Initial bundle **95.33 kB gzip** (gate < 250 kB); `AssessmentJp7` + recharts
+  stays in its own lazy chunk at **112.05 kB gzip**.
+
 ## [0.12.0] — 2026-08-29 — Studio sync & backup surface (Phase 6 UI)
 
 ### Added

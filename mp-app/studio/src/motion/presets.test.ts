@@ -36,7 +36,10 @@ describe('easing curves', () => {
       expect(curve, name).toMatch(/^cubic-bezier\([-0-9., ]+\)$/);
       const parts = curve.slice('cubic-bezier('.length, -1).split(',').map(Number);
       expect(parts).toHaveLength(4);
-      expect(parts.every((n) => Number.isFinite(n)), name).toBe(true);
+      expect(
+        parts.every((n) => Number.isFinite(n)),
+        name,
+      ).toBe(true);
     }
   });
 });

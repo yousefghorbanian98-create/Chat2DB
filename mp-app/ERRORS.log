@@ -29,3 +29,21 @@
 # RULE (added after the error above): a frontend client is generated from the
 # contract (openapi.yaml) or verified against a live response — never written
 # from memory of what the backend "probably" returns.
+
+[2026-08-30] QUALITY | mp-app/studio/src (14 files) | ESLint max-lines-per-function (limit 50) had 21 violations. Sub-component extraction alone did NOT clear it: ResultPanel/SiteForm still landed at 60-66 lines after two extractions each. The real driver was inline style={{...}} object literals counted as JSX lines | fix order that works: (1) hoist every inline style to a module const in styles/blocks.ts, (2) then extract JSX clusters as sub-components, (3) move data fetching into src/hooks/* | ESLint 0 problems, --max-warnings=0 green; 90 tests passed; tsc 0
+
+[2026-08-30] TYPES | studio motion style helpers (4 separate occurrences: MotionButton.buttonStyle, CoreStatus.PILL, ProgramPreview.BANNER, Sync.NOTE) | annotating a hoisted style const as CSSProperties breaks tsc under exactOptionalPropertyTypes when the const feeds a motion.* element (CSSProperties.x?: X<string|number> vs MotionStyle.x) — and the REVERSE also breaks: a MotionStyle const fed to a plain <div>/<form> fails too | type by consumer, not by habit: MotionStyle for motion.*, CSSProperties for plain elements. When one logical style feeds both (Sync NOTE), declare two consts (NOTE + NOTE_CSS) instead of one shared object | tsc --noEmit exit 0 across all 14 refactored files
+
+[2026-08-30] LOGIC | studio/src/components/assessment/ResultPanel.tsx | found by a new test, not by review: the "saved" confirmation was rendered in an `: saved ?` ELSE branch after `preview ?`, and save is only enabled once a preview exists — so the success message was unreachable dead UI in every real flow | render SavedConfirmation alongside the preview (and keep the else-branch for the history-only case) | assessmentJp7.test.tsx "saves through the core and shows the stored confirmation" now passes
+
+[2026-08-30] LOGIC | studio/src/hooks/useNutrition.ts | refactor regression caught by reading the diff, not by tests: the original Login/Coach select handler cleared the stale plan on member change; moving state into a hook dropped that, so switching athlete would have kept showing the previous athlete's macros. No test covered it, so the suite stayed green while the bug existed | selectMember() now clears plan+error+state; same pattern applied to useProgramPlanner.setMemberId | tsc 0, 90 tests green
+
+[2026-08-30] TEST | studio vitest.setup.ts | recharts (BodyFatChart) throws in jsdom because it measures its container with ResizeObserver, which jsdom does not implement — so no test could render AssessmentJp7 at all, leaving the whole assessment page at 0% coverage | added a ResizeObserver stub to vitest.setup.ts | 7 new AssessmentJp7 page tests; coverage 63.92% -> 82.24% statements
+
+[2026-08-30] TEST | studio/src/pages/assessmentJp7.test.tsx | two self-inflicted test bugs in the first draft: (a) input ids were derived by capitalising the site key, but NumberField ids come from SITE_META[key].en and 'abdominal' renders as 'Abdomen', not 'Abdominal'; (b) the loading-skeleton assertion used findByText, but Skeleton exposes its label as aria-label only, and a fast stubbed fetch resolves before findByText can observe it | derive ids from SITE_META itself; assert getByRole('status', {name}) against a never-settling fetch so the load phase is observable | 7/7 pass
+
+# RULE (added after the errors above): when a refactor moves state into a hook,
+# diff the OLD handler bodies against the new ones line by line. Side effects
+# riding along in an event handler (clearing stale results, resetting a flag)
+# are the first thing a rewrite silently drops, and a green suite does not
+# prove they survived.

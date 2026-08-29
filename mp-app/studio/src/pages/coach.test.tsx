@@ -60,9 +60,7 @@ function stubFetch(routes: Route[]): void {
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(String(input), 'http://test.local');
       const method = (init?.method ?? 'GET').toUpperCase();
-      const hit = routes.find(
-        (r) => url.pathname === r.match && (r.method ?? 'GET') === method,
-      );
+      const hit = routes.find((r) => url.pathname === r.match && (r.method ?? 'GET') === method);
       if (!hit) throw new Error(`unexpected fetch ${method} ${url.pathname}`);
       const status = hit.status ?? 200;
       return {
@@ -89,9 +87,7 @@ describe('Coach', () => {
     render(<Coach />);
 
     await waitFor(() => expect(screen.getByTestId('ai-available')).toBeInTheDocument());
-    expect(screen.getByTestId('ai-available')).toHaveTextContent(
-      'مدل محلی در دسترس نیست',
-    );
+    expect(screen.getByTestId('ai-available')).toHaveTextContent('مدل محلی در دسترس نیست');
     expect(screen.getByTestId('ai-note')).toHaveTextContent('C7');
   });
 
@@ -165,9 +161,7 @@ describe('Coach', () => {
     await user.click(screen.getByRole('button', { name: 'محاسبهٔ انرژی و ماکرو' }));
 
     await waitFor(() =>
-      expect(screen.getByTestId('nutrition-result')).toHaveTextContent(
-        'جای توصیهٔ پزشک',
-      ),
+      expect(screen.getByTestId('nutrition-result')).toHaveTextContent('جای توصیهٔ پزشک'),
     );
   });
 
@@ -175,8 +169,6 @@ describe('Coach', () => {
     stubFetch(baseRoutes());
     render(<Coach />);
     await screen.findByTestId('nutrition-member');
-    expect(
-      screen.getByRole('button', { name: 'محاسبهٔ انرژی و ماکرو' }),
-    ).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'محاسبهٔ انرژی و ماکرو' })).toBeDisabled();
   });
 });

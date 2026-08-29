@@ -21,15 +21,9 @@ export function Skeleton({ label, width = '100%', height = 16, radius = 8 }: Ske
       aria-label={label}
       data-testid="mp-skeleton"
       animate={
-        reduced
-          ? { backgroundPosition: '0% 0' }
-          : { backgroundPosition: ['200% 0', '-200% 0'] }
+        reduced ? { backgroundPosition: '0% 0' } : { backgroundPosition: ['200% 0', '-200% 0'] }
       }
-      transition={
-        reduced
-          ? { duration: 0 }
-          : { duration: 1.8, repeat: Infinity, ease: 'linear' }
-      }
+      transition={reduced ? { duration: 0 } : { duration: 1.8, repeat: Infinity, ease: 'linear' }}
       style={{
         width,
         height,

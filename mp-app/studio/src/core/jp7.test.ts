@@ -14,29 +14,36 @@ function spread(total: number): SitesMap {
   return out;
 }
 
-type Row = [string, number, number, number, number];
-const GOLDEN: Row[] = [
-  ['male', 25, 60, 1.080674, 8.0474],
-  ['male', 25, 100, 1.066794, 14.0069],
-  ['male', 35, 80, 1.070632, 12.3439],
-  ['male', 45, 120, 1.05475, 19.3057],
-  ['male', 55, 150, 1.043272, 24.4687],
-  ['female', 25, 60, 1.067626, 13.6453],
-  ['female', 25, 100, 1.052422, 20.3436],
-  ['female', 35, 80, 1.058517, 17.6352],
-  ['female', 45, 120, 1.042926, 24.6261],
-  ['female', 55, 150, 1.032088, 29.6102],
+/** One golden fixture row. An object (not a tuple) so the callback below
+ *  stays within the <= 3-parameter contract. */
+interface Golden {
+  sex: 'male' | 'female';
+  age: number;
+  sum: number;
+  bd: number;
+  siri: number;
+}
+
+const GOLDEN: Golden[] = [
+  { sex: 'male', age: 25, sum: 60, bd: 1.080674, siri: 8.0474 },
+  { sex: 'male', age: 25, sum: 100, bd: 1.066794, siri: 14.0069 },
+  { sex: 'male', age: 35, sum: 80, bd: 1.070632, siri: 12.3439 },
+  { sex: 'male', age: 45, sum: 120, bd: 1.05475, siri: 19.3057 },
+  { sex: 'male', age: 55, sum: 150, bd: 1.043272, siri: 24.4687 },
+  { sex: 'female', age: 25, sum: 60, bd: 1.067626, siri: 13.6453 },
+  { sex: 'female', age: 25, sum: 100, bd: 1.052422, siri: 20.3436 },
+  { sex: 'female', age: 35, sum: 80, bd: 1.058517, siri: 17.6352 },
+  { sex: 'female', age: 45, sum: 120, bd: 1.042926, siri: 24.6261 },
+  { sex: 'female', age: 55, sum: 150, bd: 1.032088, siri: 29.6102 },
 ];
 
 describe('frontend jp7 mirrors backend', () => {
-  it.each(GOLDEN)(
-    '%s age %i sum %f -> BD %f BF %f',
-    (sex, age, sum, bd, siri) => {
-      const sites = spread(sum);
-      expect(bodyDensity(sex as 'male' | 'female', sites, age)).toBeCloseTo(bd, 5);
-      expect(bodyFatPercent(bodyDensity(sex as 'male' | 'female', sites, age))).toBeCloseTo(siri, 2);
-    },
-  );
+  it.each(GOLDEN)('$sex age $age sum $sum -> BD $bd BF $siri', ({ sex, age, sum, bd, siri }) => {
+    const sites = spread(sum);
+    const density = bodyDensity(sex, sites, age);
+    expect(density).toBeCloseTo(bd, 5);
+    expect(bodyFatPercent(density)).toBeCloseTo(siri, 2);
+  });
 
   it('published anchor: male 35 sum107 -> BD 1.06166', () => {
     expect(bodyDensity('male', spread(107), 35)).toBeCloseTo(1.06166, 4);

@@ -48,9 +48,9 @@ describe('validatePayment', () => {
   });
 
   it('passes for a complete draft', () => {
-    expect(
-      validatePayment({ ...emptyPaymentDraft, memberId: 3, amountRial: '500,000' }),
-    ).toEqual([]);
+    expect(validatePayment({ ...emptyPaymentDraft, memberId: 3, amountRial: '500,000' })).toEqual(
+      [],
+    );
   });
 
   it('rejects a zero amount', () => {
@@ -66,9 +66,9 @@ describe('validatePayment', () => {
 
 describe('qrLooksComplete', () => {
   it('needs the signed core fields', () => {
-    expect(
-      qrLooksComplete({ typ: 'member', gym: 1, mid: 7, exp: 9999999999, sig: 'abc' }),
-    ).toBe(true);
+    expect(qrLooksComplete({ typ: 'member', gym: 1, mid: 7, exp: 9999999999, sig: 'abc' })).toBe(
+      true,
+    );
     expect(qrLooksComplete({ gym: 1, mid: 7, exp: 1, sig: '' })).toBe(false);
     expect(qrLooksComplete({ mid: 7 })).toBe(false);
     expect(qrLooksComplete({})).toBe(false);

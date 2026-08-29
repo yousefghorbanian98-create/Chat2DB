@@ -35,9 +35,7 @@ function stubFetch(routes: Route[]): void {
     vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = new URL(String(input), 'http://test.local');
       const method = (init?.method ?? 'GET').toUpperCase();
-      const hit = routes.find(
-        (r) => url.pathname === r.match && (r.method ?? 'GET') === method,
-      );
+      const hit = routes.find((r) => url.pathname === r.match && (r.method ?? 'GET') === method);
       if (!hit) throw new Error(`unexpected fetch ${method} ${url.pathname}`);
       const status = hit.status ?? 200;
       return {
@@ -79,9 +77,7 @@ describe('Sync', () => {
   });
 
   it('reports an idle second sync instead of an empty box', async () => {
-    stubFetch([
-      { match: '/api/v1/sync/delta', body: { cursor: 'c1', total: 0, changes: {} } },
-    ]);
+    stubFetch([{ match: '/api/v1/sync/delta', body: { cursor: 'c1', total: 0, changes: {} } }]);
     const user = userEvent.setup();
     render(<Sync />);
 
@@ -120,15 +116,11 @@ describe('Sync', () => {
     await user.type(screen.getByTestId('backup-password'), 's3cret-pass');
     await user.click(screen.getByRole('button', { name: 'تهیهٔ بکاپ' }));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('backup-note')).toHaveTextContent('فقط OWNER'),
-    );
+    await waitFor(() => expect(screen.getByTestId('backup-note')).toHaveTextContent('فقط OWNER'));
   });
 
   it('restores and confirms the verified row count', async () => {
-    stubFetch([
-      { method: 'POST', match: '/api/v1/admin/backup/restore', body: RESTORED },
-    ]);
+    stubFetch([{ method: 'POST', match: '/api/v1/admin/backup/restore', body: RESTORED }]);
     const user = userEvent.setup();
     render(<Sync />);
 

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, type MotionStyle } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 import { buttonVariants, durations, springs } from '../motion/presets';
@@ -35,6 +35,51 @@ const STATE_LABEL: Record<ButtonState, string> = {
   error: 'خطا — تلاش دوباره',
 };
 
+/** Hoisted so the JSX stays inside the function budget (no per-render object). */
+function buttonStyle(variant: ButtonVariant, isDisabled: boolean): MotionStyle {
+  return {
+    background: BACKGROUND[variant],
+    color: FOREGROUND[variant],
+    border: variant === 'ghost' ? '1px solid var(--color-border-subtle)' : 'none',
+    borderRadius: 'var(--radius-sm)',
+    minHeight: 44, // MASTER.md: touch target >= 44px
+    padding: '12px 22px',
+    fontFamily: 'var(--font-body)',
+    fontSize: 15,
+    fontWeight: 600,
+    cursor: isDisabled ? 'not-allowed' : 'pointer',
+    opacity: isDisabled ? 0.7 : 1,
+  };
+}
+
+/** Pulsing dots — a blank button while loading is forbidden by the loop. */
+function Spinner() {
+  return (
+    <span className="mp-btn-spinner" aria-hidden>
+      <motion.span
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1, repeat: Infinity }}
+      >
+        ●●●
+      </motion.span>
+    </span>
+  );
+}
+
+/** Recovery hint with the FINN-LOOP error shake (neutralised for reduced motion). */
+function ErrorBadge({ reduced }: { reduced: boolean }) {
+  return (
+    <motion.span
+      role="alert"
+      animate={reduced ? { x: 0 } : { x: [0, -6, 6, -4, 4, 0] }}
+      transition={{ duration: reduced ? 0 : durations.slow }}
+      style={{ marginInlineStart: 8 }}
+    >
+      {STATE_LABEL.error}
+    </motion.span>
+  );
+}
+
 /**
  * Pressable button with spring feedback and all four MP states.
  *
@@ -66,43 +111,10 @@ export function MotionButton({
       {...(isDisabled || reduced ? {} : { whileHover: 'hover', whileTap: 'tap' })}
       variants={buttonVariants}
       transition={reduced ? { duration: 0 } : springs.snappy}
-      style={{
-        background: BACKGROUND[variant],
-        color: FOREGROUND[variant],
-        border:
-          variant === 'ghost' ? '1px solid var(--color-border-subtle)' : 'none',
-        borderRadius: 'var(--radius-sm)',
-        minHeight: 44, // MASTER.md: touch target >= 44px
-        padding: '12px 22px',
-        fontFamily: 'var(--font-body)',
-        fontSize: 15,
-        fontWeight: 600,
-        cursor: isDisabled ? 'not-allowed' : 'pointer',
-        opacity: isDisabled ? 0.7 : 1,
-      }}
+      style={buttonStyle(variant, isDisabled)}
     >
-      {busy ? (
-        <span className="mp-btn-spinner" aria-hidden>
-          <motion.span
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            ●●●
-          </motion.span>
-        </span>
-      ) : (
-        children
-      )}
-      {state === 'error' && (
-        <motion.span
-          role="alert"
-          animate={reduced ? { x: 0 } : { x: [0, -6, 6, -4, 4, 0] }}
-          transition={{ duration: reduced ? 0 : durations.slow }}
-          style={{ marginInlineStart: 8 }}
-        >
-          {STATE_LABEL.error}
-        </motion.span>
-      )}
+      {busy ? <Spinner /> : children}
+      {state === 'error' && <ErrorBadge reduced={reduced} />}
     </motion.button>
   );
 }

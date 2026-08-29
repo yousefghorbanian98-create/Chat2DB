@@ -37,7 +37,10 @@ export function StatCard({ labelFa, labelEn, value, unit, tone = 'default' }: St
       }}
     >
       <div style={{ fontSize: 12, color: 'var(--color-muted-foreground)' }}>
-        {labelFa} <span dir="ltr" style={{ opacity: 0.6 }}>{labelEn}</span>
+        {labelFa}{' '}
+        <span dir="ltr" style={{ opacity: 0.6 }}>
+          {labelEn}
+        </span>
       </div>
       <div
         className="numeric"

@@ -43,9 +43,7 @@ export function bodyDensity(sex: Sex, sites: SitesMap, age: number): number {
 
 export function bodyFatPercent(density: number, equation: Equation = 'siri'): number {
   if (density <= 0) throw new Error('body density must be > 0');
-  return equation === 'siri'
-    ? (4.95 / density - 4.5) * 100
-    : (4.57 / density - 4.142) * 100;
+  return equation === 'siri' ? (4.95 / density - 4.5) * 100 : (4.57 / density - 4.142) * 100;
 }
 
 const BANDS: Record<Sex, Array<[number, string]>> = {
@@ -87,7 +85,8 @@ export function computeJp7(opts: {
     bodyDensity: Number(density.toFixed(6)),
     bodyFatPct: Number(pct.toFixed(4)),
     fatMassKg: fm === null ? null : Number(fm.toFixed(4)),
-    leanMassKg: opts.weightKg != null && fm !== null ? Number((opts.weightKg - fm).toFixed(4)) : null,
+    leanMassKg:
+      opts.weightKg !== undefined && fm !== null ? Number((opts.weightKg - fm).toFixed(4)) : null,
     classification: classify(opts.sex, pct),
   };
 }

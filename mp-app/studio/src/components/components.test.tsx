@@ -2,7 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CoreStatus, type CoreHealth } from './CoreStatus';
+import type { CoreHealth } from '../api/client';
+import { CoreStatus } from './CoreStatus';
 import { MotionButton } from './MotionButton';
 import { MotionCard } from './MotionCard';
 import { Skeleton } from './Skeleton';
@@ -52,7 +53,11 @@ describe('MotionButton', () => {
 
 describe('MotionCard', () => {
   it('renders as an article with the glass class and its title', () => {
-    render(<MotionCard title="ارزیابی JP7" testId="card">محتوا</MotionCard>);
+    render(
+      <MotionCard title="ارزیابی JP7" testId="card">
+        محتوا
+      </MotionCard>,
+    );
     const card = screen.getByTestId('card');
     expect(card.tagName).toBe('ARTICLE');
     expect(card).toHaveClass('glass');
@@ -77,10 +82,10 @@ describe('CoreStatus (health contract)', () => {
     });
     render(<CoreStatus />);
 
-    expect(screen.getByRole('status')).toHaveAccessibleName(
-      'بررسی وضعیت هستهٔ محلی',
+    expect(screen.getByRole('status')).toHaveAccessibleName('بررسی وضعیت هستهٔ محلی');
+    await waitFor(() =>
+      expect(screen.getByTestId('mp-core-status')).toHaveAttribute('data-phase', 'online'),
     );
-    await waitFor(() => expect(screen.getByTestId('mp-core-status')).toHaveAttribute('data-phase', 'online'));
     expect(screen.getByTestId('mp-core-status')).toHaveTextContent('0001_core');
   });
 
