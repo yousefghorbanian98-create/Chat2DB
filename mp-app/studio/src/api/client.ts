@@ -192,6 +192,33 @@ export const api = {
     request<Payment>(`/api/v1/payments/${paymentId}/void`, { method: 'POST' }),
   dashboard: () => request<Dashboard>('/api/v1/reports/dashboard'),
 
+  // Phase 3 — rule planner (generate → dry-run → apply → archive)
+  generateProgram: (memberId: number, template: ProgramTemplate) =>
+    request<GeneratedProgram>(`/api/v1/members/${memberId}/programs/generate`, {
+      method: 'POST',
+      body: JSON.stringify({ template }),
+    }),
+  listPrograms: (memberId: number) =>
+    request<ProgramRow[]>(`/api/v1/members/${memberId}/programs`),
+  dryRunProgram: (programId: number) =>
+    request<DryRunResult>(`/api/v1/programs/${programId}/dry-run`, { method: 'POST' }),
+  applyProgram: (programId: number) =>
+    request<ApplyResult>(`/api/v1/programs/${programId}/apply`, { method: 'POST' }),
+  archiveProgram: (programId: number) =>
+    request<ApplyResult>(`/api/v1/programs/${programId}/archive`, { method: 'POST' }),
+
+  // Phase 4 — deterministic nutrition from the latest assessment LBM
+  planNutrition: (
+    memberId: number,
+    body: { goal?: 'cut' | 'maintain' | 'bulk'; activity?: ActivityLevel; protein_g_per_kg?: number },
+  ) =>
+    request<NutritionPlan>(`/api/v1/nutrition/members/${memberId}/plan`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  getNutrition: (memberId: number) =>
+    request<NutritionRow>(`/api/v1/nutrition/members/${memberId}/plan`),
+
   // Phase 4/6 — AI runtime, delta sync, backup
   aiRuntime: () => request<AiRuntime>('/api/v1/ai/runtime'),
   syncDelta: (since?: string) =>
@@ -241,6 +268,87 @@ export interface Dashboard {
   members_with_active_injury: number;
   check_ins_today: number;
   revenue_rial_this_month: number;
+}
+
+export type ProgramTemplate = 'ppl' | 'ul' | 'fb' | 'corrective';
+
+export interface DroppedExercise {
+  exercise?: string;
+  reason?: string;
+  [k: string]: unknown;
+}
+
+export interface ProgramDayPreview {
+  name: string;
+  exercises: string[];
+  dropped: DroppedExercise[];
+}
+
+export interface GeneratedProgram {
+  id: number;
+  status: string;
+  template: string;
+  days: ProgramDayPreview[];
+  meta: {
+    blocked_patterns: string[];
+    equipment_available: string[];
+    dropped: Array<DroppedExercise & { day: string }>;
+    corrective_block_added: boolean;
+  };
+}
+
+export interface ProgramRow {
+  id: number;
+  member_id: number;
+  title: string;
+  status: string;
+  source: string;
+  payload: string;
+  judge_score: number | null;
+  generated_by: number | null;
+  approved_by: number | null;
+  applied_at: string | null;
+  created_at: string;
+}
+
+export interface DryRunResult {
+  program_id: number;
+  status: string;
+  safe_to_apply: boolean;
+  newly_blocked: string[];
+}
+
+export interface ApplyResult {
+  id: number;
+  status: string;
+  applied_at?: string | null;
+}
+
+export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'athlete';
+
+/** Response of POST /nutrition/members/{id}/plan (verified live). */
+export interface NutritionPlan {
+  member_id: number;
+  lean_mass_kg: number;
+  bmr_kcal: number;
+  tdee_kcal: number;
+  target_kcal: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
+
+/** Response of GET /nutrition/members/{id}/plan — the stored row. */
+export interface NutritionRow {
+  id: number;
+  member_id: number;
+  bmr_kcal: number;
+  tdee_kcal: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  payload: string;
+  created_at: string;
 }
 
 export interface AiRuntime {

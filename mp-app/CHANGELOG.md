@@ -3,6 +3,29 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.10.0] — 2026-08-29 — Studio program planner (Phase 3 UI)
+
+### Added
+- `pages/Programs.tsx` — rule-planner console: member + template (PPL / UL /
+  Full Body / Corrective) → generate → dry-run → apply → history. Apply stays
+  **disabled until a dry-run returns `safe_to_apply`** (rules C6 + C8), and a 409
+  from the server is surfaced rather than swallowed.
+- `components/ProgramPreview.tsx` — the transparency surface: days with their
+  exercises, the injury filters in force, and **every dropped exercise with a
+  Persian reason** (hard block / equipment / duplicate / no candidate).
+- `api/client.ts` — `generateProgram`, `listPrograms`, `dryRunProgram`,
+  `applyProgram`, `archiveProgram`, `planNutrition`, `getNutrition`, with types
+  derived from `openapi.yaml` and a live response (not from memory).
+
+### Measured
+- Studio: **70 tests passed** (was 62) — 8 new covering generate, drop reasons,
+  the apply gate in both dry-run outcomes, the C8 409, and history empty/full.
+- `tsc --noEmit` clean; initial bundle **94.60 kB gzip**; `Programs` code-split
+  into **2.80 kB gzip**.
+- Live E2E on the running core (after seeding the 30-exercise library):
+  generate 201 → day A `ex007/ex010/ex026`, day B `ex022/ex025`; dry-run
+  `safe_to_apply: true`; apply 200 → `trainer_approved`; archive 200 → `archived`.
+
 ## [0.9.0] — 2026-08-29 — Studio Operations console (Phase 2 UI)
 
 ### Added

@@ -698,6 +698,10 @@ conventional deadlift and swaps in the trap-bar deadlift when equipped; with no
 trap bar the slot is dropped, never invented. Apply of a program whose stored ops
 are newly blocked returns 409; `archived` is terminal.
 
+- [x] Studio UI for the planner  ✅ `pages/Programs.tsx` + `ProgramPreview`: generate → dry-run → apply → history; apply is disabled until `safe_to_apply`; every dropped exercise shown with a Persian reason
+
+**Phase 3 UI evidence (2026-08-29):** studio **70 tests**, `tsc` clean, initial bundle **94.60 kB gzip** (`Programs` split at 2.80 kB gzip). Live: generate 201 (day A `ex007/ex010/ex026`, day B `ex022/ex025`), dry-run `safe_to_apply: true`, apply 200 → `trainer_approved`, archive 200 → `archived`.
+
 ### Phase 4 — AI (weeks 7–8)
 - [x] Ollama detect + AiRuntime settings  ✅ `GET /api/v1/ai/runtime`; injectable probe, never required (C1/C2)
 - [ ] RAG over KB pack  ⏳ needs a vector store + embeddings (deferred; no Ollama in build env)

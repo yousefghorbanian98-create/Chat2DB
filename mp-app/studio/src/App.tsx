@@ -13,8 +13,9 @@ import { Login } from './pages/Login';
 // assessment chunk, so the initial launcher shell stays ~92 kB gzip.
 const AssessmentJp7 = lazy(() => import('./pages/AssessmentJp7'));
 const Operations = lazy(() => import('./pages/Operations'));
+const Programs = lazy(() => import('./pages/Programs'));
 
-type Route = 'home' | 'assessment' | 'operations';
+type Route = 'home' | 'assessment' | 'operations' | 'programs';
 
 const TILES: ReadonlyArray<{ key: string; fa: string; en: string; phase: string; route?: Route }> = [
   { key: 'jp7', fa: 'ارزیابی JP7', en: 'JP7 Assessment', phase: 'Phase 1', route: 'assessment' },
@@ -22,7 +23,7 @@ const TILES: ReadonlyArray<{ key: string; fa: string; en: string; phase: string;
   { key: 'injuries', fa: 'آسیب‌ها', en: 'Injuries', phase: 'Phase 1' },
   { key: 'attendance', fa: 'حضور و غیاب', en: 'Attendance', phase: 'Phase 2', route: 'operations' },
   { key: 'payments', fa: 'پرداخت‌ها', en: 'Payments', phase: 'Phase 2', route: 'operations' },
-  { key: 'programs', fa: 'برنامه تمرین', en: 'Programs', phase: 'Phase 3' },
+  { key: 'programs', fa: 'برنامه تمرین', en: 'Programs', phase: 'Phase 3', route: 'programs' },
   { key: 'ai', fa: 'مربی هوش مصنوعی', en: 'AI Coach', phase: 'Phase 4' },
   { key: 'sync', fa: 'همگام‌سازی', en: 'Sync', phase: 'Phase 6' },
 ] as const;
@@ -31,6 +32,7 @@ const SUBTITLE: Record<Route, string> = {
   home: 'سیستم‌عامل باشگاه',
   assessment: 'ارزیابی ترکیب بدنی — جکسون-پولاک ۷',
   operations: 'عملیات روزانه — ورود، پرداخت، شاخص‌ها',
+  programs: 'برنامه تمرین قانون‌محور — ساخت، بررسی ایمنی، اعمال',
 };
 
 function Shell() {
@@ -122,7 +124,13 @@ function Shell() {
           </motion.section>
         ) : (
           <Suspense fallback={<Skeleton label={SUBTITLE[route]} height={400} />}>
-            {route === 'operations' ? <Operations /> : <AssessmentJp7 />}
+            {route === 'operations' ? (
+              <Operations />
+            ) : route === 'programs' ? (
+              <Programs />
+            ) : (
+              <AssessmentJp7 />
+            )}
           </Suspense>
         )}
       </motion.main>
