@@ -102,3 +102,50 @@ def test_pin_is_never_exposed_in_any_read(seeded, owner_auth, member_id) -> None
     seeded.post(f"/api/v1/members/{member_id}/pin", headers=owner_auth, json={"pin": "9876"})
     got = seeded.get(f"/api/v1/members/{member_id}", headers=owner_auth).json()
     assert "pin_hash" not in got and "pin" not in got
+
+
+JP7_SITES = {
+    "chest": 12, "midaxillary": 10, "triceps": 14, "subscapular": 16,
+    "abdominal": 20, "suprailiac": 15, "thigh": 18,
+}
+
+
+def _give_member_a_plan(seeded, owner_auth, member_id) -> None:
+    seeded.post(
+        f"/api/v1/members/{member_id}/assessments",
+        headers=owner_auth,
+        json={"weight_kg": 62.5, "age_years": 30, "sites_mm": JP7_SITES},
+    )
+    res = seeded.post(
+        f"/api/v1/nutrition/members/{member_id}/plan",
+        headers=owner_auth,
+        json={"goal": "maintain", "activity": "moderate"},
+    )
+    assert res.status_code == 201, res.text
+
+
+def test_member_reads_own_nutrition_without_internal_payload(
+    seeded, owner_auth, member_auth, member_id
+) -> None:
+    _give_member_a_plan(seeded, owner_auth, member_id)
+
+    staff_view = seeded.get(
+        f"/api/v1/nutrition/members/{member_id}/plan", headers=owner_auth
+    ).json()
+    assert "payload" in staff_view  # the coach keeps the envelope
+
+    res = seeded.get("/api/v1/client/me/nutrition", headers=member_auth(member_id))
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["tdee_kcal"] == staff_view["tdee_kcal"]
+    assert body["protein_g"] == staff_view["protein_g"]
+    assert "payload" not in body  # C11: the athlete never sees the blob
+
+
+def test_client_nutrition_is_404_before_any_plan(seeded, member_auth, member_id) -> None:
+    res = seeded.get("/api/v1/client/me/nutrition", headers=member_auth(member_id))
+    assert res.status_code == 404
+
+
+def test_staff_token_rejected_on_client_nutrition(seeded, owner_auth) -> None:
+    assert seeded.get("/api/v1/client/me/nutrition", headers=owner_auth).status_code == 403

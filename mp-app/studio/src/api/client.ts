@@ -9,6 +9,7 @@
 export * from './types';
 
 import type {
+  ClientNutrition,
   CoreHealth,
   Member,
   Assessment,
@@ -111,6 +112,7 @@ export const api = {
   clientMe: () => request<Member>('/api/v1/client/me'),
   clientAssessments: () => request<Assessment[]>('/api/v1/client/me/assessments'),
   clientPrograms: () => request<ProgramRow[]>('/api/v1/client/me/programs'),
+  clientNutrition: () => request<ClientNutrition>('/api/v1/client/me/nutrition'),
   listMembers: () => request<Member[]>('/api/v1/members'),
   listAssessments: (memberId: number) =>
     request<Assessment[]>(`/api/v1/members/${memberId}/assessments`),

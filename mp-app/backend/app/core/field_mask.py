@@ -34,3 +34,18 @@ def mask_assessment_row(role: str, row: dict[str, Any]) -> dict[str, Any]:
 
 def mask_many(role: str, rows, masker=mask_member_row) -> list[dict[str, Any]]:
     return [masker(role, dict(r)) for r in rows]
+
+
+#: Internal serialization a MEMBER has no business seeing on a nutrition plan.
+NUTRITION_MEMBER_HIDDEN = frozenset({"payload", "created_by", "updated_by", "deleted_at"})
+
+
+def mask_nutrition_row(role: str, row: dict[str, Any]) -> dict[str, Any]:
+    """Strip the internal `payload` blob from a nutrition plan for MEMBER.
+
+    The athlete needs the numbers (BMR/TDEE/macros); the stored JSON envelope is
+    an implementation detail (PII minimization, map C11).
+    """
+    if role != "MEMBER":
+        return dict(row)
+    return {k: v for k, v in row.items() if k not in NUTRITION_MEMBER_HIDDEN}

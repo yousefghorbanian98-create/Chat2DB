@@ -9,9 +9,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.deps import PrincipalDep, get_principal
-from app.core.field_mask import mask_assessment_row, mask_member_row
+from app.core.field_mask import mask_assessment_row, mask_member_row, mask_nutrition_row
 from app.repo import assessments as assessments_repo
 from app.repo import members as members_repo
+from app.repo import nutrition as nutrition_repo
 from app.repo import programs as programs_repo
 from app.state import get_engine
 
@@ -53,3 +54,12 @@ def my_assessments(principal: MemberPrincipal) -> list[dict]:
 def my_programs(principal: MemberPrincipal) -> list[dict]:
     mid = _require_member(principal)
     return programs_repo.list_for_member(get_engine(), principal.gym_id, mid)
+
+
+@router.get("/me/nutrition", summary="My latest nutrition plan (payload stripped)")
+def my_nutrition(principal: MemberPrincipal) -> dict:
+    mid = _require_member(principal)
+    row = nutrition_repo.latest(get_engine(), principal.gym_id, mid)
+    if row is None:
+        raise HTTPException(status_code=404, detail="no nutrition plan yet")
+    return mask_nutrition_row(principal.role, row)

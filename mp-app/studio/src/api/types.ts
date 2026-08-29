@@ -214,6 +214,9 @@ export interface NutritionRow {
   created_at: string;
 }
 
+/** The athlete's own plan: the internal `payload` blob is stripped server-side. */
+export type ClientNutrition = Omit<NutritionRow, 'payload'>;
+
 export interface AiRuntime {
   available: boolean;
   base_url: string;

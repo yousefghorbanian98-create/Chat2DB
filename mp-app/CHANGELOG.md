@@ -3,6 +3,35 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.19.0] — 2026-08-30 — Jalali dates + athlete nutrition (Persian-first C, C11)
+
+### Added
+- `studio/src/core/jalali.ts` — dependency-free Gregorian → Jalali conversion
+  (published jalaali arithmetic, MIT) plus `faDigits`. `Intl`'s Persian calendar
+  is not present on every target (old kiosks, jsdom), so the math is ours and
+  unit-pinned. Nine golden anchors cross-checked against an independent
+  implementation (Python `jdatetime`) — including Nowruz 1405 (2026-03-21) and a
+  leap Esfand (2025-03-20 → 1403-12-30).
+- `ClientShell` renders assessment dates **and** membership expiry as Jalali;
+  both were raw ISO slices before (a Persian-first contract gap).
+- `GET /client/me/nutrition` — the athlete's own plan, force-scoped and passed
+  through the new `mask_nutrition_row`, which strips the internal `payload`
+  envelope (PII minimization). `NutritionCard` shows kcal + macros.
+
+### Fixed
+- `requirements.txt` was missing `cryptography` (a fresh install could not even
+  import the app — `app/core/backup.py` needs Fernet) and `PyMuPDF` (its absence
+  silently skipped the PDF text-extraction test).
+
+### Measured (C12)
+- Backend tests **231 → 234** (+3 client-nutrition); coverage **90.39%**, gate
+  exit 0. Studio tests **96 → 110** (+13 jalali anchors/cases, +1 nutrition card);
+  `tsc --noEmit` 0, `eslint .` 0.
+- Live E2E on the running core: coach plan (LBM 50.0857 → BMR 1451.9, TDEE
+  2250.4, protein 90.2 — all match `370 + 21.6·LBM`, `×1.55`, `1.8 g/kg` by
+  hand); athlete read returns the same numbers with **no `payload`**; staff
+  token on `/client/me/nutrition` → **403**.
+
 ## [0.18.0] — 2026-08-30 — Athlete web client shell (§5, dual-shell isolation)
 
 ### Added

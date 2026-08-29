@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react';
 
-import type { Assessment, Member, ProgramRow } from '../api/client';
+import type { Assessment, ClientNutrition, Member, ProgramRow } from '../api/client';
 import { MotionButton } from '../components/MotionButton';
 import { MotionCard } from '../components/MotionCard';
 import { Skeleton } from '../components/Skeleton';
 import { StatCard } from '../components/StatCard';
 import { useAuth } from '../auth/useAuth';
 import { useClientData } from '../hooks/useClientData';
+import { faDate } from '../core/jalali';
 import { cardSection, cardTitle, muted, stackLg } from '../styles/blocks';
 
 const PAGE: CSSProperties = {
@@ -28,8 +29,22 @@ function ProfileCard({ me }: { me: Member }) {
         <StatCard
           labelFa="اعتبار تا"
           labelEn="exp"
-          value={me.membership_exp ? me.membership_exp.slice(0, 10) : '—'}
+          value={me.membership_exp ? faDate(me.membership_exp) : '—'}
         />
+      </div>
+    </MotionCard>
+  );
+}
+
+/** Daily energy + macro targets (the internal payload blob is server-stripped). */
+function NutritionCard({ plan }: { plan: ClientNutrition }) {
+  return (
+    <MotionCard title="تغذیهٔ من" testId="client-nutrition">
+      <div style={STAT_ROW}>
+        <StatCard labelFa="کالری روزانه" labelEn="kcal" value={plan.tdee_kcal.toFixed(0)} unit="kcal" tone="primary" />
+        <StatCard labelFa="پروتئین" labelEn="protein" value={plan.protein_g.toFixed(0)} unit="g" />
+        <StatCard labelFa="کربوهیدرات" labelEn="carbs" value={plan.carbs_g.toFixed(0)} unit="g" />
+        <StatCard labelFa="چربی" labelEn="fat" value={plan.fat_g.toFixed(0)} unit="g" />
       </div>
     </MotionCard>
   );
@@ -46,10 +61,8 @@ function AssessmentList({ rows }: { rows: Assessment[] }) {
         <ul style={LIST}>
           {rows.slice(0, 6).map((a) => (
             <li key={a.id}>
-              <span className="numeric" dir="ltr">
-                {a.created_at.slice(0, 10)}
-              </span>{' '}
-              — چربی {a.body_fat_pct.toFixed(1)}٪ · وزن {a.weight_kg.toFixed(1)} kg
+              <span className="numeric">{faDate(a.created_at)}</span> — چربی{' '}
+              {a.body_fat_pct.toFixed(1)}٪ · وزن {a.weight_kg.toFixed(1)} kg
             </li>
           ))}
         </ul>
@@ -84,7 +97,7 @@ function ProgramList({ rows }: { rows: ProgramRow[] }) {
  */
 export function ClientShell() {
   const { logout } = useAuth();
-  const { me, assessments, programs, loading, error, reload } = useClientData();
+  const { me, assessments, programs, nutrition, loading, error, reload } = useClientData();
 
   return (
     <div style={PAGE}>
@@ -110,6 +123,7 @@ export function ClientShell() {
       ) : me ? (
         <>
           <ProfileCard me={me} />
+          {nutrition ? <NutritionCard plan={nutrition} /> : null}
           <AssessmentList rows={assessments} />
           <ProgramList rows={programs} />
         </>

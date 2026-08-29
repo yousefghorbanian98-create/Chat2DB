@@ -3,7 +3,7 @@
 ```
 Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: Athlete web client shell CLOSED (0.18.0) — Studio 96 tests, tsc 0, eslint 0; live E2E member-login → /client/me with staff-403 isolation. Next = the remaining env-BLOCKED items (Core Web Vitals, Electron binary, native Flutter, Ollama live, runnable Kiosk).
+Current Task: Jalali dates + athlete nutrition CLOSED (0.19.0) — backend 234 tests / 90.39% cov, Studio 110 tests / tsc 0 / eslint 0; live E2E: athlete reads own macros with `payload` stripped, staff 403. Fixed a real install break: requirements.txt lacked cryptography + PyMuPDF. Next = the remaining env-BLOCKED items (Core Web Vitals, Electron binary, native Flutter, Ollama live, runnable Kiosk).
 Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
