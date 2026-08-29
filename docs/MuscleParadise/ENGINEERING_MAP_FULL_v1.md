@@ -715,6 +715,10 @@ absent, ties, or violates limitations, and `ollama` only when strictly safer and
 better. Nutrition: LBM 49.1088 → BMR 1430.8 (Katch–McArdle), reconstructed macro
 calories ≈ target. `/ai/runtime` reports `available: false` in this sandbox.
 
+- [x] Studio UI for nutrition + AI status  ✅ `pages/Coach.tsx`: goal × activity → server-computed BMR/TDEE/macros (no client maths, C4), 422 → "register a JP7 assessment first", honest offline-AI card carrying the C7 note
+
+**Phase 4 UI evidence (2026-08-29):** studio **75 tests**, `tsc` clean, initial bundle **94.69 kB gzip** (`Coach` split at 2.18 kB gzip). Nutrition re-derived independently and matched live: BMR `370+21.6×71.8327 = 1921.6`, TDEE `×1.725 = 3314.7`, cut `×0.85 = 2817.5`, protein `129.3`, fat `78.3`, carbs `399.0`.
+
 ### Phase 5 — Client app (weeks 9–10)
 - [x] Flutter auth scoped API  ✅ `/api/v1/client/*` force-scoped to the token's member_id; staff tokens 403
 - [ ] Home / workout logger / QR / payments self  ⏳ Flutter client UI (Phase 6/7)

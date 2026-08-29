@@ -14,8 +14,9 @@ import { Login } from './pages/Login';
 const AssessmentJp7 = lazy(() => import('./pages/AssessmentJp7'));
 const Operations = lazy(() => import('./pages/Operations'));
 const Programs = lazy(() => import('./pages/Programs'));
+const Coach = lazy(() => import('./pages/Coach'));
 
-type Route = 'home' | 'assessment' | 'operations' | 'programs';
+type Route = 'home' | 'assessment' | 'operations' | 'programs' | 'coach';
 
 const TILES: ReadonlyArray<{ key: string; fa: string; en: string; phase: string; route?: Route }> = [
   { key: 'jp7', fa: 'ارزیابی JP7', en: 'JP7 Assessment', phase: 'Phase 1', route: 'assessment' },
@@ -24,7 +25,7 @@ const TILES: ReadonlyArray<{ key: string; fa: string; en: string; phase: string;
   { key: 'attendance', fa: 'حضور و غیاب', en: 'Attendance', phase: 'Phase 2', route: 'operations' },
   { key: 'payments', fa: 'پرداخت‌ها', en: 'Payments', phase: 'Phase 2', route: 'operations' },
   { key: 'programs', fa: 'برنامه تمرین', en: 'Programs', phase: 'Phase 3', route: 'programs' },
-  { key: 'ai', fa: 'مربی هوش مصنوعی', en: 'AI Coach', phase: 'Phase 4' },
+  { key: 'ai', fa: 'مربی هوش مصنوعی', en: 'AI Coach', phase: 'Phase 4', route: 'coach' },
   { key: 'sync', fa: 'همگام‌سازی', en: 'Sync', phase: 'Phase 6' },
 ] as const;
 
@@ -33,6 +34,7 @@ const SUBTITLE: Record<Route, string> = {
   assessment: 'ارزیابی ترکیب بدنی — جکسون-پولاک ۷',
   operations: 'عملیات روزانه — ورود، پرداخت، شاخص‌ها',
   programs: 'برنامه تمرین قانون‌محور — ساخت، بررسی ایمنی، اعمال',
+  coach: 'تغذیهٔ قطعی و وضعیت هوش مصنوعی',
 };
 
 function Shell() {
@@ -128,6 +130,8 @@ function Shell() {
               <Operations />
             ) : route === 'programs' ? (
               <Programs />
+            ) : route === 'coach' ? (
+              <Coach />
             ) : (
               <AssessmentJp7 />
             )}

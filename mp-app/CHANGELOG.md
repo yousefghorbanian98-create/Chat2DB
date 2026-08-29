@@ -3,6 +3,29 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.11.0] — 2026-08-29 — Studio coach surface (Phase 4 UI)
+
+### Added
+- `pages/Coach.tsx` — deterministic nutrition (goal × activity → BMR / TDEE /
+  target / protein / carbs / fat) plus an honest AI-runtime card.
+  - **No client-side nutrition maths**: every kcal and gram is the server's
+    answer. A 422 (no assessment with LBM) is translated into "register a JP7
+    assessment first" — the client never fabricates a number (rule C4).
+  - AI card states plainly when no local model is reachable and always shows the
+    C7 note that rules stay authoritative.
+  - Clinical disclaimer travels with every plan.
+
+### Measured
+- Studio: **75 tests passed** (was 70) — 5 new covering offline-AI honesty, the
+  no-assessment guard, server-computed macros, the disclaimer, and the disabled
+  compute button.
+- `tsc --noEmit` clean; initial bundle **94.69 kB gzip**; `Coach` code-split at
+  **2.18 kB gzip**.
+- Nutrition math independently re-derived and matched the live server:
+  LBM 71.8327 → BMR `370 + 21.6×71.8327 = 1921.6`; TDEE `×1.725 = 3314.7`;
+  cut target `×0.85 = 2817.5`; protein `×1.8 = 129.3`; fat `25%÷9 = 78.3`;
+  carbs `399.0`.
+
 ## [0.10.0] — 2026-08-29 — Studio program planner (Phase 3 UI)
 
 ### Added
