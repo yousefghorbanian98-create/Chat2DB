@@ -3,6 +3,34 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.9.0] — 2026-08-29 — Studio Operations console (Phase 2 UI)
+
+### Added
+- `pages/Operations.tsx` — daily-ops console: door KPIs for everyone, money KPIs
+  only for OWNER/ADMIN (§2.4), with loading / error+retry / success states.
+- `components/CheckinPanel.tsx` — manual check-in + signed-QR paste. HTTP codes
+  become actionable Persian: 402 expired, 409 already inside, 401 tampered QR.
+- `components/PaymentPanel.tsx` — package quick-pick, Rial entry, method chips,
+  receipt PDF link.
+- `ops/opsValidation.ts` — pure `formatRial` / `parseRial` (Persian digits +
+  separators) / `validatePayment` / `qrLooksComplete`.
+- `.mp-input` + `.mp-chip` in `tokens.css` with hover/focus/active states;
+  motion is transform+opacity only and neutralised by `prefers-reduced-motion`.
+
+### Fixed
+- `api/client.ts` shipped wrong paths/types: packages are at `/api/v1/packages`
+  (the payments router has no prefix), `/attendance/today` returns `check_ins`
+  not `count`, and the dashboard/payment/package field names did not match the
+  server. All verified live against the running core.
+
+### Measured
+- Studio: **62 tests passed** (was 45); `tsc --noEmit` clean.
+- Build: initial **94.40 kB gzip** (< 250 kB bar); `Operations` split into its
+  own **3.43 kB gzip** chunk; recharts stays in the lazy `AssessmentJp7` chunk.
+- Live E2E on the running core: check-in 201 → repeat 409; payment 201 with
+  `receipt_no` `R-1-000001`; dashboard moved `check_ins_today` 0→1 and
+  `revenue_rial_this_month` 0→1,500,000 (C12: a measured number moved).
+
 ## [0.8.0] — 2026-08-29 — Phase 6 sync & harden (backend slice)
 
 ### Added

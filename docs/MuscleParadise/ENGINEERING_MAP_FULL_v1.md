@@ -679,6 +679,14 @@ CLI inserted 30 then 0 on re-run (idempotent); check-in of an expired membership
 returned 402; a tampered QR returned 401; receipt returned a valid %PDF with
 `1,234,567 Rial` in the uncompressed text layer; openapi grew to 26 paths.
 
+- [x] Studio UI for ops  ✅ `pages/Operations.tsx` + `CheckinPanel` + `PaymentPanel`:
+  door KPIs for all staff, money KPIs gated to OWNER/ADMIN; 402/409/401 rendered as
+  actionable Persian; studio **62 tests**, initial bundle **94.40 kB gzip**
+
+**Phase 2 UI evidence (2026-08-29):** live against the running core — check-in 201,
+repeat 409, payment 201 (`receipt_no` `R-1-000001`), dashboard moved
+`check_ins_today` 0→1 and `revenue_rial_this_month` 0→1,500,000.
+
 ### Phase 3 — Programs without AI (week 6)
 - [x] Rule templates PPL/UL/FB/corrective  ✅ `core/program_builder.py` (pure, unit-tested)
 - [x] Contraindication graph filter  ✅ hard_block DROP → SWAP → equipment DROP → corrective block; never emits a blocked op

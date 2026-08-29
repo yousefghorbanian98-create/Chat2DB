@@ -122,6 +122,84 @@ input.numeric {
   text-align: left;
 }
 
+/* Shared form control (select / textarea / input) for the Operations console.
+   Matches NumberField's look; MASTER.md requires a >= 44px touch target. */
+.mp-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-foreground);
+  background: #0a1218;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  transition:
+    border-color 150ms,
+    box-shadow 150ms;
+}
+
+.mp-input:hover:not(:disabled) {
+  border-color: var(--color-ring);
+}
+
+.mp-input:focus-visible,
+.mp-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 184, 106, 0.25);
+}
+
+.mp-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+textarea.mp-input {
+  resize: vertical;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Quick-pick chip (package / method). Motion is transform+opacity only, and
+   the whole block is neutralised by the reduced-motion query below. */
+.mp-chip {
+  min-height: 44px;
+  padding: 8px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-subtle);
+  background: transparent;
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition:
+    transform 150ms,
+    border-color 150ms,
+    background-color 150ms;
+}
+
+.mp-chip:hover:not(:disabled) {
+  border-color: var(--color-ring);
+  transform: translateY(-1px);
+}
+
+.mp-chip:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+.mp-chip:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.mp-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .glass {
   background: rgba(18, 28, 36, var(--glass-opacity));
   backdrop-filter: blur(var(--blur-amount));
