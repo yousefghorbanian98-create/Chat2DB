@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 4
+Current Iteration: 5
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Phase 1 backend complete; next = "Assessment UI (mockup 07) + history chart"
-Status: PHASE_1_BACKEND_DONE
+Current Task: Assessment UI + history chart DONE; next = "PDF assessment report"
+Status: PHASE_1_UI_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10
@@ -47,7 +47,7 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 - [x] Members CRUD + QR id — create/read/patch/tombstone, signed 60s QR
       (`{v,typ,gym,mid,exp,sig}`), `bootstrap.py` seeds gym + OWNER
 - [x] `jp7.py` + 10 golden tests — **12 fixtures**, external anchor included
-- [ ] Assessment UI (mockup 07) + history chart — **next task** (frontend)
+- [x] Assessment UI (mockup 07) + history chart  ✅ RTL, 3-col, silhouette markers, live preview (client jp7 mirror, unit-tested), injury banner, BF% trend (Recharts), lazy-split
 - [ ] PDF assessment report — needs `reportlab`, not installed yet
 - [x] Injury/limitation CRUD + safety card data — dossier, contraindication
       patterns, `GET /members/{id}/filters`, and the Studio-vs-member field mask
@@ -63,7 +63,7 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 | Phase 1 API | `pytest tests/test_phase1_api.py` | 40 tests incl. full RBAC matrix |
 | Live E2E | `uvicorn :8752` + curl chain | login → member → JP7 (BD 1.050006 / BF 21.4259) → injury → filters → masked view → signed QR → injury badge = 1 |
 | OpenAPI | `python -m app.export_openapi` | 13 paths, 13 schemas, 1179-line YAML |
-| Studio gate | `npm run gate` | tsc clean, 25 tests, 91.73 kB gzip |
+| Studio gate | `npm run gate` | tsc clean, **45 tests**, initial **93.97 kB gzip** (recharts lazy-split: +111 kB on assessment route) |
 
 ### Live E2E transcript (real HTTP, not TestClient)
 
@@ -98,7 +98,7 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 
 | Axis | Score | Why |
 |------|-------|-----|
-| Visual Polish | 6 | Tokens + glass cards real; launcher not yet matched to mockup 06; Lucide not wired |
+| Visual Polish | 7 | Assessment page now matches mockup 07 layout; Lucide still not wired; no PDF yet |
 | Animation Quality | 8 | Presets unit-tested, reduced-motion honoured, dashboard/cinematic split enforced |
 | Interaction Design | 7 | Spring press/hover, labelled skeletons; no command palette yet |
 | Readability | 9 | Docstrings, typed, ≤300-line files, no `any` |
@@ -119,7 +119,7 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
    shell was never launched.
 5. **`reportlab` not installed** → PDF assessment report (Phase 1) is pending.
-6. **Assessment UI + history chart** — the visible half of Phase 1.
+6. ~~Assessment UI + history chart~~ — **CLOSED**: `pages/AssessmentJp7.tsx` with live preview, validation, history chart.
 7. ~~TRAINER member scoping~~ — **CLOSED this iteration**: `app/auth/scope.py`
    now filters member lists and 404s unassigned access across members,
    assessments and injuries routers.

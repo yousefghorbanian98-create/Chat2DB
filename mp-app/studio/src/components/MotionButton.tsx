@@ -12,6 +12,8 @@ interface MotionButtonProps {
   variant?: ButtonVariant;
   state?: ButtonState;
   disabled?: boolean;
+  /** Defaults to "button" so an unhandled click never submits a form. */
+  type?: 'button' | 'submit';
 }
 
 const BACKGROUND: Record<ButtonVariant, string> = {
@@ -45,6 +47,7 @@ export function MotionButton({
   variant = 'primary',
   state = 'idle',
   disabled = false,
+  type = 'button',
 }: MotionButtonProps) {
   const reduced = useReducedMotion() ?? false;
   const busy = state === 'loading';
@@ -52,7 +55,7 @@ export function MotionButton({
 
   return (
     <motion.button
-      type="button"
+      type={type}
       className={`mp-btn mp-btn-${variant}`}
       onClick={onClick}
       disabled={isDisabled}

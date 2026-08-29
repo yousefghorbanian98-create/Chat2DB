@@ -3,6 +3,35 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.2.1] — 2026-08-29 — Phase 1 assessment UI (frontend)
+
+### Added
+- `pages/AssessmentJp7.tsx` — mockup 07 layout: athlete card, 7-site form with
+  numbered silhouette markers, results panel, injury safety banner, error
+  summary, and a BF% trend chart at the bottom. RTL + `dir="ltr"` numerics.
+- `pages/jp7Validation.ts` — pure form validation (validate on blur; block
+  Calculate on empty/<=0), unit-tested (7 tests).
+- `core/jp7.ts` — client-side mirror of the JP7 math for the live preview,
+  unit-tested against the same golden fixtures as the backend.
+- `components/` — `NumberField` (decimal, ltr, tabular), `StatCard` (count-in),
+  `BodyFatChart` (Recharts, animated draw, labelled empty state).
+- `auth/AuthContext.tsx` + `pages/Login.tsx` — staff PIN login; 401 gives a
+  single neutral message (no user enumeration).
+
+### Performance (Performance Watchdog)
+- Initial bundle was 204.51 kB gzip once recharts landed — over the loop's own
+  comfort zone — so the assessment route is now `React.lazy` code-split:
+  **initial 93.97 kB gzip**, assessment chunk 111.06 kB lazy.
+
+### Measured
+- Studio `npm run gate`: `tsc --noEmit` clean, **45 tests passed**, build OK.
+- Live over the Vite proxy: login → member → assessment save (BF 10.2092,
+  "athletic") → history rows 1.
+
+### Known gaps
+- PDF assessment report (Phase 1) still pending (`reportlab` not installed).
+- Lucide icons not yet wired (no-emoji rule still relies on text markers).
+
 ## [0.2.0] — 2026-08-29 — Phase 1 identity & JP7 (backend)
 
 ### Added
