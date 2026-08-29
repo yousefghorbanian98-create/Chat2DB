@@ -3,6 +3,21 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.7.0] — 2026-08-29 — Phase 5 client API (scoped + masked)
+
+### Added
+- `core/field_mask.py` — single choke point: `mask_member_row` / `mask_assessment_row`
+  strip `note`/`clinician_note`/`created_by` for MEMBER, leave staff untouched.
+- `/api/v1/client/{me,me/assessments,me/programs}` — MEMBER-only, force-scoped to
+  the token's member_id; staff tokens are 403.
+
+### Measured
+- Backend: **208 tests passed** (penetration-style field-mask + scope tests).
+- OpenAPI: 36 paths.
+
+### Deferred
+- Flutter client UI (home/logger/QR/payments-self) and pain feedback → Phase 6/7.
+
 ## [0.6.0] — 2026-08-29 — Phase 4 AI (backend slice: nutrition + runtime + race)
 
 ### Added

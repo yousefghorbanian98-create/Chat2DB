@@ -124,6 +124,26 @@ def assigned_trainer_auth(seeded: TestClient, trainer_auth: dict[str, str]):
 
 
 @pytest.fixture
+def member_auth(seeded: TestClient):
+    """A MEMBER session token for a given member_id, minted with the test secret.
+
+    The client app authenticates members directly; this bypasses PIN login (not
+    yet wired) and proves the force-scoped, masked /client routes (map §2.4, §9).
+    """
+    from app.core.security import Principal, issue_token
+
+    def make(member_id: int) -> dict[str, str]:
+        token = issue_token(
+            Principal(subject=f"member:{member_id}", role="MEMBER", gym_id=1,
+                      member_id=member_id),
+            secret_key="test-machine-local-secret",
+        )
+        return {"authorization": f"Bearer {token}"}
+
+    return make
+
+
+@pytest.fixture
 def member_id(seeded: TestClient, owner_auth: dict[str, str]) -> int:
     """One registered female member, used across Phase 1 tests."""
     res = seeded.post(

@@ -948,6 +948,100 @@ paths:
       summary: Staff PIN login
       tags:
       - auth
+  /api/v1/client/me:
+    get:
+      operationId: me_api_v1_client_me_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Me Api V1 Client Me Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My profile (clinician notes stripped)
+      tags:
+      - client
+  /api/v1/client/me/assessments:
+    get:
+      operationId: my_assessments_api_v1_client_me_assessments_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Assessments Api V1 Client Me Assessments Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My assessment history (masked)
+      tags:
+      - client
+  /api/v1/client/me/programs:
+    get:
+      operationId: my_programs_api_v1_client_me_programs_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Programs Api V1 Client Me Programs Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My programs
+      tags:
+      - client
   /api/v1/client/members/{member_id}/injuries:
     get:
       description: Same rows, narrower schema — the clinician note never crosses this

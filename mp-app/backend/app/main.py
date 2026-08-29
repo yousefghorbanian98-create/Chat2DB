@@ -27,6 +27,7 @@ from app.routers import (
     assessments,
     attendance,
     auth,
+    client,
     equipment,
     exercises,
     health,
@@ -141,6 +142,7 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         programs,
         nutrition,
         ai,
+        client,
         reports,
     ):
         app.include_router(module.router, prefix=API_PREFIX)

@@ -704,10 +704,15 @@ better. Nutrition: LBM 49.1088 → BMR 1430.8 (Katch–McArdle), reconstructed m
 calories ≈ target. `/ai/runtime` reports `available: false` in this sandbox.
 
 ### Phase 5 — Client app (weeks 9–10)
-- [ ] Flutter auth scoped API  
-- [ ] Home / workout logger / QR / payments self  
-- [ ] Feedback pain → Studio  
-- [ ] Field-mask tests (penetration style unit tests)  
+- [x] Flutter auth scoped API  ✅ `/api/v1/client/*` force-scoped to the token's member_id; staff tokens 403
+- [ ] Home / workout logger / QR / payments self  ⏳ Flutter client UI (Phase 6/7)
+- [ ] Feedback pain → Studio  ⏳ needs the Flutter logger
+- [x] Field-mask tests (penetration style unit tests)  ✅ `core/field_mask.py` + `tests/test_client_api.py`: MEMBER never sees clinician notes / other members
+
+**Phase 5 backend evidence (2026-08-29):** `pytest` → **208 passed**. A MEMBER token
+reads only its own profile/assessments/programs; an OWNER token on `/client/*` is
+403; `mask_member_row`/`mask_assessment_row` strip `note`/`clinician_note`/
+`created_by` for MEMBER but not for staff. OpenAPI: 36 paths.
 
 ### Phase 6 — Sync & harden (weeks 11–12)
 - [ ] Delta sync + backup encrypt/restore test  

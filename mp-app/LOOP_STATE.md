@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 9
+Current Iteration: 10
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Phase 4 backend slice COMPLETE; next = Phase 5 "Client app scoped API + field-mask tests" (RAG + AI dry-run UI deferred)
-Status: PHASE_4_BACKEND_DONE
+Current Task: Phase 5 client API COMPLETE (scoped + masked); next = Phase 6 "Sync & harden" (Flutter client + sync/Electron binary remain)
+Status: PHASE_5_BACKEND_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10
@@ -78,7 +78,7 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 
 | Check | Command | Result |
 |-------|---------|--------|
-| Backend suite | `pytest` (mp-app/backend) | **203 passed**, 2 warnings |
+| Backend suite | `pytest` (mp-app/backend) | **208 passed**, 2 warnings |
 | JP7 golden | `pytest -m golden` | 32 tests; 12 fixtures within ±0.05 %BF |
 | Schema | `pytest -m schema` | 33 tests; audit columns on all 24 tables |
 | Security | `pytest tests/test_security.py` | 24 tests (tamper/replay/expiry/algo) |
