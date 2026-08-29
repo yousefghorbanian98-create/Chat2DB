@@ -1,4 +1,4 @@
-# 🏋️ MUSCLE PARADISE (MP) — COMPLETE ENGINEERING MAP v1.0
+# 🏋️ MUSCLE PARADISE (MP) — COMPLETE ENGINEERING MAP v1.1
 ## Zero-to-One Spec for Any AI Coding Agent
 
 > **How to use this document**  
@@ -8,8 +8,20 @@
 
 **Brand:** Muscle Paradise · Logo monogram **MP**  
 **Owner domain:** Gym OS for a personal trainer who runs Jackson–Pollock 7-site body composition  
-**Date locked:** 2026-08-28 (Asia/Tehran context)  
-**Repo context (if present):** https://github.com/yousefghorbanian98-create/Chat2DB  
+**Map version:** 1.1 (2026-08-29) — added §12.7 Dev-Agent Tooling + download links  
+**Date locked (product rules):** 2026-08-28 (Asia/Tehran context)  
+**Repo:** https://github.com/yousefghorbanian98-create/Chat2DB  
+**Branch with this pack:** `arena/01a048a6-chat2db`  
+
+### Direct download links (always use branch raw URLs)
+| What | URL |
+|------|-----|
+| **This map (raw MD)** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md |
+| **This map (GitHub view)** | https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md |
+| **Full ZIP pack (~1.9MB)** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.zip |
+| **Dev-agent tooling doc** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/DEV_AGENT_TOOLING.md |
+| **Folder on GitHub** | https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/01a048a6-chat2db/docs/MuscleParadise |
+| **Release tag page** | https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/mp-eng-v1.0 |
 
 ---
 
@@ -317,9 +329,11 @@ docs/MuscleParadise/   # already exists — keep extending
   EXECUTIVE_SCHEMATIC_v1.md
   PRODUCT_PARAMS_v1.md
   OSS_INTEGRATION_UIUX_OMNIROUTE.md
+  DEV_AGENT_TOOLING.md
   design-system/muscle-paradise/MASTER.md
   mockups/
   tools/ui-ux-pro-max/
+  releases/
 ```
 
 **Forbidden paths to edit:** `ce-app/**`, `docs/CuttingEdge/**`.
@@ -444,6 +458,77 @@ python3 tools/ui-ux-pro-max/scripts/search.py "touch target" --stack flutter
 - Raw fingerprint images  
 - Scrapers violating site ToS for exercise content  
 
+## 12.7 DEV-AGENT TOOLING (build faster — NOT product runtime)
+
+> These tools make the **coding agent** smarter while building `mp-app`.  
+> They are **Layer A (developer laptop)**.  
+> They do **not** replace JP7, free-exercise-db, Ollama, or Studio/Client (**Layer B = product**).  
+> Full install notes: `docs/MuscleParadise/DEV_AGENT_TOOLING.md`
+
+### Critical split
+```
+Layer A — Dev tools (this section)     →  speed/accuracy of AI coding agents
+Layer B — Product runtime (rest of map) →  what the gym coach/athlete runs
+```
+
+### Recommended stack for building MP
+
+| Priority | Tool | URL | License | Role for MP |
+|----------|------|-----|---------|-------------|
+| **P0** | **ChunkHound** | https://github.com/chunkhound/chunkhound | MIT | Local semantic + regex + git-history research with citations; index monorepo so agent finds CE patterns without editing `ce-app` |
+| **P0** | **open-codebase-index** / `opencode-codebase-index` | https://github.com/Helweg/open-codebase-index | MIT | Semantic codebase index for OpenCode, Claude, Codex, MCP; tree-sitter + BM25 + call graph; Ollama embeddings |
+| **P0** | **Librarian (docs)** | https://github.com/iannuttall/librarian | check repo | Up-to-date library/docs search for agents (FastAPI, Flutter, Electron…) so models stop inventing APIs |
+| **P0** | **GitHub Copilot Chat (Agent)** | https://github.com/features/copilot | proprietary SaaS | Daily multi-file agent + semantic `#codebase` if you have a seat |
+| **P1** | **Librarian CLI (tech explore)** | https://github.com/SkrOYC/librarian | Apache-2.0 | Agentic explore of technology repos (“how does X handle Y?”) |
+| **P1** | **Open Aware** | https://github.com/qodo-ai/open-aware | see repo | MCP deep research on **pre-indexed public OSS** (FastAPI/React patterns); free tier rate-limited; private repos = commercial |
+| **P1** | **Sourcegraph Deep Search** | https://sourcegraph.com/docs · product Deep Search | freemium / enterprise | NL questions over large codebases; use public sourcegraph.com for OSS examples; full self-host is overkill for thesis |
+| **P2** | **SocratiCode** | https://github.com/giancarloerra/socraticode | **AGPL-3** | Excellent local MCP hybrid search + dependency graphs at huge scale — **DEV MACHINE ONLY**; never link into MP binary (copyleft) |
+| **P3** | **OSS Compass** | https://oss-compass.org · https://github.com/oss-compass | AGPL components | Ecosystem **health** scores before forking gym/fitness repos (activity, not stars alone) |
+| — | **Ziv** | *(name ambiguous — no canonical public tool locked)* | — | If you meant a specific repo, add its URL under DEV_AGENT_TOOLING; do not block Phase 0 on it |
+
+### Related already-in-map (do not confuse)
+| Tool | Section | Notes |
+|------|---------|-------|
+| UI/UX Pro Max | §11, §12.1 | Design intelligence for UI generation |
+| OmniRoute | §12.4 | Optional **product/dev** LLM gateway, not a codebase indexer |
+| Ollama | §5, §12.1 | Product local LLM **and** can embed for ChunkHound/indexers |
+
+### Install sketch (developer machine only)
+```bash
+# --- Codebase intelligence (pick one primary) ---
+# A) ChunkHound
+pip install chunkhound          # or: uv tool install chunkhound
+cd /path/to/Chat2DB
+chunkhound index .
+chunkhound research "How does ce-app brain race planner work? Do not edit ce-app."
+
+# B) open-codebase-index (OpenCode / MCP hosts)
+npm install open-codebase-index
+# configure host per https://github.com/Helweg/open-codebase-index
+ollama pull nomic-embed-text    # local embeddings
+
+# --- Fresh framework docs for the agent ---
+npm i -g @iannuttall/librarian
+librarian setup
+librarian search --library fastapi/fastapi "background tasks websocket"
+
+# --- Optional deep OSS research (MCP) ---
+# Open Aware: follow https://github.com/qodo-ai/open-aware README (MCP client config)
+
+# --- Optional AGPL indexer (dev only, never ship in MP) ---
+# SocratiCode: https://github.com/giancarloerra/socraticode
+```
+
+### Agent rules when using these tools
+1. Index may include `ce-app/` as **read-only context** — still **never write** there.  
+2. Prefer citations/file:line from ChunkHound / codebase-index over free-form memory.  
+3. For gym **domain data**, still use §12.2 (free-exercise-db, USDA, OFF) — indexers don’t replace seeds.  
+4. SocratiCode/OSS Compass AGPL code stays on the **dev** box; MP product stays MIT/Apache-friendly.  
+5. Copilot/Sourcegraph cloud: avoid pasting raw member medical PII into prompts.
+
+### What these tools do NOT replace
+- JP7 golden tests · injury filters · RBAC Client isolation · offline Knowledge Packs · electron-updater · free-exercise-db seed  
+
 ---
 
 # 13. KNOWLEDGE PACK FORMAT
@@ -476,6 +561,7 @@ App update ≠ KB update (separate delta channels).
 - [ ] Studio Electron hello + theme tokens from MASTER.md  
 - [ ] STATE.md + this map linked  
 - [ ] License attribution page stub  
+- [ ] **Dev tooling:** install ChunkHound *or* open-codebase-index; index repo; optional Librarian docs (§12.7)  
 
 ### Phase 1 — Identity & JP7 (weeks 2–3)
 - [ ] Staff auth PIN  
@@ -557,23 +643,26 @@ App update ≠ KB update (separate delta channels).
 
 ```
 You are building Muscle Paradise (MP), a local-first gym OS.
-Read and obey: docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md
+Read and obey: docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md (v1.1+)
 Also: PRODUCT_PARAMS_v1.md, EXECUTIVE_SCHEMATIC_v1.md,
-OSS_INTEGRATION_UIUX_OMNIROUTE.md, design-system/muscle-paradise/MASTER.md.
+OSS_INTEGRATION_UIUX_OMNIROUTE.md, DEV_AGENT_TOOLING.md,
+design-system/muscle-paradise/MASTER.md.
 
 Rules:
 - Create code only under mp-app/ and docs/MuscleParadise/
-- NEVER modify ce-app/ or docs/CuttingEdge/
+- NEVER modify ce-app/ or docs/CuttingEdge/ (read-only pattern source)
 - Dual shells Studio vs Client with server-side isolation
 - JP7 is pure code with golden tests
 - Injuries hard-filter programs
 - AI = rules + optional Ollama + dry-run + judge (CE brain pattern)
 - UI: emerald #00B86A, gold #FFD700, dark glass, Vazirmatn, Lucide
 - Port 8751 for API
-- Prefer MIT/Apache deps; no AGPL in-process (wger)
+- Prefer MIT/Apache deps; no AGPL in-process (wger, SocratiCode)
+- Dev-only tools (ChunkHound, codebase-index, Librarian, Copilot, Open Aware)
+  improve YOUR context — do not ship them inside the gym binary
 - Every feature needs a measurable test
 
-Start with Phase 0 skeleton, then Phase 1 JP7+members+injuries.
+Start with Phase 0 skeleton (+ optional codebase index), then Phase 1 JP7+members+injuries.
 ```
 
 ---
@@ -602,24 +691,32 @@ git clone --depth 1 https://github.com/yuhonas/free-exercise-db /tmp/free-exerci
 # UI skill search
 cd docs/MuscleParadise
 python3 tools/ui-ux-pro-max/scripts/search.py "fitness dashboard" --domain ux
+
+# Dev-agent codebase intelligence (optional but recommended) — see §12.7
+# pip install chunkhound && chunkhound index .
+# npm i -g @iannuttall/librarian && librarian setup
 ```
 
 ---
 
 # 19. RELATED DOCS IN THIS REPO (READ ORDER)
 
-1. `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md` ← **you are here**  
-2. `docs/MuscleParadise/PRODUCT_PARAMS_v1.md` — dual shell, injuries, backlog P0–P3  
-3. `docs/MuscleParadise/EXECUTIVE_SCHEMATIC_v1.md` — gaps vs v1 map, CE reuse matrix  
-4. `docs/MuscleParadise/OSS_INTEGRATION_UIUX_OMNIROUTE.md` — Pro Max + OmniRoute policy  
-5. `docs/MuscleParadise/design-system/muscle-paradise/MASTER.md` — tokens  
-6. `docs/MuscleParadise/design-system/muscle-paradise/pages/*.md` — page overrides  
-7. `docs/MuscleParadise/mockups/*.jpg` — visual targets  
-8. Read-only patterns: `docs/CuttingEdge/BRAIN_DESIGN.md`, `ce-app/` structure  
+1. `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md` ← **you are here (v1.1)**  
+2. `docs/MuscleParadise/DEV_AGENT_TOOLING.md` — ChunkHound, codebase-index, Librarian, Copilot, Open Aware, SocratiCode, OSS Compass  
+3. `docs/MuscleParadise/PRODUCT_PARAMS_v1.md` — dual shell, injuries, backlog P0–P3  
+4. `docs/MuscleParadise/EXECUTIVE_SCHEMATIC_v1.md` — gaps vs v1 map, CE reuse matrix  
+5. `docs/MuscleParadise/OSS_INTEGRATION_UIUX_OMNIROUTE.md` — Pro Max + OmniRoute policy  
+6. `docs/MuscleParadise/design-system/muscle-paradise/MASTER.md` — tokens  
+7. `docs/MuscleParadise/design-system/muscle-paradise/pages/*.md` — page overrides  
+8. `docs/MuscleParadise/mockups/*.jpg` — visual targets  
+9. Read-only patterns: `docs/CuttingEdge/BRAIN_DESIGN.md`, `ce-app/` structure  
 
 **External product links (owner’s other work — reference only):**  
 - Repo: https://github.com/yousefghorbanian98-create/Chat2DB  
+- Branch pack: https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/01a048a6-chat2db/docs/MuscleParadise  
 - Cutting Edge release example: https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/v0.9.38  
+- Map raw download: https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md  
+- ZIP pack: https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.zip  
 
 ---
 
@@ -650,6 +747,7 @@ PACK knowledge offline; cloud never required.
 
 ---
 
-**END OF ENGINEERING MAP v1.0**  
+**END OF ENGINEERING MAP v1.1**  
 File path: `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md`  
+Changelog 1.0 → 1.1: §12.7 Dev-Agent Tooling; download link table; Phase 0 + bootstrap + §18/§19 updates.  
 Cutting Edge tree: untouched by design.
