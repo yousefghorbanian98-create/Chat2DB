@@ -167,4 +167,93 @@ export const api = {
       body: JSON.stringify(body),
     }),
   listInjuries: (memberId: number) => request<Injury[]>(`/api/v1/members/${memberId}/injuries`),
+
+  // Phase 2 — operations. Paths verified against mp-app/openapi.yaml: the
+  // payments router has no prefix, so packages live at /api/v1/packages.
+  attendanceToday: () => request<AttendanceToday>('/api/v1/attendance/today'),
+  checkInManual: (memberId: number) =>
+    request<CheckinResult>('/api/v1/attendance/check-in', {
+      method: 'POST',
+      body: JSON.stringify({ member_id: memberId, method: 'manual' }),
+    }),
+  checkInQr: (payload: Record<string, unknown>) =>
+    request<CheckinResult>('/api/v1/attendance/check-in', {
+      method: 'POST',
+      body: JSON.stringify({ payload, method: 'qr' }),
+    }),
+  listPackages: () => request<MembershipPackage[]>('/api/v1/packages'),
+  recordPayment: (body: {
+    member_id: number;
+    amount_rial: number;
+    method?: 'cash' | 'card' | 'transfer' | 'pos';
+    package_id?: number;
+  }) => request<Payment>('/api/v1/payments', { method: 'POST', body: JSON.stringify(body) }),
+  voidPayment: (paymentId: number) =>
+    request<Payment>(`/api/v1/payments/${paymentId}/void`, { method: 'POST' }),
+  dashboard: () => request<Dashboard>('/api/v1/reports/dashboard'),
+
+  // Phase 4/6 — AI runtime, delta sync, backup
+  aiRuntime: () => request<AiRuntime>('/api/v1/ai/runtime'),
+  syncDelta: (since?: string) =>
+    request<SyncDelta>(
+      `/api/v1/sync/delta${since ? `?since=${encodeURIComponent(since)}` : ''}`,
+    ),
 } as const;
+
+export interface AttendanceToday {
+  date: string;
+  check_ins: number;
+}
+
+export interface CheckinResult {
+  id: number;
+  member_id: number;
+  method: string;
+}
+
+export interface MembershipPackage {
+  id: number;
+  name: string;
+  duration_days: number;
+  price_rial: number;
+  /** SQLite stores booleans as 0/1. */
+  active: number;
+  created_at: string;
+}
+
+export interface Payment {
+  id: number;
+  member_id: number;
+  package_id: number | null;
+  amount_rial: number;
+  method: string;
+  receipt_no: string | null;
+  /** SQLite stores booleans as 0/1. */
+  voided: number;
+  staff_id: number | null;
+  created_at: string;
+}
+
+export interface Dashboard {
+  date: string;
+  members_total: number;
+  members_active: number;
+  members_with_active_injury: number;
+  check_ins_today: number;
+  revenue_rial_this_month: number;
+}
+
+export interface AiRuntime {
+  available: boolean;
+  base_url: string;
+  model: string | null;
+  models: string[];
+  error: string | null;
+  note: string;
+}
+
+export interface SyncDelta {
+  cursor: string;
+  total: number;
+  changes: Record<string, Array<Record<string, unknown>>>;
+}
