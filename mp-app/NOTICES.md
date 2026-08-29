@@ -12,6 +12,7 @@ what Phase 0 actually pulls in; it must grow with every dependency.
 | starlette | 1.6.0 | BSD-3 | (fastapi dependency) |
 | sqlalchemy | 2.0.52 | MIT | SQLite access |
 | pydantic | 2.13.5 | MIT | validation |
+| reportlab | 5.0.1 | BSD-3 | PDF assessment reports |
 | react | 18.3.1 | MIT | Studio renderer |
 | react-dom | 18.3.1 | MIT | Studio renderer |
 | framer-motion | 12.x | MIT | motion system |

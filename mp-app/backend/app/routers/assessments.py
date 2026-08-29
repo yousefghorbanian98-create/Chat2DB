@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 
 from app.auth.deps import PrincipalDep, require_assessor
 from app.auth.scope import ensure_member_visible
@@ -109,6 +110,49 @@ def calculate(body: AssessmentCreate) -> dict[str, object]:
         "classification": result.classification,
         "disclaimer": "Population equation estimate; not a medical diagnosis.",
     }
+
+
+@router.get(
+    "/members/{member_id}/assessments/{assessment_id}/pdf",
+    summary="PDF assessment report (map §14 Phase 1)",
+)
+def assessment_pdf(
+    member_id: int, assessment_id: int, principal: AssessorPrincipal
+) -> Response:
+    """Render one stored assessment to a downloadable PDF."""
+    from app.core.jp7 import body_fat_percent
+    from app.core.pdf_report import build_assessment_pdf
+
+    engine = get_engine()
+    _require_member(principal, member_id)
+
+    try:
+        assessment = assessments_repo.get_assessment(engine, principal.gym_id, assessment_id)
+    except assessments_repo.AssessmentNotFound as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    if assessment["member_id"] != member_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="not found")
+
+    member = members_repo.get_member(engine, principal.gym_id, member_id)
+    brozek = body_fat_percent(assessment["body_density"], "brozek")
+    history = assessments_repo.history(engine, principal.gym_id, member_id)
+
+    from app.state import get_gym_name
+
+    pdf_bytes = build_assessment_pdf(
+        gym_name=get_gym_name(),
+        member=member,
+        assessment=assessment,
+        brozek_pct=brozek,
+        history=history,
+    )
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="mp-assessment-{assessment_id}.pdf"'
+        },
+    )
 
 
 def _member_sex(engine, gym_id: int, member_id: int) -> str:

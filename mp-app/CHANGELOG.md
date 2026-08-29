@@ -3,6 +3,23 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.3.0] — 2026-08-29 — Phase 1 PDF assessment report
+
+### Added
+- `app/core/pdf_report.py` — reportlab A4 report: branding, member line, result
+  table (Siri primary + Brozek), the 7 measured sites, a history table, and the
+  population-equation disclaimer. `compress` flag lets tests read the text layer.
+- `GET /api/v1/members/{id}/assessments/{id}/pdf` returns `application/pdf` with a
+  `Content-Disposition: attachment` header; 404s unknown and cross-member ids.
+
+### Measured
+- Backend: **140 tests passed** (5 PDF unit + 3 PDF API tests incl. cross-member 404).
+- Live over HTTP: 200, `application/pdf`, 2767 bytes, magic `%PDF-`.
+
+### Notes
+- Body text is English for now (reportlab ships only Latin base fonts); embedding
+  Vazirmatn (OFL) for a true Persian PDF is deferred and tracked in LOOP_STATE.
+
 ## [0.2.1] — 2026-08-29 — Phase 1 assessment UI (frontend)
 
 ### Added

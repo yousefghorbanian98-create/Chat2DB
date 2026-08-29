@@ -358,6 +358,45 @@ class TestAssessments:
         )
         assert res.status_code == 422
 
+    def test_pdf_endpoint_returns_a_downloadable_report(
+        self, seeded: TestClient, owner_auth, member_id: int
+    ) -> None:
+        created = seeded.post(
+            f"/api/v1/members/{member_id}/assessments",
+            headers=owner_auth,
+            json={"weight_kg": 62.5, "age_years": 30, "sites_mm": JP7_SITES},
+        ).json()
+
+        res = seeded.get(
+            f"/api/v1/members/{member_id}/assessments/{created['id']}/pdf",
+            headers=owner_auth,
+        )
+        assert res.status_code == 200
+        assert res.headers["content-type"] == "application/pdf"
+        assert res.content[:5] == b"%PDF-"
+        assert "attachment" in res.headers["content-disposition"]
+
+    def test_pdf_of_a_missing_assessment_is_404(self, seeded, owner_auth, member_id) -> None:
+        res = seeded.get(
+            f"/api/v1/members/{member_id}/assessments/999999/pdf", headers=owner_auth
+        )
+        assert res.status_code == 404
+
+    def test_pdf_of_another_members_assessment_is_404(
+        self, seeded: TestClient, owner_auth, member_id: int
+    ) -> None:
+        """Cross-member reference must not leak another member's report."""
+        created = seeded.post(
+            f"/api/v1/members/{member_id}/assessments",
+            headers=owner_auth,
+            json={"weight_kg": 62.5, "age_years": 30, "sites_mm": JP7_SITES},
+        ).json()
+        res = seeded.get(
+            f"/api/v1/members/{member_id + 1}/assessments/{created['id']}/pdf",
+            headers=owner_auth,
+        )
+        assert res.status_code == 404
+
     def test_assessment_on_unknown_member_is_404(self, seeded, owner_auth) -> None:
         res = seeded.post(
             "/api/v1/members/999999/assessments",

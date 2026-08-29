@@ -24,16 +24,22 @@ class AppState:
     engine: Engine
     session_factory: sessionmaker[Session]
     secret_key: str = ""
+    gym_name: str = "Muscle Paradise"
 
     @classmethod
     def open(
-        cls, db_path: Path, *, echo: bool = False, secret_key: str = ""
+        cls, db_path: Path, *, echo: bool = False, secret_key: str = "", gym_name: str = "Muscle Paradise"
     ) -> "AppState":
         """Open the database, run pending migrations, return ready state."""
         engine = make_engine(db_path, echo=echo)
         migrate(engine)
         key = secret_key or load_or_create_secret_key(db_path.parent / "secret.key")
-        return cls(engine=engine, session_factory=make_session_factory(engine), secret_key=key)
+        return cls(
+            engine=engine,
+            session_factory=make_session_factory(engine),
+            secret_key=key,
+            gym_name=gym_name,
+        )
 
     def dispose(self) -> None:
         """Release pooled connections (used by tests and shutdown hooks)."""
@@ -64,6 +70,11 @@ def get_engine() -> Engine:
 def get_secret_key() -> str:
     """Machine-local key used for session tokens and QR signatures."""
     return get_state().secret_key
+
+
+def get_gym_name() -> str:
+    """Display name used in reports and the /meta endpoint."""
+    return get_state().gym_name
 
 
 def get_session() -> Session:

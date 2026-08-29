@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 5
+Current Iteration: 6
 Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Assessment UI + history chart DONE; next = "PDF assessment report"
-Status: PHASE_1_UI_DONE
+Current Task: Phase 1 COMPLETE; next = Phase 2 "Attendance QR signed check-in"
+Status: PHASE_1_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 9/10
@@ -56,7 +56,7 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 
 | Check | Command | Result |
 |-------|---------|--------|
-| Backend suite | `pytest` (mp-app/backend) | **132 passed**, 1 warning |
+| Backend suite | `pytest` (mp-app/backend) | **140 passed**, 1 warning |
 | JP7 golden | `pytest -m golden` | 32 tests; 12 fixtures within ±0.05 %BF |
 | Schema | `pytest -m schema` | 33 tests; audit columns on all 24 tables |
 | Security | `pytest tests/test_security.py` | 24 tests (tamper/replay/expiry/algo) |
@@ -118,7 +118,7 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 3. **Browser Core Web Vitals (FCP/LCP/CLS)** unmeasured — needs a real browser.
 4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
    shell was never launched.
-5. **`reportlab` not installed** → PDF assessment report (Phase 1) is pending.
+5. ~~`reportlab` not installed~~ — **CLOSED**: installed 5.0.1, PDF endpoint live (2.7 KB, valid %PDF). Persian PDF needs a Vazirmatn TTF embed — deferred.
 6. ~~Assessment UI + history chart~~ — **CLOSED**: `pages/AssessmentJp7.tsx` with live preview, validation, history chart.
 7. ~~TRAINER member scoping~~ — **CLOSED this iteration**: `app/auth/scope.py`
    now filters member lists and 404s unassigned access across members,

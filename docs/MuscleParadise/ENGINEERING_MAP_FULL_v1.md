@@ -658,7 +658,7 @@ first release. Open gaps tracked in `mp-app/LOOP_STATE.md`.
 - [x] Members CRUD + QR id  ✅ tombstones + HMAC-signed 60s QR `{v,typ,gym,mid,exp,sig}`
 - [x] `jp7.py` + 10 golden tests  ✅ 12 fixtures ±0.05 %BF + external anchor (BD 1.061664 vs published 1.06166)
 - [x] Assessment UI (mockup 07) + history chart  ✅ RTL 3-col, live preview (client jp7 mirror, golden-tested), injury banner, BF% trend (Recharts), lazy-split (93.97 kB gzip initial)
-- [ ] PDF assessment report  ⏳ needs `reportlab`
+- [x] PDF assessment report  ✅ reportlab 5.0.1; Siri+Brozek, sites table, history; `GET /api/v1/members/{id}/assessments/{id}/pdf` → application/pdf (2.7 KB live)
 - [x] Injury/limitation CRUD + safety card UI  ✅ data layer + `/filters` + server-side field masking (UI pending)
 
 **Phase 1 backend evidence (2026-08-29):** `pytest` → **132 passed**. Live E2E on

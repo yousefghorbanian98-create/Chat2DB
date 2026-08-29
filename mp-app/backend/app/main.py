@@ -53,7 +53,7 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         settings: resolved runtime settings.
         run_migrations: set False only for tests that assert on a raw database.
     """
-    state = AppState.open(settings.db_path, secret_key=settings.secret_key) if run_migrations else None
+    state = AppState.open(settings.db_path, secret_key=settings.secret_key, gym_name=settings.gym_name) if run_migrations else None
     if state is not None:
         set_state(state)
 
