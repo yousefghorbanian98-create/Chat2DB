@@ -43,6 +43,11 @@ Format: Keep a Changelog. Versioning: every release must move a measured number
 - Tests: **83 → 90 passed** (10 files).
 - Statement coverage: **63.92% → 82.24%** (branch 79.92%, functions 85.46%).
 - `tsc --noEmit` exit 0; `npm run gate` exit 0.
+- Backend: **90.54%** statement coverage (219 tests, 1967 statements) — first
+  measurement. `pytest-cov` pinned and wired as a hard gate in `pytest.ini`
+  (`--cov-fail-under=80`); verified to exit 1 when the bar is raised to 95%.
+  The only 0% files are the two CLI dev scripts (`export_openapi.py`,
+  `seed_exercises.py`), which are entry points rather than library code.
 - Initial bundle **95.33 kB gzip** (gate < 250 kB); `AssessmentJp7` + recharts
   stays in its own lazy chunk at **112.05 kB gzip**.
 

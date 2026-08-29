@@ -137,9 +137,12 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 1. ~~**ESLint + Prettier not configured**~~ — **CLOSED 2026-08-30**: flat config +
    Prettier config, both in `npm run gate`. ESLint **21 → 0 problems** at
    `--max-warnings=0`; Prettier **29 → 0 files**.
-2. ~~**Coverage not measured**~~ — **CLOSED 2026-08-30** (Studio): `@vitest/coverage-v8`
-   installed; statements **63.92% → 82.24%** (branch 79.92%, functions 85.46%).
-   Backend `pytest-cov` still not run — the 219-test suite has no coverage number.
+2. ~~**Coverage not measured**~~ — **CLOSED 2026-08-30** on both sides:
+   - Studio: `@vitest/coverage-v8`; statements **63.92% → 82.24%** (branch 79.92%,
+     functions 85.46%).
+   - Backend: `pytest-cov` pinned; **90.54%** over 1967 statements, 219 tests.
+     Wired as a hard gate in `pytest.ini` (`--cov-fail-under=80`), verified to
+     fail with exit 1 when the threshold is raised to 95%.
 3. **Browser Core Web Vitals (FCP/LCP/CLS)** unmeasured — needs a real browser.
 4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
    shell was never launched.
@@ -160,7 +163,8 @@ GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
 | Prettier `--check` | 0 files | 29 flagged | **0** |
 | `tsc --noEmit` | exit 0 | exit 0 | **exit 0** |
 | Unit tests | pass | 83 | **90 passed (10 files)** |
-| Statement coverage | ≥ 80% | 63.92% | **82.24%** (branch 79.92%, funcs 85.46%) |
+| Studio statement coverage | ≥ 80% | 63.92% | **82.24%** (branch 79.92%, funcs 85.46%) |
+| Backend statement coverage | ≥ 80% | unmeasured | **90.54%** (219 tests, gated in `pytest.ini`) |
 | Initial bundle | < 250 kB gzip | 94.81 kB | **95.33 kB** |
 
 `max-lines-per-function` ≤ 50 was the last rule standing. Sub-component extraction
