@@ -654,12 +654,18 @@ forward from Phase 1 because rule C12 requires a measurable number from the
 first release. Open gaps tracked in `mp-app/LOOP_STATE.md`.
 
 ### Phase 1 — Identity & JP7 (weeks 2–3)
-- [ ] Staff auth PIN  
-- [ ] Members CRUD + QR id  
-- [ ] `jp7.py` + 10 golden tests  
-- [ ] Assessment UI (mockup 07) + history chart  
-- [ ] PDF assessment report  
-- [ ] Injury/limitation CRUD + safety card UI  
+- [x] Staff auth PIN  ✅ PBKDF2-HMAC-SHA256 200k + machine-local HMAC tokens; no user enumeration
+- [x] Members CRUD + QR id  ✅ tombstones + HMAC-signed 60s QR `{v,typ,gym,mid,exp,sig}`
+- [x] `jp7.py` + 10 golden tests  ✅ 12 fixtures ±0.05 %BF + external anchor (BD 1.061664 vs published 1.06166)
+- [ ] Assessment UI (mockup 07) + history chart  ⏳ next task
+- [ ] PDF assessment report  ⏳ needs `reportlab`
+- [x] Injury/limitation CRUD + safety card UI  ✅ data layer + `/filters` + server-side field masking (UI pending)
+
+**Phase 1 backend evidence (2026-08-29):** `pytest` → **132 passed**. Live E2E on
+:8752 returned BD **1.050006** / BF **21.4259** / FM 13.3912 / LBM 49.1088 for a
+female, 30y, 62.5kg, Σ7=105mm — matching the hand-computed value. Two RBAC holes
+found and closed (KIOSK could write members; TRAINER could read all members —
+unassigned access now 404s). See `mp-app/LOOP_STATE.md` for the role matrix.
 
 ### Phase 2 — Ops (weeks 4–5)
 - [ ] Attendance QR signed check-in  

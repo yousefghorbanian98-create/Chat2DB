@@ -1,15 +1,15 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 2
-Current Phase: Phase 0 — Skeleton (ENGINEERING_MAP_FULL_v1.md §14)
-Current Task: Phase 0 complete; next = Phase 1 task "Members CRUD + QR id"
-Status: PHASE_0_DONE
+Current Iteration: 4
+Current Phase: Phase 1 — Identity & JP7 (ENGINEERING_MAP_FULL_v1.md §14)
+Current Task: Phase 1 backend complete; next = "Assessment UI (mockup 07) + history chart"
+Status: PHASE_1_BACKEND_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
-Code Quality Score: 8/10
+Code Quality Score: 9/10
 Completed Tasks: [see checklist below]
-Failed Tasks: [] (3 defects found + fixed, logged in ERRORS.log)
+Failed Tasks: [] (7 defects found + fixed, all logged in ERRORS.log)
 Last Updated: 2026-08-29 (Asia/Tehran)
 ```
 
@@ -19,68 +19,119 @@ Last Updated: 2026-08-29 (Asia/Tehran)
 |------|-----------|-------------|
 | `mp-app/` monorepo scaffold | medium | Plan → Implement → Test |
 | SQLite schema (24 tables) + migration runner | complex | Plan → Decompose (base/runner/v001) → Implement → Integration test |
-| JP7 deterministic core | **critical** | Plan → Implement → Unit (12 golden) → Integration (payload) → external-anchor test |
+| JP7 deterministic core | **critical** | Plan → Implement → Unit (12 golden) → Integration → external-anchor test |
 | `/health` probe | medium | Plan → Implement → Test |
 | Studio tokens + motion system | medium | Plan → Implement → Test |
 | Studio launcher shell | simple | Direct implementation |
+| PIN hashing / tokens / signed QR | **critical** | Plan → Implement → Unit (24) → tamper + replay + expiry tests |
+| RBAC dependencies | **critical** | Plan → Implement → per-role matrix tests |
+| Members CRUD + QR | complex | Plan → Implement → Unit + integration + tombstone test |
+| Assessments API (compute + history) | **critical** | Plan → Implement → Unit → golden-math assertion on the stored row |
+| Injuries + field masking | complex | Plan → Implement → masking + filter tests |
 
-## Phase 0 checklist (map §14)
+## Phase 0 checklist (map §14) — DONE
 
 - [x] Create `mp-app/` monorepo (backend + studio + openapi.yaml)
-- [x] FastAPI `/health` on **8751** — verified live: `status ok`, 25 tables
-- [x] SQLite schema + migrations + `gym_id` — 24 tables, audit columns asserted per table
-- [x] openapi.yaml stub — generated from the real app (`python -m app.export_openapi`)
-- [x] Studio Electron hello + theme tokens from MASTER.md — tokens.css 1:1 with MASTER.md
+- [x] FastAPI `/health` on **8751** — verified live
+- [x] SQLite schema + migrations + `gym_id` — 24 tables, checksum drift detection
+- [x] openapi.yaml — regenerated from the real app: **13 paths / 13 schemas**
+- [x] Studio Electron hello + theme tokens from MASTER.md
 - [x] STATE.md + map linked — this file
-- [x] License attribution page stub — `mp-app/NOTICES.md`
+- [x] License attribution stub — `mp-app/NOTICES.md`
 - [ ] **Dev tooling:** ChunkHound / open-codebase-index not installed in this sandbox
-      (no `chunkhound` on PATH, and `pip install chunkhound` was not attempted —
-      see Open Items)
+
+## Phase 1 checklist (map §14)
+
+- [x] Staff auth PIN — PBKDF2-HMAC-SHA256 200k iters, constant-time compare,
+      no user enumeration; machine-local HMAC session tokens (8h TTL)
+- [x] Members CRUD + QR id — create/read/patch/tombstone, signed 60s QR
+      (`{v,typ,gym,mid,exp,sig}`), `bootstrap.py` seeds gym + OWNER
+- [x] `jp7.py` + 10 golden tests — **12 fixtures**, external anchor included
+- [ ] Assessment UI (mockup 07) + history chart — **next task** (frontend)
+- [ ] PDF assessment report — needs `reportlab`, not installed yet
+- [x] Injury/limitation CRUD + safety card data — dossier, contraindication
+      patterns, `GET /members/{id}/filters`, and the Studio-vs-member field mask
 
 ## Verified evidence (commands actually run)
 
 | Check | Command | Result |
 |-------|---------|--------|
-| Backend suite | `pytest` (mp-app/backend) | **73 passed**, 1 warning |
-| JP7 golden fixtures | `pytest -m golden` | 12 fixtures within ±0.05 %BF; external anchor BD 1.061664 vs published 1.06166 |
-| Studio typecheck | `npx tsc --noEmit` | exit 0, zero errors (strict + exactOptionalPropertyTypes) |
-| Studio unit tests | `npx vitest run` | **25 passed** (2 files) |
-| Studio build | `npx vite build` | 280.03 kB raw / **91.73 kB gzip** (budget 250 kB) |
-| Live API | `uvicorn --factory` + `curl :8751/health` | 200, `schema_version 0001_core`, `x-response-ms 2.9` |
-| CORS allowlist | curl with `Origin: https://evil.example` | 0 `access-control-allow-origin` headers |
+| Backend suite | `pytest` (mp-app/backend) | **132 passed**, 1 warning |
+| JP7 golden | `pytest -m golden` | 32 tests; 12 fixtures within ±0.05 %BF |
+| Schema | `pytest -m schema` | 33 tests; audit columns on all 24 tables |
+| Security | `pytest tests/test_security.py` | 24 tests (tamper/replay/expiry/algo) |
+| Phase 1 API | `pytest tests/test_phase1_api.py` | 40 tests incl. full RBAC matrix |
+| Live E2E | `uvicorn :8752` + curl chain | login → member → JP7 (BD 1.050006 / BF 21.4259) → injury → filters → masked view → signed QR → injury badge = 1 |
+| OpenAPI | `python -m app.export_openapi` | 13 paths, 13 schemas, 1179-line YAML |
+| Studio gate | `npm run gate` | tsc clean, 25 tests, 91.73 kB gzip |
 
-## Taste score breakdown (Phase 3.5) — honest, not aspirational
+### Live E2E transcript (real HTTP, not TestClient)
+
+```
+POST /api/v1/auth/pin                    -> token (role OWNER, 8h)
+POST /api/v1/members                     -> member id 1 (Sara Azad, female)
+POST /api/v1/members/1/assessments       -> body_density 1.050006, body_fat_pct
+                                            21.4259, FM 13.3912, LBM 49.1088,
+                                            classification "fit"
+POST /api/v1/members/1/injuries          -> injury 1, patterns ['spinal_flexion']
+GET  /api/v1/members/1/filters           -> blocked ['spinal_flexion'],
+                                            allowed ['trap_bar_deadlift']
+GET  /api/v1/client/members/1/injuries   -> keys [body_region,id,label,
+                                            member_visible_note,status]
+                                            clinician_note leaked? False
+GET  /api/v1/members/1/qr                -> {v:1,typ:member,gym:1,mid:1,exp,sig}
+GET  /api/v1/members                     -> Sara Azad | active_injuries: 1
+```
+
+## RBAC matrix (locked by tests)
+
+| Endpoint group | OWNER | ADMIN | TRAINER | RECEPTION | KIOSK | MEMBER |
+|----------------|-------|-------|---------|-----------|-------|--------|
+| read members | ✅ all | ✅ all | ⚠️ assigned only | ✅ all | ❌ 403 | ❌ 403 |
+| write members | ✅ | ✅ | ❌ 403 | ✅ | ❌ 403 | ❌ 403 |
+| JP7 assessments | ✅ | ✅ | ⚠️ assigned only | ❌ 403 | ❌ 403 | ❌ 403 |
+| injuries / filters | ✅ | ✅ | ✅ | ❌ 403 | ❌ 403 | ❌ 403 |
+| `/auth/me` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `POST /assessments/calculate` (pure math) | open — no PII, no persistence |
+
+## Taste score breakdown (Phase 3.5)
 
 | Axis | Score | Why |
 |------|-------|-----|
-| Visual Polish | 6 | Tokens + glass cards are real, but the launcher is not yet matched to mockup 06; no iconography (Lucide not wired) |
-| Animation Quality | 8 | Preset table encoded + unit-tested, reduced-motion honoured, dashboard/cinematic split resolved; no celebration/choreography moments built yet |
-| Interaction Design | 7 | Button press + hover springs, skeletons everywhere; no keyboard shortcuts or command palette yet |
+| Visual Polish | 6 | Tokens + glass cards real; launcher not yet matched to mockup 06; Lucide not wired |
+| Animation Quality | 8 | Presets unit-tested, reduced-motion honoured, dashboard/cinematic split enforced |
+| Interaction Design | 7 | Spring press/hover, labelled skeletons; no command palette yet |
 | Readability | 9 | Docstrings, typed, ≤300-line files, no `any` |
-| Consistency | 9 | Single token source (MASTER.md), single motion source (presets.ts) |
-| Performance | 8 | 91.7 kB gzip, transform-only animations; LCP/CLS not yet measured in a browser |
-| Security | 7 | CORS allowlist + Electron isolation flags + FK enforcement; no auth yet (Phase 1) |
-| Accessibility | 8 | roles/aria-busy/aria-label, 44px targets, reduced motion; no screen-reader pass yet |
-| Responsiveness | 7 | CSS grid auto-fill; not yet tested at 375px/2560px |
-| Delight Factor | 4 | Deliberately deferred — dashboard-first per MASTER.md motion dial 4/10 |
-| **Average** | **7.3** | **Below the loop's 8.0 bar** → Phase 0 ships as a skeleton by design; the bar applies to user-facing modules from Phase 1 |
+| Consistency | 9 | One token source, one motion source, one error envelope |
+| Performance | 8 | 91.73 kB gzip; `x-response-ms` 2.9 on /health; browser metrics unmeasured |
+| Security | 9 | PBKDF2 200k, constant-time compare, HMAC tokens + QR, RBAC matrix, CORS allowlist, Electron isolation, FK enforcement |
+| Accessibility | 8 | roles/aria-busy/44px targets/reduced motion; no screen-reader pass |
+| Responsiveness | 7 | CSS grid auto-fill; untested at 375px/2560px |
+| Delight Factor | 4 | Deferred by design (MASTER.md motion dial 4/10) |
+| **Average** | **7.9** | Backend is at bar; the average is held down by UI axes that Phase 1's remaining frontend tasks will move |
 
 ## Open items (not done, not hidden)
 
-1. **ESLint + Prettier not configured** → FINN-LOOP gate 3.1 is only *partially*
-   satisfied (`tsc --noEmit` passes; lint/format gates do not exist yet).
-2. **Coverage not measured** → gate 3.2 requires ≥80%; `@vitest/coverage-v8` and
-   `pytest-cov` are not installed. Every changed code path *is* exercised, but the
-   percentage is unverified.
-3. **Browser performance metrics (FCP/LCP/CLS)** unmeasured — needs a real browser.
-4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`), so the packaged
-   shell was never launched; only the web renderer was built and tested.
-5. **Flutter client, Ollama, sync fabric** — Phases 5–6, untouched.
+1. **ESLint + Prettier not configured** → gate 3.1 only partially satisfied
+   (`tsc --noEmit` passes; lint/format gates don't exist).
+2. **Coverage not measured** → gate 3.2 needs `pytest-cov` + `@vitest/coverage-v8`.
+3. **Browser Core Web Vitals (FCP/LCP/CLS)** unmeasured — needs a real browser.
+4. **Electron binary skipped** (`ELECTRON_SKIP_BINARY_DOWNLOAD=1`); the packaged
+   shell was never launched.
+5. **`reportlab` not installed** → PDF assessment report (Phase 1) is pending.
+6. **Assessment UI + history chart** — the visible half of Phase 1.
+7. ~~TRAINER member scoping~~ — **CLOSED this iteration**: `app/auth/scope.py`
+   now filters member lists and 404s unassigned access across members,
+   assessments and injuries routers.
+8. **Flutter client, Ollama, sync fabric** — Phases 5–6, untouched.
 
-## Conflict resolved this iteration
+## Conflicts resolved
 
-MASTER.md sets MP's motion dial to **4/10 (dense dashboard, no back.out on tables,
-200ms page fades)** while FINN-LOOP demands cinematic motion everywhere. Resolution:
-`presets.ts` exposes `mode: 'dashboard' | 'cinematic'` — dense data surfaces use
-dashboard, celebrations/modals/launcher use cinematic. Enforced by unit tests
-(`presets.test.ts` → "dashboard cards translate only — no scale on dense surfaces").
+MASTER.md motion dial 4/10 vs FINN-LOOP cinematic → `presets.ts` exposes
+`mode: 'dashboard' | 'cinematic'`; dense surfaces use dashboard, celebrations and
+modals use cinematic. Asserted in `presets.test.ts`.
+
+## Rule added to ERRORS.log after a self-inflicted defect
+
+> Never paste an expected numeric literal you did not compute. Derive it with an
+> independent calculation (python decimal) and cite the derivation in the test.

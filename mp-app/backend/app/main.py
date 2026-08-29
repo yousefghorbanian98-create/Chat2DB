@@ -22,7 +22,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app import __version__
 from app.config import API_PREFIX, Settings
-from app.routers import health
+from app.routers import assessments, auth, health, injuries, members
 from app.state import AppState, set_state
 
 logger = logging.getLogger("mp.core")
@@ -53,7 +53,7 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
         settings: resolved runtime settings.
         run_migrations: set False only for tests that assert on a raw database.
     """
-    state = AppState.open(settings.db_path) if run_migrations else None
+    state = AppState.open(settings.db_path, secret_key=settings.secret_key) if run_migrations else None
     if state is not None:
         set_state(state)
 
@@ -115,6 +115,8 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
     # Map contract: GET /health at root, everything else under /api/v1.
     app.include_router(health.router)
     app.include_router(health.router, prefix=API_PREFIX)
+    for module in (auth, members, assessments, injuries):
+        app.include_router(module.router, prefix=API_PREFIX)
 
     @app.get("/meta", include_in_schema=False)
     def meta() -> dict[str, object]:

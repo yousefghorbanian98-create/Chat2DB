@@ -12,6 +12,7 @@ from pathlib import Path
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.core.security import load_or_create_secret_key
 from app.db import make_engine, make_session_factory
 from app.migrations import migrate
 
@@ -22,13 +23,17 @@ class AppState:
 
     engine: Engine
     session_factory: sessionmaker[Session]
+    secret_key: str = ""
 
     @classmethod
-    def open(cls, db_path: Path, *, echo: bool = False) -> "AppState":
+    def open(
+        cls, db_path: Path, *, echo: bool = False, secret_key: str = ""
+    ) -> "AppState":
         """Open the database, run pending migrations, return ready state."""
         engine = make_engine(db_path, echo=echo)
         migrate(engine)
-        return cls(engine=engine, session_factory=make_session_factory(engine))
+        key = secret_key or load_or_create_secret_key(db_path.parent / "secret.key")
+        return cls(engine=engine, session_factory=make_session_factory(engine), secret_key=key)
 
     def dispose(self) -> None:
         """Release pooled connections (used by tests and shutdown hooks)."""
@@ -54,6 +59,11 @@ def get_state() -> AppState:
 def get_engine() -> Engine:
     """FastAPI dependency: the shared SQLAlchemy engine."""
     return get_state().engine
+
+
+def get_secret_key() -> str:
+    """Machine-local key used for session tokens and QR signatures."""
+    return get_state().secret_key
 
 
 def get_session() -> Session:

@@ -11,3 +11,15 @@
 [2026-08-29] QUALITY | app/migrations/v001_core.py | self-inflicted: index was written against a non-existent column (measured_at_idx) then string-patched at import time | removed the patch, indexed body_assessments(member_id, created_at) directly | tests/test_migrations.py::test_every_mapped_table_was_created
 
 [2026-08-29] INTEGRATION | app/main.py | uvicorn failed with: Error loading ASGI app. Attribute "app" not found in module "app.main" — the module only exported the create_app() factory, so the documented run command could not boot | added create_app_from_env() (env-driven factory, keeps DB untouched at import time) + backend/run.sh, launched with --factory | manual smoke test on :8751 returned status ok / 25 tables / schema 0001_core, x-request-id + x-response-ms headers present, CORS allowlist rejected https://evil.example
+
+[2026-08-29] LOGIC | tests/test_phase1_api.py (self-inflicted) | asserted body_fat_pct == 21.5437 for female/30y/sum=105mm — that literal was GUESSED, not computed; the implementation returned 21.4259 | recomputed independently with python decimal (BD 1.050006 -> Siri 21.4259) and pinned both body_density and body_fat_pct in the test | test_stored_numbers_match_the_golden_math now asserts the derived value; rule added below
+
+[2026-08-29] LOGIC | app/auth/deps.py | RBAC hole: require_staff included KIOSK, so the kiosk role could create/list members. Map §2.4 says KIOSK is "Scan only" | split into MEMBER_READ_ROLES (OWNER/ADMIN/TRAINER/RECEPTION) and MEMBER_WRITE_ROLES (OWNER/ADMIN/RECEPTION); members router now uses require_member_read / require_member_write | TestRbac: kiosk 403 on create AND on list; trainer read-only; reception can register; MEMBER token 403 on studio surface
+
+# RULE (added after the error above, per Auto Debug step 6):
+# never paste an expected numeric literal you did not compute. Derive it with an
+# independent calculation (python decimal) and cite the derivation in the test.
+
+[2026-08-29] LOGIC | app/auth/scope.py (new) + app/repo/members.py + routers | RBAC hole #2: TRAINER could read/assess EVERY member. staff_can_see_member() existed in the repo layer but no router called it (verified: grep found zero call sites) | added app/auth/scope.py with scope_trainer_id() + ensure_member_visible(); list_members gained a trainer_id filter; unassigned access returns 404 (not 403) so trainers cannot learn a member exists | TestRbac::test_trainer_sees_only_assigned_members (empty list -> 404 -> assign -> visible), test_unassigned_trainer_cannot_touch_injuries_or_assessments
+
+[2026-08-29] LOGIC | tests/test_phase1_api.py | an older test (test_trainer_can_run_assessments) had fossilised the unscoped behaviour and failed once scoping landed | replaced with test_assigned_trainer_can_run_assessments + an assigned_trainer_auth fixture that states the assignment explicitly | suite 132 passed

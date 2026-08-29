@@ -33,6 +33,9 @@ class Settings:
     port: int = DEFAULT_PORT
     cors_origins: tuple[str, ...] = _DEFAULT_ORIGINS
     gym_name: str = "Muscle Paradise"
+    #: Machine-local key for tokens + QR signatures. Empty means "load/create
+    #: the file next to the database" (map §15: secrets stay on this machine).
+    secret_key: str = ""
 
     @property
     def sqlalchemy_url(self) -> str:
@@ -75,4 +78,5 @@ class Settings:
             port=port,
             cors_origins=cors,
             gym_name=source.get("MP_GYM_NAME", "Muscle Paradise"),
+            secret_key=source.get("MP_SECRET", ""),
         )

@@ -16,8 +16,18 @@ mp-app/
 ```bash
 cd mp-app/backend
 python3 -m venv ../../.venv-mp && ../../.venv-mp/bin/pip install -r requirements.txt
+
+# first run: create the gym + OWNER (PIN comes from the env, never argv)
+MP_OWNER_USER=owner MP_OWNER_PIN=1234 ../../.venv-mp/bin/python -m app.bootstrap
+
 ./run.sh                      # uvicorn --factory on 127.0.0.1:8751
 curl -s localhost:8751/health # {"status":"ok","db":{"schema_version":"0001_core", ...}}
+
+# then log in and use the API
+TOKEN=$(curl -s -X POST localhost:8751/api/v1/auth/pin \
+  -H 'content-type: application/json' \
+  -d '{"username":"owner","pin":"1234"}' | python3 -c 'import json,sys;print(json.load(sys.stdin)["token"])')
+curl -s localhost:8751/api/v1/members -H "authorization: Bearer $TOKEN"
 ```
 
 Migrations run automatically on startup. `MP_DB_PATH`, `MP_PORT`, `MP_HOST`,
