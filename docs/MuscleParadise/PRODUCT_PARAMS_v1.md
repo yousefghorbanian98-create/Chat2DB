@@ -1,9 +1,10 @@
-# 🏋️ MUSCLE PARADISE — پارامترهای محصول جامع v1.1
-## دو نسخه · آسیب/محدودیت · شخصی‌سازی · پیشنهادهای تکمیلی
+# 🏋️ MUSCLE PARADISE — پارامترهای محصول جامع v1.2
+## دو نسخه · آسیب/محدودیت · شخصی‌سازی · پیشنهادهای تکمیلی · اتوماسیون n8n
 
-> تاریخ: 2026-08-28  
+> تاریخ: 2026-08-29 (v1.2: پل n8n)  
 > وضعیت Cutting Edge: **دست‌نخورده**  
-> این سند مکمل `EXECUTIVE_SCHEMATIC_v1.md` است.
+> این سند مکمل `EXECUTIVE_SCHEMATIC_v1.md` و `ENGINEERING_MAP_FULL_v1.md` است.  
+> اتوماسیون اختیاری: `N8N_AUTOMATION_BRIDGE.md` · کاتالوگ: https://zie619.github.io/n8n-workflows/
 
 ---
 
@@ -243,6 +244,8 @@ Candidate exercise
 | P1-15 | **Export ورزشکار بدون داده مالی دیگران** | QR/PDF امن |
 | P1-16 | **حالت مهمان/آزمایشی ۷ روز** | جذب |
 | P1-17 | **مقایسه before/after JP7 یک‌کلیکی برای فروش تمدید** | |
+| P1-18 | **پل اتوماسیون n8n (اختیاری)** — یادآوری انقضا، رسید، غیبت، بکاپ | کاتالوگ: https://zie619.github.io/n8n-workflows/ · جزئیات: `N8N_AUTOMATION_BRIDGE.md` |
+| P1-19 | **کانال اطلاع‌رسانی** Telegram / WhatsApp / SMS ایرانی روی webhookهای MP | هسته بدون n8n هم کار کند |
 
 ## ۵.۳ P2 — درجه یک / رقابتی
 

@@ -1,4 +1,4 @@
-# 🏋️ MUSCLE PARADISE (MP) — COMPLETE ENGINEERING MAP v1.1
+# 🏋️ MUSCLE PARADISE (MP) — COMPLETE ENGINEERING MAP v1.2
 ## Zero-to-One Spec for Any AI Coding Agent
 
 > **How to use this document**  
@@ -8,7 +8,8 @@
 
 **Brand:** Muscle Paradise · Logo monogram **MP**  
 **Owner domain:** Gym OS for a personal trainer who runs Jackson–Pollock 7-site body composition  
-**Map version:** 1.1 (2026-08-29) — added §12.7 Dev-Agent Tooling + download links  
+**Map version:** 1.2 (2026-08-29) — added §12.8 n8n automation bridge (Zie619 4343+ workflows)  
+**Prior:** 1.1 Dev-Agent Tooling · 1.0 baseline  
 **Date locked (product rules):** 2026-08-28 (Asia/Tehran context)  
 **Repo:** https://github.com/yousefghorbanian98-create/Chat2DB  
 **Branch with this pack:** `arena/01a048a6-chat2db`  
@@ -18,10 +19,14 @@
 |------|-----|
 | **This map (raw MD)** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md |
 | **This map (GitHub view)** | https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md |
-| **Full ZIP pack (~1.9MB)** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.zip |
+| **Full ZIP pack** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.zip |
+| **ZIP pack v1.1+** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.1.zip |
 | **Dev-agent tooling doc** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/DEV_AGENT_TOOLING.md |
+| **n8n automation bridge** | https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/N8N_AUTOMATION_BRIDGE.md |
 | **Folder on GitHub** | https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/01a048a6-chat2db/docs/MuscleParadise |
 | **Release tag page** | https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/mp-eng-v1.0 |
+| **Zie619 n8n catalog UI** | https://zie619.github.io/n8n-workflows/ |
+| **Zie619 n8n catalog repo** | https://github.com/Zie619/n8n-workflows |
 
 ---
 
@@ -100,7 +105,9 @@ Locked Studio flavor: QR scan in/out only, auto-idle, PIN exit.
 17. Consents & medical disclaimer signatures  
 18. Messaging coach↔member  
 19. Progress photos  
-20. PT session packs (optional P1)
+20. PT session packs (optional P1)  
+21. **Automation bridge** (optional n8n webhooks — §12.8)  
+22. **n8n companion runbook** (import Zie619 templates — not required offline)
 
 ---
 
@@ -330,6 +337,7 @@ docs/MuscleParadise/   # already exists — keep extending
   PRODUCT_PARAMS_v1.md
   OSS_INTEGRATION_UIUX_OMNIROUTE.md
   DEV_AGENT_TOOLING.md
+  N8N_AUTOMATION_BRIDGE.md
   design-system/muscle-paradise/MASTER.md
   mockups/
   tools/ui-ux-pro-max/
@@ -529,6 +537,81 @@ librarian search --library fastapi/fastapi "background tasks websocket"
 ### What these tools do NOT replace
 - JP7 golden tests · injury filters · RBAC Client isolation · offline Knowledge Packs · electron-updater · free-exercise-db seed  
 
+## 12.8 OPTIONAL AUTOMATION BRIDGE — n8n + Zie619 workflow catalog
+
+> Full extraction, event contract, and **direct JSON download links**:  
+> **`docs/MuscleParadise/N8N_AUTOMATION_BRIDGE.md`**  
+> Catalog UI: https://zie619.github.io/n8n-workflows/  
+> Catalog repo (MIT collection): https://github.com/Zie619/n8n-workflows (~**4,343** workflows, 15+ categories)
+
+### What it is
+A searchable library of **ready-made n8n workflow JSON** (WhatsApp, Telegram, SMS/Twilio, invoice/PDF, cron/expiry patterns, Ollama/RAG, Google Calendar, backup to Nextcloud/Git, sheets/CRM).  
+**Not** a gym-specific product — we **map MP needs → general automation patterns** and import only what we need.
+
+### Role in MP architecture (optional Layer C)
+```
+Layer B — MP Core offline (source of truth)
+    │  optional signed webhooks / poll APIs
+    ▼
+Layer C — n8n self-host (LAN)  ← import Zie619 JSON templates
+    │
+    └── Telegram / WhatsApp / SMS-IR / Email / Nextcloud backup / coach digests
+```
+
+| Rule | |
+|------|--|
+| Core gym ops (JP7, check-in, Client auth, payments ledger) | **Never require n8n** |
+| Expiry SMS, receipt delivery, absent-member digests, encrypted backup copy | **Good n8n fit** |
+| Program generation / injury filters | **Stay in MP brain** (§5) |
+| PHI / full injury notes in cloud AI nodes | **Forbidden by default** |
+
+### MP needs covered by catalog patterns
+
+| MP need | Pattern family | Example raw JSON (see bridge doc for full list) |
+|---------|----------------|--------------------------------------------------|
+| Membership expiry D-7/D-3/D-0 | Schedule + HTTP + notify | SSL Expiry Alert pattern: https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Schedule/1614_Schedule_HTTP_Send_Webhook.json |
+| Payment → send receipt | Webhook + PDF + mail/Telegram | Html2Pdf webhook: https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Webhook/0813_Webhook_Respondtowebhook_Process_Webhook.json · Invoice email: https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Slack/1194_Slack_Emailreadimap_Create.json |
+| WhatsApp member channel | WhatsApp starter / business bot | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Whatsapp/2030_Whatsapp_Respondtowebhook_Automate_Webhook.json · https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Whatsapp/1521_Whatsapp_Stickynote_Automation_Webhook.json |
+| Telegram coach bot | Telegram AI-bot | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Openai/0248_Openai_Telegram_Automate_Triggered.json |
+| SMS (replace w/ Kavenegar HTTP) | Twilio/MSG91/sms77 primitives | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Twilio/0842_Twilio_Cron_Send_Scheduled.json · https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Error/1036_Error_Twilio_Send_Triggered.json |
+| Local AI assist | Ollama Chat / RAG pdf / Milvus | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Stickynote/1691_Stickynote_Automation_Triggered.json · https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Stopanderror/1061_Stopanderror_Telegram_Automation_Triggered.json · https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Splitout/1243_Splitout_Limit_Automation_Webhook.json |
+| Nightly encrypted backup copy | Backup Nextcloud / Git | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Functionitem/1067_Functionitem_Manual_Export_Webhook.json · https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Code/0628_Code_Schedule_Export_Scheduled.json |
+| API health monitor | URL Pinger | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Http/1447_HTTP_Schedule_Automation_Webhook.json |
+| Class / PT calendar | Google Calendar Agent | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Googlecalendartool/1792_Googlecalendartool_Executeworkflow_Automation_Triggered.json |
+| Fun meal tip push (non-clinical) | “What To Eat” cron | https://raw.githubusercontent.com/Zie619/n8n-workflows/main/workflows/Http/0084_HTTP_Cron_Automation_Webhook.json |
+
+### First five gym workflows to build (from templates)
+1. `mp-expiry-d3` — daily cron → expiring members → FA SMS/Telegram  
+2. `mp-payment-receipt` — webhook → attach MP PDF → send  
+3. `mp-absent-7d` — weekly digest to coach  
+4. `mp-backup-nightly` — encrypted export → folder/Nextcloud  
+5. `mp-health-ping` — `/health` fail → SMS owner  
+
+### MP API hooks to add when enabling bridge
+```
+POST /api/v1/automation/test
+Settings: automation_enabled, n8n_webhook_base, hmac_secret, channels[]
+Events: membership.expiring | payment.created | attendance.absent_streak
+        | program.approved | backup.completed | ai.job.failed
+```
+Payload schema + privacy flags: see `N8N_AUTOMATION_BRIDGE.md` §3.
+
+### Module catalog add-ons (optional)
+21. Automation bridge (webhook emitter + settings UI)  
+22. n8n runbook (imported workflows list + health)
+
+### Roadmap touch
+- Phase 2+: optional `automation` feature flag after payments work  
+- Phase 6: document n8n as **recommended companion**, not hard dependency  
+
+### License notes
+- Zie619 **collection** repo: **MIT**  
+- **n8n engine**: verify https://github.com/n8n-io/n8n terms for your distribution (self-host internal gym use is the intended mode)  
+- Attribution on Studio About → Automation page  
+
+### Catalog search queries (UI)
+https://zie619.github.io/n8n-workflows/ → try: `whatsapp`, `telegram schedule`, `invoice pdf`, `ollama`, `rag`, `backup nextcloud`, `twilio cron`, `google calendar`, `expiry`
+
 ---
 
 # 13. KNOWLEDGE PACK FORMAT
@@ -643,10 +726,10 @@ App update ≠ KB update (separate delta channels).
 
 ```
 You are building Muscle Paradise (MP), a local-first gym OS.
-Read and obey: docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md (v1.1+)
+Read and obey: docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md (v1.2+)
 Also: PRODUCT_PARAMS_v1.md, EXECUTIVE_SCHEMATIC_v1.md,
 OSS_INTEGRATION_UIUX_OMNIROUTE.md, DEV_AGENT_TOOLING.md,
-design-system/muscle-paradise/MASTER.md.
+N8N_AUTOMATION_BRIDGE.md, design-system/muscle-paradise/MASTER.md.
 
 Rules:
 - Create code only under mp-app/ and docs/MuscleParadise/
@@ -660,6 +743,8 @@ Rules:
 - Prefer MIT/Apache deps; no AGPL in-process (wger, SocratiCode)
 - Dev-only tools (ChunkHound, codebase-index, Librarian, Copilot, Open Aware)
   improve YOUR context — do not ship them inside the gym binary
+- Optional n8n (Zie619 templates) is Layer C automation only — never required for offline core;
+  no PHI to cloud nodes by default; Iranian SMS via HTTP adapters
 - Every feature needs a measurable test
 
 Start with Phase 0 skeleton (+ optional codebase index), then Phase 1 JP7+members+injuries.
@@ -701,15 +786,16 @@ python3 tools/ui-ux-pro-max/scripts/search.py "fitness dashboard" --domain ux
 
 # 19. RELATED DOCS IN THIS REPO (READ ORDER)
 
-1. `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md` ← **you are here (v1.1)**  
-2. `docs/MuscleParadise/DEV_AGENT_TOOLING.md` — ChunkHound, codebase-index, Librarian, Copilot, Open Aware, SocratiCode, OSS Compass  
-3. `docs/MuscleParadise/PRODUCT_PARAMS_v1.md` — dual shell, injuries, backlog P0–P3  
-4. `docs/MuscleParadise/EXECUTIVE_SCHEMATIC_v1.md` — gaps vs v1 map, CE reuse matrix  
-5. `docs/MuscleParadise/OSS_INTEGRATION_UIUX_OMNIROUTE.md` — Pro Max + OmniRoute policy  
-6. `docs/MuscleParadise/design-system/muscle-paradise/MASTER.md` — tokens  
-7. `docs/MuscleParadise/design-system/muscle-paradise/pages/*.md` — page overrides  
-8. `docs/MuscleParadise/mockups/*.jpg` — visual targets  
-9. Read-only patterns: `docs/CuttingEdge/BRAIN_DESIGN.md`, `ce-app/` structure  
+1. `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md` ← **you are here (v1.2)**  
+2. `docs/MuscleParadise/N8N_AUTOMATION_BRIDGE.md` — Zie619 n8n catalog → gym automations + JSON links  
+3. `docs/MuscleParadise/DEV_AGENT_TOOLING.md` — ChunkHound, codebase-index, Librarian, Copilot, Open Aware, SocratiCode, OSS Compass  
+4. `docs/MuscleParadise/PRODUCT_PARAMS_v1.md` — dual shell, injuries, backlog P0–P3  
+5. `docs/MuscleParadise/EXECUTIVE_SCHEMATIC_v1.md` — gaps vs v1 map, CE reuse matrix  
+6. `docs/MuscleParadise/OSS_INTEGRATION_UIUX_OMNIROUTE.md` — Pro Max + OmniRoute policy  
+7. `docs/MuscleParadise/design-system/muscle-paradise/MASTER.md` — tokens  
+8. `docs/MuscleParadise/design-system/muscle-paradise/pages/*.md` — page overrides  
+9. `docs/MuscleParadise/mockups/*.jpg` — visual targets  
+10. Read-only patterns: `docs/CuttingEdge/BRAIN_DESIGN.md`, `ce-app/` structure  
 
 **External product links (owner’s other work — reference only):**  
 - Repo: https://github.com/yousefghorbanian98-create/Chat2DB  
@@ -717,6 +803,7 @@ python3 tools/ui-ux-pro-max/scripts/search.py "fitness dashboard" --domain ux
 - Cutting Edge release example: https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/v0.9.38  
 - Map raw download: https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md  
 - ZIP pack: https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/01a048a6-chat2db/docs/MuscleParadise/releases/MuscleParadise-EngineeringPack-v1.zip  
+- n8n catalog: https://zie619.github.io/n8n-workflows/ · https://github.com/Zie619/n8n-workflows  
 
 ---
 
@@ -747,7 +834,9 @@ PACK knowledge offline; cloud never required.
 
 ---
 
-**END OF ENGINEERING MAP v1.1**  
+**END OF ENGINEERING MAP v1.2**  
 File path: `docs/MuscleParadise/ENGINEERING_MAP_FULL_v1.md`  
-Changelog 1.0 → 1.1: §12.7 Dev-Agent Tooling; download link table; Phase 0 + bootstrap + §18/§19 updates.  
+Changelog:  
+- 1.0 → 1.1: §12.7 Dev-Agent Tooling; download links; Phase 0/bootstrap updates  
+- 1.1 → 1.2: §12.8 n8n + Zie619 4343-workflow bridge; modules 21–22; N8N_AUTOMATION_BRIDGE.md  
 Cutting Edge tree: untouched by design.
