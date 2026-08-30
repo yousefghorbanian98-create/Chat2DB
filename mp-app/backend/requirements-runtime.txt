@@ -1,0 +1,14 @@
+# MP local-first core — RUNTIME dependencies only.
+#
+# This is what the packaged installer installs. `requirements.txt` is the
+# superset used for development (it adds pytest, pytest-cov and PyMuPDF, which
+# only the test suite needs). Do not add a package here unless `app/` imports
+# it at runtime — every line here ships inside the installer.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+pydantic==2.13.5
+httpx==0.28.1          # app/core/ai_brain.py probes a local Ollama
+reportlab==5.0.1       # Persian assessment + receipt PDFs
+arabic-reshaper==3.0.1 # letter shaping for those PDFs (MIT)
+cryptography==50.0.1   # app/core/backup.py encrypts archives with Fernet

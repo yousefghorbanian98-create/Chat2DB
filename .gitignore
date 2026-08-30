@@ -99,3 +99,4 @@ mp-app/backend/**/__pycache__/
 *.db
 *.db-wal
 *.db-shm
+mp-app/dist-release/
