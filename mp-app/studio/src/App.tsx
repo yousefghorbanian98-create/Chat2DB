@@ -9,6 +9,7 @@ import { MotionButton } from './components/MotionButton';
 import { Skeleton } from './components/Skeleton';
 import { listVariants, pageVariants } from './motion/presets';
 import { ClientShell } from './pages/ClientShell';
+import { Landing } from './pages/Landing';
 import { Login } from './pages/Login';
 
 // Route-based code splitting (Performance Watchdog): each surface is its own
@@ -135,7 +136,7 @@ function LauncherTile({ tile, onOpen }: { tile: Tile; onOpen: (r: Route) => void
 
 /** The staggered launcher grid (MASTER.md: 40–60 ms stagger, y:12, no scale). */
 function LauncherGrid({ onOpen }: { onOpen: (r: Route) => void }) {
-  const { container, item } = listVariants('dashboard');
+  const { container, item } = listVariants('cinematic');
   return (
     <motion.section variants={container} initial="hidden" animate="visible" style={TILE_GRID}>
       {TILES.map((tile) => (
@@ -166,8 +167,9 @@ function RoutedPage({ route }: { route: Route }) {
 function Shell() {
   const { role, logout } = useAuth();
   const [route, setRoute] = useState<Route>('home');
+  const [introDone, setIntroDone] = useState(false);
 
-  if (!role) return <Login />;
+  if (!role) return introDone ? <Login /> : <Landing onDone={() => setIntroDone(true)} />;
   if (role === 'MEMBER') return <ClientShell />;
 
   return (

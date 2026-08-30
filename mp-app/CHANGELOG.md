@@ -27,6 +27,21 @@ Format: Keep a Changelog. Versioning: every release must move a measured number
 - `InjuryList` (clinician note can never render) and `PaymentList` (Rial, staff
   hidden), plus new rows in `useClientData`.
 
+### Added (experience, automation, installers)
+- **Cinematic landing** (`src/pages/Landing.tsx`): self-drawing MP monogram,
+  staggered letter wordmark, breathing brand glows and a progress hand-off — the
+  one surface where FINN-LOOP's full motion bar is allowed (launcher entrance
+  also switched to `cinematic`). Reduced-motion users get a static hand-off.
+- **n8n automation bridge (backend)**: `app/automation/events.py` (HMAC-signed,
+  PHI-redacted, best-effort delivery), `app/repo/reports.py`
+  (`list_expiring`, `list_inactive`), and `/automation/config` +
+  `/reports/expiring` + `/reports/inactive-members` (owner/staff-gated).
+  `payment.created` is now emitted on every payment. Core never requires it.
+- **Native installer CI** (`.github/workflows/mp-installers.yml`): Windows NSIS
+  `.exe` via electron-builder and an Android WebView `.apk`, both built on
+  GitHub runners (which have internet) and attached to the v0.20.0 release —
+  the sandbox itself cannot download Electron/Android SDK.
+
 ### Measured (C12)
 - Backend: 249 → **256 passing**, coverage **90.97 %**.
 - Studio: 124 → **150 passing**; statements **82.18 %**, branches **81.31 %**,

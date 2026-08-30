@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 18
+Current Iteration: 19
 Current Phase: Phase 5 — Commit/publish (athlete-app completeness closed)
 Current Task: ATHLETE APP COMPLETE CLOSED — the four named gaps are all live and tested: (1) QR self check-in (signed 60 s, kiosk-verifiable), (2) membership status + payment history (staff attribution masked), (3) self workout-session logging (weight/reps each optional), (4) injuries/limitations view (clinician note server-stripped). Backed by migration 0003_workout_logs + repo/workouts.py + payments.list_for_member + five force-scoped /client/me endpoints. Backend 256 passed / 90.97%; Studio 150 tests / branches 81.31% / gate exit 0. Release rebuilt as 0.20.0. Native .apk/.exe remain env-BLOCKED (mirrors unreachable); a real-data rendered preview (docs-preview-athlete.png) stands in for a browser screenshot, which cannot be taken here (deb.debian.org 000).
-Status: ATHLETE_APP_COMPLETE_RELEASE_0_20_0
+Status: LANDING_N8N_CI_INSTALLERS_RELEASE_0_20_0
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 10/10

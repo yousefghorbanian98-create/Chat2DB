@@ -40,6 +40,10 @@ class Settings:
     #: When set, the core serves it at `/` so one process answers on one port —
     #: the packaged installer's single-service mode. Empty = API only.
     static_dir: str = ""
+    #: Optional n8n automation bridge (map §12.8). Never required for core ops.
+    automation_enabled: bool = False
+    automation_url: str = ""
+    automation_secret: str = ""
 
     @property
     def sqlalchemy_url(self) -> str:
@@ -84,4 +88,7 @@ class Settings:
             gym_name=source.get("MP_GYM_NAME", "Muscle Paradise"),
             static_dir=source.get("MP_STATIC_DIR", ""),
             secret_key=source.get("MP_SECRET", ""),
+            automation_enabled=source.get("MP_AUTOMATION_ENABLED", "") == "1",
+            automation_url=source.get("MP_AUTOMATION_URL", ""),
+            automation_secret=source.get("MP_AUTOMATION_SECRET", ""),
         )

@@ -12,6 +12,7 @@ from app.auth.deps import PrincipalDep, require_finance, require_roles
 from app.core.receipt_pdf import build_receipt_pdf
 from app.repo import members as members_repo
 from app.repo import payments as payments_repo
+from app.automation import events
 from app.state import get_engine, get_gym_name
 
 router = APIRouter(tags=["payments"])
@@ -72,7 +73,7 @@ def create_payment(body: PaymentCreate, principal: CashierPrincipal) -> dict:
         members_repo.get_member(engine, principal.gym_id, body.member_id)
     except members_repo.MemberNotFound as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    return payments_repo.create_payment(
+    row = payments_repo.create_payment(
         engine,
         principal.gym_id,
         member_id=body.member_id,
@@ -80,6 +81,18 @@ def create_payment(body: PaymentCreate, principal: CashierPrincipal) -> dict:
         method=body.method,
         package_id=body.package_id,
     )
+    # Optional n8n bridge (best-effort, redacted): receipt delivery downstream.
+    events.emit(
+        "payment.created",
+        principal.gym_id,
+        {
+            "member_id": row["member_id"],
+            "amount_rial": row["amount_rial"],
+            "method": row["method"],
+            "receipt_no": row["receipt_no"],
+        },
+    )
+    return row
 
 
 @router.get("/payments/{payment_id}/receipt", summary="Receipt PDF")
