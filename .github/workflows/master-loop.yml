@@ -11,7 +11,8 @@ on:
       - '.github/workflows/master-loop.yml'
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 concurrency:
   group: master-loop-${{ github.workflow }}-${{ github.ref }}
@@ -56,6 +57,44 @@ jobs:
         env:
           MASTER_LOOP_REQUIRE_PLAYWRIGHT: '1'
         run: node scripts/master-loop/run-loop.cjs
+
+      - name: Package install-ready build
+        if: success()
+        run: |
+          rm -rf ../pkg && mkdir -p ../pkg
+          cp -r dist/* ../pkg/
+          cp scripts/master-loop/serve-dist.cjs ../pkg/
+          cp scripts/master-loop/launcher/start.bat ../pkg/
+          cp scripts/master-loop/launcher/start.sh ../pkg/
+          cp scripts/master-loop/launcher/README-INSTALL.md ../pkg/
+          cd ../pkg
+          python3 -m zipfile -c ../motion-package-dist.zip .
+          ls -lh ../motion-package-dist.zip
+
+      - name: Publish rolling release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete motion-package-latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create motion-package-latest \
+            --target "$GITHUB_SHA" \
+            --title "Motion Package — latest build" \
+            --notes "Automated build of commit $GITHUB_SHA. Download motion-package-dist.zip, unzip, then run start.bat (Windows) or start.sh (macOS/Linux)." \
+            ../motion-package-dist.zip
+
+      - name: Open or update PR to main
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --base main \
+            --head arena/01a05327-chat2db \
+            --title "Motion Package switcher (Data Cosmos / Hyperreal)" \
+            --body "Automated PR produced by the Master Loop workflow — motion package switcher integration, verified by gates G1–G6." \
+          || gh pr view arena/01a05327-chat2db --json url --jq '.url' 2>/dev/null \
+          || echo "::notice::PR already exists or cannot be created"
 
       - name: Publish differential patch (best-effort)
         if: always()
