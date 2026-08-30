@@ -1,0 +1,1 @@
+import{a as t,G as f}from"./tokens-BR8iTfOk.js";function c(){const[s,r]=t.useState([]),[a,o]=t.useState(!0),[i,n]=t.useState(null);return t.useEffect(()=>{let e=!0;return f.listMembers().then(u=>{e&&r(u)}).catch(()=>{e&&n("دریافت فهرست اعضا ناموفق بود")}).finally(()=>{e&&o(!1)}),()=>{e=!1}},[]),{members:s,loading:a,error:i}}export{c as u};
