@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 19
-Current Phase: Phase 5 — Commit/publish (athlete-app completeness closed)
-Current Task: ATHLETE APP COMPLETE CLOSED — the four named gaps are all live and tested: (1) QR self check-in (signed 60 s, kiosk-verifiable), (2) membership status + payment history (staff attribution masked), (3) self workout-session logging (weight/reps each optional), (4) injuries/limitations view (clinician note server-stripped). Backed by migration 0003_workout_logs + repo/workouts.py + payments.list_for_member + five force-scoped /client/me endpoints. Backend 256 passed / 90.97%; Studio 150 tests / branches 81.31% / gate exit 0. Release rebuilt as 0.20.0. Native .apk/.exe remain env-BLOCKED (mirrors unreachable); a real-data rendered preview (docs-preview-athlete.png) stands in for a browser screenshot, which cannot be taken here (deb.debian.org 000).
-Status: LANDING_N8N_CI_INSTALLERS_RELEASE_0_20_0
+Current Iteration: 20
+Current Phase: Phase 5 — Commit/publish (CI installers closed)
+Current Task: CI INSTALLERS CLOSED — GitHub Actions now builds both native installers on every v* tag: CI run 33302638581 (tag v0.20.4) green on both jobs (Windows NSIS 1m42s, Android APK 55s). Release v0.20.0 carries Muscle.Paradise.Setup.0.20.0.exe (83,998,753 B) + app-debug.apk (8,537 B). Fixes that unblocked CI: committed package-lock.json (was gitignored), committed prebuilt studio dist (linux lock lacked rollup native binary for the windows runner), workflow switched to npm install then to packaging-only (user-committed; agent token has no workflows push permission). Live core re-verified after sandbox restore: /health ok, 26 tables, schema 0003_workout_logs.
+Status: CI_INSTALLERS_GREEN_EXE_APK_ON_RELEASE_0_20_0
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 10/10

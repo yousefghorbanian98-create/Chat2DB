@@ -3,6 +3,26 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.20.4-ci] — 2026-08-30 — GitHub CI now produces the real installers (Windows .exe + Android .apk)
+
+### Added
+- `mp-app/studio/package-lock.json` committed (force-added past `.gitignore`) so
+  dependency resolution works on GitHub runners.
+- Prebuilt `mp-app/studio/dist/` committed so the Windows job packages the app
+  without rebuilding (the linux-generated lock could not provide rollup's native
+  binary on the windows runner).
+- Workflow finalized (committed by the user; the agent token has no `workflows`
+  push permission): the windows job now only installs the Electron toolchain and
+  packages the committed dist with electron-builder; canonical copy kept at
+  `mp-app/packaging/ci/mp-installers.yml`.
+
+### Measured
+- CI run `33302638581` (tag `v0.20.4`): **Windows NSIS installer ✓ in 1m42s**,
+  **Android APK ✓ in 55s** — both jobs green.
+- Release `v0.20.0` now ships `Muscle.Paradise.Setup.0.20.0.exe`
+  (83,998,753 B — NSIS, not one-click, install dir changeable, per-user) and
+  `app-debug.apk` (8,537 B WebView shell).
+
 ## [0.20.0] — 2026-08-30 — the athlete app becomes a real product (QR check-in, payments, session logging, restrictions)
 
 ### Added (backend)
