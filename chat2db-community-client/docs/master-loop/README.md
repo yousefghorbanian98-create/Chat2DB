@@ -355,3 +355,83 @@ HEAD
 ```
 gh workflow run "Master Loop — Motion Package Switcher"
 ```
+
+
+## مسیر کمکار برای کاربر
+
+ورکفلو بعد از هر اجرای موفق:
+
+- بستهی آمادهی نصب را میسازد (شامل:
+
+```
+serve-dist.cjs
+```
+
+،
+
+```
+start.bat
+```
+
+،
+
+```
+start.sh
+```
+
+،
+
+```
+README-INSTALL.md
+```
+
+).
+
+- آن را در Release چرخان با نام:
+
+```
+motion-package-latest
+```
+
+منتشر میکند.
+
+- PR به
+
+```
+main
+
+```
+
+میسازد.
+
+کار کاربر فقط:
+
+```
+دانلود از Release
+```
+
+←
+
+```
+باز کردن zip
+```
+
+←
+
+```
+دوبار کلیک روی start.bat
+```
+
+(یا
+
+```
+./start.sh
+```
+
+) — مرورگر خودکار باز میشود.
+
+اجرای دستی محلی برای توسعه:
+
+```
+PORT=8890 node scripts/master-loop/serve-dist.cjs --open
+```

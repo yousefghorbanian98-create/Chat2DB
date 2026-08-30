@@ -1,22 +1,52 @@
 #!/usr/bin/env node
 /**
- * Minimal static server for the G6 visual gate.
+ * Minimal static server for the production build (dist/).
  *
- * Serves the production build (dist/) produced by G5 with SPA fallback to
- * index.html — memory-light (~50MB) so the sandbox's ~4GB RAM can also fit
- * the Playwright Chromium without OOM kills (the webpack dev server alone
- * used ~2.7GB and died alongside the browser).
+ * Serves the production build with SPA fallback to index.html — memory-light
+ * so it can run next to a browser on small machines.
+ *
+ * Works in two layouts:
+ *   - repository layout:  <client>/scripts/master-loop/serve-dist.cjs  → <client>/dist
+ *   - packaged layout:    <pkg>/serve-dist.cjs with <pkg>/dist/ next to it
+ *
+ * Usage:
+ *   node serve-dist.cjs [--open]        (PORT=8890 to change the port)
  */
 'use strict';
 
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const { exec } = require('node:child_process');
 
-const ROOT = path.resolve(__dirname, '../..');
-const DIST = path.join(ROOT, 'dist');
+const SCRIPT_DIR = __dirname;
+const LOCAL_DIST = path.join(SCRIPT_DIR, 'dist');
+const REPO_DIST = path.resolve(SCRIPT_DIR, '../..', 'dist');
+
+const args = process.argv.slice(2);
+const openBrowser = args.includes('--open');
+
 const PORT = Number(process.env.PORT || 8889);
 const HOST = process.env.HOST || '127.0.0.1';
+
+// Layout detection:
+//   - packaged: <pkg>/serve-dist.cjs + <pkg>/index.html next to it
+//   - packaged v2: <pkg>/dist/  + <pkg>/serve-dist.cjs
+//   - repository: <client>/scripts/master-loop/serve-dist.cjs → <client>/dist
+let DIST = null;
+if (fs.existsSync(path.join(SCRIPT_DIR, 'index.html'))) {
+  DIST = SCRIPT_DIR;
+} else if (fs.existsSync(path.join(LOCAL_DIST, 'index.html'))) {
+  DIST = LOCAL_DIST;
+} else if (fs.existsSync(path.join(REPO_DIST, 'index.html'))) {
+  DIST = REPO_DIST;
+}
+if (!DIST) {
+  console.error(
+    'dist/index.html not found — run the build first (yarn build:web:community) or place this script next to the dist files',
+  );
+  process.exit(1);
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -62,7 +92,23 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`serve-dist listening on http://${HOST}:${PORT} (${DIST})`);
+  const url = `http://${HOST}:${PORT}`;
+  console.log(`serve-dist listening on ${url} (serving ${DIST})`);
+  if (openBrowser) {
+    const cmd =
+      process.platform === 'win32'
+        ? `start "" "${url}"`
+        : process.platform === 'darwin'
+          ? `open "${url}"`
+          : `xdg-open "${url}" >/dev/null 2>&1 || sensible-browser "${url}" >/dev/null 2>&1 || true`;
+    exec(cmd, (err) => {
+      if (err) {
+        console.log(`open the browser manually: ${url}`);
+      } else {
+        console.log(`browser opened at ${url}`);
+      }
+    });
+  }
 });
 
 process.on('SIGTERM', () => {
