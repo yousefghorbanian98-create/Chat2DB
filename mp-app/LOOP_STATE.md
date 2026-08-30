@@ -3,7 +3,7 @@
 ```
 Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: Jalali dates + athlete nutrition CLOSED (0.19.0) — backend 234 tests / 90.39% cov, Studio 110 tests / tsc 0 / eslint 0; live E2E: athlete reads own macros with `payload` stripped, staff 403. Fixed a real install break: requirements.txt lacked cryptography + PyMuPDF. Next = the remaining env-BLOCKED items (Core Web Vitals, Electron binary, native Flutter, Ollama live, runnable Kiosk).
+Current Task: LOOP CLOSED. FINAL_REPORT.md written 2026-08-30 after a full re-measure on a rebuilt toolchain: backend 234 passed / 90.39% cov / gate exit 0; Studio `npm run gate` exit 0 (110 tests, tsc 0, eslint 0, prettier clean, 97.79 kB gzip initial). Five deliverables remain BLOCKED by missing environment tooling (flutter/dart/electron/ollama/lighthouse/any browser — all re-verified absent) and are NOT counted as done.
 Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
