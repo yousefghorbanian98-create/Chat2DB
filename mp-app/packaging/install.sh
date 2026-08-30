@@ -58,13 +58,18 @@ VPY="$PREFIX/venv/bin/python"
 REQS="requirements-runtime.txt"
 if [ "$WITH_TESTS" -eq 1 ]; then REQS="requirements.txt"; fi
 
-# Offline first (bundled wheels are cp311/manylinux); fall back to PyPI so the
-# installer also works on macOS and on other Python versions.
-if "$VPY" -m pip install --quiet --no-index --find-links "$HERE/wheels" \
-     -r "$PREFIX/app/backend/$REQS" 2>/dev/null; then
+# Offline first when wheels/ ships with this archive (cp311/manylinux); fall
+# back to PyPI otherwise, so the installer also works on macOS/Windows and on
+# other Python versions.
+if [ -d "$HERE/wheels" ] && "$VPY" -m pip install --quiet --no-index \
+     --find-links "$HERE/wheels" -r "$PREFIX/app/backend/$REQS" 2>/dev/null; then
   say "Installed dependencies from bundled wheels (offline)"
 else
-  say "Bundled wheels do not match this platform — installing from PyPI"
+  if [ -d "$HERE/wheels" ]; then
+    say "Bundled wheels do not match this platform — installing from PyPI"
+  else
+    say "No bundled wheels in this archive — installing from PyPI (needs internet)"
+  fi
   "$VPY" -m pip install --quiet --upgrade pip
   "$VPY" -m pip install --quiet -r "$PREFIX/app/backend/$REQS"
 fi

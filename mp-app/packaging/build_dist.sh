@@ -18,6 +18,9 @@ PY="$VENV/bin/python"
 VERSION="$(cd "$MP/backend" && "$PY" -c "from app import __version__; print(__version__)")"
 OUT="$MP/dist-release"
 STAGE="$OUT/mp-app-$VERSION"
+# `zip` appends to an existing archive instead of replacing it, so a stale
+# artifact would silently keep old files. Always start from nothing.
+rm -rf "$OUT"; mkdir -p "$OUT"
 
 echo "==> Building Muscle Paradise $VERSION"
 rm -rf "$STAGE"; mkdir -p "$STAGE"
@@ -39,9 +42,15 @@ cp "$HERE/install.sh" "$HERE/install.ps1" "$HERE/INSTALL.md" "$STAGE/"
 chmod +x "$STAGE/install.sh"
 
 # --- 3. offline wheels (Linux x86_64 / CPython 3.11) -----------------------
-echo "==> Downloading runtime wheels for offline install"
-mkdir -p "$STAGE/wheels"
-"$PY" -m pip download --quiet -r "$MP/backend/requirements-runtime.txt" -d "$STAGE/wheels"
+# MP_DIST_NO_WHEELS=1 omits them: the archive is then ~2 MB instead of ~27 MB
+# and the installer resolves dependencies from PyPI at install time.
+if [ "${MP_DIST_NO_WHEELS:-0}" = "1" ]; then
+  echo "==> Skipping wheels (MP_DIST_NO_WHEELS=1) — installer will use PyPI"
+else
+  echo "==> Downloading runtime wheels for offline install"
+  mkdir -p "$STAGE/wheels"
+  "$PY" -m pip download --quiet -r "$MP/backend/requirements-runtime.txt" -d "$STAGE/wheels"
+fi
 
 # --- 4. artifacts ----------------------------------------------------------
 echo "==> Packing"
