@@ -1,12 +1,13 @@
 import editionUiExtension from '@/edition-ui';
 import { appendEditionSettingMenuItems } from '@/edition-ui/settingMenus';
 import i18n from '@/i18n';
-import { ClipboardPen, Info, Keyboard, SlidersHorizontal, Terminal } from 'lucide-react';
+import { ClipboardPen, Info, Keyboard, SlidersHorizontal, Sparkles, Terminal } from 'lucide-react';
 import { useEffect, useMemo } from 'react';
 import About from './About';
 import BaseSetting from './BaseSetting';
 import EditorSetting from './EditorSetting';
 import McpSetting from './McpSetting';
+import MotionPackageSetting from '@/motion-package/MotionPackageSetting';
 import NetworkProxySetting from './NetworkProxySetting';
 import SettingLayout, { type SettingMenuItem } from './SettingLayout';
 
@@ -47,6 +48,14 @@ function Setting() {
         icon: ClipboardPen,
         body: <EditorSetting />,
         code: 'editSetting',
+      },
+      {
+        title: i18n('setting.nav.motionPackage'),
+        describe: i18n('setting.nav.motionPackageDescribe'),
+        group: 'general' as const,
+        icon: Sparkles,
+        body: <MotionPackageSetting />,
+        code: 'motionPackage',
       },
       ...(isDesktop
         ? [

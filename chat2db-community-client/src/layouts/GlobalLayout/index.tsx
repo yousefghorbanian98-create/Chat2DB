@@ -3,6 +3,7 @@ import { Outlet } from 'umi';
 import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import AppTheme, { AppThemeProps } from '@/components/AppTheme';
+import MotionPackageProvider from '@/motion-package/MotionPackageProvider';
 import LoadingGracile from '@/components/Loading/LoadingGracile';
 import ConfigProvider from '@/components/ConfigProvider';
 import GlobalStyle from '@/styles/global';
@@ -82,15 +83,17 @@ const GlobalLayout: FC<GlobalLayoutProps> = () => {
 
   return (
     <ConfigProvider>
-      <AppTheme>
-        <GlobalStyle />
-        <CommercialGlobalComponentExtras />
-        <GlobalComponent />
-        <div className={styles.app}>
-          <AppTitleBar />
-          <div className={styles.appContent}>{renderApp()}</div>
-        </div>
-      </AppTheme>
+      <MotionPackageProvider>
+        <AppTheme>
+          <GlobalStyle />
+          <CommercialGlobalComponentExtras />
+          <GlobalComponent />
+          <div className={styles.app}>
+            <AppTitleBar />
+            <div className={styles.appContent}>{renderApp()}</div>
+          </div>
+        </AppTheme>
+      </MotionPackageProvider>
     </ConfigProvider>
   );
 };

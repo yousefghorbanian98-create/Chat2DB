@@ -82,3 +82,11 @@ package-lock.json
 /chat2db-community-server/latest_version.json
 .java-version
 derby.log
+
+# A test fixture with a face in it: fetched locally, never redistributed
+# (tests/test_reframe.py skips itself when it is absent).
+tests/assets/face.jpg
+image-search/
+
+# Master Loop runtime state (regenerated on every loop run)
+chat2db-community-client/scripts/master-loop/loop-state.json

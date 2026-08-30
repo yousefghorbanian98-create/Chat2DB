@@ -5,6 +5,7 @@ import { createStyles } from 'antd-style';
 import AppTheme, { AppThemeProps } from '@/components/AppTheme';
 import LoadingGracile from '@/components/Loading/LoadingGracile';
 import ConfigProvider from '@/components/ConfigProvider';
+import MotionPackageProvider from '@/motion-package/MotionPackageProvider';
 import GlobalStyle from '@/styles/global';
 import GlobalComponentCommunity from '@/layouts/init/GlobalComponentCommunity';
 import useInit from '../init/init';
@@ -80,14 +81,16 @@ const CommunityLayout: FC<CommunityLayoutProps> = () => {
 
   return (
     <ConfigProvider>
-      <AppTheme>
-        <GlobalStyle />
-        <GlobalComponentCommunity />
-        <div className={styles.app}>
-          <AppTitleBar />
-          <div className={styles.appContent}>{renderApp()}</div>
-        </div>
-      </AppTheme>
+      <MotionPackageProvider>
+        <AppTheme>
+          <GlobalStyle />
+          <GlobalComponentCommunity />
+          <div className={styles.app}>
+            <AppTitleBar />
+            <div className={styles.appContent}>{renderApp()}</div>
+          </div>
+        </AppTheme>
+      </MotionPackageProvider>
     </ConfigProvider>
   );
 };

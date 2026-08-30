@@ -1,0 +1,108 @@
+/* ============================================================
+   Motion Package (Data Cosmos / Hyperreal) — settings + theming
+   Applied app-wide via CSS custom properties on :root.
+   ============================================================ */
+
+.motion-package-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.motion-package-heading {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.motion-package-sub {
+  margin: 0 0 12px;
+  color: var(--text-color-secondary, rgba(255, 255, 255, 0.55));
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.motion-package-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.motion-package-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  background: var(--background-color-2, rgba(255, 255, 255, 0.04));
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.motion-package-card:hover {
+  transform: translateY(-1px);
+}
+
+.motion-package-card.active {
+  border-color: var(--mp-accent, #3b82f6);
+  box-shadow: 0 8px 28px -10px var(--mp-glow, rgba(59, 130, 246, 0.5));
+}
+
+.motion-package-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.motion-package-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.motion-package-card-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.motion-package-card-title b {
+  font-size: 14px;
+}
+
+.motion-package-tagline {
+  font-family: var(--font-family-mono, 'SFMono-Regular', Consolas, monospace);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.motion-package-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  opacity: 0.75;
+}
+
+.motion-package-state {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--mp-accent, #3b82f6);
+}
+
+.motion-package-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  line-height: 1.7;
+  opacity: 0.55;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  padding-top: 10px;
+}
