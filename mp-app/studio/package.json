@@ -1,7 +1,7 @@
 {
   "name": "mp-studio",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.19.0",
   "description": "Muscle Paradise Studio \u2014 coach/owner shell (Electron + React)",
   "type": "module",
   "main": "electron/main.cjs",

@@ -476,6 +476,24 @@ components:
       - created_at
       title: MemberOut
       type: object
+    MemberPinLogin:
+      additionalProperties: false
+      properties:
+        membership_code:
+          maxLength: 64
+          minLength: 1
+          title: Membership Code
+          type: string
+        pin:
+          maxLength: 32
+          minLength: 1
+          title: Pin
+          type: string
+      required:
+      - membership_code
+      - pin
+      title: MemberPinLogin
+      type: object
     MemberUpdate:
       additionalProperties: false
       properties:
@@ -650,6 +668,18 @@ components:
       - blob_b64
       title: RestoreRequest
       type: object
+    SetMemberPin:
+      additionalProperties: false
+      properties:
+        pin:
+          maxLength: 32
+          minLength: 4
+          title: Pin
+          type: string
+      required:
+      - pin
+      title: SetMemberPin
+      type: object
     Sites:
       additionalProperties: false
       properties:
@@ -748,7 +778,7 @@ components:
 info:
   description: Local-first Gym OS core API (offline-capable).
   title: Muscle Paradise Core
-  version: 0.1.0
+  version: 0.19.0
   x-generated-by: app.export_openapi
 openapi: 3.1.0
 paths:
@@ -990,8 +1020,7 @@ paths:
       - attendance
   /api/v1/auth/me:
     get:
-      description: Echo the verified identity — the shell renders role-appropriate
-        UI.
+      description: Echo the verified identity — the shell renders role-appropriate UI.
       operationId: me_api_v1_auth_me_get
       parameters:
       - in: header
@@ -1020,11 +1049,40 @@ paths:
       summary: Current principal
       tags:
       - auth
+  /api/v1/auth/member-pin:
+    post:
+      description: 'Exchange a membership code + PIN for a MEMBER-scoped session token.
+
+
+        Identical 401 for unknown code, unset PIN, and wrong PIN (no enumeration).'
+      operationId: login_with_member_pin_api_v1_auth_member_pin_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberPinLogin'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Member PIN login
+      tags:
+      - auth
   /api/v1/auth/pin:
     post:
-      description: "Exchange a staff username + PIN for a machine-local session token.\n\
-        \nRaises:\n    HTTPException 401: unknown user, inactive user, or wrong PIN.\
-        \ The\n    message is deliberately identical for all three (no user enumeration)."
+      description: "Exchange a staff username + PIN for a machine-local session token.\n\nRaises:\n  \
+        \  HTTPException 401: unknown user, inactive user, or wrong PIN. The\n    message is deliberately\
+        \ identical for all three (no user enumeration)."
       operationId: login_with_pin_api_v1_auth_pin_post
       requestBody:
         content:
@@ -1110,6 +1168,36 @@ paths:
       summary: My assessment history (masked)
       tags:
       - client
+  /api/v1/client/me/nutrition:
+    get:
+      operationId: my_nutrition_api_v1_client_me_nutrition_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response My Nutrition Api V1 Client Me Nutrition Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My latest nutrition plan (payload stripped)
+      tags:
+      - client
   /api/v1/client/me/programs:
     get:
       operationId: my_programs_api_v1_client_me_programs_get
@@ -1144,8 +1232,7 @@ paths:
       - client
   /api/v1/client/members/{member_id}/injuries:
     get:
-      description: Same rows, narrower schema — the clinician note never crosses this
-        line.
+      description: Same rows, narrower schema — the clinician note never crosses this line.
       operationId: list_public_injuries_api_v1_client_members__member_id__injuries_get
       parameters:
       - in: path
@@ -1169,8 +1256,7 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/InjuryPublicOut'
-                title: Response List Public Injuries Api V1 Client Members  Member
-                  Id  Injuries Get
+                title: Response List Public Injuries Api V1 Client Members  Member Id  Injuries Get
                 type: array
           description: Successful Response
         '422':
@@ -1349,8 +1435,7 @@ paths:
                 items:
                   additionalProperties: true
                   type: object
-                title: Response Contraindications Api V1 Exercises  Exercise Key  Contraindications
-                  Get
+                title: Response Contraindications Api V1 Exercises  Exercise Key  Contraindications Get
                 type: array
           description: Successful Response
         '422':
@@ -1364,10 +1449,10 @@ paths:
       - exercises
   /api/v1/health:
     get:
-      description: "Report process, database and schema-migration state.\n\nReturns:\n\
-        \    ``{\"status\": \"ok\"|\"degraded\", \"service\", \"version\", \"db\"\
-        : {...}}``.\n    Never raises: a broken database is reported as ``degraded``\
-        \ so the\n    Studio shell can show a recovery action instead of a blank screen."
+      description: "Report process, database and schema-migration state.\n\nReturns:\n    ``{\"status\"\
+        : \"ok\"|\"degraded\", \"service\", \"version\", \"db\": {...}}``.\n    Never raises: a broken\
+        \ database is reported as ``degraded`` so the\n    Studio shell can show a recovery action instead\
+        \ of a blank screen."
       operationId: health_api_v1_health_get
       responses:
         '200':
@@ -1573,8 +1658,7 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/AssessmentOut'
-                title: Response List Assessments Api V1 Members  Member Id  Assessments
-                  Get
+                title: Response List Assessments Api V1 Members  Member Id  Assessments Get
                 type: array
           description: Successful Response
         '422':
@@ -1694,8 +1778,7 @@ paths:
                   items:
                     type: string
                   type: array
-                title: Response Member Filters Api V1 Members  Member Id  Filters
-                  Get
+                title: Response Member Filters Api V1 Members  Member Id  Filters Get
                 type: object
           description: Successful Response
         '422':
@@ -1732,8 +1815,7 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/InjuryOut'
-                title: Response List Injuries Api V1 Members  Member Id  Injuries
-                  Get
+                title: Response List Injuries Api V1 Members  Member Id  Injuries Get
                 type: array
           description: Successful Response
         '422':
@@ -1820,6 +1902,46 @@ paths:
       summary: Tombstone an injury record
       tags:
       - injuries
+  /api/v1/members/{member_id}/pin:
+    post:
+      description: 'Store a PBKDF2 hash of the member''s PIN so they can use the client app.
+
+
+        Only the hash is written; the plaintext never touches disk (C11).'
+      operationId: set_member_pin_api_v1_members__member_id__pin_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMemberPin'
+        required: true
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Set member PIN (front desk)
+      tags:
+      - members
   /api/v1/members/{member_id}/programs:
     get:
       operationId: list_programs_api_v1_members__member_id__programs_get
@@ -1846,8 +1968,7 @@ paths:
                 items:
                   additionalProperties: true
                   type: object
-                title: Response List Programs Api V1 Members  Member Id  Programs
-                  Get
+                title: Response List Programs Api V1 Members  Member Id  Programs Get
                 type: array
           description: Successful Response
         '422':
@@ -1889,8 +2010,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: true
-                title: Response Generate Api V1 Members  Member Id  Programs Generate
-                  Post
+                title: Response Generate Api V1 Members  Member Id  Programs Generate Post
                 type: object
           description: Successful Response
         '422':
@@ -1963,8 +2083,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: true
-                title: Response Get Plan Api V1 Nutrition Members  Member Id  Plan
-                  Get
+                title: Response Get Plan Api V1 Nutrition Members  Member Id  Plan Get
                 type: object
           description: Successful Response
         '422':
@@ -2005,8 +2124,7 @@ paths:
             application/json:
               schema:
                 additionalProperties: true
-                title: Response Create Plan Api V1 Nutrition Members  Member Id  Plan
-                  Post
+                title: Response Create Plan Api V1 Nutrition Members  Member Id  Plan Post
                 type: object
           description: Successful Response
         '422':
@@ -2369,10 +2487,10 @@ paths:
       - sync
   /health:
     get:
-      description: "Report process, database and schema-migration state.\n\nReturns:\n\
-        \    ``{\"status\": \"ok\"|\"degraded\", \"service\", \"version\", \"db\"\
-        : {...}}``.\n    Never raises: a broken database is reported as ``degraded``\
-        \ so the\n    Studio shell can show a recovery action instead of a blank screen."
+      description: "Report process, database and schema-migration state.\n\nReturns:\n    ``{\"status\"\
+        : \"ok\"|\"degraded\", \"service\", \"version\", \"db\": {...}}``.\n    Never raises: a broken\
+        \ database is reported as ``degraded`` so the\n    Studio shell can show a recovery action instead\
+        \ of a blank screen."
       operationId: health_health_get
       responses:
         '200':

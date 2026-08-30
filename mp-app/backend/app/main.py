@@ -11,12 +11,14 @@ import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 from typing import Any
 
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -160,6 +162,15 @@ def create_app(settings: Settings, *, run_migrations: bool = True) -> FastAPI:
             "db_path": str(settings.db_path),
             "gym": settings.gym_name,
         }
+
+    # Packaged single-service mode: serve a built Studio shell at "/" so one
+    # process answers on one port. Every API route above is registered first, so
+    # it always wins over this catch-all.
+    if settings.static_dir:
+        static_root = Path(settings.static_dir).expanduser().resolve()
+        if not (static_root / "index.html").is_file():
+            raise ValueError(f"MP_STATIC_DIR has no index.html: {static_root}")
+        app.mount("/", StaticFiles(directory=static_root, html=True), name="studio")
 
     return app
 

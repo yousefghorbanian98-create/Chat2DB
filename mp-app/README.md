@@ -58,10 +58,11 @@ cd mp-app/backend && ../../.venv-mp/bin/python -m pytest -m golden   # JP7 fixtu
 
 ```bash
 cd mp-app/backend
-../../.venv-mp/bin/python -m app.export_openapi | python3 -c \
-  "import json,sys,yaml; yaml.safe_dump(json.load(sys.stdin), sys.stdout, sort_keys=False)" \
-  > ../openapi.yaml
+../../.venv-mp/bin/python -m app.export_openapi --yaml > ../openapi.yaml
 ```
+
+`--yaml` emits the spec as YAML (matching the file extension) via the pinned
+`PyYAML`; without it the exporter prints JSON to stdout.
 
 ## Guardrails
 

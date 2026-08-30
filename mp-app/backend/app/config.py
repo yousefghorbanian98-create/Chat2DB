@@ -36,6 +36,10 @@ class Settings:
     #: Machine-local key for tokens + QR signatures. Empty means "load/create
     #: the file next to the database" (map §15: secrets stay on this machine).
     secret_key: str = ""
+    #: Optional directory holding a built Studio shell (`vite build` output).
+    #: When set, the core serves it at `/` so one process answers on one port —
+    #: the packaged installer's single-service mode. Empty = API only.
+    static_dir: str = ""
 
     @property
     def sqlalchemy_url(self) -> str:
@@ -78,5 +82,6 @@ class Settings:
             port=port,
             cors_origins=cors,
             gym_name=source.get("MP_GYM_NAME", "Muscle Paradise"),
+            static_dir=source.get("MP_STATIC_DIR", ""),
             secret_key=source.get("MP_SECRET", ""),
         )

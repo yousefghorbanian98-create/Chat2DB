@@ -1,7 +1,8 @@
 """Dump the OpenAPI document to stdout (keeps mp-app/openapi.yaml honest).
 
 Usage:
-    python -m app.export_openapi > ../openapi.yaml
+    python -m app.export_openapi --yaml > ../openapi.yaml   # YAML, matches the extension
+    python -m app.export_openapi                            # JSON on stdout
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ def main(argv: list[str] | None = None) -> int:
     """Write the OpenAPI JSON to stdout. Returns a process exit code."""
     argv = sys.argv[1:] if argv is None else argv
     indent = 2 if "--compact" not in argv else 0
+    as_yaml = "--yaml" in argv
 
     with TemporaryDirectory() as tmp:
         settings = Settings(db_path=Path(tmp) / "export.db")
@@ -26,6 +28,12 @@ def main(argv: list[str] | None = None) -> int:
         document = app.openapi()
         app.state  # keep reference for linters; app owns the engine
         document["info"]["x-generated-by"] = "app.export_openapi"
+
+    if as_yaml:
+        import yaml  # pinned in requirements.txt: the shipped spec is YAML
+
+        yaml.safe_dump(document, sys.stdout, sort_keys=True, allow_unicode=True, width=100)
+        return 0
 
     json.dump(document, sys.stdout, indent=indent, sort_keys=True)
     sys.stdout.write("\n")
