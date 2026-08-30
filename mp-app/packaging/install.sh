@@ -107,7 +107,7 @@ LAUNCHER
 chmod +x "$PREFIX/bin/mp"
 
 # --- 5. done ---------------------------------------------------------------
-say "Installed Muscle Paradise 0.19.0"
+say "Installed Muscle Paradise 0.20.0"
 cat <<EOF
 
 Next steps

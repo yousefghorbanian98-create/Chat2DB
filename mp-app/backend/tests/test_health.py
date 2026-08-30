@@ -11,7 +11,7 @@ def test_health_at_root(client) -> None:
     assert body["status"] == "ok"
     assert body["service"] == "muscle-paradise-core"
     assert body["db"]["ok"] is True
-    assert body["db"]["schema_version"] == "0002_member_pin"
+    assert body["db"]["schema_version"] == "0003_workout_logs"
     assert body["db"]["table_count"] >= 25  # 24 business + schema_migrations
 
 

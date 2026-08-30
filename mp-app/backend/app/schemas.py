@@ -97,6 +97,34 @@ class SetMemberPin(BaseModel):
     pin: str = Field(min_length=4, max_length=32)
 
 
+class WorkoutSet(BaseModel):
+    """One performed set: load and repetitions. Both optional so a bodyweight
+    or timed set can be logged without inventing a number."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    weight_kg: float | None = Field(default=None, ge=0, le=1000)
+    reps: int | None = Field(default=None, ge=0, le=1000)
+
+
+class WorkoutExercise(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=120)
+    sets: list[WorkoutSet] = Field(default_factory=list, max_length=20)
+
+
+class WorkoutLogCreate(BaseModel):
+    """An athlete logging their own session (client app, map §5)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    session_date: str = Field(min_length=8, max_length=32)
+    program_id: int | None = None
+    exercises: list[WorkoutExercise] = Field(min_length=1, max_length=40)
+    athlete_note: str | None = Field(default=None, max_length=500)
+
+
 class Sites(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

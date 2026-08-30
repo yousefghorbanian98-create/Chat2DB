@@ -12,6 +12,9 @@ from typing import Any
 MEMBER_HIDDEN = frozenset({
     "note", "clinical_note", "trainer_note", "internal_note",
     "created_by", "updated_by", "deleted_at",
+    # Which staffer handled a payment is internal bookkeeping, not the
+    # athlete's business (PII minimization, map C11).
+    "staff_id",
 })
 
 

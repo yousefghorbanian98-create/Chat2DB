@@ -1,4 +1,4 @@
-# Muscle Paradise 0.19.0 — installer
+# Muscle Paradise 0.20.0 — installer
 
 Local-first gym OS. **Everything runs on your own machine** against a SQLite
 file; there is no cloud account and no telemetry.

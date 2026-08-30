@@ -231,3 +231,51 @@ export interface SyncDelta {
   total: number;
   changes: Record<string, Array<Record<string, unknown>>>;
 }
+
+/** A masked payment row as the athlete may see it (no `staff_id`, C11). */
+export interface ClientPayment {
+  id: number;
+  member_id: number;
+  package_id: number | null;
+  amount_rial: number;
+  method: string;
+  receipt_no: string;
+  voided: boolean;
+  created_at: string;
+}
+
+/** Signed, short-lived check-in QR handed to the athlete to show the kiosk. */
+export interface CheckinQr {
+  payload: Record<string, unknown>;
+  expires_in: number;
+}
+
+/** One performed set; `weight_kg` stays absent for bodyweight work. */
+export interface WorkoutSetInput {
+  weight_kg?: number;
+  reps?: number;
+}
+
+export interface WorkoutExerciseInput {
+  name: string;
+  sets?: WorkoutSetInput[];
+}
+
+/** A session the athlete logged themselves, as read back from the server. */
+export interface WorkoutLog {
+  id: number;
+  member_id: number;
+  program_id: number | null;
+  session_date: string;
+  athlete_note: string | null;
+  exercises: WorkoutExerciseInput[];
+  created_at: string;
+}
+
+/** Body for `POST /client/me/workouts`. */
+export interface WorkoutLogCreate {
+  session_date: string;
+  program_id?: number | null;
+  exercises: WorkoutExerciseInput[];
+  athlete_note?: string | null;
+}

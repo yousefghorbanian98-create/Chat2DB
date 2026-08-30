@@ -109,7 +109,7 @@ if (-not $NoShortcuts) {
 }
 
 # --- 5. done ---------------------------------------------------------------
-Say "Installed Muscle Paradise 0.19.0"
+Say "Installed Muscle Paradise 0.20.0"
 Write-Host @"
 
 Next steps

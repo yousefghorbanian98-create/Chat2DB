@@ -6,7 +6,12 @@ import { MotionCard } from '../components/MotionCard';
 import { Skeleton } from '../components/Skeleton';
 import { StatCard } from '../components/StatCard';
 import { useAuth } from '../auth/useAuth';
-import { useClientData } from '../hooks/useClientData';
+import { useClientData, type ClientData } from '../hooks/useClientData';
+import { useWorkoutLog, type WorkoutLogState } from '../hooks/useWorkoutLog';
+import { CheckinQrCard } from './client/CheckinQrCard';
+import { InjuryList } from './client/InjuryList';
+import { PaymentList } from './client/PaymentList';
+import { WorkoutLogCard } from './client/WorkoutLogCard';
 import { faDate } from '../core/jalali';
 import { cardSection, cardTitle, muted, stackLg } from '../styles/blocks';
 
@@ -97,13 +102,33 @@ function ProgramList({ rows }: { rows: ProgramRow[] }) {
   );
 }
 
+/** Everything the signed-in athlete sees, in reading order. */
+function AthleteHome({ data, workout }: { data: ClientData; workout: WorkoutLogState }) {
+  const { me, assessments, programs, nutrition, injuries, payments, workouts } = data;
+  if (me === null) return null;
+  return (
+    <>
+      <ProfileCard me={me} />
+      <CheckinQrCard active />
+      {nutrition ? <NutritionCard plan={nutrition} /> : null}
+      <WorkoutLogCard state={workout} history={workouts} />
+      <InjuryList rows={injuries} />
+      <PaymentList rows={payments} />
+      <AssessmentList rows={assessments} />
+      <ProgramList rows={programs} />
+    </>
+  );
+}
+
 /**
  * Athlete (client) shell. Rendered only for a MEMBER token; every row is the
  * server-masked version, so no clinician note can leak here (C9).
  */
 export function ClientShell() {
   const { logout } = useAuth();
-  const { me, assessments, programs, nutrition, loading, error, reload } = useClientData();
+  const data = useClientData();
+  const { loading, error, reload, refreshWorkouts } = data;
+  const workout = useWorkoutLog(refreshWorkouts);
 
   return (
     <div style={PAGE}>
@@ -126,14 +151,9 @@ export function ClientShell() {
           <p>{error}</p>
           <MotionButton onClick={reload}>تلاش دوباره</MotionButton>
         </div>
-      ) : me ? (
-        <>
-          <ProfileCard me={me} />
-          {nutrition ? <NutritionCard plan={nutrition} /> : null}
-          <AssessmentList rows={assessments} />
-          <ProgramList rows={programs} />
-        </>
-      ) : null}
+      ) : (
+        <AthleteHome data={data} workout={workout} />
+      )}
     </div>
   );
 }

@@ -9,7 +9,9 @@
 export * from './types';
 
 import type {
+  CheckinQr,
   ClientNutrition,
+  ClientPayment,
   CoreHealth,
   Member,
   Assessment,
@@ -28,6 +30,8 @@ import type {
   GeneratedProgram,
   ProgramRow,
   DryRunResult,
+  WorkoutLog,
+  WorkoutLogCreate,
   ApplyResult,
   ActivityLevel,
   NutritionPlan,
@@ -113,6 +117,15 @@ export const api = {
   clientAssessments: () => request<Assessment[]>('/api/v1/client/me/assessments'),
   clientPrograms: () => request<ProgramRow[]>('/api/v1/client/me/programs'),
   clientNutrition: () => request<ClientNutrition>('/api/v1/client/me/nutrition'),
+  clientInjuries: () => request<Injury[]>('/api/v1/client/me/injuries'),
+  clientPayments: () => request<ClientPayment[]>('/api/v1/client/me/payments'),
+  clientCheckinQr: () => request<CheckinQr>('/api/v1/client/me/checkin-qr'),
+  clientWorkouts: () => request<WorkoutLog[]>('/api/v1/client/me/workouts'),
+  logWorkout: (body: WorkoutLogCreate) =>
+    request<WorkoutLog>('/api/v1/client/me/workouts', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   listMembers: () => request<Member[]>('/api/v1/members'),
   listAssessments: (memberId: number) =>
     request<Assessment[]>(`/api/v1/members/${memberId}/assessments`),

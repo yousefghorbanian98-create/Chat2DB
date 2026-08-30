@@ -3,6 +3,41 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
+## [0.20.0] — 2026-08-30 — the athlete app becomes a real product (QR check-in, payments, session logging, restrictions)
+
+### Added (backend)
+- Migration `0003_workout_logs`: `workout_logs` table (+ member index). The
+  athlete's self-authored note is stored as `athlete_note` (never `note`) so the
+  MEMBER field-mask can never strip it (C9 vs C5 balanced).
+- `app/repo/workouts.py`: add/list/count per member with `mp.workout/v1`
+  envelope; every query parameterized and scoped by gym+member.
+- `payments.list_for_member` and five new force-scoped client endpoints:
+  `GET /client/me/injuries`, `GET /client/me/payments`,
+  `GET /client/me/checkin-qr` (signed 60 s QR, same shape as members.py),
+  `GET`/`POST /client/me/workouts`.
+- `staff_id` added to `MEMBER_HIDDEN` — which staffer took a payment is internal
+  bookkeeping, not the athlete's business (C11).
+
+### Added (athlete UI)
+- `CheckinQrCard`: a real, scannable QR of the server-signed payload, rendered
+  locally, auto-reminting just before the 60 s expiry so a scan never lands on a
+  dead code.
+- `WorkoutLogCard` + `useWorkoutLog`: log sets where weight AND reps are each
+  optional — a bodyweight set is real training, never an invented number.
+- `InjuryList` (clinician note can never render) and `PaymentList` (Rial, staff
+  hidden), plus new rows in `useClientData`.
+
+### Measured (C12)
+- Backend: 249 → **256 passing**, coverage **90.97 %**.
+- Studio: 124 → **150 passing**; statements **82.18 %**, branches **81.31 %**,
+  functions **80.63 %** (threshold 80 enforced).
+- Release artifacts rebuilt as **0.20.0** with fresh SHA256SUMS; archive contains
+  the new migration, repo and client router (111 files in MANIFEST).
+
+
+Format: Keep a Changelog. Versioning: every release must move a measured number
+(map rule C12).
+
 ## [0.19.0] — 2026-08-30 — Jalali dates, athlete nutrition, installers, differential update, two installable PWAs
 
 ### Added (installable apps)

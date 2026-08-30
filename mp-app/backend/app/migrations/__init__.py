@@ -24,6 +24,7 @@ from app.migrations.base import (
 )
 from app.migrations.v001_core import MIGRATION as V001
 from app.migrations.v002_member_pin import MIGRATION as V002
+from app.migrations.v003_workout_logs import MIGRATION as V003
 
 __all__ = [
     "MIGRATIONS",
@@ -36,7 +37,7 @@ __all__ = [
 ]
 
 
-MIGRATIONS: tuple[Migration, ...] = (V001, V002)
+MIGRATIONS: tuple[Migration, ...] = (V001, V002, V003)
 
 _TRACKING_TABLE = "schema_migrations"
 

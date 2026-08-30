@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import time
+
+import pytest
+
 from app.core.field_mask import mask_assessment_row, mask_member_row
 
 
@@ -149,3 +153,138 @@ def test_client_nutrition_is_404_before_any_plan(seeded, member_auth, member_id)
 
 def test_staff_token_rejected_on_client_nutrition(seeded, owner_auth) -> None:
     assert seeded.get("/api/v1/client/me/nutrition", headers=owner_auth).status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# map §5: the athlete app is a real product, not a stub — they must be able to
+# see their restrictions and payments, check themselves in, and log sessions.
+# ---------------------------------------------------------------------------
+
+
+def _record_injury(seeded, owner_auth, member_id: int) -> None:
+    seeded.post(
+        f"/api/v1/members/{member_id}/injuries",
+        headers=owner_auth,
+        json={
+            "body_region": "lumbar",
+            "label": "کمردرد مزمن",
+            "status": "active",
+            "contraindicated_patterns": ["deadlift"],
+            "clinician_note": "داده‌ای که ورزشکار نباید ببیند",
+        },
+    )
+
+
+def test_member_sees_own_injury_but_not_the_clinician_note(
+    seeded, owner_auth, member_auth, member_id
+) -> None:
+    _record_injury(seeded, owner_auth, member_id)
+
+    res = seeded.get("/api/v1/client/me/injuries", headers=member_auth(member_id))
+    assert res.status_code == 200, res.text
+    rows = res.json()
+    assert len(rows) == 1
+    assert rows[0]["label"] == "کمردرد مزمن"
+    assert rows[0]["contraindicated_patterns"] == ["deadlift"]
+    assert "clinician_note" not in rows[0]
+
+
+def test_member_sees_payments_without_staff_attribution(
+    seeded, owner_auth, member_auth, member_id
+) -> None:
+    seeded.post(
+        "/api/v1/payments",
+        headers=owner_auth,
+        json={"member_id": member_id, "amount_rial": 2_500_000, "method": "card"},
+    )
+
+    res = seeded.get("/api/v1/client/me/payments", headers=member_auth(member_id))
+    assert res.status_code == 200, res.text
+    rows = res.json()
+    assert len(rows) == 1
+    assert rows[0]["amount_rial"] == 2_500_000
+    assert rows[0]["method"] == "card"
+    assert "staff_id" not in rows[0]
+
+
+def test_member_checkin_qr_is_signed_and_short_lived(seeded, member_auth, member_id) -> None:
+    from app.core.security import verify_qr
+    from app.state import get_secret_key
+
+    res = seeded.get("/api/v1/client/me/checkin-qr", headers=member_auth(member_id))
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["expires_in"] == 60
+
+    verified = verify_qr(body["payload"], secret_key=get_secret_key())
+    assert verified["mid"] == member_id
+    assert verified["exp"] - time.time() <= 61
+
+    tampered = {**body["payload"], "mid": member_id + 1}
+    with pytest.raises(Exception):
+        verify_qr(tampered, secret_key=get_secret_key())
+
+
+def test_checkin_qr_is_rejected_for_staff(seeded, owner_auth) -> None:
+    assert seeded.get("/api/v1/client/me/checkin-qr", headers=owner_auth).status_code == 403
+
+
+def test_member_logs_a_session_and_reads_it_back(seeded, member_auth, member_id) -> None:
+    session = {
+        "session_date": "1405-06-08",
+        "exercises": [
+            {"name": "اسکات", "sets": [{"weight_kg": 60, "reps": 8}, {"reps": 12}]},
+            {"name": "پرس سینه", "sets": [{"weight_kg": 40, "reps": 10}]},
+        ],
+        "athlete_note": "ست آخر سنگین بود",
+    }
+
+    created = seeded.post("/api/v1/client/me/workouts", headers=member_auth(member_id), json=session)
+    assert created.status_code == 201, created.text
+    assert created.json()["session_date"] == "1405-06-08"
+
+    res = seeded.get("/api/v1/client/me/workouts", headers=member_auth(member_id))
+    assert res.status_code == 200, res.text
+    rows = res.json()
+    assert len(rows) == 1
+    assert [e["name"] for e in rows[0]["exercises"]] == ["اسکات", "پرس سینه"]
+    # A bodyweight set keeps no invented weight.
+    assert "weight_kg" not in rows[0]["exercises"][0]["sets"][1]
+    assert rows[0]["athlete_note"] == "ست آخر سنگین بود"
+    assert "payload" not in rows[0]
+
+
+def test_workout_log_rejects_empty_and_unknown_fields(seeded, member_auth, member_id) -> None:
+    empty = seeded.post(
+        "/api/v1/client/me/workouts",
+        headers=member_auth(member_id),
+        json={"session_date": "1405-06-08", "exercises": []},
+    )
+    assert empty.status_code == 422
+
+    extra = seeded.post(
+        "/api/v1/client/me/workouts",
+        headers=member_auth(member_id),
+        json={"session_date": "1405-06-08", "exercises": [{"name": "x"}], "sneaky": 1},
+    )
+    assert extra.status_code == 422
+
+
+def test_workout_logs_do_not_leak_between_members(seeded, owner_auth, member_auth, member_id) -> None:
+    seeded.post(
+        "/api/v1/client/me/workouts",
+        headers=member_auth(member_id),
+        json={"session_date": "1405-06-08", "exercises": [{"name": "اسکات"}]},
+    )
+
+    other = seeded.post(
+        "/api/v1/members",
+        headers=owner_auth,
+        json={"membership_code": "MP-0002", "first_name": "Reza", "last_name": "K", "sex": "male"},
+    )
+    assert other.status_code in (200, 201), other.text
+    other_id = other.json()["id"]
+    assert other_id != member_id
+
+    rows = seeded.get("/api/v1/client/me/workouts", headers=member_auth(other_id)).json()
+    assert rows == []

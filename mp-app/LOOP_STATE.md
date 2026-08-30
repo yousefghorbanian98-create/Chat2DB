@@ -1,10 +1,10 @@
 # MP LOOP_STATE.md — FINN-LOOP v3.0 execution record
 
 ```
-Current Iteration: 17
-Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: two installable PWAs CLOSED — admin (/) and athlete (/client.html) with separate manifests, maskable icons, service worker (API never cached) and Windows shortcuts; studio coverage threshold now ENFORCED at 80% (branches 80.33%) where it previously only reported. Backend 249 passed / 90.81%; Studio 124 tests / gate exit 0. Native .apk/.exe/.dmg remain env-BLOCKED: dl.google.com, storage.googleapis.com and services.gradle.org are all unreachable (verified, no response).
-Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
+Current Iteration: 18
+Current Phase: Phase 5 — Commit/publish (athlete-app completeness closed)
+Current Task: ATHLETE APP COMPLETE CLOSED — the four named gaps are all live and tested: (1) QR self check-in (signed 60 s, kiosk-verifiable), (2) membership status + payment history (staff attribution masked), (3) self workout-session logging (weight/reps each optional), (4) injuries/limitations view (clinician note server-stripped). Backed by migration 0003_workout_logs + repo/workouts.py + payments.list_for_member + five force-scoped /client/me endpoints. Backend 256 passed / 90.97%; Studio 150 tests / branches 81.31% / gate exit 0. Release rebuilt as 0.20.0. Native .apk/.exe remain env-BLOCKED (mirrors unreachable); a real-data rendered preview (docs-preview-athlete.png) stands in for a browser screenshot, which cannot be taken here (deb.debian.org 000).
+Status: ATHLETE_APP_COMPLETE_RELEASE_0_20_0
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
 Code Quality Score: 10/10

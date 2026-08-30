@@ -146,3 +146,19 @@ def has_payment(engine: Engine, gym_id: int, member_id: int) -> bool:
             {"g": gym_id, "m": member_id},
         ).first()
     return row is not None
+
+
+def list_for_member(
+    engine: Engine, gym_id: int, member_id: int, *, limit: int = 12
+) -> list[dict[str, Any]]:
+    """This member's payment history, newest first (client app, map §5)."""
+    with engine.connect() as conn:
+        rows = conn.execute(
+            text(
+                f"SELECT {_PAY_COLS} FROM payments "
+                "WHERE gym_id = :g AND member_id = :m AND deleted_at IS NULL "
+                "ORDER BY created_at DESC, id DESC LIMIT :lim"
+            ),
+            {"g": gym_id, "m": member_id, "lim": limit},
+        ).mappings().all()
+    return [dict(r) for r in rows]

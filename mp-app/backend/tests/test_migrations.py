@@ -47,7 +47,7 @@ def test_migration_is_idempotent(engine) -> None:
     """Re-running must apply nothing and change no version."""
     before = schema_version(engine)
     assert migrate(engine) == []
-    assert schema_version(engine) == before == "0002_member_pin"
+    assert schema_version(engine) == before == "0003_workout_logs"
 
 
 @pytest.mark.schema
