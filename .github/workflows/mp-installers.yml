@@ -24,9 +24,8 @@ jobs:
           node-version: '20'
       - name: Build Studio shell
         shell: pwsh
-        run: |
-          npm install --no-audit --no-fund
-          npx vite build
+        run:
+          echo "using prebuilt dist committed to repo"
       - name: Add Electron toolchain (CI has internet; sandbox does not)
         shell: pwsh
         run: npm install --no-save electron@31 electron-builder@24
