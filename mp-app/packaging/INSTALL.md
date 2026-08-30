@@ -79,11 +79,37 @@ needs a `--with-tests` install and says so plainly if pytest is missing.
 | `MP_GYM_NAME` | `Muscle Paradise` | gym name |
 | `MP_CORS_ORIGINS` | local origins | comma-separated allowlist (no wildcard) |
 
-## Updating / uninstalling
+## Updating (differential)
 
-Re-run `./install.sh` over the existing prefix; your `mp.db` is untouched.
-To remove everything: `rm -rf ~/.muscle-paradise` (back up `mp.db` first — it is
-your gym's data).
+Every package carries a `MANIFEST.json` (version + sha256 per file) and every
+install keeps a copy, so `mp update` writes **only the files that actually
+differ** — your database, `venv/` and `bin/` are never touched.
+
+```bash
+tar xzf mp-app-0.20.0-linux.tar.gz
+mp update --from ./mp-app-0.20.0 --dry-run    # show the plan, write nothing
+mp update --from ./mp-app-0.20.0              # apply it
+```
+
+```
+updated 0.19.0 -> 0.20.0
+  files: 1 new, 1 changed, 1 removed, 91 unchanged
+```
+
+A **patch archive** (`patch-<old>-to-<new>.tar.gz`, built with
+`MP_PATCH_FROM=<previous package> ./packaging/build_dist.sh`) contains only the
+changed files and applies the same way — 13 KB where a full package is 684 KB.
+
+The apply is transactional: the current tree is archived first and restored if
+post-update verification fails, and protected paths (`venv/`, `bin/`, `*.db*`)
+are refused outright. Dependencies are re-installed only when a requirements
+file actually changed.
+
+Re-running `./install.sh` over the prefix also works as a blunt full refresh.
+
+## Uninstalling
+
+`rm -rf ~/.muscle-paradise` — back up `mp.db` first, it is your gym's data.
 
 ## Verifying the download
 

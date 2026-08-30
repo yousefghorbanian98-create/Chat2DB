@@ -44,7 +44,11 @@ Copy-Item -Recurse -Force (Join-Path $Here "assets") (Join-Path $Prefix "app\ass
 Copy-Item -Recurse -Force (Join-Path $Here "packs") (Join-Path $Prefix "app\packs")
 $Studio = Join-Path $Prefix "app\studio"
 if (Test-Path $Studio) { Remove-Item -Recurse -Force $Studio }
-Copy-Item -Recurse -Force (Join-Path $Here "studio-dist") $Studio
+Copy-Item -Recurse -Force (Join-Path $Here "studio") $Studio
+# The manifest is how `mp update` later knows what is installed and what differs.
+if (Test-Path (Join-Path $Here "MANIFEST.json")) {
+  Copy-Item -Force (Join-Path $Here "MANIFEST.json") (Join-Path $Prefix "app\MANIFEST.json")
+}
 
 # --- 3. virtualenv + dependencies (PyPI: bundled wheels are Linux-only) -----
 $Venv = Join-Path $Prefix "venv"
@@ -72,8 +76,9 @@ if "%1"=="" goto start
 if "%1"=="start" goto start
 if "%1"=="init"  ( shift & "$VPy" -m app.bootstrap %* & goto :eof )
 if "%1"=="demo"  ( shift & "$VPy" -m app.seed_demo %* & goto :eof )
+if "%1"=="update" ( shift & "$VPy" -m app.updater --prefix "$Prefix" %* & goto :eof )
 if "%1"=="test"  ( "$VPy" -c "import pytest" 2>nul || (echo pytest is not installed - reinstall with -WithTests & exit /b 3) & shift & "$VPy" -m pytest %* & goto :eof )
-echo usage: mp [start^|init^|demo^|test] & exit /b 2
+echo usage: mp [start^|init^|demo^|update^|test] & exit /b 2
 :start
 "$VPy" -m uvicorn app.main:create_app_from_env --factory --host %MP_HOST% --port %MP_PORT%
 "@ | Set-Content -Encoding ASCII $Launcher

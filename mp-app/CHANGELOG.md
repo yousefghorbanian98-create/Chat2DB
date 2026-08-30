@@ -3,7 +3,23 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
-## [0.19.0] — 2026-08-30 — Jalali dates + athlete nutrition (Persian-first C, C11)
+## [0.19.0] — 2026-08-30 — Jalali dates, athlete nutrition, installers + differential update
+
+### Added (packaging & update)
+- `app/updater.py` + `mp update` — differential self-update. Every package and
+  every install carries a `MANIFEST.json` (version + sha256 per file); the
+  updater diffs them and writes **only** the files that differ. `--dry-run`
+  shows the plan first (map rule: dry-run before apply).
+- Transactional apply: the current tree is archived, the result is re-hashed
+  against the new manifest, and a mismatch restores the previous version.
+  `venv/`, `bin/` and `*.db*` are protected — the gym's database is never
+  touched (verified: identical sha256 across an update).
+- `build_dist.sh` emits `patch-<old>-to-<new>.tar.gz` via `MP_PATCH_FROM`, which
+  applies through the same `mp update`: 13 KB where the full package is 684 KB.
+- Single-service mode (`MP_STATIC_DIR`) so one process serves the API and the
+  prebuilt Studio shell on one port; installers (`install.sh` / `install.ps1`)
+  and a `mp init|demo|start|update|test` launcher.
+
 
 ### Added
 - `studio/src/core/jalali.ts` — dependency-free Gregorian → Jalali conversion
@@ -24,8 +40,8 @@ Format: Keep a Changelog. Versioning: every release must move a measured number
   silently skipped the PDF text-extraction test).
 
 ### Measured (C12)
-- Backend tests **231 → 234** (+3 client-nutrition); coverage **90.39%**, gate
-  exit 0. Studio tests **96 → 110** (+13 jalali anchors/cases, +1 nutrition card);
+- Backend tests **231 → 249** (+3 client-nutrition, +10 updater); coverage
+  **90.81%**, gate exit 0. Studio tests **96 → 110** (+13 jalali anchors/cases, +1 nutrition card);
   `tsc --noEmit` 0, `eslint .` 0.
 - Live E2E on the running core: coach plan (LBM 50.0857 → BMR 1451.9, TDEE
   2250.4, protein 90.2 — all match `370 + 21.6·LBM`, `×1.55`, `1.8 g/kg` by

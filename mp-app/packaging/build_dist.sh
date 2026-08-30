@@ -35,11 +35,18 @@ fi
 cp -R "$MP/backend" "$STAGE/backend"
 find "$STAGE/backend" -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
 rm -f "$STAGE/backend/.coverage"
-cp -R "$MP/studio/dist" "$STAGE/studio-dist"
+cp -R "$MP/studio/dist" "$STAGE/studio"   # same name as the install layout
 cp -R "$MP/assets" "$STAGE/assets"     # Persian TTF, resolved via parents[3]
 cp -R "$MP/packs"  "$STAGE/packs"      # exercise library seed
 cp "$HERE/install.sh" "$HERE/install.ps1" "$HERE/INSTALL.md" "$STAGE/"
 chmod +x "$STAGE/install.sh"
+
+# --- 2b. manifest of what an install copies (drives `mp update`) -----------
+(cd "$MP/backend" && "$PY" -c "
+from pathlib import Path
+from app.updater import INSTALLED_TOP_LEVEL, write_manifest
+write_manifest(Path('$STAGE'), '$VERSION', INSTALLED_TOP_LEVEL)
+")
 
 # --- 3. offline wheels (Linux x86_64 / CPython 3.11) -----------------------
 # MP_DIST_NO_WHEELS=1 omits them: the archive is then ~2 MB instead of ~27 MB
@@ -52,12 +59,48 @@ else
   "$PY" -m pip download --quiet -r "$MP/backend/requirements-runtime.txt" -d "$STAGE/wheels"
 fi
 
+# --- 3b. optional differential (patch) archive -----------------------------
+# MP_PATCH_FROM=<dir containing an older MANIFEST.json> also emits an archive
+# holding only the files that changed since that version. `mp update --from`
+# applies it exactly like a full package.
+if [ -n "${MP_PATCH_FROM:-}" ]; then
+  echo "==> Building a patch archive against $MP_PATCH_FROM"
+  PATCH="$(cd "$MP/backend" && "$PY" - "$STAGE" "$MP_PATCH_FROM" <<'PYSCRIPT'
+import json, sys
+from pathlib import Path
+from app.updater import MANIFEST_NAME, diff_manifests, load_manifest, read_version
+
+stage, previous = Path(sys.argv[1]), Path(sys.argv[2])
+old_files = load_manifest(previous / MANIFEST_NAME) or {}
+new_files = load_manifest(stage / MANIFEST_NAME)
+plan = diff_manifests(old_files, new_files)
+out = stage.parent / f"patch-{read_version(previous / MANIFEST_NAME) or 'base'}-to-{read_version(stage / MANIFEST_NAME)}"
+out.mkdir(parents=True, exist_ok=True)
+for rel in (*plan.added, *plan.changed):
+    target = out / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes((stage / rel).read_bytes())
+(out / MANIFEST_NAME).write_bytes((stage / MANIFEST_NAME).read_bytes())
+(out / "PATCH_INFO.json").write_text(json.dumps({
+    "from": read_version(previous / MANIFEST_NAME),
+    "to": read_version(stage / MANIFEST_NAME),
+    "added": list(plan.added), "changed": list(plan.changed),
+    "removed": list(plan.removed), "unchanged": plan.unchanged,
+}, indent=2), encoding="utf-8")
+print(out.name)
+PYSCRIPT
+)"
+  (cd "$OUT" && tar czf "$PATCH.tar.gz" "$PATCH")
+  rm -rf "$OUT/$PATCH"
+fi
+
 # --- 4. artifacts ----------------------------------------------------------
 echo "==> Packing"
 (cd "$OUT" && tar czf "mp-app-$VERSION-linux.tar.gz" "mp-app-$VERSION")
 (cd "$OUT" && zip -qr "mp-app-$VERSION-windows.zip" "mp-app-$VERSION")
 rm -rf "$STAGE"
-(cd "$OUT" && sha256sum "mp-app-$VERSION-linux.tar.gz" "mp-app-$VERSION-windows.zip" > SHA256SUMS)
+(cd "$OUT" && find . -maxdepth 1 \( -name '*.tar.gz' -o -name '*.zip' \) -printf '%f\n' \
+  | sort | xargs sha256sum > SHA256SUMS)
 
 echo "==> Done"
 ls -lh "$OUT"

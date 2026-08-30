@@ -3,7 +3,7 @@
 ```
 Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: LOOP CLOSED. FINAL_REPORT.md written 2026-08-30 after a full re-measure on a rebuilt toolchain: backend 234 passed / 90.39% cov / gate exit 0; Studio `npm run gate` exit 0 (110 tests, tsc 0, eslint 0, prettier clean, 97.79 kB gzip initial). Five deliverables remain BLOCKED by missing environment tooling (flutter/dart/electron/ollama/lighthouse/any browser — all re-verified absent) and are NOT counted as done.
+Current Task: differential update CLOSED — app/updater.py + `mp update` with per-file sha256 manifests, dry-run, transactional rollback and protected venv/bin/db; build_dist.sh emits patch archives (13 KB vs 684 KB full). Backend 249 passed / 90.81% cov; Studio gate exit 0 / 110 tests. Verified end to end: 0.19.0 -> 0.20.0 touched 3 of 93 files and the database sha256 was byte-identical. Next = the env-BLOCKED items only.
 Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10

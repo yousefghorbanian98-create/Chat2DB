@@ -45,7 +45,9 @@ cp -R "$HERE/backend/." "$PREFIX/app/backend/"
 cp -R "$HERE/assets" "$PREFIX/app/assets"
 cp -R "$HERE/packs"  "$PREFIX/app/packs"
 rm -rf "$PREFIX/app/studio"
-cp -R "$HERE/studio-dist" "$PREFIX/app/studio"
+cp -R "$HERE/studio" "$PREFIX/app/studio"
+# The manifest is how `mp update` later knows what is installed and what differs.
+[ -f "$HERE/MANIFEST.json" ] && cp "$HERE/MANIFEST.json" "$PREFIX/app/MANIFEST.json"
 
 # --- 3. virtualenv + dependencies ------------------------------------------
 if [ ! -x "$PREFIX/venv/bin/python" ]; then
@@ -90,6 +92,7 @@ cd "\$PREFIX/app/backend"
 case "\${1:-start}" in
   init)   shift; exec "\$VPY" -m app.bootstrap "\$@" ;;
   demo)   shift; exec "\$VPY" -m app.seed_demo "\$@" ;;
+  update) shift; exec "\$VPY" -m app.updater --prefix "\$PREFIX" "\$@" ;;
   test)   shift
           "\$VPY" -c "import pytest" 2>/dev/null || {
             echo "pytest is not installed. Re-run the installer with --with-tests," >&2
@@ -98,7 +101,7 @@ case "\${1:-start}" in
           exec "\$VPY" -m pytest "\$@" ;;
   start)  shift; exec "\$VPY" -m uvicorn app.main:create_app_from_env --factory \\
             --host "\$MP_HOST" --port "\$MP_PORT" ;;
-  *) echo "usage: mp [start|init|demo|test]" >&2; exit 2 ;;
+  *) echo "usage: mp [start|init|demo|update|test]" >&2; exit 2 ;;
 esac
 LAUNCHER
 chmod +x "$PREFIX/bin/mp"
