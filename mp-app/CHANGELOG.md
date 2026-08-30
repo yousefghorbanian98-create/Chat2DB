@@ -3,7 +3,24 @@
 Format: Keep a Changelog. Versioning: every release must move a measured number
 (map rule C12).
 
-## [0.19.0] — 2026-08-30 — Jalali dates, athlete nutrition, installers + differential update
+## [0.19.0] — 2026-08-30 — Jalali dates, athlete nutrition, installers, differential update, two installable PWAs
+
+### Added (installable apps)
+- **Two separate installable PWAs** out of one build: admin/coach at `/`
+  (`id: mp-admin`) and athlete at `/client.html` (`id: mp-client`), each with its
+  own manifest, icons (any + maskable, 192/512), `theme_color`, standalone
+  display and Persian title. `client.html` + `ClientApp` mount the athlete root
+  directly, so it opens in athlete sign-in and never shows a coach surface.
+- `public/sw.js`: navigations network-first with a cached-shell fallback, hashed
+  assets cache-first, icons stale-while-revalidate, and `/api`+`/health`
+  **never cached** — a stale member row would be a correctness bug.
+- Windows installer now creates Start Menu and Desktop shortcuts.
+
+### Changed (quality gate)
+- Studio coverage thresholds are now **enforced at 80%** in `vitest.config`;
+  previously `npm run coverage` only reported a number and could not fail.
+  Bootstrap/type-only/asset files are excluded so the number measures real logic.
+
 
 ### Added (packaging & update)
 - `app/updater.py` + `mp update` — differential self-update. Every package and

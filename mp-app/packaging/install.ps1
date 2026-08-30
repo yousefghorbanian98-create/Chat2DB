@@ -15,7 +15,8 @@
 param(
   [string]$Prefix = $(if ($env:MP_PREFIX) { $env:MP_PREFIX } else { Join-Path $env:USERPROFILE ".muscle-paradise" }),
   [int]$Port = $(if ($env:MP_PORT) { [int]$env:MP_PORT } else { 8751 }),
-  [switch]$WithTests
+  [switch]$WithTests,
+  [switch]$NoShortcuts
 )
 
 $ErrorActionPreference = "Stop"
@@ -82,6 +83,30 @@ echo usage: mp [start^|init^|demo^|update^|test] & exit /b 2
 :start
 "$VPy" -m uvicorn app.main:create_app_from_env --factory --host %MP_HOST% --port %MP_PORT%
 "@ | Set-Content -Encoding ASCII $Launcher
+
+# --- 4b. Start Menu + Desktop shortcuts -----------------------------------
+# So it behaves like an installed app rather than a folder you have to remember.
+if (-not $NoShortcuts) {
+  $Shell = New-Object -ComObject WScript.Shell
+  $Targets = @(
+    @{ Path = (Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Muscle Paradise.lnk") },
+    @{ Path = (Join-Path $env:USERPROFILE "Desktop\Muscle Paradise.lnk") }
+  )
+  foreach ($t in $Targets) {
+    try {
+      $Lnk = $Shell.CreateShortcut($t.Path)
+      $Lnk.TargetPath = $Launcher
+      $Lnk.Arguments = "start"
+      $Lnk.WorkingDirectory = $Prefix
+      $Lnk.IconLocation = "$VPy,0"
+      $Lnk.Description = "Muscle Paradise - local gym OS"
+      $Lnk.Save()
+      Say "Shortcut created: $($t.Path)"
+    } catch {
+      Say "Could not create a shortcut at $($t.Path) - start with 'mp start' instead"
+    }
+  }
+}
 
 # --- 5. done ---------------------------------------------------------------
 Say "Installed Muscle Paradise 0.19.0"

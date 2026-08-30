@@ -50,6 +50,23 @@ export default tseslint.config(
     },
   },
   {
+    // The service worker runs in its own global scope (self/caches/clients).
+    files: ['public/sw.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'script',
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        clients: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        Promise: 'readonly',
+        CustomEvent: 'readonly',
+      },
+    },
+  },
+  {
     // Tests exercise failure paths on purpose; keep the limits off there.
     files: ['**/*.test.{ts,tsx}'],
     rules: {

@@ -7,18 +7,47 @@ file; there is no cloud account and no telemetry.
 
 | Component | State |
 |---|---|
-| Core API (FastAPI + SQLite, migrations, PDF receipts, encrypted backups) | complete — 239 tests, 90.9% coverage |
-| Studio shell (coach) — prebuilt static bundle | complete |
-| Athlete shell (`ClientShell`) — prebuilt in the same bundle | complete |
+| Core API (FastAPI + SQLite, migrations, PDF receipts, encrypted backups) | complete — 249 tests, 90.8% coverage |
+| **Admin app** (owner + coach) — installable PWA at `/` | complete |
+| **Athlete app** — installable PWA at `/client.html` | complete |
+| Offline shell (service worker), icons, standalone display | complete |
 | Persian/Jalali UI, Persian PDF assessment + receipt | complete |
-| Windows `.exe` / macOS `.dmg` / Electron desktop app | **not included** — see below |
-| Native Flutter athlete app | **not included** — see below |
+| Windows install + Start Menu/Desktop shortcuts | complete (script installer) |
+| Android install | complete **as a PWA** — see below |
+| Native `.apk` / `.exe` / `.dmg` binaries | **not included** — see below |
 
-**Why there is no `.exe`/`.dmg`/APK:** the build sandbox has no Electron
-runtime, no `electron-builder`, no NSIS/Inno Setup and no Flutter SDK (all
-verified absent). This installer therefore ships the app in its supported form:
-one local service on one port, which you open in a browser. It is not a
-native-desktop build, and it is not labelled as one.
+## Installing on Android
+
+The two apps are Progressive Web Apps, so they install on Android without a
+Play Store listing. Point Chrome at the machine running the core, then install:
+
+1. On the PC: `mp start` (default `http://127.0.0.1:8751`).
+2. To reach it from the phone, expose it on the LAN and allow the phone's origin:
+   ```bash
+   MP_HOST=0.0.0.0 MP_CORS_ORIGINS="http://<pc-ip>:8751" mp start
+   ```
+3. On the phone (same Wi‑Fi), open `http://<pc-ip>:8751/` → Chrome menu →
+   **Install app** / **افزودن به صفحهٔ اصلی**. Repeat on
+   `http://<pc-ip>:8751/client.html` to install the athlete app separately.
+
+You get two separate launcher icons (`mp-admin` and `mp-client`), full-screen
+with no browser chrome, and the shell loads offline. Data still lives on the PC,
+which is the local-first design.
+
+> An `.apk` is **not** provided: building one needs the Android SDK, Gradle and
+> a Flutter/Android toolchain, and `dl.google.com`, `storage.googleapis.com` and
+> `services.gradle.org` are all unreachable from the build sandbox (verified —
+> each returns no response). A PWA install is the supported Android path here.
+
+## Installing on Windows
+
+`install.ps1` creates a virtualenv, installs the app, writes `mp.cmd` and adds
+**Start Menu and Desktop shortcuts** (pass `-NoShortcuts` to skip). Double-click
+the shortcut, or run `mp start`, then open <http://127.0.0.1:8751> — and
+**Install app** from Edge/Chrome to get it as a windowed app with its own icon.
+
+There is no `.exe`/`.msi`: NSIS, Inno Setup and `wine` are absent from the build
+environment, and PyInstaller cannot cross-compile a Windows binary from Linux.
 
 ## Install
 

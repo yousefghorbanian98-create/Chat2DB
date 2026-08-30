@@ -119,10 +119,10 @@ function describeLoginError(err: unknown): string {
 }
 
 /** Dual-mode sign-in: staff PIN, or athlete membership-code + PIN (C9). */
-export function Login() {
+export function Login({ initialMode = 'staff' }: { initialMode?: Mode }) {
   const { login, memberLogin } = useAuth();
   const reduced = useReducedMotion() ?? false;
-  const [mode, setMode] = useState<Mode>('staff');
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [first, setFirst] = useState('');
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);

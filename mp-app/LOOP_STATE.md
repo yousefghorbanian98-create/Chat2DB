@@ -3,7 +3,7 @@
 ```
 Current Iteration: 17
 Current Phase: Phase 3 — Quality gates (FINN-LOOP §3: ESLint 0 / Prettier / tsc / coverage >=80%)
-Current Task: differential update CLOSED — app/updater.py + `mp update` with per-file sha256 manifests, dry-run, transactional rollback and protected venv/bin/db; build_dist.sh emits patch archives (13 KB vs 684 KB full). Backend 249 passed / 90.81% cov; Studio gate exit 0 / 110 tests. Verified end to end: 0.19.0 -> 0.20.0 touched 3 of 93 files and the database sha256 was byte-identical. Next = the env-BLOCKED items only.
+Current Task: two installable PWAs CLOSED — admin (/) and athlete (/client.html) with separate manifests, maskable icons, service worker (API never cached) and Windows shortcuts; studio coverage threshold now ENFORCED at 80% (branches 80.33%) where it previously only reported. Backend 249 passed / 90.81%; Studio 124 tests / gate exit 0. Native .apk/.exe/.dmg remain env-BLOCKED: dl.google.com, storage.googleapis.com and services.gradle.org are all unreachable (verified, no response).
 Status: PERSIAN_PDF_AND_BACKEND_COV_DONE
 Design Quality Score: 7/10
 Animation Quality Score: 8/10
