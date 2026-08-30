@@ -41,7 +41,13 @@ function NutritionCard({ plan }: { plan: ClientNutrition }) {
   return (
     <MotionCard title="تغذیهٔ من" testId="client-nutrition">
       <div style={STAT_ROW}>
-        <StatCard labelFa="کالری روزانه" labelEn="kcal" value={plan.tdee_kcal.toFixed(0)} unit="kcal" tone="primary" />
+        <StatCard
+          labelFa="کالری روزانه"
+          labelEn="kcal"
+          value={plan.tdee_kcal.toFixed(0)}
+          unit="kcal"
+          tone="primary"
+        />
         <StatCard labelFa="پروتئین" labelEn="protein" value={plan.protein_g.toFixed(0)} unit="g" />
         <StatCard labelFa="کربوهیدرات" labelEn="carbs" value={plan.carbs_g.toFixed(0)} unit="g" />
         <StatCard labelFa="چربی" labelEn="fat" value={plan.fat_g.toFixed(0)} unit="g" />

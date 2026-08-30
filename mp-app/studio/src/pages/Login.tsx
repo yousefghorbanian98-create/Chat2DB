@@ -66,7 +66,9 @@ function BrandHeader({ mode }: { mode: Mode }) {
       <h1 style={{ fontSize: 30 }}>
         Muscle Paradise <span style={{ color: 'var(--color-primary)' }}>Studio</span>
       </h1>
-      <p style={SUBHEAD}>{mode === 'staff' ? 'ورود کارکنان — پین' : 'ورود ورزشکار — کد عضویت و پین'}</p>
+      <p style={SUBHEAD}>
+        {mode === 'staff' ? 'ورود کارکنان — پین' : 'ورود ورزشکار — کد عضویت و پین'}
+      </p>
     </div>
   );
 }

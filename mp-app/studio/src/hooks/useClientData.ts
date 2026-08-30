@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { ApiError, api, type Assessment, type ClientNutrition, type Member, type ProgramRow } from '../api/client';
+import {
+  ApiError,
+  api,
+  type Assessment,
+  type ClientNutrition,
+  type Member,
+  type ProgramRow,
+} from '../api/client';
 
 export interface ClientData {
   me: Member | null;

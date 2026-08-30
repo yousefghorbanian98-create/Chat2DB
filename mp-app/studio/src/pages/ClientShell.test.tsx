@@ -33,7 +33,9 @@ describe('ClientShell (athlete web shell)', () => {
   it('renders the masked profile and a body-fat figure', () => {
     setData({
       me: { id: 2, first_name: 'نسیم', last_name: 'رحیمی', membership_code: 'MP-DEMO-1' },
-      assessments: [{ id: 1, created_at: '2026-08-30T00:00:00Z', body_fat_pct: 13.6453, weight_kg: 58 }],
+      assessments: [
+        { id: 1, created_at: '2026-08-30T00:00:00Z', body_fat_pct: 13.6453, weight_kg: 58 },
+      ],
       programs: [{ id: 9, title: 'قدرت', status: 'active' }],
     });
     render(<ClientShell />);
@@ -76,7 +78,12 @@ describe('ClientShell (athlete web shell)', () => {
   });
 
   it('surfaces a transport error instead of an empty shell', () => {
-    setData({ me: null, assessments: [], programs: [], error: 'بارگذاری اطلاعات میسر نشد — دوباره تلاش کنید.' });
+    setData({
+      me: null,
+      assessments: [],
+      programs: [],
+      error: 'بارگذاری اطلاعات میسر نشد — دوباره تلاش کنید.',
+    });
     render(<ClientShell />);
     expect(screen.getByRole('alert')).toBeTruthy();
   });
