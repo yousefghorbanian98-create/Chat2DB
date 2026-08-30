@@ -40,6 +40,32 @@ switch to **ورزشکار** and use `MP-DEMO-1` / `1234`.
 `mp init`, `mp demo`, `mp start`, `mp test` are the only subcommands; `mp test`
 needs a `--with-tests` install and says so plainly if pytest is missing.
 
+## Updating later (differential)
+
+This is the first release that can update itself. Every package and every
+install carries a `MANIFEST.json` (version + sha256 per file), so a future
+`mp update` writes **only the files that actually differ** — your database,
+`venv/` and `bin/` are never touched.
+
+```bash
+tar xzf mp-app-0.20.0-linux.tar.gz
+mp update --from ./mp-app-0.20.0 --dry-run    # show the plan, write nothing
+mp update --from ./mp-app-0.20.0              # apply it
+```
+
+```
+updated 0.19.0 -> 0.20.0
+  files: 1 new, 1 changed, 1 removed, 91 unchanged
+```
+
+The apply is transactional — the current tree is archived first and restored if
+post-update verification fails. Patch archives (`patch-<old>-to-<new>.tar.gz`,
+13 KB where a full package is 684 KB) apply through the same command.
+
+Verified for this release: an update from 0.19.0 to 0.20.0 touched 3 of 93
+files, left an unchanged file's mtime and the font's hash alone, and the
+database sha256 was byte-identical before and after.
+
 ## What is in this build
 
 - Core API (FastAPI + SQLite): migrations, members, assessments, programs,
@@ -50,6 +76,8 @@ needs a `--with-tests` install and says so plainly if pytest is missing.
 - Deterministic JP7/Siri body composition and macro planning — the LLM never
   invents a measurement.
 - Server-side isolation: a member token can only ever read its own masked rows.
+- **Differential updater** (`mp update`) with per-file sha256 manifests,
+  dry-run and transactional rollback.
 
 **Verified for this release:** backend 239 tests passed, 90.9% statement
 coverage, coverage gate exit 0. Studio `npm run gate` exit 0 (lint 0 warnings,
