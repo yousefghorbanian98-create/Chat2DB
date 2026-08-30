@@ -46,8 +46,11 @@ jobs:
 
       - name: Install Playwright for the visual gate (not saved to lockfile)
         run: |
-          npm install --no-save --no-package-lock playwright@1.62.1
-          npx playwright install chromium
+          # --legacy-peer-deps is required: the project already carries an
+          # ERESOLVE conflict (react 16 vs @xyflow/react >= 17) which is why
+          # it installs with yarn. Plain `npm install playwright` fails there.
+          npm install --no-save --no-package-lock --legacy-peer-deps --registry https://registry.npmjs.org/ playwright@1.62.1
+          npx playwright install --with-deps chromium
 
       - name: Run Master Loop (G1–G6)
         env:
@@ -57,7 +60,8 @@ jobs:
       - name: Publish differential patch (best-effort)
         if: always()
         run: |
-          BASE=$(git merge-base HEAD origin/main 2>/dev/null || echo HEAD)
+          git fetch --depth 1 origin main 2>/dev/null || true
+          BASE=$(git merge-base HEAD FETCH_HEAD 2>/dev/null || echo HEAD)
           git diff "$BASE" HEAD -- src/motion-package src/blocks/Setting src/i18n src/layouts scripts/i18n-source-hashes.json scripts/master-loop docs/master-loop .gitignore > ../motion-package-update.patch || true
           if [ -s ../motion-package-update.patch ]; then
             echo "patch written ($(wc -l < ../motion-package-update.patch) lines)"
