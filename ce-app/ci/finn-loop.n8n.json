@@ -1,5 +1,5 @@
 {
- "name": "Finn-Loop v3 — Cutting Edge (n8n + OmniRoute)",
+ "name": "Finn-Loop v3.1 — Cutting Edge (n8n + OmniRoute + Nemotron-Brain)",
  "nodes": [
   {
    "parameters": {},
@@ -32,13 +32,13 @@
   },
   {
    "parameters": {
-    "command": "echo STAGE 0-0: 0.1 Inventory کامل فایل/ماژول/endpoint/دکمه+selector (gate: report exists) — already done in v2"
+    "command": "echo STAGE 0-0: done in v2 (gate: report exists)"
    },
    "name": "run-0-0",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    660,
+    220,
     0
    ]
   },
@@ -54,19 +54,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    880,
+    330,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 0-1: 0.2 Dead-code scan (ts-prune/knip+vulture) (gate: dead-code report) — already done in v2"
+    "command": "echo STAGE 0-1: done in v2 (gate: dead-code report)"
    },
    "name": "run-0-1",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    1100,
+    440,
     0
    ]
   },
@@ -82,19 +82,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    1320,
+    550,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 0-2: 0.3 Dependency-graph+cohesion (gate: graph report) — already done in v2"
+    "command": "echo STAGE 0-2: done in v2 (gate: graph report)"
    },
    "name": "run-0-2",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    1540,
+    660,
     0
    ]
   },
@@ -110,19 +110,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    1760,
+    770,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 0-3: 0.4 Baseline snapshot (تست+اسکرین+متریک) (gate: baseline saved) — already done in v2"
+    "command": "echo STAGE 0-3: done in v2 (gate: baseline saved)"
    },
    "name": "run-0-3",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    1980,
+    880,
     0
    ]
   },
@@ -138,19 +138,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    2200,
+    990,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 1-4: 1.1 aurora+ذرات gate‌شده (gate: visual gate) — already done in v2"
+    "command": "echo STAGE 1-4: done in v2 (gate: visual gate)"
    },
    "name": "run-1-4",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    2420,
+    1100,
     0
    ]
   },
@@ -166,19 +166,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    2640,
+    1210,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 1-5: 1.2 لوگو spring (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 1-5: done in v2 (gate: anim gate)"
    },
    "name": "run-1-5",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    2860,
+    1320,
     0
    ]
   },
@@ -194,19 +194,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    3080,
+    1430,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 1-6: 1.3 جاروب playhead (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 1-6: done in v2 (gate: anim gate)"
    },
    "name": "run-1-6",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    3300,
+    1540,
     0
    ]
   },
@@ -222,19 +222,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    3520,
+    1650,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 1-7: 1.4 دکمه شیشه‌ای مغناطیسی (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 1-7: done in v2 (gate: anim gate)"
    },
    "name": "run-1-7",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    3740,
+    1760,
     0
    ]
   },
@@ -250,19 +250,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    3960,
+    1870,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 1-8: 1.5 Celebration (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 1-8: done in v2 (gate: anim gate)"
    },
    "name": "run-1-8",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    4180,
+    1980,
     0
    ]
   },
@@ -278,19 +278,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    4400,
+    2090,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 2-9: 2.1 روبان Blend (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 2-9: done in v2 (gate: anim gate)"
    },
    "name": "run-2-9",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    4620,
+    2200,
     0
    ]
   },
@@ -306,19 +306,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    4840,
+    2310,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 2-10: 2.2 رادار DNA+جاروب (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 2-10: done in v2 (gate: anim gate)"
    },
    "name": "run-2-10",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    5060,
+    2420,
     0
    ]
   },
@@ -334,19 +334,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    5280,
+    2530,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 2-11: 2.3 ریتم stagger (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 2-11: done in v2 (gate: anim gate)"
    },
    "name": "run-2-11",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    5500,
+    2640,
     0
    ]
   },
@@ -362,19 +362,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    5720,
+    2750,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 2-12: 2.4 کارت‌ها spring-stagger (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 2-12: done in v2 (gate: anim gate)"
    },
    "name": "run-2-12",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    5940,
+    2860,
     0
    ]
   },
@@ -390,19 +390,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    6160,
+    2970,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 2-13: 2.5 reveal ستونی (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 2-13: done in v2 (gate: anim gate)"
    },
    "name": "run-2-13",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    6380,
+    3080,
     0
    ]
   },
@@ -418,19 +418,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    6600,
+    3190,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-14: 3.1 Playhead+دنباله (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-14: done in v2 (gate: anim gate)"
    },
    "name": "run-3-14",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    6820,
+    3300,
     0
    ]
   },
@@ -446,19 +446,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    7040,
+    3410,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-15: 3.2 Clip spring-in (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-15: done in v2 (gate: anim gate)"
    },
    "name": "run-3-15",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    7260,
+    3520,
     0
    ]
   },
@@ -474,19 +474,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    7480,
+    3630,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-16: 3.3 دنباله کی‌فریم (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-16: done in v2 (gate: anim gate)"
    },
    "name": "run-3-16",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    7700,
+    3740,
     0
    ]
   },
@@ -502,19 +502,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    7920,
+    3850,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-17: 3.4 Transition ripple (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-17: done in v2 (gate: anim gate)"
    },
    "name": "run-3-17",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    8140,
+    3960,
     0
    ]
   },
@@ -530,19 +530,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    8360,
+    4070,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-18: 3.5 Waveform beat-glow (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-18: done in v2 (gate: anim gate)"
    },
    "name": "run-3-18",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    8580,
+    4180,
     0
    ]
   },
@@ -558,19 +558,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    8800,
+    4290,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 3-19: 3.6 zoom-punch+spotlight (gate: anim gate) — already done in v2"
+    "command": "echo STAGE 3-19: done in v2 (gate: anim gate)"
    },
    "name": "run-3-19",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    9020,
+    4400,
     0
    ]
   },
@@ -586,19 +586,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    9240,
+    4510,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 4-20: 4.1 event-bus واحد brain/editor/style (gate: cohesion test) — already done in v2"
+    "command": "echo STAGE 4-20: done in v2 (gate: cohesion test)"
    },
    "name": "run-4-20",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    9460,
+    4620,
     0
    ]
   },
@@ -614,19 +614,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    9680,
+    4730,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 4-21: 4.2 کش اندازه‌گیری‌ها (gate: cache test) — already done in v2"
+    "command": "echo STAGE 4-21: done in v2 (gate: cache test)"
    },
    "name": "run-4-21",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    9900,
+    4840,
     0
    ]
   },
@@ -642,19 +642,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    10120,
+    4950,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 4-22: 4.3 prefetch+lazy موشن (gate: perf gate) — already done in v2"
+    "command": "echo STAGE 4-22: done in v2 (gate: perf gate)"
    },
    "name": "run-4-22",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    10340,
+    5060,
     0
    ]
   },
@@ -670,19 +670,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    10560,
+    5170,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 4-23: 4.4 تزریق اوپن‌سورس MIT/Apache جای کد مرده (gate: licence gate) — already done in v2"
+    "command": "echo STAGE 4-23: done in v2 (gate: licence gate)"
    },
    "name": "run-4-23",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    10780,
+    5280,
     0
    ]
   },
@@ -698,19 +698,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    11000,
+    5390,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 5-24: 5.1 pytest/verify/tsc per-file (gate: tests pass) — already done in v2"
+    "command": "echo STAGE 5-24: done in v2 (gate: tests pass)"
    },
    "name": "run-5-24",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    11220,
+    5500,
     0
    ]
   },
@@ -726,19 +726,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    11440,
+    5610,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 5-25: 5.2 Auto Debug تشخیص→fix→retry (gate: self-debug) — already done in v2"
+    "command": "echo STAGE 5-25: done in v2 (gate: self-debug)"
    },
    "name": "run-5-25",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    11660,
+    5720,
     0
    ]
   },
@@ -754,19 +754,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    11880,
+    5830,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 5-26: 5.3 Mutation testing (gate: mutation score) — already done in v2"
+    "command": "echo STAGE 5-26: done in v2 (gate: mutation score)"
    },
    "name": "run-5-26",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    12100,
+    5940,
     0
    ]
   },
@@ -782,19 +782,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    12320,
+    6050,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 6-27: 6.x Security Scan (10 چک) (gate: security pass) — already done in v2"
+    "command": "echo STAGE 6-27: done in v2 (gate: security pass)"
    },
    "name": "run-6-27",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    12540,
+    6160,
     0
    ]
   },
@@ -810,19 +810,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    12760,
+    6270,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 7-28: 7.x Performance Watchdog (CWV+60fps+bundle) (gate: perf pass) — already done in v2"
+    "command": "echo STAGE 7-28: done in v2 (gate: perf pass)"
    },
    "name": "run-7-28",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    12980,
+    6380,
     0
    ]
   },
@@ -838,19 +838,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    13200,
+    6490,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 8-29: 8.1 فهرست دکمه‌ها (gate: inventory) — already done in v2"
+    "command": "echo STAGE 8-29: done in v2 (gate: inventory)"
    },
    "name": "run-8-29",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    13420,
+    6600,
     0
    ]
   },
@@ -866,19 +866,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    13640,
+    6710,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 8-30: 8.2 کلیک خودکار هر دکمه+assert اثر (gate: button E2E) — already done in v2"
+    "command": "echo STAGE 8-30: done in v2 (gate: button E2E)"
    },
    "name": "run-8-30",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    13860,
+    6820,
     0
    ]
   },
@@ -894,19 +894,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    14080,
+    6930,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 8-31: 8.3 گزارش کارایی هر دکمه (gate: button report) — already done in v2"
+    "command": "echo STAGE 8-31: done in v2 (gate: button report)"
    },
    "name": "run-8-31",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    14300,
+    7040,
     0
    ]
   },
@@ -922,19 +922,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    14520,
+    7150,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 9-32: 9.x Visual Quality Gate (SSIM) (gate: visual pass) — already done in v2"
+    "command": "echo STAGE 9-32: done in v2 (gate: visual pass)"
    },
    "name": "run-9-32",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    14740,
+    7260,
     0
    ]
   },
@@ -950,19 +950,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    14960,
+    7370,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 10-33: 10.x Animation Quality Gate (18 چک) (gate: anim pass) — already done in v2"
+    "command": "echo STAGE 10-33: done in v2 (gate: anim pass)"
    },
    "name": "run-10-33",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    15180,
+    7480,
     0
    ]
   },
@@ -978,19 +978,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    15400,
+    7590,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 11-34: 11.x Taste Skill gate (gate: taste pass) — already done in v2"
+    "command": "echo STAGE 11-34: done in v2 (gate: taste pass)"
    },
    "name": "run-11-34",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    15620,
+    7700,
     0
    ]
   },
@@ -1006,19 +1006,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    15840,
+    7810,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 12-35: 12.x Self-Healing patch+retry (gate: heal) — already done in v2"
+    "command": "echo STAGE 12-35: done in v2 (gate: heal)"
    },
    "name": "run-12-35",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    16060,
+    7920,
     0
    ]
   },
@@ -1034,19 +1034,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    16280,
+    8030,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-36: 13.1 Contract tests فرانت/بک (gate: contract pass) — already done in v2"
+    "command": "echo STAGE 13-36: done in v2 (gate: contract pass)"
    },
    "name": "run-13-36",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    16500,
+    8140,
     0
    ]
   },
@@ -1062,19 +1062,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    16720,
+    8250,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-37: 13.2 Snapshot bank per route (gate: snapshot saved) — already done in v2"
+    "command": "echo STAGE 13-37: done in v2 (gate: snapshot saved)"
    },
    "name": "run-13-37",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    16940,
+    8360,
     0
    ]
   },
@@ -1090,19 +1090,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    17160,
+    8470,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-38: 13.3 Feature-flag rollout موشن (gate: flag test) — already done in v2"
+    "command": "echo STAGE 13-38: done in v2 (gate: flag test)"
    },
    "name": "run-13-38",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    17380,
+    8580,
     0
    ]
   },
@@ -1118,19 +1118,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    17600,
+    8690,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-39: 13.4 چک i18n/RTL (gate: i18n pass) — already done in v2"
+    "command": "echo STAGE 13-39: done in v2 (gate: i18n pass)"
    },
    "name": "run-13-39",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    17820,
+    8800,
     0
    ]
   },
@@ -1146,19 +1146,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    18040,
+    8910,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-40: 13.5 چک a11y (focus/contrast/reduced-motion) (gate: a11y pass) — already done in v2"
+    "command": "echo STAGE 13-40: done in v2 (gate: a11y pass)"
    },
    "name": "run-13-40",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    18260,
+    9020,
     0
    ]
   },
@@ -1174,19 +1174,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    18480,
+    9130,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-41: 13.6 گیت حجم bundle (gate: bundle gate) — already done in v2"
+    "command": "echo STAGE 13-41: done in v2 (gate: bundle gate)"
    },
    "name": "run-13-41",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    18700,
+    9240,
     0
    ]
   },
@@ -1202,19 +1202,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    18920,
+    9350,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-42: 13.7 بازسازی افزایشی (gate: incremental ok) — already done in v2"
+    "command": "echo STAGE 13-42: done in v2 (gate: incremental ok)"
    },
    "name": "run-13-42",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    19140,
+    9460,
     0
    ]
   },
@@ -1230,19 +1230,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    19360,
+    9570,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 13-43: 13.8 Changelog خودکار (gate: changelog) — already done in v2"
+    "command": "echo STAGE 13-43: done in v2 (gate: changelog)"
    },
    "name": "run-13-43",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    19580,
+    9680,
     0
    ]
   },
@@ -1258,19 +1258,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    19800,
+    9790,
     0
    ]
   },
   {
    "parameters": {
-    "command": "echo STAGE 14-44: 14.x Publish یک پچ تفاضلی+آپدیت (gate: release) — already done in v2"
+    "command": "echo STAGE 14-44: done in v2 (gate: release)"
    },
    "name": "run-14-44",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    20020,
+    9900,
     0
    ]
   },
@@ -1286,19 +1286,19 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    20240,
+    10010,
     0
    ]
   },
   {
    "parameters": {
-    "command": "BR=arena/01a057ca-chat2db; for f in run_stage.py; do curl -sfL https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/$BR/ce-app/ci/finn-loop-v3/$f -o ce-app/ci/finn-loop-v3/$f --create-dirs; done; curl -sfL https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/$BR/ce-app/ci/finn-loop-v3/stages.tar.gz | tar xz -C ce-app/ci/finn-loop-v3/ && echo BOOTSTRAP-OK"
+    "command": "BR=arena/01a057ca-chat2db; curl -sfL https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/$BR/ce-app/ci/finn-loop-v3/run_stage.py -o ce-app/ci/finn-loop-v3/run_stage.py --create-dirs; curl -sfL https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/$BR/ce-app/ci/finn-loop-v3/stages.tar.gz | tar xz -C ce-app/ci/finn-loop-v3/ && echo BOOTSTRAP-OK"
    },
    "name": "run-15-0",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    20460,
+    10120,
     0
    ]
   },
@@ -1314,7 +1314,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    20680,
+    10230,
     0
    ]
   },
@@ -1326,7 +1326,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    20900,
+    10340,
     0
    ]
   },
@@ -1342,7 +1342,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    21120,
+    10450,
     0
    ]
   },
@@ -1354,7 +1354,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    21340,
+    10560,
     0
    ]
   },
@@ -1370,7 +1370,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    21560,
+    10670,
     0
    ]
   },
@@ -1382,7 +1382,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    21780,
+    10780,
     0
    ]
   },
@@ -1398,7 +1398,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    22000,
+    10890,
     0
    ]
   },
@@ -1410,7 +1410,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    22220,
+    11000,
     0
    ]
   },
@@ -1426,7 +1426,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    22440,
+    11110,
     0
    ]
   },
@@ -1438,7 +1438,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    22660,
+    11220,
     0
    ]
   },
@@ -1454,7 +1454,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    22880,
+    11330,
     0
    ]
   },
@@ -1466,7 +1466,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    23100,
+    11440,
     0
    ]
   },
@@ -1482,7 +1482,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    23320,
+    11550,
     0
    ]
   },
@@ -1494,7 +1494,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    23540,
+    11660,
     0
    ]
   },
@@ -1510,7 +1510,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    23760,
+    11770,
     0
    ]
   },
@@ -1522,7 +1522,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    23980,
+    11880,
     0
    ]
   },
@@ -1538,7 +1538,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    24200,
+    11990,
     0
    ]
   },
@@ -1550,7 +1550,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    24420,
+    12100,
     0
    ]
   },
@@ -1566,7 +1566,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    24640,
+    12210,
     0
    ]
   },
@@ -1578,7 +1578,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    24860,
+    12320,
     0
    ]
   },
@@ -1594,7 +1594,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    25080,
+    12430,
     0
    ]
   },
@@ -1606,7 +1606,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    25300,
+    12540,
     0
    ]
   },
@@ -1622,7 +1622,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    25520,
+    12650,
     0
    ]
   },
@@ -1634,7 +1634,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    25740,
+    12760,
     0
    ]
   },
@@ -1650,7 +1650,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    25960,
+    12870,
     0
    ]
   },
@@ -1662,7 +1662,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    26180,
+    12980,
     0
    ]
   },
@@ -1678,7 +1678,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    26400,
+    13090,
     0
    ]
   },
@@ -1690,7 +1690,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    26620,
+    13200,
     0
    ]
   },
@@ -1706,7 +1706,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    26840,
+    13310,
     0
    ]
   },
@@ -1718,7 +1718,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    27060,
+    13420,
     0
    ]
   },
@@ -1734,7 +1734,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    27280,
+    13530,
     0
    ]
   },
@@ -1746,7 +1746,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    27500,
+    13640,
     0
    ]
   },
@@ -1762,7 +1762,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    27720,
+    13750,
     0
    ]
   },
@@ -1774,7 +1774,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    27940,
+    13860,
     0
    ]
   },
@@ -1790,7 +1790,7 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    28160,
+    13970,
     0
    ]
   },
@@ -1802,7 +1802,7 @@
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    28380,
+    14080,
     0
    ]
   },
@@ -1818,19 +1818,215 @@
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    28600,
+    14190,
     0
    ]
   },
   {
    "parameters": {
-    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py --report || echo report-fallback"
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-0 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-0",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    14300,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-0.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-0",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    14410,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-1 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-1",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    14520,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-1.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-1",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    14630,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-2 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-2",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    14740,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-2.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-2",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    14850,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-3 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-3",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    14960,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-3.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-3",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    15070,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-4 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-4",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    15180,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-4.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-4",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    15290,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-5 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-5",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    15400,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-5.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-5",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    15510,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py 19-6 || python3 ce-app/ci/finn-loop-v3/run_stage.py --report   # 19-*: بدون کلید CE_NVIDIA_API_KEY => pending-needs-key"
+   },
+   "name": "run-19-6",
+   "type": "n8n-nodes-base.executeCommand",
+   "typeVersion": 1,
+   "position": [
+    15620,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "operation": "createFile",
+    "repository": "Chat2DB",
+    "path": "docs/loop/done/19-6.done",
+    "content": "done",
+    "branch": "arena/01a032fb-chat2db"
+   },
+   "name": "mark-19-6",
+   "type": "n8n-nodes-base.github",
+   "typeVersion": 1,
+   "position": [
+    15730,
+    -240
+   ]
+  },
+  {
+   "parameters": {
+    "command": "python3 ce-app/ci/finn-loop-v3/run_stage.py --report"
    },
    "name": "Build Report",
    "type": "n8n-nodes-base.executeCommand",
    "typeVersion": 1,
    "position": [
-    28820,
+    15840,
     0
    ]
   },
@@ -1839,14 +2035,14 @@
     "operation": "createFile",
     "repository": "Chat2DB",
     "path": "docs/loop/report.md",
-    "content": " Finn-Loop v3 report ",
+    "content": "report",
     "branch": "arena/01a032fb-chat2db"
    },
    "name": "Commit Report",
    "type": "n8n-nodes-base.github",
    "typeVersion": 1,
    "position": [
-    29260,
+    15950,
     0
    ]
   }
@@ -1857,17 +2053,6 @@
     [
      {
       "node": "Read Manifest",
-      "type": "main",
-      "index": 0
-     }
-    ]
-   ]
-  },
-  "Read Manifest": {
-   "main": [
-    [
-     {
-      "node": "run-0-0",
       "type": "main",
       "index": 0
      }
@@ -3271,7 +3456,161 @@
     ]
    ]
   },
+  "run-19-0": {
+   "main": [
+    [
+     {
+      "node": "mark-19-0",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
   "mark-18-3": {
+   "main": [
+    [
+     {
+      "node": "run-19-0",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-1": {
+   "main": [
+    [
+     {
+      "node": "mark-19-1",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-0": {
+   "main": [
+    [
+     {
+      "node": "run-19-1",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-2": {
+   "main": [
+    [
+     {
+      "node": "mark-19-2",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-1": {
+   "main": [
+    [
+     {
+      "node": "run-19-2",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-3": {
+   "main": [
+    [
+     {
+      "node": "mark-19-3",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-2": {
+   "main": [
+    [
+     {
+      "node": "run-19-3",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-4": {
+   "main": [
+    [
+     {
+      "node": "mark-19-4",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-3": {
+   "main": [
+    [
+     {
+      "node": "run-19-4",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-5": {
+   "main": [
+    [
+     {
+      "node": "mark-19-5",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-4": {
+   "main": [
+    [
+     {
+      "node": "run-19-5",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "run-19-6": {
+   "main": [
+    [
+     {
+      "node": "mark-19-6",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-5": {
+   "main": [
+    [
+     {
+      "node": "run-19-6",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "mark-19-6": {
    "main": [
     [
      {

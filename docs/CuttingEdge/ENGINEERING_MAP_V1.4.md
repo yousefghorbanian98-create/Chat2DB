@@ -347,10 +347,22 @@ GitHub (منبع حقیقت) ◄──── کامیت هر مرحله ──�
 | **۱۸ انتشار 1.5.0** | 18-1 | گیت حجم bundle+نصبی (بودجه ≤۳۳۶MB) | size | — |
 | | 18-2 | Changelog + مستندات + اسکرین‌شات‌های جدید | docs | — |
 | | 18-3 | bump به 1.5.0 → ریلیز CI → تأیید آپدیت تفاضلی روی v1.4.0 | release زنده | ce-workflow |
+| **۱۹ Nemotron-Brain** | 19-0 | سند + کلید/کنسنت Settings + اسکیمای `.cetemplate` v2 | tests+i18n | build.nvidia.com |
+| | 19-1 | NemotronProvider در نردبان هوش (timeout/retry/fallback) | pytest providers | OpenAI-compat |
+| | 19-2 | `brain/nemotron.py` + بخش «چرایی سبک» در Style Match v2 | pytest style | Nemotron 3 Super |
+| | 19-3 | هارنس A/B سه fixture + گزارش متریک‌ها (قاعدهٔ −۱۰٪) | ab report | — |
+| | 19-4 | پیش‌فرض Style Match با کلید+کنسنت؛ حفظ offline | pytest brain | — |
+| | 19-5 | گسترش به editor_brain/critic با همان adapter | pytest brain | — |
+| | 19-6 | مستندات STATE/PROVIDERS + changelog | docs | — |
+
+> **فاز ۱۹ (تأییدشده ۲۰۲۶-۰۸-۳۱):** مغز متفکر برنامه = **NVIDIA Nemotron 3** — سطح API ابری
+> (سخت‌افزار فعلی: ۱۶GB رم / GTX 1650 4GB ⇒ اجرای لوکال Nemotron ممکن نیست؛ GPU فقط برای NVENC
+> و بینایی سبک). جزئیات: بخش ۱۵ همین سند + `docs/CuttingEdge/NEMOTRON_BRAIN.md`. بدون کلید API،
+> مراحل ۱۹-* به‌جای شکست `pending-needs-key` می‌شوند و لوپ گیر نمی‌کند.
 
 ### ۱۱.۵ فایل‌های اجرایی v3 (در همین برنچ، کنار این سند)
-- `ce-app/ci/finn-loop.manifest.json` — **نسخهٔ ۳** (۶۳ مرحله؛ ۴۴ انجام‌شدهٔ v2 + ۱۹ جدید)
-- `ce-app/ci/finn-loop.n8n.json` — ورک‌فلوی n8n با ۱۲۷ node (آمادهٔ import)
+- `ce-app/ci/finn-loop.manifest.json` — **نسخهٔ ۳** (۷۱ مرحله؛ ۴۵ انجام‌شده + ۲۶ جدید)
+- `ce-app/ci/finn-loop.n8n.json` — ورک‌فلوی n8n (auto-generated از مانیفست) (آمادهٔ import)
 - `ce-app/ci/finn-loop-v3/run_stage.py` — دیسپچر مراحل (خواندن manifest، اجرای gate، گزارش)
 - `ce-app/ci/finn-loop-v3/stages/<id>.sh` — اسکریپت واقعی هر مرحلهٔ جدید
 - `ce-app/ci/finn-loop-v3/README.md` — راهنمای کوتاه اجرا
@@ -405,6 +417,37 @@ GitHub (منبع حقیقت) ◄──── کامیت هر مرحله ──�
 
 ---
 
+## بخش ۱۵ — Nemotron-Brain: انویدیا به‌عنوان مغز متفکر (فاز ۱۹ لوپ)
+
+**تصمیم تأییدشدهٔ کارفرما (۲۰۲۶-۰۸-۳۱):** قضاوت‌های LLM برنامه به خانوادهٔ **NVIDIA Nemotron 3**
+سپرده می‌شود — پلکانی، با گیت A/B، اولویت نخست **Style Match**.
+
+| مدل | نقش در CE | مسیر |
+|---|---|---|
+| Nemotron 3 Super 120B (A12B، کانتکست 1M) | پیش‌فرض مغز: Style Match، planners، critic، دستیار | API رایگان `integrate.api.nvidia.com/v1` (OpenAI-compatible) |
+| Nemotron 3 Ultra 550B (A55B) | «حالت استودیو» برای قضاوت‌های سخت (race نهایی/نقد عمیق) — اختیاری | همان API |
+| Nemotron 3 Nano-Omni (دارای بینایی) | فاز آینده: دیدن فریم مرجع برای تایپوگرافی/کالرگرید | API |
+
+**نردبان هوش (اولین زنده):** `nvidia` → `OmniRoute (localhost:20128/v1)` → `ollama` → `offline (پاسخ از اندازه‌گیری‌ها؛ هرگز حذف نمی‌شود)`
+
+**قواعد تغییرنکردنی:**
+1. LLM فقط قضاوت می‌کند؛ اعداد همیشه از اندازه‌گیری می‌آیند؛ خروجی فقط JSON در اسکیمای وایت‌لیست.
+2. provider در هر پاسخ نام‌برده می‌شود (`nvidia:nemotron-3-super-120b-a12b`).
+3. کنسنت «ارسال رونویسی به سرویس ابری» پیش‌فرض خاموش (رونویسی+اعداد می‌روند؛ هرگز ویدیو/تصویر).
+4. تایم‌اوت ۳۰s + دو retry + fallback خودکار به سطح بعدی؛ بدون بلاک‌شدن UI.
+
+**Style Match v2:** به `.cetemplate` بخش `nemotron` اضافه می‌شود — چرایی سبک
+(`narrative_rhythm`, `hook_pattern`, `caption_tone`, `pacing_verdict`, keep/drop_phrases,
+`style_summary_fa/en`) + `provider/model/measured_hash`. بازسازی همچنان فقط از اعداد.
+
+**گیت A/B (شرط پیش‌فرض‌شدن):** روی ۳ fixture — پوشش منابع ≥ مبنا−۵٪، تطابق طول بهتر/مساوی،
+قلاب در ۳ثانیه اول ≥۲ از ۳، نرخ undo ≤ مبنا. شکست ⇒ Self-Healing روی پرامپت، نه اعداد.
+
+**سخت‌افزار:** ۱۶GB رم / GTX 1650 4GB ⇒ Nemotron فقط ابری؛ GPU صرف NVENC و بینایی سبک.
+لایسنس OpenMDW-1.1 ⇒ گیت لایسنس (قانون ۴) پاس. سند کامل: `NEMOTRON_BRAIN.md`.
+
+---
+
 ## پیوست — فایل‌های همراه این سند (دانلود مستقیم در ریلیز)
 
 | فایل | نقش |
@@ -413,4 +456,5 @@ GitHub (منبع حقیقت) ◄──── کامیت هر مرحله ──�
 | `ce-app/ci/finn-loop.manifest.json` (v3) | ۶۳ مرحله با gate/done — منبع حقیقت لوپ |
 | `ce-app/ci/finn-loop.n8n.json` (v3) | ورک‌فلوی n8n قابل-import |
 | `ce-app/ci/finn-loop-v3/run_stage.py` | دیسپچر اجرای مرحله |
-| `ce-app/ci/finn-loop-v3/stages/*.sh` | منطق هر مرحلهٔ جدید |
+| `ce-app/ci/finn-loop-v3/stages/*.sh` | منطق هر مرحلهٔ جدید (۱۵–۱۹) |
+| `docs/CuttingEdge/NEMOTRON_BRAIN.md` | سند طراحی مغز Nemotron (فاز ۱۹) |

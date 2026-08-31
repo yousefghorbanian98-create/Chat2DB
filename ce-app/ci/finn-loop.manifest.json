@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 3.1,
   "loop": "finn-loop",
   "target_branch": "arena/01a032fb-chat2db",
   "target_app_version_from": "1.4.0",
@@ -454,6 +454,57 @@
       "title": "18.3 bump 1.5.0→ریلیز CI→تأیید آپدیت تفاضلی",
       "gate": "release live",
       "done": false
+    },
+    {
+      "id": "19-0",
+      "phase": "19",
+      "title": "19.0 سند Nemotron + کلید/کنسنت Settings + اسکیمای .cetemplate v2",
+      "gate": "tests+i18n",
+      "done": false
+    },
+    {
+      "id": "19-1",
+      "phase": "19",
+      "title": "19.1 NemotronProvider در نردبان هوش (timeout/retry/fallback)",
+      "gate": "pytest -k providers",
+      "done": false
+    },
+    {
+      "id": "19-2",
+      "phase": "19",
+      "title": "19.2 brain/nemotron.py + چرایی سبک در Style Match v2",
+      "gate": "pytest -k style",
+      "done": false
+    },
+    {
+      "id": "19-3",
+      "phase": "19",
+      "title": "19.3 هارنس A/B سه fixture + گزارش متریک‌ها (قاعده −۱۰٪)",
+      "gate": "ab report",
+      "done": false
+    },
+    {
+      "id": "19-4",
+      "phase": "19",
+      "title": "19.4 پیش‌فرض Style Match با کلید+کنسنت؛ حفظ offline",
+      "gate": "pytest -k brain",
+      "done": false
+    },
+    {
+      "id": "19-5",
+      "phase": "19",
+      "title": "19.5 گسترش به editor_brain/critic با همان adapter",
+      "gate": "pytest -k brain",
+      "done": false
+    },
+    {
+      "id": "19-6",
+      "phase": "19",
+      "title": "19.6 مستندات STATE/PROVIDERS + changelog",
+      "gate": "docs",
+      "done": false
     }
-  ]
+  ],
+  "brain_model": "nvidia/nemotron-3-super-120b-a12b (API: integrate.api.nvidia.com/v1)",
+  "hardware_note": "16GB RAM / GTX 1650 4GB -> Nemotron is cloud-API only; GPU used for NVENC + light vision"
 }
