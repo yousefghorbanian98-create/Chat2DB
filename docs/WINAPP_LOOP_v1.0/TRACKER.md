@@ -1,7 +1,30 @@
 # 📋 TRACKER — ساخت خودکارِ اپ ویندوزی (قالب A + D)
 
 > راهنما: ⬜ در انتظار · 🔄 در حال اجرا · ✅ انجام و تأیید شده · ⚠️ مسدود/نیاز به تصمیم
-> آخرین به‌روزرسانی: 2026-09-01 · شاخه: `arena/01a05e0d-chat2db`
+> آخرین به‌روزرسانی: 2026-09-02 · شاخه: `arena/01a05e0d-chat2db`
+
+---
+
+## 🚀 تحویل — نصب‌کنندهٔ ویندوزی
+
+**لینک دانلود مستقیم:**
+
+```
+https://github.com/yousefghorbanian98-create/Chat2DB/releases/download/forge-v0.1.0/Forge_0.1.0_x64-setup.exe
+```
+
+| مورد | مقدار |
+|---|---|
+| فایل | `Forge_0.1.0_x64-setup.exe` |
+| حجم | ۲۱٫۷ مگابایت |
+| معماری | Windows x64 (WebView2 از پیش‌نیازِ نصب است) |
+| Release | [`forge-v0.1.0`](https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/forge-v0.1.0) |
+| ساخته‌شده از | run ۳۳۵۵۹۱۰۵۴۴۸ روی `windows-latest` |
+
+نصب‌کننده شاملِ خودِ برنامه، `node.exe` و باندلِ سرور است؛ هیچ چیزی
+نیاز به نصبِ جداگانه ندارد (به‌جز WebView2 که روی ویندوز ۱۱ هست).
+جریانِ انتشار خودکار است: هر push به `forge/**` پایپ‌لاین را اجرا و همین
+Release را با `--clobber` به‌روزرسانی می‌کند، پس لینک بالا ثابت می‌ماند.
 
 ---
 
@@ -16,7 +39,7 @@
 | M-5 | سیستم طراحی | Tailwind 4 + توکن‌های DESIGN.md + Motion (DaisyUI حذف شد — D-1) | ✅ |
 | M-6 | لایه مدل | OAuth مستقیمِ jcode (در این مرحله غیرفعال: jcode نصب نیست) | ✅ |
 | M-7 | پایگاه داده | JSON پشتِ رابطِ Store (SQLite جایگزین شد — D-2) | ✅ |
-| M-8 | خروجی نهایی | exe/msi از GitHub Actions روی windows-latest | 🔄 |
+| M-8 | خروجی نهایی | exe از GitHub Actions روی windows-latest | ✅ |
 
 ---
 
@@ -142,7 +165,7 @@
 | INT-1 | پوستهٔ Tauri 2 | ✅ Cargo/main.rs/conf |
 | INT-2 | پیوند sidecar | ✅ پورتِ پویا + انتظار برای health |
 | INT-3 | workflow ویندوزی | ✅ توسط کاربر ساخته شد |
-| INT-4 | تولید exe | ✅ `forge-windows-installer` ۲۱٫۷ م‌ب (run ۳۳۵۵۳۰۹۹۰۷۷) |
+| INT-4 | تولید exe + انتشار | ✅ Release `forge-v0.1.0` + artifact (run ۳۳۵۵۹۱۰۵۴۴۸) |
 | INT-5 | آیکون | ✅ ۵ اندازه + ico + icns (۸-بیت؛ ۱۶-بیت توسط tauri-build رد می‌شود) |
 | INT-6 | موجودی مجوزها | ✅ در جدول زیر |
 | INT-7 | ارتقای actions به نسخه‌های جدید (هشدار Node ۲۰) | ⬜ |
