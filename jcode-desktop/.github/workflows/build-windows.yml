@@ -11,8 +11,6 @@ on:
   workflow_dispatch:
   push:
     branches: [arena/01a05b8a-chat2db]
-    paths:
-      - 'jcode-desktop/**'
 
 permissions:
   contents: write
