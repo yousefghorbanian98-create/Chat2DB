@@ -1,6 +1,6 @@
 /* ============================================================
  * Jcode Desktop — main page
- * The page IS the cosmos. Nothing else on screen.
+ * The page IS the black hole. Nothing else on screen.
  * ============================================================ */
 
 * {
@@ -17,15 +17,23 @@ body {
   overflow: hidden;
 }
 
-/* Full-bleed cosmos: cover-fit, centred, no chrome, no interaction */
-.cosmos {
+#blackhole-canvas {
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
 }
 
+#blackhole-canvas:active {
+  cursor: grabbing;
+}
+
+/* Fallback timelapse (no WebGL2). */
 .cosmos-img {
-  position: absolute;
+  position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
@@ -35,20 +43,5 @@ body {
   user-select: none;
   pointer-events: none;
   -webkit-user-drag: none;
-  image-rendering: auto;
-  /* The timelapse is dark astrophotography — lift it so the nebula reads clearly. */
   filter: brightness(1.45) contrast(1.08) saturate(1.05);
-}
-
-/* A faint photographic vignette — the only "finish" on top of the image.
-   Kept very light so the nebula stays visible edge to edge. */
-.vignette {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 120% 90% at 50% 45%,
-    transparent 60%,
-    rgba(0, 0, 0, 0.22) 100%
-  );
 }

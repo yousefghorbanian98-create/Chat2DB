@@ -7,10 +7,12 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Cosmos B — the page is the image. Nothing else. -->
-  <main class="cosmos" aria-hidden="true">
-    <img class="cosmos-img" src="assets/cosmos-b.gif" alt="" draggable="false" />
-  </main>
-  <div class="vignette" aria-hidden="true"></div>
+  <!-- Black hole — faithful port of vercel-labs/vgpu's black-hole example. -->
+  <canvas id="blackhole-canvas"></canvas>
+
+  <!-- Fallback: Cosmos B timelapse, shown only when WebGL2 is unavailable. -->
+  <img class="cosmos-img" id="cosmos-fallback" src="assets/cosmos-b.gif" alt="" draggable="false" hidden />
+
+  <script src="blackhole.js"></script>
 </body>
 </html>
