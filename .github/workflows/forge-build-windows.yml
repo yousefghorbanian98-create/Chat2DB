@@ -26,31 +26,25 @@ jobs:
           node-version: 22
 
       - name: Setup Rust
-        -        uses: Swatinemem/rust-cache@v2
-+        uses: Swatinem/rust-cache@v2
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Rust
-        uses: Swatinemem/rust-cache@v2
+        uses: Swatinem/rust-cache@v2
         with:
           workspaces: forge/src-tauri
 
-      # ۱) فرانت‌اند
       - name: Build frontend
         working-directory: forge
         run: |
           npm ci
           npm run build
 
-      # ۲) بک‌اند (باندل تک‌فایلی)
       - name: Build backend bundle
         working-directory: forge/server
         run: |
           npm ci
           npm run build
 
-      # ۳) آماده‌سازی runtime نود برای sidecar
-      #    (nexe/pkg روی نسخه‌های جدید نود غیرقابل‌اتکا هستند؛
-      #     بنابراین node.exe رسمی را کنار سرور می‌گذاریم)
       - name: Bundle Node runtime
         shell: pwsh
         run: |
@@ -62,14 +56,12 @@ jobs:
           New-Item -ItemType Directory -Force forge/src-tauri/resources/server | Out-Null
           Copy-Item "forge/server/dist/*" forge/src-tauri/resources/server -Recurse -Force
 
-      # ۴) ساخت پوستهٔ Tauri 2 (WebView2 از پیش روی runner هست)
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
         with:
           projectPath: forge
           args: --target x86_64-pc-windows-msvc
 
-      # ۵) تحویل نصب‌کننده
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
