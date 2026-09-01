@@ -8,6 +8,7 @@
  * مسیرِ استاندارد می‌آوریم — بدونِ فرض درباره‌ی چیدمانِ پوشه‌ها.
  */
 import { spawnSync } from 'node:child_process'
+import { maybePublishUpdate } from './publish-update.mjs'
 import { existsSync, cpSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs'
 import { join, dirname, resolve, relative, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -107,5 +108,8 @@ function mirror() {
 }
 
 mirror()
+
+// انتشارِ بسته‌ی تفاضلی — فقط روی CI و فقط با علامتِ .publish-update
+await maybePublishUpdate()
 
 process.exit(result.status ?? 1)

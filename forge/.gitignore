@@ -11,3 +11,7 @@ src-tauri/gen/
 
 # خروجیِ TypeScript (نباید در گیت باشد)
 tsconfig.tsbuildinfo
+
+# خروجی‌های انتشار
+dist-update/
+.update-base/
