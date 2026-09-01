@@ -2,12 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { api, runStream, type HealthResponse } from './lib/api.ts'
 import type { Agent, Command, Message, Session } from './lib/types.ts'
+import Icon from './components/Icon.tsx'
 import StatusPills from './components/StatusPills.tsx'
 import SessionList from './components/SessionList.tsx'
 import ChatStream, { type TraceEntry } from './components/ChatStream.tsx'
 import Composer from './components/Composer.tsx'
 import CommandPalette from './components/CommandPalette.tsx'
 import SidePanel from './components/SidePanel.tsx'
+import Welcome from './components/Welcome.tsx'
+import SetupSheet from './components/SetupSheet.tsx'
 
 type Theme = 'forge-dark' | 'forge-light'
 
@@ -24,6 +27,8 @@ export default function App() {
   const [trace, setTrace] = useState<TraceEntry[]>([])
   const [skills, setSkills] = useState<string[]>([])
   const [palette, setPalette] = useState(false)
+  const [setup, setSetup] = useState(false)
+  const [focusSignal, setFocusSignal] = useState(0)
   const [theme, setTheme] = useState<Theme>('forge-dark')
 
   useEffect(() => {
@@ -44,6 +49,18 @@ export default function App() {
     api.agents().then(setAgents).catch(() => setAgents([]))
     refreshSessions()
   }, [refreshSessions])
+
+  // میانبرِ سراسری: Ctrl+K فهرستِ دستورها
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPalette((p) => !p)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   const loadSession = useCallback(async (id: string) => {
     setActiveId(id)
@@ -130,19 +147,41 @@ export default function App() {
   return (
     <div className="flex h-full flex-col bg-canvas">
       <header className="flex items-center justify-between border-b border-hairline bg-canvas-soft px-6 py-3">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-[22px] leading-none text-ink">Forge</h1>
-          <span className="text-[12px] text-muted">کنسولِ عامل‌های کدنویسی</span>
+        <div className="flex items-center gap-3">
+          <span
+            className="flex size-8 items-center justify-center rounded-lg border border-hairline-strong bg-surface"
+            style={{ color: 'var(--color-brand)' }}
+          >
+            <Icon name="sparkles" size={17} />
+          </span>
+          <div className="flex flex-col">
+            <h1 className="text-display-sm leading-none text-ink">Forge</h1>
+            <span className="mt-1 text-body-sm leading-none text-muted">
+              کنسولِ عامل‌های کدنویسی
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <StatusPills health={health} />
-          <button
-            onClick={() => setTheme(theme === 'forge-dark' ? 'forge-light' : 'forge-dark')}
-            className="rounded-md border border-hairline px-3 py-1.5 text-[12px] text-body transition-colors hover:bg-surface hover:text-ink"
-          >
-            {theme === 'forge-dark' ? 'روشن' : 'تاریک'}
-          </button>
+        <div className="flex items-center gap-3">
+          <StatusPills health={health} onOpenSetup={() => setSetup(true)} />
+          <div className="flex items-center gap-1.5 border-r border-hairline pr-3">
+            <button
+              onClick={() => setSetup(true)}
+              aria-label="راهنمای وصل‌کردنِ ابزارها"
+              title="راهنمای وصل‌کردنِ ابزارها"
+              className="rounded-md border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+            >
+              <Icon name="wrench" size={15} />
+            </button>
+            <button
+              onClick={() => setTheme(theme === 'forge-dark' ? 'forge-light' : 'forge-dark')}
+              aria-label="تغییرِ تم"
+              title="تغییرِ تم"
+              className="rounded-md border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+            >
+              <Icon name={theme === 'forge-dark' ? 'sun' : 'moon'} size={15} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -155,14 +194,25 @@ export default function App() {
         />
 
         <main className="flex min-w-0 flex-1 flex-col">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex min-h-0 flex-1 flex-col"
-          >
-            <ChatStream messages={messages} trace={trace} busy={busy} skills={skills} />
-          </motion.div>
+          {messages.length === 0 && !busy ? (
+            <Welcome
+              health={health}
+              onOpenSetup={() => setSetup(true)}
+              onPick={(prompt) => {
+                setInput(prompt)
+                setFocusSignal((n) => n + 1)
+              }}
+            />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="flex min-h-0 flex-1 flex-col"
+            >
+              <ChatStream messages={messages} trace={trace} busy={busy} skills={skills} />
+            </motion.div>
+          )}
 
           <Composer
             value={input}
@@ -170,6 +220,7 @@ export default function App() {
             onSubmit={send}
             busy={busy}
             onOpenPalette={() => setPalette(true)}
+            focusSignal={focusSignal}
           />
         </main>
 
@@ -187,6 +238,8 @@ export default function App() {
         agents={agents}
         onPick={(slug) => setInput(`/${slug} `)}
       />
+
+      <SetupSheet open={setup} onClose={() => setSetup(false)} health={health} />
     </div>
   )
 }

@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import type { Message, Stage } from '../lib/types.ts'
+import Icon from './Icon.tsx'
 import StagePill from './StagePill.tsx'
+import type { Message } from '../lib/types.ts'
 
 export interface TraceEntry {
-  stage: Stage
+  stage: Message['stage'] & string
   text?: string
 }
 
@@ -14,22 +16,17 @@ interface Props {
   skills: string[]
 }
 
-/** نمایشِ متن با پشتیبانیِ ابتدایی از بلوک کد (JetBrains Mono طبق DESIGN.md) */
+/** نمایشِ متن با پشتیبانی از بلوک کد (JetBrains Mono طبق DESIGN.md) */
 function Formatted({ text }: { text: string }) {
   const parts = text.split(/(```[\s\S]*?```)/g)
   return (
     <>
       {parts.map((part, i) => {
         if (part.startsWith('```')) {
+          const lang = part.match(/^```([a-z]*)/)?.[1] ?? ''
           const body = part.replace(/^```[a-z]*\n?/, '').replace(/```$/, '')
           return (
-            <pre
-              key={i}
-              dir="ltr"
-              className="my-3 overflow-x-auto rounded-md border border-hairline bg-canvas p-3 text-left font-mono text-[13px] leading-relaxed text-body"
-            >
-              <code>{body}</code>
-            </pre>
+            <CodeBlock key={i} code={body} lang={lang} />
           )
         }
         return (
@@ -42,69 +39,138 @@ function Formatted({ text }: { text: string }) {
   )
 }
 
+function CodeBlock({ code, lang }: { code: string; lang: string }) {
+  const [copied, setCopied] = useState(false)
+  return (
+    <div className="my-3 overflow-hidden rounded-lg border border-hairline bg-canvas">
+      <div className="flex items-center justify-between border-b border-hairline px-3 py-1.5">
+        <span className="text-caption text-muted">{lang || 'کد'}</span>
+        <button
+          onClick={() => {
+            navigator.clipboard?.writeText(code).then(() => {
+              setCopied(true)
+              setTimeout(() => setCopied(false), 1400)
+            })
+          }}
+          className="flex items-center gap-1 text-caption text-muted transition-colors hover:text-ink"
+        >
+          <Icon name={copied ? 'check' : 'copy'} size={13} />
+          {copied ? 'کپی شد' : 'کپی'}
+        </button>
+      </div>
+      <pre dir="ltr" className="overflow-x-auto p-3 text-left text-code text-body">
+        <code>{code}</code>
+      </pre>
+    </div>
+  )
+}
+
+function Avatar({ role }: { role: Message['role'] }) {
+  const map = {
+    user: { icon: 'message' as const, token: 'brand' },
+    agent: { icon: 'terminal' as const, token: 'muted' },
+    system: { icon: 'alert' as const, token: 'muted-soft' },
+  }
+  const m = map[role]
+  return (
+    <span
+      className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-hairline bg-surface"
+      style={{ color: `var(--color-${m.token})` }}
+    >
+      <Icon name={m.icon} size={15} />
+    </span>
+  )
+}
+
 export default function ChatStream({ messages, trace, busy, skills }: Props) {
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-5">
-      {messages.length === 0 && !busy ? (
-        <div className="flex h-full flex-col items-center justify-center text-center">
-          <h2 className="text-[26px] leading-tight text-ink">Forge</h2>
-          <p className="mt-2 max-w-md text-[14px] text-muted">
-            سه ابزار در یک پنجره: Jcode برای اجرا، Godmode برای گردش‌کار، Soup برای
-            انتخابِ مهارت. وضعیتِ هر کدام در بالای صفحه است.
-          </p>
-        </div>
-      ) : null}
-
-      <div className="mx-auto max-w-3xl space-y-4">
+    <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="mx-auto max-w-3xl">
         {messages.map((m) => (
           <motion.div
             key={m.id}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-            className={
-              m.role === 'user'
-                ? 'rounded-md border border-hairline bg-surface px-4 py-3 text-[15px] text-ink'
-                : 'rounded-md border border-hairline-strong bg-canvas-soft px-4 py-3 text-[14px] leading-relaxed text-body'
-            }
+            className="flex gap-3 py-3"
           >
-            {m.role !== 'user' && (
-              <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.88px] text-muted">
-                {m.role === 'agent' ? 'عامل' : 'سیستم'}
-              </span>
-            )}
-            <Formatted text={m.text} />
+            <Avatar role={m.role} />
+            <div className="min-w-0 flex-1">
+              <div className="mb-1 flex items-center gap-2">
+                <span className="text-caption text-muted">
+                  {m.role === 'user' ? 'شما' : m.role === 'agent' ? 'عامل' : 'سیستم'}
+                </span>
+                <span className="text-caption text-muted-soft">
+                  {new Date(m.at).toLocaleTimeString('fa-IR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+              </div>
+              <div
+                className={
+                  m.role === 'user'
+                    ? 'text-body-md text-ink'
+                    : 'text-body-md leading-relaxed text-body'
+                }
+              >
+                <Formatted text={m.text} />
+              </div>
+            </div>
           </motion.div>
         ))}
 
+        {/* ردیفِ مراحل: خطِ زمانیِ عمودی با پاستیل‌های DESIGN.md */}
         <AnimatePresence>
-          {trace.length > 0 && (
+          {(busy || trace.length > 0) && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-wrap gap-2 pt-1"
+              className="flex gap-3 py-3"
             >
-              {trace.map((t, i) => (
-                <StagePill key={`${t.stage}-${i}`} stage={t.stage} text={t.text} />
-              ))}
+              <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border border-hairline-strong bg-surface">
+                <span className="flex items-center gap-0.5">
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="size-1.5 animate-forge-pulse rounded-full"
+                      style={{
+                        backgroundColor: 'var(--color-brand)',
+                        animationDelay: `${i * 0.16}s`,
+                      }}
+                    />
+                  ))}
+                </span>
+              </span>
+              <div className="min-w-0 flex-1">
+                <span className="text-caption text-muted">مراحلِ اجرا</span>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {trace.map((t, i) => (
+                    <StagePill key={`${t.stage}-${i}`} stage={t.stage} text={t.text} />
+                  ))}
+                  {busy && trace.length === 0 && (
+                    <span className="text-body-sm text-muted">در حال آماده‌سازی…</span>
+                  )}
+                </div>
+
+                {skills.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-hairline pt-3">
+                    <span className="text-caption text-muted">مهارت‌ها</span>
+                    {skills.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full border border-hairline-strong px-2.5 py-1 text-code text-body"
+                      >
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {skills.length > 0 && !busy && (
-          <div className="flex flex-wrap items-center gap-2 pt-1">
-            <span className="text-[11px] uppercase tracking-[0.88px] text-muted">مهارت‌ها</span>
-            {skills.map((s) => (
-              <span
-                key={s}
-                className="rounded-full border border-hairline-strong px-2.5 py-1 font-mono text-[11px] text-body"
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
