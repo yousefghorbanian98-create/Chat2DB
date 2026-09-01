@@ -15,7 +15,7 @@
  * هیچ دسترسیِ تازه‌ای درخواست نمی‌شود.
  */
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, rmSync, mkdirSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, rmSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -46,6 +46,56 @@ function gitToken() {
     return token || null
   } catch {
     return null
+  }
+}
+
+/** خلاصه‌ی خوانا از آنچه منتشر شد — در توضیحاتِ Release */
+async function writeReleaseNotes(tag, outDir, files, hadBase, env) {
+  const manifest = JSON.parse(readFileSync(join(outDir, 'update-manifest.json'), 'utf8'))
+  const pack = files.find((f) => f.split(/[\\/]/).pop().startsWith('update-pack-'))
+  const kb = (n) => `${(n / 1024).toFixed(1)} کیلوبایت`
+  const total = manifest.files.reduce((n, f) => n + f.size, 0)
+  const packBytes = pack ? statSync(pack).size : 0
+
+  // فایل‌هایی که نسبت به انتشارِ قبلی عوض شده‌اند
+  let changedPaths = []
+  if (hadBase) {
+    try {
+      const base = JSON.parse(readFileSync(join(projectDir, '.update-base', 'update-manifest.json'), 'utf8'))
+      const before = new Map(base.files.map((f) => [f.path, f.sha256]))
+      changedPaths = manifest.files
+        .filter((f) => before.get(f.path) !== f.sha256)
+        .map((f) => `- \`${f.path}\` — ${kb(f.size)}`)
+    } catch { /* مبنا نباشد، فهرست خالی می‌ماند */ }
+  }
+
+  const lines = [
+    '## به‌روزرسانی تفاضلی',
+    '',
+    `- ساخت: \`${manifest.build}\``,
+    `- پرونده‌های تحتِ مدیریت: **${manifest.files.length}**`,
+    `- حجمِ بسته‌ی همین انتشار: **${kb(packBytes)}**`,
+    `- حجمِ نصبِ کامل: ${kb(total)}`,
+    `- مبنای تفاضل: ${hadBase ? 'مانیفستِ انتشارِ قبلی' : 'ندارد — بسته‌ی کامل ساخته شد'}`,
+  ]
+  if (hadBase) {
+    lines.push(`- پرونده‌های تغییرکرده: **${changedPaths.length}**`)
+    if (changedPaths.length) {
+      lines.push('', changedPaths.slice(0, 20).join('\n'))
+      if (changedPaths.length > 20) lines.push(`- و ${changedPaths.length - 20} پرونده‌ی دیگر`)
+    }
+  }
+
+  const section = lines.join('\n')
+  const current = run('gh', ['release', 'view', tag, '--json', 'body', '--jq', '.body'], env).stdout ?? ''
+  const kept = current.split('## به‌روزرسانی تفاضلی')[0].trimEnd()
+  const body = `${kept}\n\n${section}\n`
+
+  const edited = run('gh', ['release', 'edit', tag, '--notes', body], env)
+  if (edited.status !== 0) {
+    console.warn(`[update] به‌روزرسانیِ توضیحات ناموفق: ${(edited.stderr || '').slice(0, 200)}`)
+  } else {
+    console.log('[update] خلاصه در توضیحاتِ Release نوشته شد')
   }
 }
 
@@ -117,6 +167,15 @@ export async function maybePublishUpdate() {
       console.log(`[update] منتشر شد روی ${tag}: ${files.map((f) => f.split(/[\\/]/).pop()).join(', ')}`)
     } else {
       console.warn(`[update] بارگذاری ناموفق: ${(up.stderr || up.stdout || '').slice(0, 300)}`)
+    }
+
+    // ۴) خلاصه را در توضیحاتِ Release می‌نویسیم.
+    //    چرا؟ دارایی‌ها از همه‌جا قابلِ خواندن نیستند، اما توضیحات هست؛
+    //    این‌طور هر انتشار خودش می‌گوید چه فرستاده است و چقدر.
+    try {
+      await writeReleaseNotes(tag, outDir, files, baseArgs.length > 0, env)
+    } catch (err) {
+      console.warn(`[update] نوشتنِ خلاصه ناموفق: ${err?.message ?? err}`)
     }
   } catch (err) {
     // قید ۳ — انتشار هرگز نباید بیلد را بترکاند

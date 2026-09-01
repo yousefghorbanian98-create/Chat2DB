@@ -190,3 +190,30 @@ test('حجمِ تفاضلی در برابرِ کل — دلیلِ وجودیِ �
 
   await rm(root, { recursive: true, force: true })
 })
+
+test('مانیفست خودش در شمارش نمی‌آید (وگرنه همیشه «به‌روزرسانی هست» نشان می‌دهد)', async () => {
+  const root = await makeDir({
+    'index.js': 'v1',
+    'skills/commands/genesis.md': '# genesis',
+  })
+  // مانیفست روی دیسک هست — مثلِ هر نصبِ واقعی بعد از نخستین اجرا
+  const local = await buildManifest(root, { version: '0.1.0', build: 'local' })
+  await writeManifest(root, local)
+
+  const scanned = await buildManifest(root, { version: '0.1.0', build: 'local2' })
+  assert.ok(
+    !scanned.files.some((f) => f.path === 'update-manifest.json'),
+    'مانیفست نباید جزوِ پرونده‌های برنامه شمرده شود',
+  )
+
+  // حالا همان را با یک مانیفستِ منتشرشده مقایسه کنیم:
+  // چیزی تغییر نکرده پس نباید تفاوتی گزارش شود
+  const remote = await buildManifest(root, { version: '0.1.0', build: 'published' })
+  const diff = diffManifests(scanned, remote)
+  assert.equal(diff.added.length, 0)
+  assert.equal(diff.changed.length, 0)
+  assert.equal(diff.removed.length, 0)
+  assert.equal(diff.downloadBytes, 0)
+
+  await rm(root, { recursive: true, force: true })
+})

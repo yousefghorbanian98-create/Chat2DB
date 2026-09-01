@@ -63,9 +63,14 @@ export async function scanDir(root: string): Promise<ManifestFile[]> {
       if (entry.isDirectory()) {
         await walk(full)
       } else {
+        const rel = normalizePath(relative(root, full))
+        // مانیفست خودش «محتوای برنامه» نیست — فقط داده‌ی راهنماست.
+        // اگر در شمارش بیاید، چون روی هر دستگاه تازه ساخته می‌شود همیشه
+        // با نسخه‌ی منتشرشده فرق می‌کند و همیشه «به‌روزرسانی هست» نشان می‌دهد.
+        if (rel === MANIFEST_NAME) continue
         const buf = await readFile(full)
         out.push({
-          path: normalizePath(relative(root, full)),
+          path: rel,
           size: buf.byteLength,
           sha256: hashBuffer(buf),
         })

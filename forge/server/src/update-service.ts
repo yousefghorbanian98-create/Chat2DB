@@ -18,6 +18,9 @@ import {
   type Manifest,
 } from './update'
 
+/** پایگاهِ API — قابلِ تغییر برای تست و برای خود-میزبانی */
+const API = (process.env.FORGE_UPDATE_API ?? 'https://api.github.com').replace(/\/+$/, '')
+
 export const UPDATE_REPO = process.env.FORGE_UPDATE_REPO ?? 'yousefghorbanian98-create/Chat2DB'
 export const UPDATE_TAG = process.env.FORGE_UPDATE_TAG ?? 'forge-v0.1.0'
 const ENABLED = (process.env.FORGE_UPDATE_ENABLED ?? '1') !== '0'
@@ -33,31 +36,39 @@ interface ReleaseAsset {
   size: number
 }
 
+/** خطاها را نگه می‌داریم تا پیامِ «مانیفست یافت نشد» گمراه‌کننده نباشد */
+class FetchFailure extends Error {}
+
 async function fetchJson<T>(url: string): Promise<T | null> {
+  if (process.env.FORGE_UPDATE_INSECURE_TLS === '1') {
+    // فقط برای تستِ محلی؛ هرگز در حالت عادی
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+  }
   try {
     const res = await fetch(url, {
       headers: { accept: 'application/vnd.github+json', 'user-agent': 'forge-updater' },
     })
-    if (!res.ok) return null
+    if (!res.ok) throw new FetchFailure(`پاسخ ${res.status}`)
     return (await res.json()) as T
-  } catch {
-    return null
+  } catch (err) {
+    throw new FetchFailure(err instanceof Error ? err.message : 'خطای شبکه')
   }
 }
 
-async function fetchBinary(url: string): Promise<Buffer | null> {
+async function fetchBinary(url: string): Promise<Buffer> {
   try {
     const res = await fetch(url, { headers: { 'user-agent': 'forge-updater' } })
-    if (!res.ok) return null
+    if (!res.ok) throw new FetchFailure(`پاسخ ${res.status}`)
     return Buffer.from(await res.arrayBuffer())
-  } catch {
-    return null
+  } catch (err) {
+    if (err instanceof FetchFailure) throw err
+    throw new FetchFailure(err instanceof Error ? err.message : 'خطای شبکه')
   }
 }
 
 async function releaseAssets(): Promise<ReleaseAsset[]> {
   const data = await fetchJson<{ assets?: ReleaseAsset[] }>(
-    `https://api.github.com/repos/${UPDATE_REPO}/releases/tags/${UPDATE_TAG}`,
+    `${API}/repos/${UPDATE_REPO}/releases/tags/${UPDATE_TAG}`,
   )
   return data?.assets ?? []
 }
@@ -103,14 +114,24 @@ export async function checkForUpdate(): Promise<CheckResult> {
 
   if (!ENABLED) return base
 
-  const assets = await releaseAssets()
-  const manifestAsset = assets.find((a) => a.name === 'update-manifest.json')
-  if (!manifestAsset) {
-    return { ...base, error: 'مانیفستِ انتشار یافت نشد' }
+  let assets: ReleaseAsset[] = []
+  try {
+    assets = await releaseAssets()
+  } catch (err) {
+    return { ...base, error: `ارتباط با ${API} برقرار نشد: ${err instanceof Error ? err.message : ''}` }
   }
 
-  const remoteBuf = await fetchBinary(manifestAsset.browser_download_url)
-  if (!remoteBuf) return { ...base, error: 'دریافتِ مانیفست ناموفق بود' }
+  const manifestAsset = assets.find((a) => a.name === 'update-manifest.json')
+  if (!manifestAsset) {
+    return { ...base, error: 'در این Release هنوز مانیفستی منتشر نشده است' }
+  }
+
+  let remoteBuf: Buffer
+  try {
+    remoteBuf = await fetchBinary(manifestAsset.browser_download_url)
+  } catch (err) {
+    return { ...base, error: `دریافتِ مانیفست ناموفق: ${err instanceof Error ? err.message : ''}` }
+  }
 
   const remote = JSON.parse(remoteBuf.toString('utf8')) as Manifest
   const diff = diffManifests(local, remote)
@@ -143,15 +164,23 @@ export interface ApplyOutcome {
 export async function applyUpdate(): Promise<ApplyOutcome> {
   if (!ENABLED) return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'به‌روزرسانی غیرفعال است' }
 
-  const assets = await releaseAssets()
-  const manifestAsset = assets.find((a) => a.name === 'update-manifest.json')
-  if (!manifestAsset) {
-    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'مانیفستِ انتشار یافت نشد' }
+  let assets: ReleaseAsset[] = []
+  try {
+    assets = await releaseAssets()
+  } catch (err) {
+    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: err instanceof Error ? err.message : 'خطای شبکه' }
   }
 
-  const remoteBuf = await fetchBinary(manifestAsset.browser_download_url)
-  if (!remoteBuf) {
-    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'دریافتِ مانیفست ناموفق بود' }
+  const manifestAsset = assets.find((a) => a.name === 'update-manifest.json')
+  if (!manifestAsset) {
+    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'در این Release هنوز مانیفستی منتشر نشده است' }
+  }
+
+  let remoteBuf: Buffer
+  try {
+    remoteBuf = await fetchBinary(manifestAsset.browser_download_url)
+  } catch (err) {
+    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: err instanceof Error ? err.message : 'خطای شبکه' }
   }
   const remote = JSON.parse(remoteBuf.toString('utf8')) as Manifest
 
@@ -160,9 +189,11 @@ export async function applyUpdate(): Promise<ApplyOutcome> {
     return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'بسته‌ی به‌روزرسانی برای این ساخت یافت نشد' }
   }
 
-  const packBuf = await fetchBinary(packAsset.browser_download_url)
-  if (!packBuf) {
-    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'دریافتِ بسته ناموفق بود' }
+  let packBuf: Buffer
+  try {
+    packBuf = await fetchBinary(packAsset.browser_download_url)
+  } catch (err) {
+    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: err instanceof Error ? err.message : 'خطای شبکه' }
   }
 
   try {
