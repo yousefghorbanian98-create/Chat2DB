@@ -1,5 +1,12 @@
 name: Build Jcode Desktop (Windows)
 
+# NOTE: GitHub only discovers workflows under the REPOSITORY ROOT
+# `.github/workflows/`. This reference file lives inside jcode-desktop so it can
+# be versioned with the app; to enable it, copy it to:
+#   .github/workflows/build-jcode-desktop.yml
+# at the repository root (requires "workflows" write permission, which the
+# Arena automation token does not have — the repo owner can do this in one step).
+
 on:
   workflow_dispatch:
   push:
