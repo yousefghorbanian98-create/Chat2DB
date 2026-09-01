@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "apple-design": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/apple-design/SKILL.md",
+      "computedHash": "8b94db67cb9edaad5f1501010804caa610131f1d2dfda0a27664b2e858deade3"
+    },
+    "design-motion-principles": {
+      "source": "kylezantos/design-motion-principles",
+      "sourceType": "github",
+      "skillPath": "skills/design-motion-principles/SKILL.md",
+      "computedHash": "6410c1844f511249f11f38d30d217cfecf7f595f45a868d74284b6380bab47d7"
+    },
+    "design-taste-frontend": {
+      "source": "Leonxlnx/taste-skill",
+      "sourceType": "github",
+      "skillPath": "skills/taste-skill/SKILL.md",
+      "computedHash": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+    },
+    "finn-build": {
+      "source": "finna/Finn-loop",
+      "sourceType": "github",
+      "skillPath": "skills/finn-build/SKILL.md",
+      "computedHash": "e4b9582f71408eaff345fe2c4f63af93a64618404b774b9fe2da2d09caefcedb"
+    },
+    "finn-review": {
+      "source": "finna/Finn-loop",
+      "sourceType": "github",
+      "skillPath": "skills/finn-review/SKILL.md",
+      "computedHash": "84ae1ad7412f681890482a65778e489800811409c27237ec15c5836af82493f9"
+    },
+    "finn-spec": {
+      "source": "finna/Finn-loop",
+      "sourceType": "github",
+      "skillPath": "skills/finn-spec/SKILL.md",
+      "computedHash": "1f961328dc037f73ba99fa92924c968089abfa2216fa819ee3f674ca904b1f46"
+    },
+    "n8n-agents": {
+      "source": "czlonkowski/n8n-skills",
+      "sourceType": "github",
+      "skillPath": "skills/n8n-agents/SKILL.md",
+      "computedHash": "1826feb28c196a6fb94bf87929f10e05d77cf1c6c2fe02ba36c6573a556b1fa6"
+    },
+    "originkit": {
+      "source": "vellum-ai/originkit",
+      "sourceType": "github",
+      "skillPath": "skills/originkit/SKILL.md",
+      "computedHash": "50222c9520522a24cb2dae3d98fc09f1c6e0ad60922352fa914a9ce38e17cdd9"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "523b8063c07eedd2b8a1ca94d7a0be9ad340026bd9f21a1eda0b6be2a855298f"
+    }
+  }
+}

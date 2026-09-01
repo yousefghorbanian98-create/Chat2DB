@@ -1,0 +1,57 @@
+name: Build Jcode Desktop (Windows)
+
+# NOTE: GitHub only discovers workflows under the REPOSITORY ROOT
+# `.github/workflows/`. This reference file lives inside jcode-desktop so it can
+# be versioned with the app; to enable it, copy it to:
+#   .github/workflows/build-jcode-desktop.yml
+# at the repository root (requires "workflows" write permission, which the
+# Arena automation token does not have — the repo owner can do this in one step).
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [arena/01a05b8a-chat2db]
+
+permissions:
+  contents: write
+
+jobs:
+  build-win:
+    name: Windows installer (NSIS)
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: jcode-desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: jcode-desktop/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch jcode engine binaries
+        run: npm run fetch:jcode
+
+      - name: Rebuild native modules for Electron
+        run: npm run rebuild
+
+      - name: Build Windows installer
+        run: npm run dist:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jcode-Desktop-Setup
+          path: |
+            jcode-desktop/dist/*.exe
+          if-no-files-found: error
