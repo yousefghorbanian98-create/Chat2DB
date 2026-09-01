@@ -28,7 +28,11 @@ const result = spawnSync(bin, args, {
 
 /** کپیِ پوشه‌ی bundle از زیرشاخه‌ی triple به مسیرِ استاندارد */
 function mirrorBundle() {
-  if (!existsSync(targetDir)) return
+  if (!existsSync(targetDir)) {
+    console.log(`[forge] no target dir at ${targetDir}`)
+    return
+  }
+  console.log(`[forge] target entries: ${readdirSync(targetDir).join(', ') || '(none)'}`)
   const standard = join(targetDir, 'release', 'bundle')
   const candidates = []
 
@@ -47,8 +51,12 @@ function mirrorBundle() {
     if (resolve(from) === resolve(standard)) continue
     try {
       mkdir(standard, { recursive: true })
-      cp(from, standard, { recursive: true, force: true })
-      console.log(`[forge] mirrored bundle → ${standard}`)
+      // کپیِ تک‌تکِ فرزندان: با cp روی یک مقصدِ موجود، پوشه درون مقصد
+      // می‌نشیند (‎bundle/bundle/...‎) که مسیرِ آپلود را خراب می‌کند
+      for (const child of readdirSync(from)) {
+        cp(join(from, child), join(standard, child), { recursive: true, force: true })
+        console.log(`[forge] mirrored ${child} → ${join(standard, child)}`)
+      }
     } catch (err) {
       console.warn(`[forge] bundle mirror skipped: ${err?.message ?? err}`)
     }
