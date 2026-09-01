@@ -1,0 +1,114 @@
+@import 'tailwindcss';
+
+/*
+ * توکن‌های DESIGN.md — تنها منبعِ حقیقت برای رنگ.
+ * هیچ کلاسی در کامپوننت‌ها نباید رنگِ ثابت (hex) داشته باشد.
+ * SOURCE: forge/DESIGN.md ← https://getdesign.md/cursor/design-md
+ */
+@theme {
+  --color-canvas: var(--fg-canvas);
+  --color-canvas-soft: var(--fg-canvas-soft);
+  --color-surface: var(--fg-surface);
+  --color-surface-strong: var(--fg-surface-strong);
+  --color-ink: var(--fg-ink);
+  --color-body: var(--fg-body);
+  --color-muted: var(--fg-muted);
+  --color-muted-soft: var(--fg-muted-soft);
+  --color-hairline: var(--fg-hairline);
+  --color-hairline-strong: var(--fg-hairline-strong);
+  --color-brand: var(--fg-brand);
+  --color-brand-active: var(--fg-brand-active);
+  --color-success: var(--fg-success);
+  --color-error: var(--fg-error);
+
+  /* امضای بصری — پنج پاستیلِ تایم‌لاینِ عامل */
+  --color-thinking: var(--fg-stage-thinking);
+  --color-grep: var(--fg-stage-grep);
+  --color-read: var(--fg-stage-read);
+  --color-edit: var(--fg-stage-edit);
+  --color-done: var(--fg-stage-done);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* تم تاریک (پیش‌فرض) — سطوح برای پنجره‌ی دسکتاپ بازتعریف شده‌اند [برگرفته] */
+:root,
+[data-theme='forge-dark'] {
+  --fg-canvas: #17171a;
+  --fg-canvas-soft: #1e1e22;
+  --fg-surface: #24242a;
+  --fg-surface-strong: #32323a;
+  --fg-ink: #f2f1ee;
+  --fg-body: #c9c7c0;
+  --fg-muted: #807d72;
+  --fg-muted-soft: #a09c92;
+  --fg-hairline: #2e2e35;
+  --fg-hairline-strong: #3d3d46;
+  --fg-brand: #f54e00;
+  --fg-brand-active: #d04200;
+  --fg-success: #1f8a65;
+  --fg-error: #cf2d56;
+  --fg-stage-thinking: #dfa88f;
+  --fg-stage-grep: #9fc9a2;
+  --fg-stage-read: #9fbbe0;
+  --fg-stage-edit: #c0a8dd;
+  --fg-stage-done: #c08532;
+}
+
+/* تم روشن — پالتِ اصلی از منبع */
+[data-theme='forge-light'] {
+  --fg-canvas: #f7f7f4;
+  --fg-canvas-soft: #fafaf7;
+  --fg-surface: #ffffff;
+  --fg-surface-strong: #e6e5e0;
+  --fg-ink: #26251e;
+  --fg-body: #5a5852;
+  --fg-muted: #807d72;
+  --fg-muted-soft: #a09c92;
+  --fg-hairline: #e6e5e0;
+  --fg-hairline-strong: #cfcdc4;
+  --fg-brand: #f54e00;
+  --fg-brand-active: #d04200;
+  --fg-success: #1f8a65;
+  --fg-error: #cf2d56;
+  --fg-stage-thinking: #c9805f;
+  --fg-stage-grep: #5f9c66;
+  --fg-stage-read: #5f88b5;
+  --fg-stage-edit: #8f6bb5;
+  --fg-stage-done: #a06a1f;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* عنوان‌های نمایشی همیشه وزن ۴۰۰ (قاعده‌ی DESIGN.md) */
+  h1,
+  h2,
+  h3 {
+    font-weight: 400;
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand) 30%, transparent);
+  }
+
+  /* نوارِ اسکرولِ باریک و هم‌راستا با پالت */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hairline-strong) transparent;
+  }
+}

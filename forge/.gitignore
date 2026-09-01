@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-ssr/
+.data/
+src-tauri/target/
+src-tauri/gen/
