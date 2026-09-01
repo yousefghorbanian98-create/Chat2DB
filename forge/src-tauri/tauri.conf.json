@@ -25,7 +25,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": {},
+    "resources": {
+      "resources/node.exe": "node.exe",
+      "resources/server": "server"
+    },
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
