@@ -30,6 +30,8 @@ export interface UpdateCheck {
   changed: string[]
   removed: string[]
   deltaBytes: number
+  /** آیا این دستگاه می‌تواند از بسته‌ی تفاضلی استفاده کند */
+  delta: boolean
   fullBytes: number
   restartRequired: boolean
   error?: string

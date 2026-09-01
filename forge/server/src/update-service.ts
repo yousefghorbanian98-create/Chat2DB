@@ -93,6 +93,8 @@ export interface CheckResult {
   removed: string[]
   /** حجمِ دانلود در برابرِ حجمِ نصب‌کننده‌ی کامل — دلیلِ اصلیِ این سیستم */
   deltaBytes: number
+  /** آیا همین دستگاه می‌تواند از بسته‌ی تفاضلی استفاده کند (یک انتشار را نپریده باشد) */
+  delta: boolean
   fullBytes: number
   restartRequired: boolean
   error?: string
@@ -108,6 +110,7 @@ export async function checkForUpdate(): Promise<CheckResult> {
     changed: [],
     removed: [],
     deltaBytes: 0,
+    delta: false,
     fullBytes: totalBytes(local),
     restartRequired: false,
   } satisfies CheckResult
@@ -135,6 +138,8 @@ export async function checkForUpdate(): Promise<CheckResult> {
 
   const remote = JSON.parse(remoteBuf.toString('utf8')) as Manifest
   const diff = diffManifests(local, remote)
+  // کدام بسته نصیبِ این دستگاه می‌شود؟ اندازه‌ی همان را گزارش می‌کنیم
+  const pick = pickPack(assets, remote, local)
 
   return {
     enabled: true,
@@ -143,11 +148,41 @@ export async function checkForUpdate(): Promise<CheckResult> {
     upToDate: diff.added.length === 0 && diff.changed.length === 0 && diff.removed.length === 0,
     changed: [...diff.added, ...diff.changed].map((f) => f.path),
     removed: diff.removed,
-    deltaBytes: diff.downloadBytes,
+    deltaBytes: pick.asset?.size ?? diff.downloadBytes,
+    delta: pick.delta,
     fullBytes: totalBytes(remote),
     restartRequired: [...diff.added, ...diff.changed].some((f) =>
       ['index.js', 'package.json'].includes(f.path),
     ),
+  }
+}
+
+/**
+ * کدام بسته برای این کاربر درست است؟
+ *
+ * بسته‌ی تفاضلی فقط برای کسی است که دقیقاً روی همان ساختی باشد که بسته
+ * نسبت به آن ساخته شده (‎remote.from‎). هر کس عقب‌تر است باید بسته‌ی کامل
+ * را بگیرد — وگرنه فایل‌هایی را که نیاز دارد در بسته پیدا نمی‌کند و
+ * به‌روزرسانی با خطای تطابق شکست می‌خورد.
+ */
+export function pickPack(
+  assets: ReleaseAsset[],
+  remote: Manifest,
+  local: Manifest,
+): { asset?: ReleaseAsset; delta: boolean; error?: string } {
+  const fullName = `update-full-${remote.build}.tar.gz`
+  const deltaName = `update-pack-${remote.build}.tar.gz`
+  const full = assets.find((a) => a.name === fullName)
+  const delta = assets.find((a) => a.name === deltaName)
+
+  const canUseDelta = Boolean(delta) && remote.from != null && remote.from === local.build
+
+  if (canUseDelta && delta) return { asset: delta, delta: true }
+  if (full) return { asset: full, delta: false }
+
+  return {
+    delta: false,
+    error: fullName === '' ? '' : `هیچ بسته‌ای برای ساختِ ${remote.build} منتشر نشده است`,
   }
 }
 
@@ -184,10 +219,12 @@ export async function applyUpdate(): Promise<ApplyOutcome> {
   }
   const remote = JSON.parse(remoteBuf.toString('utf8')) as Manifest
 
-  const packAsset = assets.find((a) => a.name === `update-pack-${remote.build}.tar.gz`)
-  if (!packAsset) {
-    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: 'بسته‌ی به‌روزرسانی برای این ساخت یافت نشد' }
+  const local = await localManifest()
+  const pick = pickPack(assets, remote, local)
+  if (!pick.asset) {
+    return { ok: false, applied: 0, removed: 0, restartRequired: false, reloadSufficient: true, error: pick.error ?? 'بسته‌ی به‌روزرسانی برای این ساخت یافت نشد' }
   }
+  const packAsset = pick.asset
 
   let packBuf: Buffer
   try {

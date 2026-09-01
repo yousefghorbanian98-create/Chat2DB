@@ -63,8 +63,11 @@ export default function UpdateChip({ check }: Props) {
         {state === 'idle' && (
           <>
             <span className="text-body-sm text-body">
-              به‌روزرسانیِ {kb} کیلوبایت
-              <span className="text-muted"> (به‌جای {mb} مگابایت)</span>
+              {check.delta ? 'به‌روزرسانیِ تفاضلی' : 'به‌روزرسانیِ کاملِ'} {kb} کیلوبایت
+              <span className="text-muted">
+                {' '}
+                (به‌جای {mb} مگابایت{check.delta ? '' : ' — یک انتشار عقب‌ترید'})
+              </span>
             </span>
             <button
               onClick={apply}

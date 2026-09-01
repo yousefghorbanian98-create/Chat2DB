@@ -1,6 +1,7 @@
 // نقطهٔ ورودِ تست — قطعاتِ داخلی را برای تست‌های واحد صادر می‌کند.
 // (خروجیِ اصلی برنامه dist/index.js است؛ این فایل فقط برای تست باندل می‌شود)
-export { SkillRouter, tokenize } from './adapters/router'
+export {
+  SkillRouter, tokenize } from './adapters/router'
 export { SoupAdapter } from './adapters/soup'
 export { JcodeAdapter } from './adapters/jcode'
 export { GodmodeAdapter } from './adapters/godmode'
@@ -23,3 +24,4 @@ export {
 } from './update'
 export { ProviderAdapter, readSse } from './adapters/provider'
 export { loadSettings, saveSettings, patchSettings, normalizeProvider, DEFAULT_SETTINGS } from './core/settings'
+export { pickPack } from './update-service'

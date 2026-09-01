@@ -24,6 +24,8 @@ export interface Manifest {
   channel: string
   version: string
   build: string
+  /** بسته‌ی تفاضلی نسبت به کدام ساخت ساخته شده؛ برای تشخیصِ «عقب‌ماندن از چند انتشار» */
+  from?: string | null
   generatedAt: string
   files: ManifestFile[]
 }

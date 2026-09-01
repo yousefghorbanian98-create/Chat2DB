@@ -55,10 +55,27 @@ for (const f of targets) {
   pack.set(f.path, buf)
 }
 
+// بسته‌ی تفاضلی — فقط برای کسی که دقیقاً روی ساختِ مبناست
 const gz = createTarGz(pack)
 const packName = `update-pack-${build}.tar.gz`
 await writeFile(join(outDir, packName), gz)
-await writeFile(join(outDir, 'update-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8')
+
+// بسته‌ی کامل — برای هر کسی که بیش از یک انتشار عقب مانده است.
+// چرا؟ مانیفست هشِ «همه‌ی فایل‌ها در وضعیتِ فعلی» را می‌دهد، اما بسته‌ی
+// تفاضلی فقط اختلاف با انتشارِ قبلی را دارد. کاربری که یک انتشار را پریده
+// باشد با بسته‌ی تفاضلی به فایل‌های مورد نیازش نمی‌رسد.
+const full = new Map()
+for (const f of manifest.files) full.set(f.path, await readFile(join(distDir, f.path)))
+const fullGz = createTarGz(full)
+const fullName = `update-full-${build}.tar.gz`
+await writeFile(join(outDir, fullName), fullGz)
+
+// ‎from‎ می‌گوید این بسته‌ی تفاضلی نسبت به چه ساختی ساخته شده است
+await writeFile(
+  join(outDir, 'update-manifest.json'),
+  JSON.stringify({ ...manifest, from: base?.build ?? null }, null, 2),
+  'utf8',
+)
 
 const pct = base && totalBytes(manifest) > 0
   ? ((diff.downloadBytes / totalBytes(manifest)) * 100).toFixed(1)
@@ -68,4 +85,5 @@ console.log(`[update] نسخه ${version} · ساخت ${build}`)
 console.log(`[update] فایل‌های کل: ${manifest.files.length}`)
 console.log(`[update] تغییرکرده: ${diff.added.length + diff.changed.length} · حذف‌شده: ${diff.removed.length}`)
 console.log(`[update] حجمِ بسته: ${(gz.byteLength / 1024).toFixed(1)} کیلوبایت (${pct}% از کلِ ${(totalBytes(manifest) / 1048576).toFixed(2)} مگابایت)`)
+console.log(`[update] بسته‌ی کامل: ${(fullGz.byteLength / 1024).toFixed(1)} کیلوبایت (برای انتشارهای پریده‌شده)`)
 console.log(`[update] خروجی: ${outDir}`)

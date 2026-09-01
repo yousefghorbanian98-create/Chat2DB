@@ -13,6 +13,7 @@ import {
   writeManifest,
   hashBuffer,
   totalBytes,
+  pickPack,
 } from '../dist/test-api.js'
 
 /**
@@ -216,4 +217,37 @@ test('مانیفست خودش در شمارش نمی‌آید (وگرنه همی
   assert.equal(diff.downloadBytes, 0)
 
   await rm(root, { recursive: true, force: true })
+})
+
+test('انتخابِ بسته: اگر کاربر دقیقاً روی ساختِ مبناست، بسته‌ی تفاضلی', () => {
+  const assets = [
+    { name: 'update-pack-c.tar.gz', size: 900, browser_download_url: '' },
+    { name: 'update-full-c.tar.gz', size: 400_000, browser_download_url: '' },
+  ]
+  const remote = { build: 'c', from: 'b', files: [] }
+  const local = { build: 'b', files: [] }
+
+  const pick = pickPack(assets, remote, local)
+  assert.equal(pick.delta, true)
+  assert.equal(pick.asset.name, 'update-pack-c.tar.gz')
+})
+
+test('انتخابِ بسته: اگر یک انتشار را پریده باشد، بسته‌ی کامل', () => {
+  const assets = [
+    { name: 'update-pack-c.tar.gz', size: 900, browser_download_url: '' },
+    { name: 'update-full-c.tar.gz', size: 400_000, browser_download_url: '' },
+  ]
+  const remote = { build: 'c', from: 'b', files: [] }
+  const local = { build: 'a', files: [] } // یک انتشار عقب‌تر
+
+  const pick = pickPack(assets, remote, local)
+  assert.equal(pick.delta, false)
+  assert.equal(pick.asset.name, 'update-full-c.tar.gz')
+})
+
+test('انتخابِ بسته: بدونِ بسته‌ی تفاضلی، همان بسته‌ی کامل', () => {
+  const assets = [{ name: 'update-full-c.tar.gz', size: 10, browser_download_url: '' }]
+  const pick = pickPack(assets, { build: 'c', from: 'b', files: [] }, { build: 'b', files: [] })
+  assert.equal(pick.delta, false)
+  assert.equal(pick.asset.name, 'update-full-c.tar.gz')
 })
