@@ -35,6 +35,7 @@
   const state = {
     sessions: [], // [{id,name,cwd,kind,createdAt}]
     activeId: null,
+    mode: 'welcome', // 'welcome' | 'session' — panels hidden on the hero screen
     settings: {
       theme: 'nebula-violet',
       customCursor: true,
@@ -226,11 +227,20 @@
     updateInfoPanel();
   }
 
+  function setMode(mode) {
+    state.mode = mode;
+    const app = $('#app');
+    app.classList.toggle('mode-welcome', mode === 'welcome');
+    app.classList.toggle('mode-session', mode === 'session');
+  }
+
   function showTerminal() {
+    setMode('session');
     $('#welcome').style.display = 'none';
     $('#terminal-pane').hidden = false;
   }
   function showWelcome() {
+    setMode('welcome');
     $('#terminal-pane').hidden = true;
     $('#welcome').style.display = '';
   }
