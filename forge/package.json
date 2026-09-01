@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "design-gate": "node scripts/design-gate.mjs",
+    "tauri": "tauri",
     "test": "npm run build:ssr && node --test tests/*.test.mjs"
   },
   "dependencies": {
