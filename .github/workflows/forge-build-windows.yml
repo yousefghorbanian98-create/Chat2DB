@@ -1,0 +1,53 @@
+name: Build Windows Installer
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "forge/**"
+      - ".github/workflows/forge-build-windows.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: forge/src-tauri
+
+      # ۱) بسته‌بندیِ sidecarِ Node (بک‌اند) → باینریِ مورد انتظارِ Tauri
+      - name: Prepare Node sidecar
+        shell: pwsh
+        run: |
+          cd forge/server
+          npm ci
+          npx --yes nexe dist/index.js `
+            -o forge-server-x86_64-pc-windows-msvc.exe `
+            -t windows-x64-22.14.0
+          New-Item -ItemType Directory -Force ../src-tauri/binaries | Out-Null
+          Move-Item forge-server-x86_64-pc-windows-msvc.exe `
+            ../src-tauri/binaries/ -Force
+
+      # ۲) ساختِ فرانت + پوستهٔ Tauri
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: forge
+          args: --target x86_64-pc-windows-msvc
+
+      # ۳) تحویلِ نصب‌کننده
+      - uses: actions/upload-artifact@v4
+        with:
+          name: forge-windows-installer
+          path: |
+            forge/src-tauri/target/release/bundle/nsis/*.exe
+            forge/src-tauri/target/release/bundle/msi/*.msi
