@@ -15,7 +15,7 @@
  * هیچ دسترسیِ تازه‌ای درخواست نمی‌شود.
  */
 import { spawnSync } from 'node:child_process'
-import { existsSync, readFileSync, rmSync, mkdirSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, rmSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -91,7 +91,10 @@ async function writeReleaseNotes(tag, outDir, files, hadBase, env) {
   const kept = current.split('## به‌روزرسانی تفاضلی')[0].trimEnd()
   const body = `${kept}\n\n${section}\n`
 
-  const edited = run('gh', ['release', 'edit', tag, '--notes', body], env)
+  const notesPath = join(outDir, 'release-notes.md')
+  writeFileSync(notesPath, body, 'utf8')
+  console.log(section)
+  const edited = run('gh', ['release', 'edit', tag, '--notes-file', notesPath], env)
   if (edited.status !== 0) {
     console.warn(`[update] به‌روزرسانیِ توضیحات ناموفق: ${(edited.stderr || '').slice(0, 200)}`)
   } else {
@@ -160,6 +163,16 @@ export async function maybePublishUpdate() {
     if (!files.length) {
       console.warn('[update] خروجی‌ای برای انتشار نیست')
       return
+    }
+
+    // بسته‌ی انتشارِ قبلی را پاک می‌کنیم تا در Release فقط بسته‌ی همین ساخت بماند
+    const listed = run('gh', ['release', 'view', tag, '--json', 'assets', '--jq', '.assets[].name'], env)
+    const stale = (listed.stdout ?? '')
+      .split('\n')
+      .map((n) => n.trim())
+      .filter((n) => n.startsWith('update-pack-') && !files.some((f) => f.split(/[\\/]/).pop() === n))
+    for (const name of stale) {
+      run('gh', ['release', 'delete-asset', tag, name, '--yes'], env)
     }
 
     const up = run('gh', ['release', 'upload', tag, ...files, '--clobber'], env)
