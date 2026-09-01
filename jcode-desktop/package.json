@@ -34,6 +34,7 @@
   "build": {
     "appId": "com.jcode.desktop",
     "productName": "Jcode Desktop",
+    "publish": null,
     "copyright": "Copyright © 2026 Jcode Desktop",
     "asar": true,
     "directories": {

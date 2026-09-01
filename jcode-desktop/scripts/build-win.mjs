@@ -11,12 +11,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const CLI = path.join(ROOT, 'node_modules', 'electron-builder', 'out', 'cli', 'cli.js');
 
-const args = ['--win', 'nsis'];
-if (process.env.GH_TOKEN) args.push('--publish', 'never');
+const args = ['--win', 'nsis', '--publish', 'never'];
+
+// Strip any GitHub token so electron-builder never enters publish mode
+// (the workflow may set GH_TOKEN; a token in the env triggers auto-publish
+// detection and electron-builder then fails when it can't resolve the repo).
+const env = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' };
+delete env.GH_TOKEN;
+delete env.GITHUB_TOKEN;
 
 const child = spawn(process.execPath, [CLI, ...args], {
   cwd: ROOT,
-  env: { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' },
+  env,
   stdio: ['ignore', 'pipe', 'pipe']
 });
 
