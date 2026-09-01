@@ -17,18 +17,14 @@ body {
   overflow: hidden;
 }
 
-#blackhole-canvas {
+#cosmos-canvas {
   position: fixed;
   inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   touch-action: none;
-  cursor: grab;
-}
-
-#blackhole-canvas:active {
-  cursor: grabbing;
+  cursor: default;
 }
 
 /* Fallback timelapse (no WebGL2). */
