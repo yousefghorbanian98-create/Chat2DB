@@ -8,6 +8,20 @@ async function get<T>(path: string): Promise<T> {
   return (await res.json()) as T
 }
 
+export interface SettingsView {
+  workspaceDir: string | null
+  jcodePath: string | null
+  mcpEnabled: string[]
+  provider: { type: 'openai-compatible' | 'anthropic'; baseUrl: string; model: string; apiKeySet: boolean } | null
+}
+
+export interface SettingsPatch {
+  workspaceDir?: string | null
+  jcodePath?: string | null
+  mcpEnabled?: string[]
+  provider?: { type: 'openai-compatible' | 'anthropic'; baseUrl: string; model: string; apiKey: string } | null
+}
+
 export interface UpdateCheck {
   enabled: boolean
   current: { version: string; build: string } | null
@@ -61,6 +75,39 @@ export const api = {
   mcp: () => get<Array<McpServer & { enabled: boolean }>>('/mcp'),
   usage: () => get<Usage>('/usage'),
   route: (q: string) => get<Array<{ name: string; score: number }>>(`/route?q=${encodeURIComponent(q)}`),
+  settings: () => get<SettingsView>('/settings'),
+  saveSettings: async (patch: SettingsPatch) => {
+    const res = await fetch(`${BASE}/settings`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(patch),
+    })
+    if (!res.ok) throw new Error(`settings → ${res.status}`)
+    return (await res.json()) as { ok: boolean }
+  },
+  testProvider: async () => {
+    const res = await fetch(`${BASE}/settings/provider/test`, { method: 'POST' })
+    if (!res.ok) throw new Error(`provider test → ${res.status}`)
+    return (await res.json()) as { ok: boolean; message: string }
+  },
+  validateWorkspace: async (path: string) => {
+    const res = await fetch(`${BASE}/workspace/validate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ path }),
+    })
+    if (!res.ok) throw new Error(`workspace → ${res.status}`)
+    return (await res.json()) as { path: string; exists: boolean; isDirectory: boolean }
+  },
+  toggleMcp: async (id: string, on: boolean) => {
+    const res = await fetch(`${BASE}/mcp/toggle`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, on }),
+    })
+    if (!res.ok) throw new Error(`mcp toggle → ${res.status}`)
+    return (await res.json()) as { ok: boolean; enabled: string[] }
+  },
   updateCheck: () => get<UpdateCheck>('/update/check'),
   updateApply: async () => {
     const res = await fetch(`${BASE}/update/apply`, { method: 'POST' })

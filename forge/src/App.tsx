@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { api, runStream, type HealthResponse, type UpdateCheck } from './lib/api.ts'
+import {
+  api,
+  runStream,
+  type HealthResponse,
+  type SettingsView,
+  type UpdateCheck,
+} from './lib/api.ts'
 import type { Agent, Command, Message, Session } from './lib/types.ts'
 import Icon from './components/Icon.tsx'
 import StatusPills from './components/StatusPills.tsx'
@@ -11,6 +17,7 @@ import CommandPalette from './components/CommandPalette.tsx'
 import SidePanel from './components/SidePanel.tsx'
 import Welcome from './components/Welcome.tsx'
 import SetupSheet from './components/SetupSheet.tsx'
+import SettingsSheet from './components/SettingsSheet.tsx'
 import UpdateChip from './components/UpdateChip.tsx'
 
 type Theme = 'forge-studio' | 'forge-studio-dark'
@@ -42,6 +49,8 @@ export default function App() {
   const [skills, setSkills] = useState<string[]>([])
   const [palette, setPalette] = useState(false)
   const [setup, setSetup] = useState(false)
+  const [settings, setSettingsOpen] = useState(false)
+  const [appSettings, setAppSettings] = useState<SettingsView | null>(null)
   const [focusSignal, setFocusSignal] = useState(0)
   const [theme, setTheme] = useState<Theme>(initialTheme)
   const [update, setUpdate] = useState<UpdateCheck | null>(null)
@@ -68,6 +77,7 @@ export default function App() {
     api.commands().then(setCommands).catch(() => setCommands([]))
     api.agents().then(setAgents).catch(() => setAgents([]))
     api.updateCheck().then(setUpdate).catch(() => setUpdate(null))
+    api.settings().then(setAppSettings).catch(() => setAppSettings(null))
     refreshSessions()
   }, [refreshSessions])
 
@@ -188,12 +198,20 @@ export default function App() {
           <StatusPills health={health} onOpenSetup={() => setSetup(true)} />
           <div className="flex items-center gap-1.5 border-r border-hairline pr-3">
             <button
+              onClick={() => setSettingsOpen(true)}
+              aria-label="تنظیمات"
+              title="تنظیمات (پوشه‌ی پروژه و مدل)"
+              className="rounded-control border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+            >
+              <Icon name="wrench" size={15} />
+            </button>
+            <button
               onClick={() => setSetup(true)}
               aria-label="راهنمای وصل‌کردنِ ابزارها"
               title="راهنمای وصل‌کردنِ ابزارها"
               className="rounded-control border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
             >
-              <Icon name="wrench" size={15} />
+              <Icon name="plug" size={15} />
             </button>
             <button
               onClick={() => setTheme(theme === 'forge-studio' ? 'forge-studio-dark' : 'forge-studio')}
@@ -228,6 +246,8 @@ export default function App() {
           {messages.length === 0 && !busy ? (
             <Welcome
               health={health}
+              brainReady={Boolean(appSettings?.provider && appSettings?.workspaceDir)}
+              onOpenSettings={() => setSettingsOpen(true)}
               onOpenSetup={() => setSetup(true)}
               onPick={(prompt) => {
                 setInput(prompt)
@@ -271,6 +291,16 @@ export default function App() {
       />
 
       <SetupSheet open={setup} onClose={() => setSetup(false)} health={health} />
+
+      <SettingsSheet
+        open={settings}
+        onClose={() => setSettingsOpen(false)}
+        onSaved={() => {
+          // سلامت و تنظیمات باید دوباره خوانده شوند تا وضعیتِ مدل تازه شود
+          api.health().then(setHealth).catch(() => setHealth(null))
+          api.settings().then(setAppSettings).catch(() => setAppSettings(null))
+        }}
+      />
     </div>
   )
 }

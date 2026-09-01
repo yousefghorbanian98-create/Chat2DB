@@ -45,7 +45,10 @@ export class McpClient implements Adapter {
     return {
       name: this.name,
       state: 'degraded',
-      detail: `${MCP_REGISTRY.length} سرور ثبت شده · ${this.enabled.size} فعال · اتصال هنوز برقرار نمی‌شود`,
+      detail:
+        this.enabled.size > 0
+          ? `${this.enabled.size} سرور فعال انتخاب شده · اتصالِ واقعی هنوز پیاده نشده`
+          : `${MCP_REGISTRY.length} سرور شناخته‌شده · هیچ‌کدام فعال نیست · اتصالِ واقعی هنوز پیاده نشده`,
     }
   }
 }

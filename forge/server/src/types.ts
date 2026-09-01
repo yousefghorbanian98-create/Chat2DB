@@ -74,3 +74,29 @@ export interface RunEvent {
   skills?: string[]
   payload?: unknown
 }
+
+/* ────────────────────────────────────────────────────────────
+ * تنظیماتِ برنامه (تا پیش از این اصلاً وجود نداشت)
+ * ──────────────────────────────────────────────────────────── */
+
+/** اتصال به مدل — «مغز»ی که Forge بدون آن فقط پوسته است */
+export interface ProviderConfig {
+  /** openai-compatible: OpenAI و هر سازگار (Groq، OpenRouter، Ollama، LM Studio) */
+  type: 'openai-compatible' | 'anthropic'
+  baseUrl: string
+  model: string
+  /** فقط روی همین دستگاه و در همین فایل نگه داشته می‌شود؛ جایی ارسال نمی‌شود */
+  apiKey: string
+}
+
+export interface Settings {
+  /** پوشه‌ای که عامل روی آن کار می‌کند — بدون آن اجرا بی‌معناست */
+  workspaceDir: string | null
+  provider: ProviderConfig | null
+  mcpEnabled: string[]
+  jcodePath: string | null
+}
+
+export interface RunOptions {
+  workspaceDir?: string | null
+}

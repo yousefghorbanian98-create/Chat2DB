@@ -143,6 +143,99 @@ export async function handleApi(
     return true
   }
 
+  // ---- تنظیمات (پوشه‌ی پروژه، مدل، MCP) ----
+  if (path === '/api/settings' && req.method === 'GET') {
+    const s = ctx.settings
+    sendJson(res, 200, {
+      workspaceDir: s.workspaceDir,
+      jcodePath: s.jcodePath,
+      mcpEnabled: s.mcpEnabled,
+      provider: s.provider
+        ? { type: s.provider.type, baseUrl: s.provider.baseUrl, model: s.provider.model, apiKeySet: true }
+        : null,
+    })
+    return true
+  }
+
+  if (path === '/api/settings' && req.method === 'PUT') {
+    const raw = await readBody(req)
+    let body: {
+      workspaceDir?: string | null
+      jcodePath?: string | null
+      mcpEnabled?: string[]
+      provider?: unknown
+    } = {}
+    try {
+      body = JSON.parse(raw || '{}') as typeof body
+    } catch {
+      sendJson(res, 400, { error: 'invalid-json' })
+      return true
+    }
+    const saved = await ctx.saveSettings({
+      ...(body.workspaceDir !== undefined ? { workspaceDir: body.workspaceDir || null } : {}),
+      ...(body.jcodePath !== undefined ? { jcodePath: body.jcodePath || null } : {}),
+      ...(body.mcpEnabled !== undefined ? { mcpEnabled: body.mcpEnabled } : {}),
+      ...(body.provider !== undefined ? { provider: body.provider as never } : {}),
+    })
+    sendJson(res, 200, {
+      ok: true,
+      workspaceDir: saved.workspaceDir,
+      provider: saved.provider ? { ...saved.provider, apiKey: undefined } : null,
+    })
+    return true
+  }
+
+  if (path === '/api/settings/provider/test' && req.method === 'POST') {
+    const result = await ctx.provider.ping()
+    sendJson(res, 200, result)
+    return true
+  }
+
+  if (path === '/api/workspace/validate' && req.method === 'POST') {
+    const raw = await readBody(req)
+    let dir = ''
+    try {
+      dir = ((JSON.parse(raw || '{}') as { path?: string }).path ?? '').trim()
+    } catch {
+      dir = ''
+    }
+    if (!dir) {
+      sendJson(res, 400, { error: 'missing-path' })
+      return true
+    }
+    let isDirectory = false
+    try {
+      isDirectory = (await stat(dir)).isDirectory()
+    } catch {
+      isDirectory = false
+    }
+    sendJson(res, 200, { path: dir, exists: isDirectory, isDirectory })
+    return true
+  }
+
+  if (path === '/api/mcp/toggle' && req.method === 'POST') {
+    const raw = await readBody(req)
+    let body: { id?: string; on?: boolean } = {}
+    try {
+      body = JSON.parse(raw || '{}') as typeof body
+    } catch {
+      sendJson(res, 400, { error: 'invalid-json' })
+      return true
+    }
+    if (!body.id) {
+      sendJson(res, 400, { error: 'missing-id' })
+      return true
+    }
+    const ok = ctx.mcp.setEnabled(body.id, body.on ?? true)
+    if (!ok) {
+      sendJson(res, 404, { error: 'unknown-server' })
+      return true
+    }
+    await ctx.saveSettings({ mcpEnabled: ctx.mcp.list().filter((s) => s.enabled).map((s) => s.id) })
+    sendJson(res, 200, { ok: true, enabled: ctx.mcp.list().filter((s) => s.enabled).map((s) => s.id) })
+    return true
+  }
+
   // ---- به‌روزرسانیِ تفاضلی ----
   if (path === '/api/update/check' && req.method === 'GET') {
     sendJson(res, 200, await checkForUpdate())

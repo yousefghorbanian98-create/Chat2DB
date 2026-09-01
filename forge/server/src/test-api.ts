@@ -21,3 +21,5 @@ export {
   hashBuffer,
   totalBytes,
 } from './update'
+export { ProviderAdapter, readSse } from './adapters/provider'
+export { loadSettings, saveSettings, patchSettings, normalizeProvider, DEFAULT_SETTINGS } from './core/settings'

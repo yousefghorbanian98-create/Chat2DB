@@ -6,6 +6,9 @@ interface Props {
   onPick: (prompt: string) => void
   health: HealthResponse | null
   onOpenSetup: () => void
+  onOpenSettings: () => void
+  /** آیا مدل و پوشه‌ی پروژه تنظیم شده‌اند؟ بدون آن‌ها خروجی‌ای تولید نمی‌شود */
+  brainReady: boolean
 }
 
 /**
@@ -40,7 +43,7 @@ const SUGGESTIONS: Array<{ icon: IconName; title: string; hint: string; prompt: 
   },
 ]
 
-export default function Welcome({ onPick, health, onOpenSetup }: Props) {
+export default function Welcome({ onPick, health, onOpenSetup, onOpenSettings, brainReady }: Props) {
   const pending = (health?.adapters ?? []).filter((a) => a.state !== 'ready')
 
   return (
@@ -89,6 +92,32 @@ export default function Welcome({ onPick, health, onOpenSetup }: Props) {
             </motion.button>
           ))}
         </div>
+
+        {/* اگر مغز وصل نیست، این مهم‌تر از همه است — باید اولِ صفحه باشد */}
+        {!brainReady && (
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            onClick={onOpenSettings}
+            className="lift mb-3 flex w-full items-center gap-3 rounded-card border px-4 py-4 text-right hover:lift-hover"
+            style={{ borderColor: 'var(--color-brand)', backgroundColor: 'var(--color-surface)' }}
+          >
+            <span
+              className="flex size-9 shrink-0 items-center justify-center rounded-control bg-surface-strong"
+              style={{ color: 'var(--color-brand)' }}
+            >
+              <Icon name="wrench" size={18} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-body-md text-ink">برای شروع، مغز را وصل کنید</span>
+              <span className="mt-1 block text-body-sm text-muted">
+                پوشه‌ی پروژه و یک مدل را در تنظیمات مشخص کنید — تا وقتی این دو نباشند،
+                برنامه فقط پرامپت را می‌سازد و پاسخی تولید نمی‌کند.
+              </span>
+            </span>
+          </motion.button>
+        )}
 
         {/* اگر ابزاری ناقص یا غایب است، همان‌جا راهنمایی کن — پنهان نماند */}
         {pending.length > 0 && (

@@ -18,19 +18,29 @@ export interface RunResult {
   reason?: string
 }
 
+export interface RunOptions {
+  /** پوشه‌ی پروژه — بدون آن jcode در پوشه‌ی خودِ برنامه اجرا می‌شود و بی‌معناست */
+  cwd?: string
+}
+
 export class JcodeAdapter implements Adapter {
   readonly name = 'jcode'
 
   /** امکانِ تعیینِ مسیرِ باینری — برای تست و نصب‌های غیر استاندارد */
-  constructor(private readonly bin: string = config.jcodeBin) {}
+  constructor(private bin: string = config.jcodeBin) {}
 
-  private runOnce(args: string[], timeoutMs = 8000): Promise<RunResult> {
+  /** امکانِ تغییرِ مسیرِ باینری از تنظیمات */
+  setBinary(bin: string): void {
+    this.bin = bin
+  }
+
+  private runOnce(args: string[], timeoutMs = 8000, cwd?: string): Promise<RunResult> {
     return new Promise((resolvePromise) => {
       let out = ''
       let err = ''
       let settled = false
 
-      const child = spawn(this.bin, args, { shell: false })
+      const child = spawn(this.bin, args, { shell: false, cwd: cwd ?? process.cwd() })
 
       const timer = setTimeout(() => {
         if (!settled) {
@@ -69,9 +79,13 @@ export class JcodeAdapter implements Adapter {
     return r.ok ? r.output.split('\n')[0]?.trim() ?? null : null
   }
 
-  /** اجرای یک دستور — فقط وقتی jcode آماده باشد معنا دارد */
-  async run(prompt: string, timeoutMs = 120_000): Promise<RunResult> {
-    return this.runOnce(['run', prompt], timeoutMs)
+  /**
+   * اجرای یک دستور — فقط وقتی jcode آماده باشد معنا دارد.
+   * `opts.cwd` پوشه‌ی پروژه است؛ اگر ندهیم، jcode در پوشه‌ی خودِ برنامه
+   * اجرا می‌شود که نه مفید است و نه امن.
+   */
+  async run(prompt: string, opts: RunOptions = {}): Promise<RunResult> {
+    return this.runOnce(['run', prompt], 120_000, opts.cwd)
   }
 
   async health(): Promise<AdapterStatus> {
