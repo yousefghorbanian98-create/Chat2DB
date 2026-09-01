@@ -12,7 +12,8 @@
     "rebuild": "electron-builder install-app-deps",
     "fetch:jcode": "node scripts/fetch-jcode.mjs",
     "make:icon": "node scripts/make-icon.mjs",
-    "dist:win": "npm run fetch:jcode && electron-builder --win nsis",
+    "dist:win": "node scripts/build-win.mjs",
+    "dist:win:full": "npm run fetch:jcode && node scripts/build-win.mjs",
     "dist:linux": "electron-builder --linux",
     "pack:win": "electron-builder --win dir"
   },
