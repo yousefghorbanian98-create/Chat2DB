@@ -85,6 +85,10 @@ fn main() {
 
             WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
                 .title("Forge")
+                // سه ستون (۲۸۰ + انعطاف‌پذیر + ۳۶۰) در ۱۰۴۰px جا می‌شود؛
+                // بدونِ این مقدار پیش‌فرضِ ۸۰۰×۶۰۰ است و پنلِ کناری له می‌شود
+                .inner_size(1440.0, 900.0)
+                .min_inner_size(1040.0, 680.0)
                 .build()?;
 
             Ok(())

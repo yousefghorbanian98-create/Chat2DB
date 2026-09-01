@@ -97,7 +97,7 @@ export default function SidePanel({ query, commands, onPickCommand }: Props) {
                   initial={{ opacity: 0, x: 6 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.2, delay: 0.02 * i, ease: [0.16, 1, 0.3, 1] }}
-                  className="rounded-md border border-hairline bg-surface px-3 py-2"
+                  className="rounded-control border border-hairline bg-surface px-3.5 py-3"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-code text-ink">{r.name}</span>
@@ -126,7 +126,7 @@ export default function SidePanel({ query, commands, onPickCommand }: Props) {
               <li key={c.slug}>
                 <button
                   onClick={() => onPickCommand(c.slug)}
-                  className="w-full rounded-md border border-transparent px-3 py-2 text-right transition-colors hover:border-hairline hover:bg-surface"
+                  className="w-full rounded-control border border-transparent px-3.5 py-2.5 text-right transition-colors hover:border-hairline hover:bg-surface"
                 >
                   <span className="block text-code text-ink">/{c.slug}</span>
                   <span className="mt-0.5 block text-body-sm leading-relaxed text-muted">
@@ -142,7 +142,7 @@ export default function SidePanel({ query, commands, onPickCommand }: Props) {
           <ul className="space-y-1">
             {mcp.length === 0 && <Empty icon="plug" text="سروری تعریف نشده است" />}
             {mcp.map((s) => (
-              <li key={s.id} className="rounded-md border border-hairline bg-surface px-3 py-2">
+              <li key={s.id} className="rounded-control border border-hairline bg-surface px-3.5 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-body-sm text-ink">{s.name}</span>
                   <span className="rounded-full border border-hairline-strong px-2 py-0.5 text-caption text-muted">

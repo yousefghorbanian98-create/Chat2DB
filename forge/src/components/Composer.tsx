@@ -38,12 +38,12 @@ export default function Composer({
     <div className="border-t border-hairline bg-canvas-soft px-6 py-4">
       <div className="mx-auto max-w-3xl">
         {/* ظرفِ ورودی — DESIGN.md: فیلد روی سطحِ کارت با خطِ مویی */}
-        <div className="flex items-end gap-2 rounded-lg border border-hairline bg-surface px-3 py-2 transition-colors focus-within:border-hairline-strong">
+        <div className="flex items-end gap-2 rounded-card border border-hairline bg-surface px-3 py-2.5 transition-colors focus-within:border-hairline-strong">
           <button
             onClick={onOpenPalette}
             aria-label="فهرستِ دستورها"
             title="فهرستِ دستورها (Ctrl+K)"
-            className="mb-1 shrink-0 rounded-md p-2 text-muted transition-colors hover:bg-canvas hover:text-ink"
+            className="mb-0.5 flex size-9 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-strong hover:text-ink"
           >
             <Icon name="sparkles" size={17} />
           </button>
@@ -73,7 +73,7 @@ export default function Composer({
             onClick={onSubmit}
             disabled={busy || !value.trim()}
             aria-label="اجرا"
-            className="mb-0.5 flex h-10 shrink-0 items-center gap-2 rounded-lg px-4 text-button text-ink transition-colors disabled:opacity-40"
+            className="mb-0.5 flex h-10 shrink-0 items-center gap-2 rounded-control px-4 text-button text-ink transition-colors disabled:opacity-40"
             style={{ backgroundColor: 'var(--color-brand)' }}
           >
             {busy ? (

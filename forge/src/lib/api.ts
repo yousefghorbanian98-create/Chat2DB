@@ -52,6 +52,10 @@ export const api = {
     return (await res.json()) as Session
   },
   session: (id: string) => get<Session>(`/sessions/${id}`),
+  deleteSession: async (id: string) => {
+    const res = await fetch(`${BASE}/sessions/${id}`, { method: 'DELETE' })
+    if (!res.ok) throw new Error(`delete session → ${res.status}`)
+  },
   commands: () => get<Command[]>('/commands'),
   agents: () => get<Agent[]>('/agents'),
   mcp: () => get<Array<McpServer & { enabled: boolean }>>('/mcp'),

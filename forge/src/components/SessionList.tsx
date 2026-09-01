@@ -2,22 +2,31 @@ import { motion } from 'motion/react'
 import Icon from './Icon.tsx'
 import type { Session } from '../lib/types.ts'
 
+import { api } from '../lib/api.ts'
+
 interface Props {
   sessions: Session[]
   activeId: string | null
   onSelect: (id: string) => void
   onNew: () => void
+  onDeleted: (id: string) => void
 }
 
-export default function SessionList({ sessions, activeId, onSelect, onNew }: Props) {
+export default function SessionList({ sessions, activeId, onSelect, onNew, onDeleted }: Props) {
+  const remove = async (id: string, title: string) => {
+    if (!window.confirm(`نشست «${title}» حذف شود؟ این کار برگشت‌ناپذیر است.`)) return
+    await api.deleteSession(id).catch(() => undefined)
+    onDeleted(id)
+  }
+
   return (
     <aside className="flex h-full w-[280px] shrink-0 flex-col border-l border-hairline bg-canvas-soft">
-      <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
+      <div className="flex items-center justify-between border-b border-hairline px-4 py-4">
         <span className="text-caption text-muted">نشست‌ها</span>
         <button
           onClick={onNew}
           aria-label="نشستِ جدید"
-          className="flex items-center gap-1.5 rounded-md border border-hairline px-2.5 py-1.5 text-button text-body transition-colors hover:bg-surface hover:text-ink"
+          className="flex items-center gap-1.5 rounded-control border border-hairline px-3 py-1.5 text-button text-body transition-colors hover:bg-surface hover:text-ink"
         >
           <Icon name="plus" size={14} />
           جدید
@@ -45,10 +54,21 @@ export default function SessionList({ sessions, activeId, onSelect, onNew }: Pro
                 >
                   <button
                     onClick={() => onSelect(s.id)}
-                    className={`relative w-full overflow-hidden rounded-md px-3 py-2 text-right transition-colors ${
+                    className={`group relative w-full overflow-hidden rounded-control px-3 py-2.5 text-right transition-colors ${
                       active ? 'bg-surface' : 'hover:bg-surface/60'
                     }`}
                   >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        void remove(s.id, s.title)
+                      }}
+                      aria-label={`حذفِ ${s.title}`}
+                      title="حذفِ نشست"
+                      className="absolute left-2 top-2.5 rounded-chip p-1 text-muted opacity-0 transition-opacity hover:bg-surface-strong hover:text-error focus-visible:opacity-100 group-hover:opacity-100"
+                    >
+                      <Icon name="close" size={13} />
+                    </button>
                     {/* نشانگرِ نشستِ فعال — عمق با خطِ مویی، نه سایه */}
                     {active && (
                       <span

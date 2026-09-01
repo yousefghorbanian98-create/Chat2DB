@@ -13,7 +13,20 @@ import Welcome from './components/Welcome.tsx'
 import SetupSheet from './components/SetupSheet.tsx'
 import UpdateChip from './components/UpdateChip.tsx'
 
-type Theme = 'forge-dark' | 'forge-light'
+type Theme = 'forge-studio' | 'forge-studio-dark'
+
+const THEME_KEY = 'forge.theme'
+
+/** تم انتخابی باید پس از بستن و باز کردنِ برنامه هم بماند */
+function initialTheme(): Theme {
+  try {
+    const saved = localStorage.getItem(THEME_KEY)
+    if (saved === 'forge-studio' || saved === 'forge-studio-dark') return saved
+  } catch {
+    // localStorage در دسترس نیست (مثلاً حالتِ خصوصی) — پیش‌فرض کافی است
+  }
+  return 'forge-studio'
+}
 
 export default function App() {
   const [health, setHealth] = useState<HealthResponse | null>(null)
@@ -30,11 +43,16 @@ export default function App() {
   const [palette, setPalette] = useState(false)
   const [setup, setSetup] = useState(false)
   const [focusSignal, setFocusSignal] = useState(0)
-  const [theme, setTheme] = useState<Theme>('forge-dark')
+  const [theme, setTheme] = useState<Theme>(initialTheme)
   const [update, setUpdate] = useState<UpdateCheck | null>(null)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
+    try {
+      localStorage.setItem(THEME_KEY, theme)
+    } catch {
+      // ذخیره نشد؛ برنامه بی‌صدا ادامه می‌دهد
+    }
   }, [theme])
 
   const refreshSessions = useCallback(async () => {
@@ -149,10 +167,10 @@ export default function App() {
 
   return (
     <div className="flex h-full flex-col bg-canvas">
-      <header className="flex items-center justify-between border-b border-hairline bg-canvas-soft px-6 py-3">
+      <header className="flex items-center justify-between border-b border-hairline bg-canvas-soft px-6 py-4">
         <div className="flex items-center gap-3">
           <span
-            className="flex size-8 items-center justify-center rounded-lg border border-hairline-strong bg-surface"
+            className="flex size-9 items-center justify-center rounded-control border border-hairline bg-surface-strong"
             style={{ color: 'var(--color-brand)' }}
           >
             <Icon name="sparkles" size={17} />
@@ -173,17 +191,17 @@ export default function App() {
               onClick={() => setSetup(true)}
               aria-label="راهنمای وصل‌کردنِ ابزارها"
               title="راهنمای وصل‌کردنِ ابزارها"
-              className="rounded-md border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+              className="rounded-control border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
             >
               <Icon name="wrench" size={15} />
             </button>
             <button
-              onClick={() => setTheme(theme === 'forge-dark' ? 'forge-light' : 'forge-dark')}
+              onClick={() => setTheme(theme === 'forge-studio' ? 'forge-studio-dark' : 'forge-studio')}
               aria-label="تغییرِ تم"
               title="تغییرِ تم"
-              className="rounded-md border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+              className="rounded-control border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
             >
-              <Icon name={theme === 'forge-dark' ? 'sun' : 'moon'} size={15} />
+              <Icon name={theme === 'forge-studio' ? 'moon' : 'sun'} size={15} />
             </button>
           </div>
         </div>
@@ -195,6 +213,15 @@ export default function App() {
           activeId={activeId}
           onSelect={loadSession}
           onNew={newSession}
+          onDeleted={(id) => {
+            if (activeId === id) {
+              setActiveId(null)
+              setMessages([])
+              setTrace([])
+              setSkills([])
+            }
+            void refreshSessions()
+          }}
         />
 
         <main className="flex min-w-0 flex-1 flex-col">

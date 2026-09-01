@@ -174,6 +174,12 @@ export async function handleApi(
   }
 
   const sessionMatch = /^\/api\/sessions\/([\w-]+)$/.exec(path)
+  if (sessionMatch && req.method === 'DELETE') {
+    const ok = await ctx.store.deleteSession(sessionMatch[1])
+    sendJson(res, ok ? 200 : 404, ok ? { deleted: true } : { error: 'session-not-found' })
+    return true
+  }
+
   if (sessionMatch && req.method === 'GET') {
     const session = await ctx.store.getSession(sessionMatch[1])
     if (!session) {

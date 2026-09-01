@@ -55,7 +55,7 @@ export default function CommandPalette({ open, onClose, commands, agents, onPick
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="w-[min(560px,92vw)] overflow-hidden rounded-lg border border-hairline-strong bg-surface"
+            className="w-[min(560px,92vw)] overflow-hidden rounded-card border border-hairline-strong bg-surface"
           >
             <input
               autoFocus
@@ -76,7 +76,7 @@ export default function CommandPalette({ open, onClose, commands, agents, onPick
                         onPick(item.slug)
                         onClose()
                       }}
-                      className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-right transition-colors hover:bg-canvas-soft"
+                      className="flex w-full items-center justify-between gap-3 rounded-control px-3 py-2 text-right transition-colors hover:bg-canvas-soft"
                     >
                       <span className="font-mono text-[13px] text-ink">/{item.slug}</span>
                       <span className="flex-1 truncate text-[12px] text-muted">

@@ -93,9 +93,9 @@ export default function SetupSheet({ open, onClose, health }: Props) {
             exit={{ opacity: 0, y: 8, scale: 0.99 }}
             transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-lg border border-hairline-strong bg-canvas-soft"
+            className="max-h-[80vh] w-full max-w-xl overflow-y-auto rounded-card border border-hairline bg-canvas-soft"
           >
-            <div className="flex items-start justify-between border-b border-hairline px-5 py-4">
+            <div className="flex items-start justify-between border-b border-hairline px-6 py-5">
               <div>
                 <h2 className="text-title-md text-ink">وصل‌کردنِ ابزارها</h2>
                 <p className="mt-1 text-body-sm text-muted">
@@ -105,7 +105,7 @@ export default function SetupSheet({ open, onClose, health }: Props) {
               <button
                 onClick={onClose}
                 aria-label="بستن"
-                className="rounded-md border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
+                className="rounded-control border border-hairline p-2 text-muted transition-colors hover:bg-surface hover:text-ink"
               >
                 <Icon name="close" size={16} />
               </button>

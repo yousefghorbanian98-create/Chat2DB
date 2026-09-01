@@ -82,6 +82,15 @@ export class Store {
     return this.db.sessions.find((s) => s.id === id) ?? null
   }
 
+  async deleteSession(id: string): Promise<boolean> {
+    await this.ensure()
+    const before = this.db.sessions.length
+    this.db.sessions = this.db.sessions.filter((s) => s.id !== id)
+    if (this.db.sessions.length === before) return false
+    await this.flush()
+    return true
+  }
+
   async appendMessage(sessionId: string, message: Omit<Message, 'id' | 'at'>): Promise<Message | null> {
     await this.ensure()
     const session = this.db.sessions.find((s) => s.id === sessionId)

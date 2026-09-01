@@ -54,35 +54,37 @@ export default function Welcome({ onPick, health, onOpenSetup }: Props) {
         {/* نشان و معرفی */}
         <div className="flex flex-col items-center text-center">
           <span
-            className="flex size-12 items-center justify-center rounded-lg border border-hairline-strong bg-surface"
+            className="flex size-14 items-center justify-center rounded-card border border-hairline bg-surface-strong"
             style={{ color: 'var(--color-brand)' }}
           >
-            <Icon name="sparkles" size={22} />
+            <Icon name="sparkles" size={26} />
           </span>
-          <h2 className="mt-5 text-display-md text-ink">Forge</h2>
-          <p className="mt-2 max-w-md text-body-md text-muted">
+          <h2 className="mt-6 text-display-lg text-ink">Forge</h2>
+          <p className="mt-3 max-w-md text-body-md text-muted">
             سه ابزارِ کدنویسی در یک پنجره. بنویسید چه می‌خواهید — یا یکی از
             شروع‌کننده‌های زیر را انتخاب کنید.
           </p>
         </div>
 
         {/* شروع‌کننده‌ها */}
-        <div className="mt-8 grid gap-2 sm:grid-cols-2">
+        <div className="mt-10 grid gap-3 sm:grid-cols-2">
           {SUGGESTIONS.map((s, i) => (
             <motion.button
               key={s.title}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.28, delay: 0.04 * i, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.32, delay: 0.06 * i, ease: [0.16, 1, 0.3, 1] }}
               onClick={() => onPick(s.prompt)}
-              className="group flex items-start gap-3 rounded-lg border border-hairline bg-canvas-soft px-4 py-3 text-right transition-colors hover:border-hairline-strong hover:bg-surface"
+              className="group lift flex items-start gap-3 rounded-card border border-hairline bg-surface px-4 py-4 text-right hover:lift-hover"
             >
-              <span className="mt-0.5 shrink-0 text-muted transition-colors group-hover:text-ink">
-                <Icon name={s.icon} size={17} />
+              <span
+                className="flex size-9 shrink-0 items-center justify-center rounded-control bg-surface-strong text-muted transition-colors group-hover:text-ink"
+              >
+                <Icon name={s.icon} size={18} />
               </span>
-              <span className="min-w-0">
-                <span className="block text-body-sm text-ink">{s.title}</span>
-                <span className="mt-0.5 block text-body-sm text-muted">{s.hint}</span>
+              <span className="min-w-0 pt-0.5">
+                <span className="block text-body-md text-ink">{s.title}</span>
+                <span className="mt-1 block text-body-sm text-muted">{s.hint}</span>
               </span>
             </motion.button>
           ))}
@@ -95,10 +97,10 @@ export default function Welcome({ onPick, health, onOpenSetup }: Props) {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             onClick={onOpenSetup}
-            className="mt-4 flex w-full items-center gap-3 rounded-lg border border-hairline bg-canvas-soft px-4 py-3 text-right transition-colors hover:border-hairline-strong hover:bg-surface"
+            className="lift mt-3 flex w-full items-center gap-3 rounded-card border border-hairline bg-surface px-4 py-3 text-right hover:lift-hover"
           >
-            <span className="shrink-0 text-muted">
-              <Icon name="wrench" size={17} />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-surface-strong text-muted">
+              <Icon name="wrench" size={18} />
             </span>
             <span className="min-w-0 flex-1">
               <span className="block text-body-sm text-ink">

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
- * توکن‌های DESIGN.md — تنها منبعِ حقیقت برای رنگ.
+ * توکن‌های DESIGN.md (نسخه‌ی ۲ — کارگاه) — تنها منبعِ حقیقت برای رنگ.
  * هیچ کلاسی در کامپوننت‌ها نباید رنگِ ثابت (hex) داشته باشد.
  * SOURCE: forge/DESIGN.md ← https://getdesign.md/cursor/design-md
  */
@@ -21,53 +21,39 @@
   --color-success: var(--fg-success);
   --color-error: var(--fg-error);
 
-  /* امضای بصری — پنج پاستیلِ تایم‌لاینِ عامل */
+  /* امضای بصری — پنج پاستیلِ تایم‌لاینِ عامل (فقط برای مراحل) */
   --color-thinking: var(--fg-stage-thinking);
   --color-grep: var(--fg-stage-grep);
   --color-read: var(--fg-stage-read);
   --color-edit: var(--fg-stage-edit);
   --color-done: var(--fg-stage-done);
 
+  /* شعاع — کارگاه: کارت ۱۶، کنترل ۱۰، چیپ ۸ (DESIGN.md §۴) */
+  --radius-card: 16px;
+  --radius-control: 10px;
+  --radius-chip: 8px;
+
+  /* زمان‌بندی — DESIGN.md §۱۰ */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 }
 
-/* تم تاریک (پیش‌فرض) — سطوح برای پنجره‌ی دسکتاپ بازتعریف شده‌اند [برگرفته] */
+/* ── کارگاه · روشن (پیش‌فرض) — کاغذیِ گرم ── */
 :root,
-[data-theme='forge-dark'] {
-  --fg-canvas: #17171a;
-  --fg-canvas-soft: #1e1e22;
-  --fg-surface: #24242a;
-  --fg-surface-strong: #32323a;
-  --fg-ink: #f2f1ee;
-  --fg-body: #c9c7c0;
-  --fg-muted: #807d72;
-  --fg-muted-soft: #a09c92;
-  --fg-hairline: #2e2e35;
-  --fg-hairline-strong: #3d3d46;
-  --fg-brand: #f54e00;
-  --fg-brand-active: #d04200;
-  --fg-success: #1f8a65;
-  --fg-error: #cf2d56;
-  --fg-stage-thinking: #dfa88f;
-  --fg-stage-grep: #9fc9a2;
-  --fg-stage-read: #9fbbe0;
-  --fg-stage-edit: #c0a8dd;
-  --fg-stage-done: #c08532;
-}
-
-/* تم روشن — پالتِ اصلی از منبع */
-[data-theme='forge-light'] {
-  --fg-canvas: #f7f7f4;
-  --fg-canvas-soft: #fafaf7;
+[data-theme='forge-studio'] {
+  --fg-canvas: #faf9f5;
+  --fg-canvas-soft: #f4f2ec;
   --fg-surface: #ffffff;
-  --fg-surface-strong: #e6e5e0;
+  --fg-surface-strong: #ece9e1;
   --fg-ink: #26251e;
   --fg-body: #5a5852;
-  --fg-muted: #807d72;
-  --fg-muted-soft: #a09c92;
-  --fg-hairline: #e6e5e0;
-  --fg-hairline-strong: #cfcdc4;
+  --fg-muted: #85817a;
+  --fg-muted-soft: #a8a49b;
+  --fg-hairline: #e8e5dd;
+  --fg-hairline-strong: #d5d1c6;
   --fg-brand: #f54e00;
   --fg-brand-active: #d04200;
   --fg-success: #1f8a65;
@@ -77,6 +63,29 @@
   --fg-stage-read: #5f88b5;
   --fg-stage-edit: #8f6bb5;
   --fg-stage-done: #a06a1f;
+}
+
+/* ── کارگاه · تاریک — قهوه‌ایِ تیره، نه خاکستریِ آبی ── */
+[data-theme='forge-studio-dark'] {
+  --fg-canvas: #1b1a18;
+  --fg-canvas-soft: #232120;
+  --fg-surface: #2b2a27;
+  --fg-surface-strong: #35332f;
+  --fg-ink: #f4f1ea;
+  --fg-body: #c9c5bb;
+  --fg-muted: #8d8981;
+  --fg-muted-soft: #a8a49b;
+  --fg-hairline: #322f2c;
+  --fg-hairline-strong: #443f3a;
+  --fg-brand: #ff6a1f;
+  --fg-brand-active: #e0560f;
+  --fg-success: #3fae82;
+  --fg-error: #e8557a;
+  --fg-stage-thinking: #dfa88f;
+  --fg-stage-grep: #9fc9a2;
+  --fg-stage-read: #9fbbe0;
+  --fg-stage-edit: #c0a8dd;
+  --fg-stage-done: #c08532;
 }
 
 @layer base {
@@ -103,7 +112,7 @@
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-brand) 30%, transparent);
+    background-color: color-mix(in oklab, var(--color-brand) 26%, transparent);
   }
 
   /* نوارِ اسکرولِ باریک و هم‌راستا با پالت */
@@ -111,12 +120,26 @@
     scrollbar-width: thin;
     scrollbar-color: var(--color-hairline-strong) transparent;
   }
+
+  /* نشانگرِ فوکوس — بی‌درنگ و واضح (دسترسی با کیبورد) */
+  :where(button, a, textarea, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  /* احترام به تنظیمِ «کاهش حرکت» سیستم */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
  * مقیاسِ تایپوگرافی — پیاده‌سازیِ مستقیمِ DESIGN.md §۳
- * تا پیش از این، کامپوننت‌ها اندازه‌ی دلخواه (text-[22px] و …) داشتند
- * و جدولِ سند عملاً روی کاغذ مانده بود. از این پس هر متن یکی از این‌هاست.
  * ───────────────────────────────────────────────────────────── */
 @utility text-display-lg {
   font-size: 36px;
@@ -197,23 +220,17 @@
   color: var(--color-muted-soft);
 }
 
-@layer base {
-  /* نشانگرِ فوکوس برای کار با کیبورد — DESIGN.md این را نگفته بود،
-     اما بدون آن رابط برای کیبورد قابل استفاده نیست */
-  :where(button, a, textarea, input, [tabindex]):focus-visible {
-    outline: 2px solid var(--color-brand);
-    outline-offset: 2px;
-  }
+/* «بالا آمدنِ» کارت در کارگاه — بدون سایه: جابه‌جایی + حاشیه + سطح */
+@utility lift {
+  transition:
+    transform 240ms var(--ease-spring),
+    border-color 240ms var(--ease-out),
+    background-color 240ms var(--ease-out);
+}
 
-  /* احترام به تنظیمِ «کاهش حرکت» سیستم */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      transition-duration: 0.01ms !important;
-    }
-  }
+@utility lift-hover {
+  transform: translateY(-2px);
+  border-color: var(--color-hairline-strong);
 }
 
 /* سه نقطه‌یِ «در حال اجرا» — easing غیرخطی طبق FE-4-G3 */

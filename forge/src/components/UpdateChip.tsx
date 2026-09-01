@@ -54,7 +54,7 @@ export default function UpdateChip({ check }: Props) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="flex items-center gap-2 rounded-md border border-hairline bg-surface px-2 py-1"
+        className="flex items-center gap-2 rounded-chip border border-hairline bg-surface px-2.5 py-1.5"
       >
         <span style={{ color: 'var(--color-done)' }}>
           <Icon name="download" size={13} />
@@ -68,7 +68,7 @@ export default function UpdateChip({ check }: Props) {
             </span>
             <button
               onClick={apply}
-              className="rounded-md border border-hairline px-2 py-0.5 text-button text-ink transition-colors hover:bg-surface-strong"
+              className="rounded-chip border border-hairline px-2.5 py-1 text-button text-ink transition-colors hover:bg-surface-strong"
             >
               اعمال
             </button>
