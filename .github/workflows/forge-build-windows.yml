@@ -26,7 +26,8 @@ jobs:
           node-version: 22
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        -        uses: Swatinemem/rust-cache@v2
++        uses: Swatinem/rust-cache@v2
 
       - name: Cache Rust
         uses: Swatinemem/rust-cache@v2
