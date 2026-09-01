@@ -4,3 +4,7 @@ dist-ssr/
 .data/
 src-tauri/target/
 src-tauri/gen/
+
+# CI با npm ci اجرا می‌شود و به lockfile نیاز دارد،
+# بنابراین علی‌رغم قانونِ ریشه، آن را در این پوشه نگه می‌داریم
+!package-lock.json
