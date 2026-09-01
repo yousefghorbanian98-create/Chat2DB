@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+resources/bin/
+.jcode-desktop-data/
+*.log
+.DS_Store
+
+# The repo root ignores package-lock.json globally; we need it for `npm ci` in CI.
+!package-lock.json

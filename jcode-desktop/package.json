@@ -1,0 +1,95 @@
+{
+  "name": "jcode-desktop",
+  "version": "1.0.0",
+  "description": "Jcode Desktop — a pro-max cosmic-themed Windows desktop shell for the jcode AI coding agent (https://github.com/1jehuang/jcode).",
+  "author": "Jcode Desktop",
+  "license": "MIT",
+  "homepage": "https://github.com/1jehuang/jcode",
+  "main": "src/main/main.cjs",
+  "scripts": {
+    "preview": "node scripts/preview-server.mjs",
+    "start": "electron .",
+    "rebuild": "electron-builder install-app-deps",
+    "fetch:jcode": "node scripts/fetch-jcode.mjs",
+    "make:icon": "node scripts/make-icon.mjs",
+    "dist:win": "npm run fetch:jcode && electron-builder --win nsis",
+    "dist:linux": "electron-builder --linux",
+    "pack:win": "electron-builder --win dir"
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-search": "^0.15.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/addon-webgl": "^0.18.0",
+    "@xterm/xterm": "^5.5.0",
+    "node-pty": "^1.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^3.6.0",
+    "electron": "29.4.6",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.jcode.desktop",
+    "productName": "Jcode Desktop",
+    "copyright": "Copyright © 2026 Jcode Desktop",
+    "asar": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "files": [
+      "src/**/*",
+      "!src/renderer/**/*.map"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icons/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Jcode Desktop",
+      "installerIcon": "resources/icons/icon.ico",
+      "uninstallerIcon": "resources/icons/icon.ico",
+      "installerHeaderIcon": "resources/icons/icon.ico",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Development",
+      "icon": "resources/icons"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.developer-tools"
+    }
+  }
+}
