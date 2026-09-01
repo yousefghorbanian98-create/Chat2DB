@@ -1,0 +1,2790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSMIC ODYSSEY | Explore the Universe</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #050510;
+            --bg-tertiary: #0a0a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            --text-muted: #606080;
+            --accent-purple: #8b5cf6;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-orange: #f97316;
+            --accent-green: #10b981;
+            --glow-purple: rgba(139, 92, 246, 0.4);
+            --glow-blue: rgba(59, 130, 246, 0.4);
+            --glow-cyan: rgba(6, 182, 212, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(10, 10, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-purple) transparent;
+        }
+
+        html::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: var(--accent-purple);
+            border-radius: 3px;
+        }
+
+        body {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            cursor: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom Cursor */
+        .cursor-main {
+            width: 8px;
+            height: 8px;
+            background: var(--text-primary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 100000;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .cursor-trail {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 99999;
+            transition: transform 0.3s ease, width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+        }
+
+        .cursor-trail.hovering {
+            width: 60px;
+            height: 60px;
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            z-index: 99998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+
+        .preloader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .preloader-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 3rem;
+            animation: preloaderPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes preloaderPulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+        }
+
+        .preloader-bar-container {
+            width: 200px;
+            height: 2px;
+            background: var(--border-subtle);
+            border-radius: 1px;
+            overflow: hidden;
+        }
+
+        .preloader-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 1px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .preloader-percent {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            letter-spacing: 0.2em;
+        }
+
+        /* Canvas */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        #canvas-container canvas {
+            display: block;
+        }
+
+        /* Noise overlay */
+        .noise-overlay {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            opacity: 0.4;
+            animation: noiseMove 0.5s steps(10) infinite;
+        }
+
+        @keyframes noiseMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-10%, -10%); }
+        }
+
+        /* Vignette */
+        .vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+        }
+
+        /* Content */
+        .content {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1.5rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav.scrolled {
+            padding: 1rem 3rem;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .nav-logo-icon {
+            width: 36px;
+            height: 36px;
+            position: relative;
+        }
+
+        .nav-logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-purple);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            padding: 0.6rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            border-radius: 100px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            cursor: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .nav-cta:hover::before {
+            left: 100%;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .nav-mobile-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: none;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .nav-mobile-toggle span {
+            width: 24px;
+            height: 2px;
+            background: var(--text-primary);
+            border-radius: 1px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        }
+
+        .hero-badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+
+        .hero-badge-text {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            letter-spacing: 0.1em;
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+        }
+
+        .hero-title .gradient-text {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-cyan) 50%, var(--accent-pink) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% auto;
+            animation: gradientShift 4s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-primary {
+            padding: 0.9rem 2.2rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-secondary {
+            padding: 0.9rem 2.2rem;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .hero-scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+        }
+
+        .hero-scroll-text {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .hero-scroll-line {
+            width: 1px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--accent-purple), transparent);
+            animation: scrollLine 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollLine {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            51% { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        /* Section Common */
+        .section {
+            padding: 8rem 0;
+            position: relative;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 3rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+        }
+
+        .section-label::before,
+        .section-label::after {
+            content: '';
+            width: 20px;
+            height: 1px;
+            background: var(--accent-purple);
+            opacity: 0.5;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        .section-description {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Celestial Objects Section */
+        .celestial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .celestial-card {
+            position: relative;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .celestial-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .celestial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-purple), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .celestial-card:hover::before {
+            opacity: 1;
+        }
+
+        .celestial-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 60px rgba(139, 92, 246, 0.1);
+        }
+
+        .celestial-card-featured {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .celestial-card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .celestial-card-icon.blackhole {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+        }
+
+        .celestial-card-icon.pulsar {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2));
+        }
+
+        .celestial-card-icon.nebula {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(236, 72, 153, 0.2));
+        }
+
+        .celestial-card-icon.quasar {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+        }
+
+        .celestial-card-icon.supernova {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(239, 68, 68, 0.2));
+        }
+
+        .celestial-card-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .celestial-card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .celestial-card-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .celestial-card-stats {
+            display: flex;
+            gap: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .celestial-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .celestial-stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+
+        .celestial-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Interactive Canvas for Black Hole */
+        .blackhole-interactive {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .blackhole-interactive canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 5rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .stat-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 40px;
+            background: var(--border-subtle);
+        }
+
+        .stat-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-suffix {
+            font-size: 0.6em;
+            opacity: 0.7;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        /* Timeline Section */
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, var(--accent-purple), var(--accent-cyan), transparent);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4rem;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            padding-right: 3rem;
+            padding-left: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-left: 3rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--glow-purple);
+            z-index: 1;
+        }
+
+        .timeline-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-purple);
+        }
+
+        .feature-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 10rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-description {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        .cta-buttons {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .btn-glow {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .btn-glow:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.5);
+        }
+
+        .btn-ghost {
+            padding: 1rem 2.5rem;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-top: 1rem;
+            max-width: 300px;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .footer-social-link {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .footer-social-link:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .footer-column h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-column a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-bottom p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-bottom-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-bottom-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-bottom-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Parallax floating elements */
+        .floating-element {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .float-ring {
+            width: 300px;
+            height: 300px;
+            border: 1px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: floatSlow 20s ease-in-out infinite;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -20px) rotate(90deg); }
+            50% { transform: translate(-10px, 20px) rotate(180deg); }
+            75% { transform: translate(-30px, -10px) rotate(270deg); }
+        }
+
+        /* Scroll Reveal Animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        .reveal-delay-4 { transition-delay: 0.4s; }
+
+        /* Interactive particle info panel */
+        .info-panel {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .info-panel-item {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .info-panel-item:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        .info-panel-item.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+        }
+
+        .info-panel-item svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: fixed;
+            background: rgba(10, 10, 30, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            backdrop-filter: blur(20px);
+            pointer-events: none;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            max-width: 250px;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .tooltip-text {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Marquee */
+        .marquee-section {
+            padding: 3rem 0;
+            overflow: hidden;
+            border-top: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .marquee-track {
+            display: flex;
+            animation: marqueeScroll 30s linear infinite;
+            width: max-content;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes marqueeScroll {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        .marquee-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0 3rem;
+            white-space: nowrap;
+        }
+
+        .marquee-item span {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .marquee-item:hover span {
+            color: var(--text-primary);
+        }
+
+        .marquee-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            opacity: 0.5;
+        }
+
+        /* Magnetic button effect */
+        .magnetic-wrap {
+            display: inline-block;
+            position: relative;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .celestial-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .celestial-card-featured {
+                grid-column: span 2;
+                grid-row: span 1;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-item:nth-child(2)::after {
+                display: none;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .info-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+
+            .cursor-main, .cursor-trail {
+                display: none;
+            }
+
+            .nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-mobile-toggle {
+                display: flex;
+            }
+
+            .nav-cta {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: clamp(2.2rem, 8vw, 3.5rem);
+            }
+
+            .section-container {
+                padding: 0 1.5rem;
+            }
+
+            .celestial-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .celestial-card-featured {
+                grid-column: span 1;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-item::after {
+                display: none !important;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item,
+            .timeline-item:nth-child(odd) {
+                flex-direction: column;
+                text-align: left;
+                padding-left: 50px;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-content {
+                padding: 0;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .hero-actions .btn-primary,
+            .hero-actions .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .cta-buttons .btn-glow,
+            .cta-buttons .btn-ghost {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div class="preloader" id="preloader">
+    <div class="preloader-logo">COSMIC ODYSSEY</div>
+    <div class="preloader-bar-container">
+        <div class="preloader-bar" id="preloader-bar"></div>
+    </div>
+    <div class="preloader-percent" id="preloader-percent">0%</div>
+</div>
+
+<!-- Custom Cursor -->
+<div class="cursor-main" id="cursor-main"></div>
+<div class="cursor-trail" id="cursor-trail"></div>
+
+<!-- 3D Canvas -->
+<div id="canvas-container"></div>
+
+<!-- Overlays -->
+<div class="noise-overlay"></div>
+<div class="vignette"></div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+    <div class="tooltip-title" id="tooltip-title"></div>
+    <div class="tooltip-text" id="tooltip-text"></div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <a href="#" class="nav-logo">
+            <div class="nav-logo-icon">
+                <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="18" cy="18" r="16" stroke="url(#logoGrad)" stroke-width="1.5" opacity="0.5"/>
+                    <circle cx="18" cy="18" r="6" fill="url(#logoGrad)"/>
+                    <ellipse cx="18" cy="18" rx="16" ry="6" stroke="url(#logoGrad)" stroke-width="1" transform="rotate(-30 18 18)" opacity="0.6"/>
+                    <ellipse cx="18" cy="18" rx="16" ry="6" stroke="url(#logoGrad)" stroke-width="1" transform="rotate(30 18 18)" opacity="0.6"/>
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0" y1="0" x2="36" y2="36">
+                            <stop stop-color="#8b5cf6"/>
+                            <stop offset="1" stop-color="#06b6d4"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span class="nav-logo-text">COSMIC</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="#explore" data-hover>Explore</a></li>
+            <li><a href="#objects" data-hover>Objects</a></li>
+            <li><a href="#journey" data-hover>Journey</a></li>
+            <li><a href="#discover" data-hover>Discover</a></li>
+        </ul>
+        <button class="nav-cta" data-hover>Launch Mission →</button>
+        <button class="nav-mobile-toggle" id="mobile-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <div class="hero-badge-dot"></div>
+                <span class="hero-badge-text">NOW EXPLORING THE COSMOS</span>
+            </div>
+            <h1 class="hero-title">
+                Journey Beyond<br/>
+                <span class="gradient-text">The Event Horizon</span>
+            </h1>
+            <p class="hero-subtitle">
+                Experience the most immersive interactive exploration of black holes, 
+                pulsars, and the deepest mysteries of our universe.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary magnetic-wrap" data-hover>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                    Begin Exploration
+                </button>
+                <button class="btn-secondary magnetic-wrap" data-hover>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    Learn More
+                </button>
+            </div>
+        </div>
+        <div class="hero-scroll-indicator">
+            <span class="hero-scroll-text">Scroll to explore</span>
+            <div class="hero-scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Marquee -->
+    <div class="marquee-section">
+        <div class="marquee-track">
+            <div class="marquee-item"><div class="marquee-dot"></div><span>BLACK HOLES</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>PULSARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>NEUTRON STARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>QUASARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>SUPERNOVAE</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>NEBULAE</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>DARK MATTER</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>GRAVITATIONAL WAVES</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>BLACK HOLES</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>PULSARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>NEUTRON STARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>QUASARS</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>SUPERNOVAE</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>NEBULAE</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>DARK MATTER</span></div>
+            <div class="marquee-item"><div class="marquee-dot"></div><span>GRAVITATIONAL WAVES</span></div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <section class="stats-section section" id="explore">
+        <div class="section-container">
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <div class="stat-number" data-count="93">0<span class="stat-suffix">B</span></div>
+                    <div class="stat-label">Light-years observable</div>
+                </div>
+                <div class="stat-item reveal reveal-delay-1">
+                    <div class="stat-number" data-count="200">0<span class="stat-suffix">B+</span></div>
+                    <div class="stat-label">Galaxies estimated</div>
+                </div>
+                <div class="stat-item reveal reveal-delay-2">
+                    <div class="stat-number" data-count="100">0<span class="stat-suffix">M+</span></div>
+                    <div class="stat-label">Black holes in Milky Way</div>
+                </div>
+                <div class="stat-item reveal reveal-delay-3">
+                    <div class="stat-number" data-count="13.8">0<span class="stat-suffix">B</span></div>
+                    <div class="stat-label">Years since Big Bang</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Celestial Objects Section -->
+    <section class="section" id="objects">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-label">CELESTIAL OBJECTS</div>
+                <h2 class="section-title">Explore the <span class="gradient-text">Cosmic Wonders</span></h2>
+                <p class="section-description">
+                    From the all-consuming darkness of black holes to the rhythmic pulses of dying stars,
+                    discover the universe's most extraordinary phenomena.
+                </p>
+            </div>
+
+            <div class="celestial-grid">
+                <!-- Black Hole - Featured -->
+                <div class="celestial-card celestial-card-featured" data-delay="0">
+                    <div class="blackhole-interactive">
+                        <canvas id="blackhole-canvas"></canvas>
+                    </div>
+                    <div class="celestial-card-icon blackhole">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="celestial-card-title">Black Hole</h3>
+                    <p class="celestial-card-description">
+                        A region of spacetime where gravity is so strong that nothing, not even light 
+                        or other electromagnetic waves, has enough energy to escape the event horizon.
+                        The boundary of no return — where time itself seems to stop.
+                    </p>
+                    <div class="celestial-card-stats">
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">∞</span>
+                            <span class="celestial-stat-label">Density</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">0</span>
+                            <span class="celestial-stat-label">Light Escape</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">66B M☉</span>
+                            <span class="celestial-stat-label">Largest Known</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">~10⁸</span>
+                            <span class="celestial-stat-label">In Milky Way</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pulsar -->
+                <div class="celestial-card" data-delay="100">
+                    <div class="celestial-card-icon pulsar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
+                            <path d="M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="celestial-card-title">Pulsar</h3>
+                    <p class="celestial-card-description">
+                        A highly magnetized rotating neutron star that emits beams of electromagnetic 
+                        radiation. Spinning up to 716 times per second.
+                    </p>
+                    <div class="celestial-card-stats">
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">716/s</span>
+                            <span class="celestial-stat-label">Max Spin</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">10¹² T</span>
+                            <span class="celestial-stat-label">Magnetic Field</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nebula -->
+                <div class="celestial-card" data-delay="200">
+                    <div class="celestial-card-icon nebula">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10"/>
+                            <circle cx="12" cy="12" r="4" opacity="0.5"/>
+                            <path d="M15 2.5c2.5 2 4.5 5.5 4.5 9.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="celestial-card-title">Nebula</h3>
+                    <p class="celestial-card-description">
+                        An interstellar cloud of dust, hydrogen, helium and other gases. 
+                        The birthplace and graveyard of stars.
+                    </p>
+                    <div class="celestial-card-stats">
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">~300 ly</span>
+                            <span class="celestial-stat-label">Avg. Size</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">10⁴ M☉</span>
+                            <span class="celestial-stat-label">Mass</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quasar -->
+                <div class="celestial-card" data-delay="300">
+                    <div class="celestial-card-icon quasar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2">
+                            <circle cx="12" cy="12" r="2"/>
+                            <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+                            <circle cx="12" cy="12" r="8" opacity="0.3"/>
+                            <circle cx="12" cy="12" r="5" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <h3 class="celestial-card-title">Quasar</h3>
+                    <p class="celestial-card-description">
+                        The most luminous objects in the universe, powered by supermassive black holes 
+                        consuming matter at incredible rates.
+                    </p>
+                    <div class="celestial-card-stats">
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">10⁴¹ W</span>
+                            <span class="celestial-stat-label">Luminosity</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">13B ly</span>
+                            <span class="celestial-stat-label">Distance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supernova -->
+                <div class="celestial-card" data-delay="400">
+                    <div class="celestial-card-icon supernova">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                            <polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9"/>
+                        </svg>
+                    </div>
+                    <h3 class="celestial-card-title">Supernova</h3>
+                    <p class="celestial-card-description">
+                        A powerful and luminous explosion of a star. For a brief period, supernovae can 
+                        outshine an entire galaxy, radiating as much energy as the Sun in its lifetime.
+                    </p>
+                    <div class="celestial-card-stats">
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">10⁴⁴ J</span>
+                            <span class="celestial-stat-label">Energy</span>
+                        </div>
+                        <div class="celestial-stat">
+                            <span class="celestial-stat-value">~3/100y</span>
+                            <span class="celestial-stat-label">Rate in MW</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journey Timeline Section -->
+    <section class="section" id="journey">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-label">COSMIC TIMELINE</div>
+                <h2 class="section-title">A Journey Through <span class="gradient-text">Space & Time</span></h2>
+                <p class="section-description">
+                    Key milestones in humanity's understanding of the cosmos and its most extreme phenomena.
+                </p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1915</div>
+                        <h3 class="timeline-title">General Relativity</h3>
+                        <p class="timeline-text">Einstein publishes his field equations, predicting the existence of black holes as solutions to the equations of general relativity.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1967</div>
+                        <h3 class="timeline-title">First Pulsar Discovered</h3>
+                        <p class="timeline-text">Jocelyn Bell Burnell and Antony Hewish discover the first pulsar, initially dubbed "LGM-1" for "Little Green Men."</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">1971</div>
+                        <h3 class="timeline-title">Cygnus X-1</h3>
+                        <p class="timeline-text">The first widely accepted black hole candidate is identified in the X-ray source Cygnus X-1.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2015</div>
+                        <h3 class="timeline-title">Gravitational Waves</h3>
+                        <p class="timeline-text">LIGO detects gravitational waves from two merging black holes, confirming Einstein's century-old prediction.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2019</div>
+                        <h3 class="timeline-title">First Black Hole Image</h3>
+                        <p class="timeline-text">The Event Horizon Telescope captures the first ever image of a black hole shadow in galaxy M87, 55 million light-years away.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-year">2025</div>
+                        <h3 class="timeline-title">Interactive Exploration</h3>
+                        <p class="timeline-text">Cosmic Odyssey launches, bringing interactive 3D exploration of the universe's most extreme objects to everyone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="discover">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <div class="section-label">CAPABILITIES</div>
+                <h2 class="section-title">Built for <span class="gradient-text">Deep Exploration</span></h2>
+                <p class="section-description">
+                    Advanced visualization technology meets scientific accuracy in an experience 
+                    designed to inspire wonder.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card" data-delay="0">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                            <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Real-Time 3D Rendering</h3>
+                    <p class="feature-text">WebGL-powered graphics with physically-based rendering for scientifically accurate visualizations of cosmic phenomena.</p>
+                </div>
+                <div class="feature-card" data-delay="100">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                            <line x1="4" y1="22" x2="4" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Interactive Physics</h3>
+                    <p class="feature-text">Interact with gravitational fields, accretion disks, and particle jets. Every interaction is based on real physics equations.</p>
+                </div>
+                <div class="feature-card" data-delay="200">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Scale Visualization</h3>
+                    <p class="feature-text">Comprehend the incomprehensible scale of the cosmos with intuitive zoom controls spanning from atoms to superclusters.</p>
+                </div>
+                <div class="feature-card" data-delay="300">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Cross-Platform</h3>
+                    <p class="feature-text">Runs on any modern browser. Optimized for desktop, tablet, and mobile with adaptive quality settings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="section-container">
+            <h2 class="cta-title reveal">
+                Ready to Explore<br/><span class="gradient-text">The Unknown?</span>
+            </h2>
+            <p class="cta-description reveal reveal-delay-1">
+                Join thousands of explorers on a journey through the most extreme 
+                environments in the known universe.
+            </p>
+            <div class="cta-buttons reveal reveal-delay-2">
+                <button class="btn-glow magnetic-wrap" data-hover>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                    </svg>
+                    Start Your Mission
+                </button>
+                <button class="btn-ghost magnetic-wrap" data-hover>
+                    View Documentation
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="section-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="nav-logo">
+                        <div class="nav-logo-icon">
+                            <svg viewBox="0 0 36 36" fill="none">
+                                <circle cx="18" cy="18" r="16" stroke="url(#logoGrad2)" stroke-width="1.5" opacity="0.5"/>
+                                <circle cx="18" cy="18" r="6" fill="url(#logoGrad2)"/>
+                                <ellipse cx="18" cy="18" rx="16" ry="6" stroke="url(#logoGrad2)" stroke-width="1" transform="rotate(-30 18 18)" opacity="0.6"/>
+                                <ellipse cx="18" cy="18" rx="16" ry="6" stroke="url(#logoGrad2)" stroke-width="1" transform="rotate(30 18 18)" opacity="0.6"/>
+                                <defs>
+                                    <linearGradient id="logoGrad2" x1="0" y1="0" x2="36" y2="36">
+                                        <stop stop-color="#8b5cf6"/>
+                                        <stop offset="1" stop-color="#06b6d4"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <span class="nav-logo-text">COSMIC</span>
+                    </a>
+                    <p>Experience the universe like never before. Interactive 3D exploration of the cosmos's most extreme phenomena.</p>
+                    <div class="footer-socials">
+                        <a href="#" class="footer-social-link" data-hover>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                        </a>
+                        <a href="#" class="footer-social-link" data-hover>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                        <a href="#" class="footer-social-link" data-hover>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Explore</h4>
+                    <ul>
+                        <li><a href="#" data-hover>Black Holes</a></li>
+                        <li><a href="#" data-hover>Pulsars</a></li>
+                        <li><a href="#" data-hover>Nebulae</a></li>
+                        <li><a href="#" data-hover>Quasars</a></li>
+                        <li><a href="#" data-hover>Supernovae</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#" data-hover>Documentation</a></li>
+                        <li><a href="#" data-hover>API Reference</a></li>
+                        <li><a href="#" data-hover>Research Papers</a></li>
+                        <li><a href="#" data-hover>Community</a></li>
+                        <li><a href="#" data-hover>Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#" data-hover>About</a></li>
+                        <li><a href="#" data-hover>Careers</a></li>
+                        <li><a href="#" data-hover>Press</a></li>
+                        <li><a href="#" data-hover>Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Cosmic Odyssey. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#" data-hover>Privacy</a>
+                    <a href="#" data-hover>Terms</a>
+                    <a href="#" data-hover>Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- Side Panel -->
+<div class="info-panel" id="info-panel">
+    <div class="info-panel-item active" data-tooltip-title="Overview" data-tooltip-text="3D cosmic visualization" data-hover>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+    </div>
+    <div class="info-panel-item" data-tooltip-title="Black Hole" data-tooltip-text="Toggle black hole mode" data-hover>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
+    </div>
+    <div class="info-panel-item" data-tooltip-title="Pulsar" data-tooltip-text="Toggle pulsar beams" data-hover>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+    </div>
+    <div class="info-panel-item" data-tooltip-title="Stars" data-tooltip-text="Toggle star density" data-hover>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15,9 22,9 16,14 18,21 12,17 6,21 8,14 2,9 9,9"/></svg>
+    </div>
+    <div class="info-panel-item" data-tooltip-title="Reset" data-tooltip-text="Reset camera view" data-hover>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+    </div>
+</div>
+
+<script>
+// ============================================
+// THREE.JS INLINE (Minimal Custom 3D Engine)
+// ============================================
+
+(function() {
+    'use strict';
+
+    // ---- PRELOADER ----
+    const preloader = document.getElementById('preloader');
+    const preloaderBar = document.getElementById('preloader-bar');
+    const preloaderPercent = document.getElementById('preloader-percent');
+    let loadProgress = 0;
+
+    function updatePreloader() {
+        loadProgress += Math.random() * 15 + 5;
+        if (loadProgress > 100) loadProgress = 100;
+        preloaderBar.style.width = loadProgress + '%';
+        preloaderPercent.textContent = Math.floor(loadProgress) + '%';
+
+        if (loadProgress < 100) {
+            setTimeout(updatePreloader, 150 + Math.random() * 200);
+        } else {
+            setTimeout(() => {
+                preloader.classList.add('hidden');
+                initScene();
+            }, 500);
+        }
+    }
+    setTimeout(updatePreloader, 300);
+
+    // ---- CUSTOM CURSOR ----
+    const cursorMain = document.getElementById('cursor-main');
+    const cursorTrail = document.getElementById('cursor-trail');
+    let mouseX = 0, mouseY = 0;
+    let trailX = 0, trailY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        cursorMain.style.left = mouseX - 4 + 'px';
+        cursorMain.style.top = mouseY - 4 + 'px';
+    });
+
+    function animateCursor() {
+        trailX += (mouseX - trailX) * 0.15;
+        trailY += (mouseY - trailY) * 0.15;
+        cursorTrail.style.left = trailX - 20 + 'px';
+        cursorTrail.style.top = trailY - 20 + 'px';
+        requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Hover effects
+    document.querySelectorAll('[data-hover]').forEach(el => {
+        el.addEventListener('mouseenter', () => cursorTrail.classList.add('hovering'));
+        el.addEventListener('mouseleave', () => cursorTrail.classList.remove('hovering'));
+    });
+
+    // ---- NAVIGATION ----
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            nav.classList.add('scrolled');
+        } else {
+            nav.classList.remove('scrolled');
+        }
+    });
+
+    // ---- SCROLL REVEAL ----
+    const revealElements = document.querySelectorAll('.reveal, .celestial-card, .feature-card, .timeline-item');
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const delay = entry.target.dataset.delay || 0;
+                setTimeout(() => {
+                    entry.target.classList.add('visible');
+                }, delay);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+
+    // ---- COUNTER ANIMATION ----
+    const counterElements = document.querySelectorAll('[data-count]');
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = parseFloat(entry.target.dataset.count);
+                const suffix = entry.target.querySelector('.stat-suffix');
+                const suffixText = suffix ? suffix.textContent : '';
+                const isFloat = target % 1 !== 0;
+                let current = 0;
+                const duration = 2000;
+                const step = target / (duration / 16);
+
+                function count() {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        entry.target.innerHTML = (isFloat ? current.toFixed(1) : Math.floor(current)) + 
+                            (suffixText ? '<span class="stat-suffix">' + suffixText + '</span>' : '');
+                        return;
+                    }
+                    entry.target.innerHTML = (isFloat ? current.toFixed(1) : Math.floor(current)) + 
+                        (suffixText ? '<span class="stat-suffix">' + suffixText + '</span>' : '');
+                    requestAnimationFrame(count);
+                }
+                count();
+                counterObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    counterElements.forEach(el => counterObserver.observe(el));
+
+    // ---- TOOLTIP ----
+    const tooltip = document.getElementById('tooltip');
+    const tooltipTitle = document.getElementById('tooltip-title');
+    const tooltipText = document.getElementById('tooltip-text');
+
+    document.querySelectorAll('.info-panel-item').forEach(item => {
+        item.addEventListener('mouseenter', (e) => {
+            tooltipTitle.textContent = item.dataset.tooltipTitle;
+            tooltipText.textContent = item.dataset.tooltipText;
+            tooltip.classList.add('show');
+        });
+        item.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.clientX - 270) + 'px';
+            tooltip.style.top = (e.clientY - 20) + 'px';
+        });
+        item.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('show');
+        });
+    });
+
+    // ---- INFO PANEL ----
+    document.querySelectorAll('.info-panel-item').forEach(item => {
+        item.addEventListener('click', function() {
+            document.querySelectorAll('.info-panel-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+
+    // ---- SMOOTH SCROLL ----
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
+    // ============================================
+    // MAIN 3D SCENE - WebGL Custom Engine
+    // ============================================
+
+    function initScene() {
+        const container = document.getElementById('canvas-container');
+        const canvas = document.createElement('canvas');
+        container.appendChild(canvas);
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+        if (!gl) {
+            console.warn('WebGL not supported, falling back to 2D');
+            init2DFallback(container);
+            return;
+        }
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width * window.devicePixelRatio;
+        canvas.height = height * window.devicePixelRatio;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+
+        // Resize
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width * window.devicePixelRatio;
+            canvas.height = height * window.devicePixelRatio;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        });
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+        // ---- Shader compilation ----
+        function createShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error(gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        function createProgram(vsSource, fsSource) {
+            const vs = createShader(gl.VERTEX_SHADER, vsSource);
+            const fs = createShader(gl.FRAGMENT_SHADER, fsSource);
+            const program = gl.createProgram();
+            gl.attachShader(program, vs);
+            gl.attachShader(program, fs);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error(gl.getProgramInfoLog(program));
+                return null;
+            }
+            return program;
+        }
+
+        // ---- STAR FIELD SHADER ----
+        const starVS = `
+            attribute vec3 aPosition;
+            attribute float aSize;
+            attribute float aBrightness;
+            attribute vec3 aColor;
+            
+            uniform mat4 uProjection;
+            uniform mat4 uView;
+            uniform float uTime;
+            uniform float uScrollY;
+            
+            varying float vBrightness;
+            varying vec3 vColor;
+            
+            void main() {
+                vec3 pos = aPosition;
+                pos.z += uScrollY * 0.0005;
+                pos.z = mod(pos.z + 2.0, 4.0) - 2.0;
+                
+                vec4 mvPos = uView * vec4(pos, 1.0);
+                gl_Position = uProjection * mvPos;
+                
+                float twinkle = sin(uTime * (1.0 + aBrightness * 3.0) + aBrightness * 100.0) * 0.3 + 0.7;
+                gl_PointSize = aSize * twinkle * (300.0 / -mvPos.z);
+                
+                vBrightness = aBrightness * twinkle;
+                vColor = aColor;
+            }
+        `;
+
+        const starFS = `
+            precision mediump float;
+            varying float vBrightness;
+            varying vec3 vColor;
+            
+            void main() {
+                vec2 center = gl_PointCoord - 0.5;
+                float dist = length(center);
+                if (dist > 0.5) discard;
+                
+                float alpha = smoothstep(0.5, 0.0, dist);
+                alpha *= alpha;
+                
+                gl_FragColor = vec4(vColor * vBrightness, alpha * vBrightness);
+            }
+        `;
+
+        // ---- BLACK HOLE EFFECT (fullscreen quad) ----
+        const quadVS = `
+            attribute vec2 aPosition;
+            varying vec2 vUV;
+            void main() {
+                vUV = aPosition * 0.5 + 0.5;
+                gl_Position = vec4(aPosition, 0.0, 1.0);
+            }
+        `;
+
+        const blackholeFS = `
+            precision highp float;
+            varying vec2 vUV;
+            uniform float uTime;
+            uniform vec2 uResolution;
+            uniform vec2 uMouse;
+            uniform float uScrollY;
+            
+            #define PI 3.14159265359
+            
+            float hash(vec2 p) {
+                return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+            
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                f = f * f * (3.0 - 2.0 * f);
+                return mix(
+                    mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+                    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
+                    f.y
+                );
+            }
+            
+            float fbm(vec2 p) {
+                float val = 0.0;
+                float amp = 0.5;
+                for (int i = 0; i < 5; i++) {
+                    val += amp * noise(p);
+                    p *= 2.0;
+                    amp *= 0.5;
+                }
+                return val;
+            }
+            
+            void main() {
+                vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
+                
+                // Mouse influence
+                vec2 mouseUV = (uMouse - 0.5) * 2.0;
+                mouseUV.x *= uResolution.x / uResolution.y;
+                
+                // Black hole position influenced by scroll
+                vec2 bhPos = vec2(0.3 + sin(uTime * 0.1) * 0.05, 0.1 + cos(uTime * 0.08) * 0.05);
+                bhPos.y -= uScrollY * 0.0003;
+                
+                vec2 toBH = uv - bhPos;
+                float dist = length(toBH);
+                float angle = atan(toBH.y, toBH.x);
+                
+                // Gravitational lensing
+                float schwarzschild = 0.08;
+                float lensStrength = schwarzschild / (dist * dist + 0.01);
+                vec2 lensed = uv + normalize(toBH) * lensStrength * 0.02;
+                
+                // Accretion disk
+                float diskAngle = angle + uTime * 0.5 + lensStrength * 2.0;
+                float diskRadius = dist;
+                float diskWidth = 0.15;
+                float diskCenter = 0.25;
+                float disk = smoothstep(diskWidth, 0.0, abs(diskRadius - diskCenter));
+                
+                // Disk detail
+                float diskNoise = fbm(vec2(diskAngle * 3.0, diskRadius * 10.0 - uTime * 0.3));
+                disk *= diskNoise * 1.5;
+                
+                // Doppler effect - disk colors
+                float doppler = sin(diskAngle) * 0.5 + 0.5;
+                vec3 diskColorHot = vec3(1.0, 0.6, 0.1);
+                vec3 diskColorCold = vec3(0.4, 0.1, 0.8);
+                vec3 diskColor = mix(diskColorCold, diskColorHot, doppler);
+                
+                // Inner glow
+                float innerGlow = exp(-dist * 8.0) * 0.5;
+                vec3 innerColor = vec3(0.5, 0.2, 1.0);
+                
+                // Event horizon (dark center)
+                float eventHorizon = smoothstep(0.06, 0.04, dist);
+                
+                // Pulsar beams
+                vec2 pulsarPos = vec2(-0.4, -0.2 + sin(uTime * 0.15) * 0.1);
+                pulsarPos.y -= uScrollY * 0.0002;
+                vec2 toPulsar = uv - pulsarPos;
+                float pulsarDist = length(toPulsar);
+                float pulsarAngle = atan(toPulsar.y, toPulsar.x);
+                
+                // Rotating beam
+                float beamAngle = uTime * 3.0;
+                float beam1 = pow(max(0.0, cos(pulsarAngle - beamAngle)), 100.0);
+                float beam2 = pow(max(0.0, cos(pulsarAngle - beamAngle + PI)), 100.0);
+                float beams = (beam1 + beam2) * exp(-pulsarDist * 2.0);
+                vec3 beamColor = vec3(0.1, 0.8, 1.0);
+                
+                // Pulsar core
+                float pulsarCore = exp(-pulsarDist * 20.0);
+                float pulsarPulse = sin(uTime * 10.0) * 0.3 + 0.7;
+                
+                // Nebula background
+                vec2 nebulaUV = uv * 2.0 + uTime * 0.02;
+                float nebula = fbm(nebulaUV) * fbm(nebulaUV + 3.0);
+                vec3 nebulaColor1 = vec3(0.1, 0.0, 0.2);
+                vec3 nebulaColor2 = vec3(0.0, 0.05, 0.15);
+                vec3 nebulaMix = mix(nebulaColor1, nebulaColor2, fbm(nebulaUV * 0.5));
+                
+                // Compose
+                vec3 color = nebulaMix * nebula * 0.3;
+                
+                // Add accretion disk
+                color += diskColor * disk * (1.0 - eventHorizon) * 1.5;
+                
+                // Add inner glow
+                color += innerColor * innerGlow * (1.0 - eventHorizon);
+                
+                // Add photon sphere
+                float photonSphere = smoothstep(0.01, 0.0, abs(dist - 0.07)) * 0.8;
+                color += vec3(0.8, 0.5, 1.0) * photonSphere * (1.0 - eventHorizon);
+                
+                // Apply event horizon
+                color *= (1.0 - eventHorizon * 0.98);
+                
+                // Add pulsar
+                color += beamColor * beams * 0.8;
+                color += vec3(0.3, 0.9, 1.0) * pulsarCore * pulsarPulse;
+                
+                // Add subtle mouse-reactive glow
+                float mouseDist = length(uv - mouseUV * 0.3);
+                color += vec3(0.2, 0.1, 0.4) * exp(-mouseDist * 4.0) * 0.15;
+                
+                // Vignette
+                float vignette = 1.0 - dot(uv * 0.5, uv * 0.5);
+                color *= max(0.0, vignette);
+                
+                // Tone mapping
+                color = color / (color + 1.0);
+                color = pow(color, vec3(0.85));
+                
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        // Create programs
+        const starProgram = createProgram(starVS, starFS);
+        const bhProgram = createProgram(quadVS, blackholeFS);
+
+        // ---- Generate Stars ----
+        const STAR_COUNT = 3000;
+        const starPositions = new Float32Array(STAR_COUNT * 3);
+        const starSizes = new Float32Array(STAR_COUNT);
+        const starBrightness = new Float32Array(STAR_COUNT);
+        const starColors = new Float32Array(STAR_COUNT * 3);
+
+        for (let i = 0; i < STAR_COUNT; i++) {
+            starPositions[i * 3] = (Math.random() - 0.5) * 6;
+            starPositions[i * 3 + 1] = (Math.random() - 0.5) * 6;
+            starPositions[i * 3 + 2] = (Math.random() - 0.5) * 4;
+            
+            starSizes[i] = Math.random() * 3 + 0.5;
+            starBrightness[i] = Math.random();
+            
+            // Star color temperature
+            const temp = Math.random();
+            if (temp < 0.3) { // Blue-white
+                starColors[i * 3] = 0.7 + Math.random() * 0.3;
+                starColors[i * 3 + 1] = 0.8 + Math.random() * 0.2;
+                starColors[i * 3 + 2] = 1.0;
+            } else if (temp < 0.7) { // White-yellow
+                starColors[i * 3] = 1.0;
+                starColors[i * 3 + 1] = 0.9 + Math.random() * 0.1;
+                starColors[i * 3 + 2] = 0.7 + Math.random() * 0.3;
+            } else { // Orange-red
+                starColors[i * 3] = 1.0;
+                starColors[i * 3 + 1] = 0.5 + Math.random() * 0.3;
+                starColors[i * 3 + 2] = 0.3 + Math.random() * 0.2;
+            }
+        }
+
+        // Star buffers
+        const starPosBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, starPosBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, starPositions, gl.STATIC_DRAW);
+
+        const starSizeBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, starSizeBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, starSizes, gl.STATIC_DRAW);
+
+        const starBrightnessBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, starBrightnessBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, starBrightness, gl.STATIC_DRAW);
+
+        const starColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, starColorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, starColors, gl.STATIC_DRAW);
+
+        // Fullscreen quad buffer
+        const quadBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+
+        // ---- Matrix utilities ----
+        function perspective(fov, aspect, near, far) {
+            const f = 1.0 / Math.tan(fov / 2);
+            return new Float32Array([
+                f / aspect, 0, 0, 0,
+                0, f, 0, 0,
+                0, 0, (far + near) / (near - far), -1,
+                0, 0, (2 * far * near) / (near - far), 0
+            ]);
+        }
+
+        function lookAt(eye, target, up) {
+            const zAxis = normalize(subtract(eye, target));
+            const xAxis = normalize(cross(up, zAxis));
+            const yAxis = cross(zAxis, xAxis);
+            return new Float32Array([
+                xAxis[0], yAxis[0], zAxis[0], 0,
+                xAxis[1], yAxis[1], zAxis[1], 0,
+                xAxis[2], yAxis[2], zAxis[2], 0,
+                -dot(xAxis, eye), -dot(yAxis, eye), -dot(zAxis, eye), 1
+            ]);
+        }
+
+        function normalize(v) {
+            const len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+            return [v[0]/len, v[1]/len, v[2]/len];
+        }
+
+        function subtract(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+        function cross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+        function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+
+        // ---- Animation state ----
+        let scrollY = 0;
+        let targetScrollY = 0;
+        let normalizedMouseX = 0.5;
+        let normalizedMouseY = 0.5;
+        let targetMouseX = 0.5;
+        let targetMouseY = 0.5;
+
+        window.addEventListener('scroll', () => {
+            targetScrollY = window.scrollY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            targetMouseX = e.clientX / window.innerWidth;
+            targetMouseY = 1.0 - e.clientY / window.innerHeight;
+        });
+
+        // ---- Render Loop ----
+        let startTime = performance.now();
+
+        function render() {
+            const time = (performance.now() - startTime) * 0.001;
+
+            // Smooth interpolation
+            scrollY += (targetScrollY - scrollY) * 0.05;
+            normalizedMouseX += (targetMouseX - normalizedMouseX) * 0.05;
+            normalizedMouseY += (targetMouseY - normalizedMouseY) * 0.05;
+
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            const aspect = canvas.width / canvas.height;
+
+            // ---- Draw Black Hole Background ----
+            gl.disable(gl.BLEND);
+            gl.useProgram(bhProgram);
+
+            const bhPosLoc = gl.getAttribLocation(bhProgram, 'aPosition');
+            gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+            gl.enableVertexAttribArray(bhPosLoc);
+            gl.vertexAttribPointer(bhPosLoc, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform1f(gl.getUniformLocation(bhProgram, 'uTime'), time);
+            gl.uniform2f(gl.getUniformLocation(bhProgram, 'uResolution'), canvas.width, canvas.height);
+            gl.uniform2f(gl.getUniformLocation(bhProgram, 'uMouse'), normalizedMouseX, normalizedMouseY);
+            gl.uniform1f(gl.getUniformLocation(bhProgram, 'uScrollY'), scrollY);
+
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            gl.disableVertexAttribArray(bhPosLoc);
+
+            // ---- Draw Stars ----
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+            gl.useProgram(starProgram);
+
+            // Camera
+            const camX = Math.sin(time * 0.05) * 0.3 + (normalizedMouseX - 0.5) * 0.5;
+            const camY = Math.cos(time * 0.03) * 0.2 + (normalizedMouseY - 0.5) * 0.3;
+            const camZ = 2.0 - scrollY * 0.0003;
+
+            const projMatrix = perspective(Math.PI / 3, aspect, 0.1, 100.0);
+            const viewMatrix = lookAt([camX, camY, camZ], [0, 0, 0], [0, 1, 0]);
+
+            gl.uniformMatrix4fv(gl.getUniformLocation(starProgram, 'uProjection'), false, projMatrix);
+            gl.uniformMatrix4fv(gl.getUniformLocation(starProgram, 'uView'), false, viewMatrix);
+            gl.uniform1f(gl.getUniformLocation(starProgram, 'uTime'), time);
+            gl.uniform1f(gl.getUniformLocation(starProgram, 'uScrollY'), scrollY);
+
+            // Position
+            const posLoc = gl.getAttribLocation(starProgram, 'aPosition');
+            gl.bindBuffer(gl.ARRAY_BUFFER, starPosBuffer);
+            gl.enableVertexAttribArray(posLoc);
+            gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+
+            // Size
+            const sizeLoc = gl.getAttribLocation(starProgram, 'aSize');
+            gl.bindBuffer(gl.ARRAY_BUFFER, starSizeBuffer);
+            gl.enableVertexAttribArray(sizeLoc);
+            gl.vertexAttribPointer(sizeLoc, 1, gl.FLOAT, false, 0, 0);
+
+            // Brightness
+            const brightLoc = gl.getAttribLocation(starProgram, 'aBrightness');
+            gl.bindBuffer(gl.ARRAY_BUFFER, starBrightnessBuffer);
+            gl.enableVertexAttribArray(brightLoc);
+            gl.vertexAttribPointer(brightLoc, 1, gl.FLOAT, false, 0, 0);
+
+            // Color
+            const colorLoc = gl.getAttribLocation(starProgram, 'aColor');
+            gl.bindBuffer(gl.ARRAY_BUFFER, starColorBuffer);
+            gl.enableVertexAttribArray(colorLoc);
+            gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+
+            gl.drawArrays(gl.POINTS, 0, STAR_COUNT);
+
+            gl.disableVertexAttribArray(posLoc);
+            gl.disableVertexAttribArray(sizeLoc);
+            gl.disableVertexAttribArray(brightLoc);
+            gl.disableVertexAttribArray(colorLoc);
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    }
+
+    // ---- Black Hole Card Canvas ----
+    function initBlackHoleCard() {
+        const canvas = document.getElementById('blackhole-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            canvas.style.width = rect.width + 'px';
+            canvas.style.height = rect.height + 'px';
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        let cardMouseX = 0.5, cardMouseY = 0.5;
+        canvas.parentElement.addEventListener('mousemove', (e) => {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            cardMouseX = (e.clientX - rect.left) / rect.width;
+            cardMouseY = (e.clientY - rect.top) / rect.height;
+        });
+
+        // Particles orbiting black hole
+        const particles = [];
+        const PARTICLE_COUNT = 200;
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 0.15 + Math.random() * 0.35;
+            particles.push({
+                angle: angle,
+                radius: radius,
+                speed: (0.3 + Math.random() * 0.7) / radius,
+                size: Math.random() * 2 + 0.5,
+                brightness: Math.random(),
+                hue: Math.random() * 60 + 250 // Purple to blue range
+            });
+        }
+
+        function drawBH(time) {
+            const w = canvas.width;
+            const h = canvas.height;
+            const dpr = window.devicePixelRatio;
+            const cx = w * (0.5 + (cardMouseX - 0.5) * 0.05);
+            const cy = h * (0.5 + (cardMouseY - 0.5) * 0.05);
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Black hole shadow
+            const bhRadius = Math.min(w, h) * 0.08;
+            const gradient = ctx.createRadialGradient(cx, cy, bhRadius * 0.5, cx, cy, bhRadius * 5);
+            gradient.addColorStop(0, 'rgba(0,0,0,1)');
+            gradient.addColorStop(0.2, 'rgba(0,0,0,0.95)');
+            gradient.addColorStop(0.4, 'rgba(80,30,150,0.1)');
+            gradient.addColorStop(0.7, 'rgba(40,10,100,0.02)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, w, h);
+
+            // Accretion disk glow
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(1, 0.3);
+            
+            for (let ring = 3; ring > 0; ring--) {
+                const ringRadius = bhRadius * (1.5 + ring * 0.8);
+                const ringGrad = ctx.createRadialGradient(0, 0, ringRadius - 10 * dpr, 0, 0, ringRadius + 10 * dpr);
+                
+                const hue = 270 + ring * 20 + time * 10;
+                ringGrad.addColorStop(0, `hsla(${hue}, 80%, 60%, 0)`);
+                ringGrad.addColorStop(0.4, `hsla(${hue}, 80%, 60%, ${0.15 / ring})`);
+                ringGrad.addColorStop(0.5, `hsla(${hue}, 90%, 70%, ${0.3 / ring})`);
+                ringGrad.addColorStop(0.6, `hsla(${hue}, 80%, 60%, ${0.15 / ring})`);
+                ringGrad.addColorStop(1, `hsla(${hue}, 80%, 60%, 0)`);
+                
+                ctx.fillStyle = ringGrad;
+                ctx.beginPath();
+                ctx.arc(0, 0, ringRadius + 15 * dpr, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            // Orbiting particles
+            particles.forEach(p => {
+                p.angle += p.speed * 0.01;
+                const x = cx + Math.cos(p.angle) * p.radius * w;
+                const y = cy + Math.sin(p.angle) * p.radius * h * 0.3;
+                
+                const distToCenterNorm = p.radius;
+                const alpha = p.brightness * (0.3 + Math.sin(time * 2 + p.angle) * 0.2);
+                
+                ctx.fillStyle = `hsla(${p.hue + time * 20}, 80%, ${60 + p.brightness * 30}%, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, p.size * dpr, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Photon ring
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(1, 0.3);
+            ctx.strokeStyle = `rgba(200, 150, 255, ${0.2 + Math.sin(time * 3) * 0.1})`;
+            ctx.lineWidth = 1.5 * dpr;
+            ctx.beginPath();
+            ctx.arc(0, 0, bhRadius * 1.3, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+
+            // Center black
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx, cy, bhRadius * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        let bhTime = 0;
+        function animateBH() {
+            bhTime += 0.016;
+            drawBH(bhTime);
+            requestAnimationFrame(animateBH);
+        }
+
+        // Start when visible
+        const bhObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                animateBH();
+                bhObserver.unobserve(canvas);
+            }
+        }, { threshold: 0.1 });
+        bhObserver.observe(canvas);
+    }
+
+    // Initialize BH card when DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBlackHoleCard);
+    } else {
+        initBlackHoleCard();
+    }
+
+    // ---- 2D Fallback ----
+    function init2DFallback(container) {
+        const canvas = document.createElement('canvas');
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const stars = [];
+        for (let i = 0; i < 500; i++) {
+            stars.push({
+                x: Math.random(),
+                y: Math.random(),
+                size: Math.random() * 2 + 0.5,
+                brightness: Math.random(),
+                speed: Math.random() * 0.0002 + 0.0001
+            });
+        }
+
+        function draw() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            stars.forEach(s => {
+                s.y += s.speed;
+                if (s.y > 1) s.y = 0;
+                
+                const twinkle = Math.sin(performance.now() * 0.002 * s.brightness) * 0.3 + 0.7;
+                ctx.fillStyle = `rgba(255, 255, 255, ${s.brightness * twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x * w, s.y * h, s.size * window.devicePixelRatio, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(draw);
+        }
+        draw();
+    }
+
+})();
+</script>
+
+</body>
+</html>
