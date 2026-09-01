@@ -8,6 +8,28 @@ async function get<T>(path: string): Promise<T> {
   return (await res.json()) as T
 }
 
+export interface UpdateCheck {
+  enabled: boolean
+  current: { version: string; build: string } | null
+  latest: { version: string; build: string; generatedAt: string } | null
+  upToDate: boolean
+  changed: string[]
+  removed: string[]
+  deltaBytes: number
+  fullBytes: number
+  restartRequired: boolean
+  error?: string
+}
+
+export interface UpdateApply {
+  ok: boolean
+  applied: number
+  removed: number
+  restartRequired: boolean
+  reloadSufficient: boolean
+  error?: string
+}
+
 export interface HealthResponse {
   ok: boolean
   service: string
@@ -35,6 +57,12 @@ export const api = {
   mcp: () => get<Array<McpServer & { enabled: boolean }>>('/mcp'),
   usage: () => get<Usage>('/usage'),
   route: (q: string) => get<Array<{ name: string; score: number }>>(`/route?q=${encodeURIComponent(q)}`),
+  updateCheck: () => get<UpdateCheck>('/update/check'),
+  updateApply: async () => {
+    const res = await fetch(`${BASE}/update/apply`, { method: 'POST' })
+    if (!res.ok) throw new Error(`update/apply → ${res.status}`)
+    return (await res.json()) as UpdateApply
+  },
 }
 
 /**

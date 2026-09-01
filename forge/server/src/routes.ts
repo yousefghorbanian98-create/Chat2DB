@@ -3,6 +3,7 @@ import { stat, readFile } from 'node:fs/promises'
 import { join, extname, resolve, normalize } from 'node:path'
 import { config } from './config'
 import type { AppContext } from './context'
+import { checkForUpdate, applyUpdate } from './update-service'
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -139,6 +140,17 @@ export async function handleApi(
 
   if (path === '/api/usage' && req.method === 'GET') {
     sendJson(res, 200, await ctx.store.getUsage())
+    return true
+  }
+
+  // ---- به‌روزرسانیِ تفاضلی ----
+  if (path === '/api/update/check' && req.method === 'GET') {
+    sendJson(res, 200, await checkForUpdate())
+    return true
+  }
+
+  if (path === '/api/update/apply' && req.method === 'POST') {
+    sendJson(res, 200, await applyUpdate())
     return true
   }
 

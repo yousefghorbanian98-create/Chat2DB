@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { api, runStream, type HealthResponse } from './lib/api.ts'
+import { api, runStream, type HealthResponse, type UpdateCheck } from './lib/api.ts'
 import type { Agent, Command, Message, Session } from './lib/types.ts'
 import Icon from './components/Icon.tsx'
 import StatusPills from './components/StatusPills.tsx'
@@ -11,6 +11,7 @@ import CommandPalette from './components/CommandPalette.tsx'
 import SidePanel from './components/SidePanel.tsx'
 import Welcome from './components/Welcome.tsx'
 import SetupSheet from './components/SetupSheet.tsx'
+import UpdateChip from './components/UpdateChip.tsx'
 
 type Theme = 'forge-dark' | 'forge-light'
 
@@ -30,6 +31,7 @@ export default function App() {
   const [setup, setSetup] = useState(false)
   const [focusSignal, setFocusSignal] = useState(0)
   const [theme, setTheme] = useState<Theme>('forge-dark')
+  const [update, setUpdate] = useState<UpdateCheck | null>(null)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -47,6 +49,7 @@ export default function App() {
     api.health().then(setHealth).catch(() => setHealth(null))
     api.commands().then(setCommands).catch(() => setCommands([]))
     api.agents().then(setAgents).catch(() => setAgents([]))
+    api.updateCheck().then(setUpdate).catch(() => setUpdate(null))
     refreshSessions()
   }, [refreshSessions])
 
@@ -163,6 +166,7 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
+          <UpdateChip check={update} />
           <StatusPills health={health} onOpenSetup={() => setSetup(true)} />
           <div className="flex items-center gap-1.5 border-r border-hairline pr-3">
             <button

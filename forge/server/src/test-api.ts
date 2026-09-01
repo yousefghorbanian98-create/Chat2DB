@@ -9,3 +9,15 @@ export { Pipeline } from './core/pipeline'
 export { Store } from './core/store'
 export { buildSkills } from './core/skills'
 export { config } from './config'
+export {
+  buildManifest,
+  scanDir,
+  diffManifests,
+  readManifest,
+  writeManifest,
+  applyPack,
+  untarGz,
+  createTarGz,
+  hashBuffer,
+  totalBytes,
+} from './update'
