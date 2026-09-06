@@ -1,0 +1,18 @@
+# electron-builder config for the Windows installer (built on GitHub CI, where
+# the Electron binaries can actually be downloaded). Kept out of package.json so
+# the offline sandbox `npm install` never tries to fetch Electron.
+appId: app.muscleparadise.studio
+productName: Muscle Paradise
+directories:
+  output: release
+files:
+  - dist/**
+  - electron/**
+  - package.json
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  perMachine: false

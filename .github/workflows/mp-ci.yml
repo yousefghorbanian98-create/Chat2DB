@@ -1,0 +1,141 @@
+# Muscle Paradise — quality gate.
+#
+# The project had installers built by CI but nothing that RAN the tests, so a
+# broken suite (a test that hard-coded "today") sat red for weeks unnoticed.
+# This workflow is the fix: make it a required check on the branch.
+#
+# Scoped to mp-app/** so it never touches Cutting Edge (constraint C3).
+name: MP CI
+
+on:
+  push:
+    paths: ['mp-app/**', '.github/workflows/mp-ci.yml']
+  pull_request:
+    paths: ['mp-app/**', '.github/workflows/mp-ci.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: mp-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mp-app/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: mp-app/backend/requirements.txt
+      # Installing from requirements.txt ALONE is the only proof that file is
+      # correct — two missing pins (cryptography, PyMuPDF) once broke collection.
+      - run: pip install -r requirements.txt
+      - name: pytest
+        # addopts is overridden so the summary line is printed; pytest.ini puts
+        # -q there, which hides the pass/fail counts.
+        run: pytest --override-ini="addopts=" -q --cov=app --cov-report=term-missing --cov-fail-under=85
+      - name: OpenAPI spec is in sync with the code
+        run: |
+          python -m app.export_openapi --yaml > /tmp/openapi.yaml
+          diff -u ../openapi.yaml /tmp/openapi.yaml \
+            || { echo "::error::openapi.yaml is stale — regenerate it"; exit 1; }
+
+  frontend:
+    name: Frontend (gate)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mp-app/studio
+    env:
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mp-app/studio/package-lock.json
+      - run: npm ci
+      # lint + format:check + typecheck + coverage + build
+      - run: npm run gate
+
+  clock-safety:
+    name: Clock safety (catches date time bombs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mp-app/studio/package-lock.json
+      - run: cd mp-app/studio && npm ci
+      # A Jalali-calendar product is unusually exposed to timezone-dependent
+      # tests. Run the suite from the far side of the date line: anything that
+      # secretly depends on the wall clock fails here first.
+      - run: cd mp-app/studio && TZ=Pacific/Kiritimati npm test
+      - run: cd mp-app/studio && TZ=Pacific/Midway npm test
+
+  smoke:
+    name: End-to-end smoke (real HTTP)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11', cache: pip, cache-dependency-path: mp-app/backend/requirements.txt }
+      - run: pip install -r mp-app/backend/requirements.txt
+      - name: boot, seed, and exercise the API
+        working-directory: mp-app/backend
+        env:
+          MP_DB_PATH: /tmp/mp-ci.db
+          MP_OWNER_PIN: ci-owner-pin-not-a-secret
+        run: |
+          set -euo pipefail
+          python -m app.bootstrap
+          python -m app.seed_demo
+          python -m uvicorn app.main:create_app_from_env --factory --port 8751 &
+          for _ in $(seq 1 30); do curl -sf localhost:8751/health && break; sleep 1; done
+
+          staff=$(curl -sf -XPOST localhost:8751/api/v1/auth/pin \
+            -H 'content-type: application/json' \
+            -d "{\"username\":\"owner\",\"pin\":\"$MP_OWNER_PIN\"}" | python -c 'import sys,json;print(json.load(sys.stdin)["token"])')
+          member=$(curl -sf -XPOST localhost:8751/api/v1/auth/member-pin \
+            -H 'content-type: application/json' \
+            -d '{"membership_code":"MP-DEMO-1","pin":"1234"}' | python -c 'import sys,json;print(json.load(sys.stdin)["token"])')
+
+          curl -sf localhost:8751/api/v1/reports/dashboard -H "authorization: Bearer $staff" >/dev/null
+          curl -sf localhost:8751/api/v1/client/me        -H "authorization: Bearer $member" >/dev/null
+
+          # C4: an athlete token must never be able to list the gym roster.
+          code=$(curl -s -o /dev/null -w '%{http_code}' localhost:8751/api/v1/members \
+            -H "authorization: Bearer $member")
+          [ "$code" = "403" ] || { echo "::error::member isolation broken: got $code, want 403"; exit 1; }
+
+          # Wrong PIN must not authenticate.
+          code=$(curl -s -o /dev/null -w '%{http_code}' -XPOST localhost:8751/api/v1/auth/member-pin \
+            -H 'content-type: application/json' -d '{"membership_code":"MP-DEMO-1","pin":"9999"}')
+          [ "$code" = "401" ] || { echo "::error::bad PIN accepted: got $code, want 401"; exit 1; }
+
+          echo "smoke OK"
+
+  security:
+    name: Security scan
+    runs-on: ubuntu-latest
+    # Advisory while the P0 backlog (rate limiting, audit log) is being cleared;
+    # flip to blocking once mp-app/backend is clean. Tracked as R5.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install pip-audit bandit
+      - run: pip-audit -r mp-app/backend/requirements.txt --strict
+      - run: bandit -q -r mp-app/backend/app -ll
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: cd mp-app/studio && npm audit --audit-level=high

@@ -1,0 +1,19 @@
+# MP local-first core — pinned to the versions verified installed in .venv-mp
+# (python -m pip list, 2026-08-29). Do not bump without re-running the suite.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy==2.0.52
+pydantic==2.13.5
+httpx==0.28.1
+pytest==9.1.1
+pytest-cov==7.1.0
+reportlab==5.0.1
+arabic-reshaper==3.0.1
+# app/core/backup.py encrypts archives with Fernet — the suite cannot even import
+# the app without it (a fresh install from this file used to fail on collection).
+cryptography==50.0.1
+# tests/test_pdf.py extracts the rendered receipt/assessment text to assert the
+# Persian runs; without it that test silently skips instead of verifying.
+PyMuPDF==1.28.2
+# app/export_openapi.py --yaml emits the shipped spec; the file is .yaml.
+PyYAML==6.0.3

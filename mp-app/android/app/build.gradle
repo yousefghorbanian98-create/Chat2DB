@@ -1,0 +1,32 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.muscleparadise.client'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'app.muscleparadise.client'
+        minSdk 24
+        targetSdk 34
+        versionCode 200
+        versionName '0.20.0'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    // Intentionally empty: a plain WebView shell needs no AndroidX fetches, so
+    // the CI build only requires AGP + the preinstalled Android SDK.
+}

@@ -1,0 +1,88 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for dist/assets/Sync-TUiACh-d.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">dist/assets</a> Sync-TUiACh-d.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">0% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>0/1</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import{a,G as p,I as b,j as e,n as h,t as y,k as d,z as v,h as C,J as j,m as E}from"./tokens-BR8iTfOk.js";function R(t){return`بکاپ ${t} بایت ساخته شد. آن را در جای امن نگه دارید — بدون گذرواژه قابل خواندن نیست.`}function S(t,s,r){return t instanceof b?t.status===403?r:t.detail||s:s}function w(){const[t,s]=a.useState(null),[r,n]=a.useState(null),[l,c]=a.useState("idle"),i=a.useCallback(()=&gt;{c("loading"),p.syncDelta(t??void 0).then(o=&gt;{n(o),s(o.cursor),c("success")}).catch(()=&gt;c("error"))},[t]);return{cursor:t,delta:r,syncState:l,runSync:i}}function B(){const[t,s]=a.useState(""),[r,n]=a.useState("idle"),[l,c]=a.useState(null),i=a.useCallback(()=&gt;{n("loading"),c(null),p.createBackup(t).then(o=&gt;{c(R(o.bytes)),n("success")}).catch(o=&gt;{n("error"),c(S(o,"تهیهٔ بکاپ ناموفق بود","فقط OWNER می‌تواند بکاپ بگیرد."))})},[t]);return{password:t,setPassword:s,backupState:r,backupNote:l,makeBackup:i}}function N(t){const[s,r]=a.useState(""),[n,l]=a.useState("idle"),[c,i]=a.useState(null),[o,x]=a.useState(null),k=a.useCallback(()=&gt;{l("loading"),i(null),x(null),p.restoreBackup(t,s.trim()).then(u=&gt;{x(u),l("success")}).catch(u=&gt;{l("error"),i(S(u,"بازیابی ناموفق بود","فقط OWNER می‌تواند بازیابی کند."))})},[t,s]);return{text:s,setText:r,restoreState:n,restoreError:c,restored:o,doRestore:k}}const O={display:"flex",flexDirection:"column",gap:"var(--space-xl)"},m={display:"flex",flexWrap:"wrap",gap:"var(--space-md)"},z={margin:0,fontSize:12,opacity:.7},g={margin:0,fontSize:13},A={margin:0,fontSize:13},F={...g,color:"var(--color-destructive)"},f={...g,color:"var(--color-accent)"},D={margin:0,fontSize:12,color:"var(--color-muted-foreground)"};function L({delta:t}){const s=Object.entries(t.changes);return t.total===0?e.jsx("p",{"data-testid":"sync-empty",style:{...f,margin:0},children:"تغییری از آخرین همگام‌سازی رخ نداده است."}):e.jsxs(e.Fragment,{children:[e.jsxs("p",{style:{margin:"0 0 6px"},children:[t.total," ردیف در ",s.length," جدول:"]}),e.jsx("ul",{style:{margin:0,paddingInlineStart:18,lineHeight:1.8},children:s.map(([r,n])=&gt;e.jsxs("li",{children:[e.jsx("span",{dir:"ltr",className:"numeric",children:r})," ","— ",n.length]},r))})]})}function P(){const{cursor:t,delta:s,syncState:r,runSync:n}=w();return e.jsx(h,{title:"همگام‌سازی افزایشی",testId:"sync-card",children:e.jsxs("div",{style:y,children:[e.jsxs("div",{style:m,children:[e.jsx(d,{onClick:n,state:r,children:t?"همگام‌سازی مجدد":"همگام‌سازی اولیه"}),t?e.jsxs("p",{dir:"ltr",className:"numeric",style:z,children:["cursor: ",t]}):null]}),s?e.jsx("div",{"data-testid":"sync-result",style:{fontSize:14},children:e.jsx(L,{delta:s})}):e.jsx("p",{style:{...v,margin:0,fontSize:13},children:"بدون نشانگر، کل داده‌ها به‌عنوان نخستین تصویر ارسال می‌شود."})]})})}function T({value:t,onChange:s}){return e.jsxs("label",{style:j,children:[e.jsx("span",{children:"گذرواژهٔ رمزنگاری (حداقل ۸ نویسه)"}),e.jsx("input",{"data-testid":"backup-password",className:"mp-input",type:"password",autoComplete:"new-password",value:t,onChange:r=&gt;s(r.target.value)})]})}function I({value:t,onChange:s}){return e.jsxs("label",{style:j,children:[e.jsx("span",{children:"محتوای بکاپ برای بازیابی (base64)"}),e.jsx("textarea",{"data-testid":"restore-blob",className:"mp-input",dir:"ltr",rows:3,value:t,onChange:r=&gt;s(r.target.value)})]})}function M({note:t,error:s,restored:r,reduced:n}){return e.jsxs(e.Fragment,{children:[t?e.jsx(E.p,{role:"status","data-testid":"backup-note",initial:n?!1:{opacity:0,y:8},animate:{opacity:1,y:0},style:A,children:t}):null,s?e.jsx("p",{role:"alert","data-testid":"restore-error",style:F,children:s}):null,r?e.jsxs("p",{role:"status","data-testid":"restore-result",style:f,children:["بازیابی انجام شد — ",r.rows," ردیف در ",Object.keys(r.restored).length," جدول، با تأیید شمارش."]}):null]})}function W(){const t=C()??!1,s=B(),r=N(s.password),n=s.password.length&gt;=8;return e.jsx(h,{title:"بکاپ رمزنگاری‌شده",testId:"backup-card",children:e.jsxs("div",{style:y,children:[e.jsx(T,{value:s.password,onChange:s.setPassword}),e.jsxs("div",{style:m,children:[e.jsx(d,{onClick:s.makeBackup,state:s.backupState,disabled:!n,children:"تهیهٔ بکاپ"}),e.jsx(d,{variant:"ghost",onClick:r.doRestore,state:r.restoreState,disabled:!n||r.text.trim()==="",children:"بازیابی"})]}),e.jsx(I,{value:r.text,onChange:r.setText}),e.jsx(M,{note:s.backupNote,error:r.restoreError,restored:r.restored,reduced:t}),e.jsx("p",{style:D,children:"رمزنگاری با Fernet (AES-128-CBC + HMAC) و کلید PBKDF2-SHA256 با ۲۰۰٬۰۰۰ تکرار. گذرواژه هیچ‌جا ذخیره نمی‌شود؛ بدون آن فایل قابل خواندن نیست."})]})})}function H(){return e.jsxs("div",{style:O,children:[e.jsx(P,{}),e.jsx(W,{})]})}export{H as Sync,H as default};<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-09-06T06:46:47.970Z
+            </div>
+        <script src="../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../sorter.js"></script>
+        <script src="../../block-navigation.js"></script>
+    </body>
+</html>
+    

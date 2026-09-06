@@ -1,0 +1,2917 @@
+components:
+  schemas:
+    AssessmentCreate:
+      additionalProperties: false
+      properties:
+        age_years:
+          maximum: 100.0
+          minimum: 10.0
+          title: Age Years
+          type: integer
+        equation:
+          default: siri
+          enum:
+          - siri
+          - brozek
+          title: Equation
+          type: string
+        height_cm:
+          anyOf:
+          - exclusiveMinimum: 0.0
+            maximum: 280.0
+            type: number
+          - type: 'null'
+          title: Height Cm
+        sites_mm:
+          $ref: '#/components/schemas/Sites'
+        weight_kg:
+          exclusiveMinimum: 0.0
+          maximum: 400.0
+          title: Weight Kg
+          type: number
+      required:
+      - weight_kg
+      - age_years
+      - sites_mm
+      title: AssessmentCreate
+      type: object
+    AssessmentOut:
+      properties:
+        age_years:
+          title: Age Years
+          type: integer
+        body_density:
+          title: Body Density
+          type: number
+        body_fat_pct:
+          title: Body Fat Pct
+          type: number
+        classification:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Classification
+        created_at:
+          title: Created At
+          type: string
+        equation:
+          title: Equation
+          type: string
+        fat_mass_kg:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Fat Mass Kg
+        id:
+          title: Id
+          type: integer
+        lean_mass_kg:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Lean Mass Kg
+        member_id:
+          title: Member Id
+          type: integer
+        protocol:
+          title: Protocol
+          type: string
+        sum_mm:
+          title: Sum Mm
+          type: number
+        weight_kg:
+          title: Weight Kg
+          type: number
+      required:
+      - id
+      - member_id
+      - protocol
+      - equation
+      - age_years
+      - weight_kg
+      - sum_mm
+      - body_density
+      - body_fat_pct
+      - fat_mass_kg
+      - lean_mass_kg
+      - classification
+      - created_at
+      title: AssessmentOut
+      type: object
+    AutomationConfigIn:
+      additionalProperties: false
+      properties:
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Enabled
+        forbid_phi:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Forbid Phi
+        secret:
+          anyOf:
+          - maxLength: 128
+            minLength: 8
+            type: string
+          - type: 'null'
+          title: Secret
+        url:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          title: Url
+      title: AutomationConfigIn
+      type: object
+    AvailabilityUpdate:
+      additionalProperties: false
+      properties:
+        available:
+          title: Available
+          type: boolean
+      required:
+      - available
+      title: AvailabilityUpdate
+      type: object
+    BackupRequest:
+      additionalProperties: false
+      properties:
+        password:
+          maxLength: 200
+          minLength: 8
+          title: Password
+          type: string
+      required:
+      - password
+      title: BackupRequest
+      type: object
+    EquipmentCreate:
+      additionalProperties: false
+      properties:
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Category
+        count:
+          default: 1
+          minimum: 1.0
+          title: Count
+          type: integer
+        name:
+          maxLength: 120
+          minLength: 1
+          title: Name
+          type: string
+      required:
+      - name
+      title: EquipmentCreate
+      type: object
+    GenerateRequest:
+      additionalProperties: false
+      properties:
+        template:
+          default: fb
+          pattern: ^(ppl|ul|fb|corrective)$
+          title: Template
+          type: string
+      title: GenerateRequest
+      type: object
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    InjuryCreate:
+      additionalProperties: false
+      properties:
+        allowed_modifications:
+          items:
+            type: string
+          title: Allowed Modifications
+          type: array
+        body_region:
+          enum:
+          - neck
+          - cervical
+          - thoracic
+          - lumbar
+          - SI
+          - shoulder
+          - scapula
+          - elbow
+          - wrist
+          - hand
+          - hip
+          - groin
+          - knee
+          - ankle
+          - foot
+          - chest
+          - abdomen
+          - cardiovascular
+          - respiratory
+          - neurological
+          - other
+          title: Body Region
+          type: string
+        cleared:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cleared
+        clinician_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinician Note
+        contraindicated_patterns:
+          items:
+            type: string
+          title: Contraindicated Patterns
+          type: array
+        label:
+          maxLength: 120
+          minLength: 1
+          title: Label
+          type: string
+        member_visible_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Member Visible Note
+        onset:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Onset
+        pain_0_10:
+          anyOf:
+          - maximum: 10.0
+            minimum: 0.0
+            type: integer
+          - type: 'null'
+          title: Pain 0 10
+        requires_clearance:
+          default: false
+          title: Requires Clearance
+          type: boolean
+        side:
+          anyOf:
+          - enum:
+            - left
+            - right
+            - bilateral
+            type: string
+          - type: 'null'
+          title: Side
+        status:
+          default: active
+          enum:
+          - active
+          - recovering
+          - cleared
+          - chronic
+          title: Status
+          type: string
+      required:
+      - body_region
+      - label
+      title: InjuryCreate
+      type: object
+    InjuryOut:
+      description: Studio view — includes the clinician note.
+      properties:
+        allowed_modifications:
+          items:
+            type: string
+          title: Allowed Modifications
+          type: array
+        body_region:
+          title: Body Region
+          type: string
+        clinician_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Clinician Note
+        contraindicated_patterns:
+          items:
+            type: string
+          title: Contraindicated Patterns
+          type: array
+        id:
+          title: Id
+          type: integer
+        label:
+          title: Label
+          type: string
+        member_id:
+          title: Member Id
+          type: integer
+        member_visible_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Member Visible Note
+        pain_0_10:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Pain 0 10
+        requires_clearance:
+          title: Requires Clearance
+          type: boolean
+        side:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Side
+        status:
+          title: Status
+          type: string
+      required:
+      - id
+      - member_id
+      - body_region
+      - side
+      - label
+      - status
+      - pain_0_10
+      - contraindicated_patterns
+      - allowed_modifications
+      - clinician_note
+      - member_visible_note
+      - requires_clearance
+      title: InjuryOut
+      type: object
+    InjuryPublicOut:
+      description: Client view — clinician note is stripped (map C10 / §9).
+      properties:
+        body_region:
+          title: Body Region
+          type: string
+        id:
+          title: Id
+          type: integer
+        label:
+          title: Label
+          type: string
+        member_visible_note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Member Visible Note
+        status:
+          title: Status
+          type: string
+      required:
+      - id
+      - body_region
+      - label
+      - status
+      - member_visible_note
+      title: InjuryPublicOut
+      type: object
+    ManualCheckin:
+      additionalProperties: false
+      properties:
+        member_id:
+          title: Member Id
+          type: integer
+        method:
+          default: manual
+          title: Method
+          type: string
+      required:
+      - member_id
+      title: ManualCheckin
+      type: object
+    MemberCreate:
+      additionalProperties: false
+      properties:
+        birth_date:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Birth Date
+        first_name:
+          maxLength: 80
+          minLength: 1
+          title: First Name
+          type: string
+        guardian_consent:
+          default: false
+          title: Guardian Consent
+          type: boolean
+        last_name:
+          maxLength: 80
+          minLength: 1
+          title: Last Name
+          type: string
+        membership_code:
+          maxLength: 40
+          minLength: 1
+          title: Membership Code
+          type: string
+        membership_exp:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Membership Exp
+        phone:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Phone
+        sex:
+          enum:
+          - male
+          - female
+          title: Sex
+          type: string
+      required:
+      - membership_code
+      - first_name
+      - last_name
+      - sex
+      title: MemberCreate
+      type: object
+    MemberOut:
+      description: Studio view — full record, no clinician notes (those live on injuries).
+      properties:
+        active_injuries:
+          default: 0
+          title: Active Injuries
+          type: integer
+        birth_date:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Birth Date
+        created_at:
+          title: Created At
+          type: string
+        first_name:
+          title: First Name
+          type: string
+        guardian_consent:
+          title: Guardian Consent
+          type: boolean
+        id:
+          title: Id
+          type: integer
+        last_name:
+          title: Last Name
+          type: string
+        membership_code:
+          title: Membership Code
+          type: string
+        membership_exp:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Membership Exp
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        sex:
+          enum:
+          - male
+          - female
+          title: Sex
+          type: string
+      required:
+      - id
+      - membership_code
+      - first_name
+      - last_name
+      - sex
+      - birth_date
+      - phone
+      - membership_exp
+      - guardian_consent
+      - created_at
+      title: MemberOut
+      type: object
+    MemberPinLogin:
+      additionalProperties: false
+      properties:
+        membership_code:
+          maxLength: 64
+          minLength: 1
+          title: Membership Code
+          type: string
+        pin:
+          maxLength: 32
+          minLength: 1
+          title: Pin
+          type: string
+      required:
+      - membership_code
+      - pin
+      title: MemberPinLogin
+      type: object
+    MemberUpdate:
+      additionalProperties: false
+      properties:
+        birth_date:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Birth Date
+        first_name:
+          anyOf:
+          - maxLength: 80
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: First Name
+        guardian_consent:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Guardian Consent
+        last_name:
+          anyOf:
+          - maxLength: 80
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: Last Name
+        membership_exp:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Membership Exp
+        phone:
+          anyOf:
+          - maxLength: 32
+            type: string
+          - type: 'null'
+          title: Phone
+        sex:
+          anyOf:
+          - enum:
+            - male
+            - female
+            type: string
+          - type: 'null'
+          title: Sex
+      title: MemberUpdate
+      type: object
+    NutritionRequest:
+      additionalProperties: false
+      properties:
+        activity:
+          default: moderate
+          enum:
+          - sedentary
+          - light
+          - moderate
+          - active
+          - athlete
+          title: Activity
+          type: string
+        goal:
+          default: maintain
+          enum:
+          - cut
+          - maintain
+          - bulk
+          title: Goal
+          type: string
+        protein_g_per_kg:
+          default: 1.8
+          exclusiveMinimum: 0.0
+          maximum: 4.0
+          title: Protein G Per Kg
+          type: number
+      title: NutritionRequest
+      type: object
+    PackageCreate:
+      additionalProperties: false
+      properties:
+        duration_days:
+          maximum: 3650.0
+          minimum: 1.0
+          title: Duration Days
+          type: integer
+        name:
+          maxLength: 80
+          minLength: 1
+          title: Name
+          type: string
+        price_rial:
+          minimum: 0.0
+          title: Price Rial
+          type: integer
+      required:
+      - name
+      - duration_days
+      - price_rial
+      title: PackageCreate
+      type: object
+    PaymentCreate:
+      additionalProperties: false
+      properties:
+        amount_rial:
+          minimum: 0.0
+          title: Amount Rial
+          type: integer
+        member_id:
+          title: Member Id
+          type: integer
+        method:
+          default: cash
+          pattern: ^(cash|card|transfer|pos)$
+          title: Method
+          type: string
+        package_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Package Id
+      required:
+      - member_id
+      - amount_rial
+      title: PaymentCreate
+      type: object
+    PinLogin:
+      additionalProperties: false
+      properties:
+        pin:
+          maxLength: 32
+          minLength: 1
+          title: Pin
+          type: string
+        username:
+          maxLength: 64
+          minLength: 1
+          title: Username
+          type: string
+      required:
+      - username
+      - pin
+      title: PinLogin
+      type: object
+    QrCheckin:
+      additionalProperties: false
+      properties:
+        method:
+          default: qr
+          title: Method
+          type: string
+        payload:
+          additionalProperties: true
+          title: Payload
+          type: object
+      required:
+      - payload
+      title: QrCheckin
+      type: object
+    RestoreRequest:
+      additionalProperties: false
+      properties:
+        blob_b64:
+          title: Blob B64
+          type: string
+        password:
+          maxLength: 200
+          minLength: 8
+          title: Password
+          type: string
+      required:
+      - password
+      - blob_b64
+      title: RestoreRequest
+      type: object
+    SetMemberPin:
+      additionalProperties: false
+      properties:
+        pin:
+          maxLength: 32
+          minLength: 4
+          title: Pin
+          type: string
+      required:
+      - pin
+      title: SetMemberPin
+      type: object
+    Sites:
+      additionalProperties: false
+      properties:
+        abdominal:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Abdominal
+          type: number
+        chest:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Chest
+          type: number
+        midaxillary:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Midaxillary
+          type: number
+        subscapular:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Subscapular
+          type: number
+        suprailiac:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Suprailiac
+          type: number
+        thigh:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Thigh
+          type: number
+        triceps:
+          exclusiveMinimum: 0.0
+          maximum: 80.0
+          title: Triceps
+          type: number
+      required:
+      - chest
+      - midaxillary
+      - triceps
+      - subscapular
+      - abdominal
+      - suprailiac
+      - thigh
+      title: Sites
+      type: object
+    TokenResponse:
+      properties:
+        expires_in:
+          title: Expires In
+          type: integer
+        gym_id:
+          title: Gym Id
+          type: integer
+        role:
+          title: Role
+          type: string
+        token:
+          title: Token
+          type: string
+      required:
+      - token
+      - role
+      - gym_id
+      - expires_in
+      title: TokenResponse
+      type: object
+    ValidationError:
+      properties:
+        ctx:
+          title: Context
+          type: object
+        input:
+          title: Input
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+    WorkoutExercise:
+      additionalProperties: false
+      properties:
+        name:
+          maxLength: 120
+          minLength: 1
+          title: Name
+          type: string
+        sets:
+          items:
+            $ref: '#/components/schemas/WorkoutSet'
+          maxItems: 20
+          title: Sets
+          type: array
+      required:
+      - name
+      title: WorkoutExercise
+      type: object
+    WorkoutLogCreate:
+      additionalProperties: false
+      description: An athlete logging their own session (client app, map §5).
+      properties:
+        athlete_note:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          title: Athlete Note
+        exercises:
+          items:
+            $ref: '#/components/schemas/WorkoutExercise'
+          maxItems: 40
+          minItems: 1
+          title: Exercises
+          type: array
+        program_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Program Id
+        session_date:
+          maxLength: 32
+          minLength: 8
+          title: Session Date
+          type: string
+      required:
+      - session_date
+      - exercises
+      title: WorkoutLogCreate
+      type: object
+    WorkoutSet:
+      additionalProperties: false
+      description: 'One performed set: load and repetitions. Both optional so a bodyweight
+
+        or timed set can be logged without inventing a number.'
+      properties:
+        reps:
+          anyOf:
+          - maximum: 1000.0
+            minimum: 0.0
+            type: integer
+          - type: 'null'
+          title: Reps
+        weight_kg:
+          anyOf:
+          - maximum: 1000.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          title: Weight Kg
+      title: WorkoutSet
+      type: object
+info:
+  description: Local-first Gym OS core API (offline-capable).
+  title: Muscle Paradise Core
+  version: 0.20.0
+  x-generated-by: app.export_openapi
+openapi: 3.1.0
+paths:
+  /api/v1/admin/backup:
+    post:
+      operationId: make_backup_api_v1_admin_backup_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Make Backup Api V1 Admin Backup Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Create a password-encrypted backup (OWNER)
+      tags:
+      - admin
+  /api/v1/admin/backup/restore:
+    post:
+      operationId: restore_api_v1_admin_backup_restore_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestoreRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Restore Api V1 Admin Backup Restore Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Restore from an encrypted backup, verifying row counts (OWNER)
+      tags:
+      - admin
+  /api/v1/ai/runtime:
+    get:
+      description: Detect Ollama on the configured base URL (env MP_AI_BASE_URL).
+      operationId: runtime_api_v1_ai_runtime_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Runtime Api V1 Ai Runtime Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Is a local LLM (Ollama) available?
+      tags:
+      - ai
+  /api/v1/assessments/calculate:
+    post:
+      description: Stateless math endpoint — used by the assessment form's live preview.
+      operationId: calculate_api_v1_assessments_calculate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentCreate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Calculate Api V1 Assessments Calculate Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Pure JP7 calculation (no persistence)
+      tags:
+      - assessments
+  /api/v1/attendance/check-in:
+    post:
+      operationId: check_in_api_v1_attendance_check_in_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/QrCheckin'
+              - $ref: '#/components/schemas/ManualCheckin'
+              title: Body
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Check In Api V1 Attendance Check In Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Check in via signed QR or manual entry
+      tags:
+      - attendance
+  /api/v1/attendance/check-out/{member_id}:
+    post:
+      operationId: check_out_api_v1_attendance_check_out__member_id__post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Check Out Api V1 Attendance Check Out  Member Id  Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Close the member's open visit
+      tags:
+      - attendance
+  /api/v1/attendance/today:
+    get:
+      operationId: today_count_api_v1_attendance_today_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Today Count Api V1 Attendance Today Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Today's check-in count (ops KPI)
+      tags:
+      - attendance
+  /api/v1/auth/me:
+    get:
+      description: Echo the verified identity — the shell renders role-appropriate UI.
+      operationId: me_api_v1_auth_me_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Me Api V1 Auth Me Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Current principal
+      tags:
+      - auth
+  /api/v1/auth/member-pin:
+    post:
+      description: 'Exchange a membership code + PIN for a MEMBER-scoped session token.
+
+
+        Identical 401 for unknown code, unset PIN, and wrong PIN (no enumeration).'
+      operationId: login_with_member_pin_api_v1_auth_member_pin_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberPinLogin'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Member PIN login
+      tags:
+      - auth
+  /api/v1/auth/pin:
+    post:
+      description: "Exchange a staff username + PIN for a machine-local session token.\n\nRaises:\n  \
+        \  HTTPException 401: unknown user, inactive user, or wrong PIN. The\n    message is deliberately\
+        \ identical for all three (no user enumeration)."
+      operationId: login_with_pin_api_v1_auth_pin_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinLogin'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Staff PIN login
+      tags:
+      - auth
+  /api/v1/automation/config:
+    get:
+      operationId: get_config_api_v1_automation_config_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Config Api V1 Automation Config Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Current bridge configuration (owner)
+      tags:
+      - automation
+    post:
+      operationId: update_config_api_v1_automation_config_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AutomationConfigIn'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Update Config Api V1 Automation Config Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Enable/disable the n8n bridge (owner)
+      tags:
+      - automation
+  /api/v1/client/me:
+    get:
+      operationId: me_api_v1_client_me_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Me Api V1 Client Me Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My profile (clinician notes stripped)
+      tags:
+      - client
+  /api/v1/client/me/assessments:
+    get:
+      operationId: my_assessments_api_v1_client_me_assessments_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Assessments Api V1 Client Me Assessments Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My assessment history (masked)
+      tags:
+      - client
+  /api/v1/client/me/checkin-qr:
+    get:
+      description: The athlete presents this; the kiosk scans and verifies it (map §8).
+      operationId: my_checkin_qr_api_v1_client_me_checkin_qr_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response My Checkin Qr Api V1 Client Me Checkin Qr Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Signed short-lived QR to show at the kiosk
+      tags:
+      - client
+  /api/v1/client/me/injuries:
+    get:
+      description: The athlete sees their own restrictions — but never the clinician note.
+      operationId: my_injuries_api_v1_client_me_injuries_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Injuries Api V1 Client Me Injuries Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My recorded injuries and limitations
+      tags:
+      - client
+  /api/v1/client/me/nutrition:
+    get:
+      operationId: my_nutrition_api_v1_client_me_nutrition_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response My Nutrition Api V1 Client Me Nutrition Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My latest nutrition plan (payload stripped)
+      tags:
+      - client
+  /api/v1/client/me/payments:
+    get:
+      operationId: my_payments_api_v1_client_me_payments_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Payments Api V1 Client Me Payments Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My payment history (staff attribution hidden)
+      tags:
+      - client
+  /api/v1/client/me/programs:
+    get:
+      operationId: my_programs_api_v1_client_me_programs_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Programs Api V1 Client Me Programs Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My programs
+      tags:
+      - client
+  /api/v1/client/me/workouts:
+    get:
+      operationId: my_workouts_api_v1_client_me_workouts_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response My Workouts Api V1 Client Me Workouts Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: My logged training sessions, newest first
+      tags:
+      - client
+    post:
+      description: Write-only to the athlete's own log; nothing here is staff-authored.
+      operationId: log_workout_api_v1_client_me_workouts_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutLogCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Log Workout Api V1 Client Me Workouts Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Log one of my sessions
+      tags:
+      - client
+  /api/v1/client/members/{member_id}/injuries:
+    get:
+      description: Same rows, narrower schema — the clinician note never crosses this line.
+      operationId: list_public_injuries_api_v1_client_members__member_id__injuries_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InjuryPublicOut'
+                title: Response List Public Injuries Api V1 Client Members  Member Id  Injuries Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Member-visible notes only (field-masked)
+      tags:
+      - injuries
+  /api/v1/equipment:
+    get:
+      operationId: list_all_api_v1_equipment_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List All Api V1 Equipment Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: All equipment
+      tags:
+      - equipment
+    post:
+      operationId: create_api_v1_equipment_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Api V1 Equipment Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Add equipment
+      tags:
+      - equipment
+  /api/v1/equipment/{equipment_id}:
+    patch:
+      operationId: set_availability_api_v1_equipment__equipment_id__patch
+      parameters:
+      - in: path
+        name: equipment_id
+        required: true
+        schema:
+          title: Equipment Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Set Availability Api V1 Equipment  Equipment Id  Patch
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Toggle availability
+      tags:
+      - equipment
+  /api/v1/exercises:
+    get:
+      operationId: list_all_api_v1_exercises_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List All Api V1 Exercises Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Exercise library (seeded)
+      tags:
+      - exercises
+  /api/v1/exercises/{exercise_key}/contraindications:
+    get:
+      operationId: contraindications_api_v1_exercises__exercise_key__contraindications_get
+      parameters:
+      - in: path
+        name: exercise_key
+        required: true
+        schema:
+          title: Exercise Key
+          type: string
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Contraindications Api V1 Exercises  Exercise Key  Contraindications Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Contraindications for one exercise
+      tags:
+      - exercises
+  /api/v1/health:
+    get:
+      description: "Report process, database and schema-migration state.\n\nReturns:\n    ``{\"status\"\
+        : \"ok\"|\"degraded\", \"service\", \"version\", \"db\": {...}}``.\n    Never raises: a broken\
+        \ database is reported as ``degraded`` so the\n    Studio shell can show a recovery action instead\
+        \ of a blank screen."
+      operationId: health_api_v1_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Health Api V1 Health Get
+                type: object
+          description: Successful Response
+      summary: Core liveness + schema readiness
+      tags:
+      - health
+  /api/v1/members:
+    get:
+      description: OWNER/ADMIN/RECEPTION see everyone; TRAINER only assigned members.
+      operationId: list_members_api_v1_members_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/MemberOut'
+                title: Response List Members Api V1 Members Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: List visible members
+      tags:
+      - members
+    post:
+      operationId: create_member_api_v1_members_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberOut'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Register a member
+      tags:
+      - members
+  /api/v1/members/{member_id}:
+    delete:
+      operationId: delete_member_api_v1_members__member_id__delete
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Soft-delete (tombstone) a member
+      tags:
+      - members
+    get:
+      operationId: get_member_api_v1_members__member_id__get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberOut'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: One member
+      tags:
+      - members
+    patch:
+      operationId: update_member_api_v1_members__member_id__patch
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberOut'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Update a member
+      tags:
+      - members
+  /api/v1/members/{member_id}/assessments:
+    get:
+      operationId: list_assessments_api_v1_members__member_id__assessments_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AssessmentOut'
+                title: Response List Assessments Api V1 Members  Member Id  Assessments Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Assessment history (newest first)
+      tags:
+      - assessments
+    post:
+      description: 'Deterministic JP7 — rule C6: no LLM is involved in these numbers.'
+      operationId: create_assessment_api_v1_members__member_id__assessments_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssessmentOut'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Compute + store a JP7 assessment
+      tags:
+      - assessments
+  /api/v1/members/{member_id}/assessments/{assessment_id}/pdf:
+    get:
+      description: Render one stored assessment to a downloadable PDF.
+      operationId: assessment_pdf_api_v1_members__member_id__assessments__assessment_id__pdf_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: path
+        name: assessment_id
+        required: true
+        schema:
+          title: Assessment Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: PDF assessment report (map §14 Phase 1)
+      tags:
+      - assessments
+  /api/v1/members/{member_id}/filters:
+    get:
+      description: The exact input Phase 3's contraindication graph consumes.
+      operationId: member_filters_api_v1_members__member_id__filters_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                title: Response Member Filters Api V1 Members  Member Id  Filters Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Blocked patterns + allowed modifications for the program builder
+      tags:
+      - injuries
+  /api/v1/members/{member_id}/injuries:
+    get:
+      operationId: list_injuries_api_v1_members__member_id__injuries_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InjuryOut'
+                title: Response List Injuries Api V1 Members  Member Id  Injuries Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Full dossier (Studio — includes clinician note)
+      tags:
+      - injuries
+    post:
+      operationId: create_injury_api_v1_members__member_id__injuries_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InjuryCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InjuryOut'
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Record an injury + contraindications
+      tags:
+      - injuries
+  /api/v1/members/{member_id}/injuries/{injury_id}:
+    delete:
+      operationId: delete_injury_api_v1_members__member_id__injuries__injury_id__delete
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: path
+        name: injury_id
+        required: true
+        schema:
+          title: Injury Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Tombstone an injury record
+      tags:
+      - injuries
+  /api/v1/members/{member_id}/pin:
+    post:
+      description: 'Store a PBKDF2 hash of the member''s PIN so they can use the client app.
+
+
+        Only the hash is written; the plaintext never touches disk (C11).'
+      operationId: set_member_pin_api_v1_members__member_id__pin_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetMemberPin'
+        required: true
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Set member PIN (front desk)
+      tags:
+      - members
+  /api/v1/members/{member_id}/programs:
+    get:
+      operationId: list_programs_api_v1_members__member_id__programs_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List Programs Api V1 Members  Member Id  Programs Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Program history for a member
+      tags:
+      - programs
+  /api/v1/members/{member_id}/programs/generate:
+    post:
+      operationId: generate_api_v1_members__member_id__programs_generate_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Generate Api V1 Members  Member Id  Programs Generate Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Generate a rule-based program (draft)
+      tags:
+      - programs
+  /api/v1/members/{member_id}/qr:
+    get:
+      description: 'QR payload per map §8: ``{v, typ, gym, mid, exp, sig}`` HMAC-signed.'
+      operationId: member_qr_api_v1_members__member_id__qr_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Member Qr Api V1 Members  Member Id  Qr Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Signed short-lived check-in QR payload
+      tags:
+      - members
+  /api/v1/nutrition/members/{member_id}/plan:
+    get:
+      operationId: get_plan_api_v1_nutrition_members__member_id__plan_get
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Plan Api V1 Nutrition Members  Member Id  Plan Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Latest stored nutrition plan
+      tags:
+      - nutrition
+    post:
+      operationId: create_plan_api_v1_nutrition_members__member_id__plan_post
+      parameters:
+      - in: path
+        name: member_id
+        required: true
+        schema:
+          title: Member Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NutritionRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Plan Api V1 Nutrition Members  Member Id  Plan Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Compute + store a nutrition plan from the latest assessment LBM
+      tags:
+      - nutrition
+  /api/v1/packages:
+    get:
+      operationId: list_packages_api_v1_packages_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response List Packages Api V1 Packages Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Active membership packages
+      tags:
+      - payments
+    post:
+      operationId: create_package_api_v1_packages_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackageCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Package Api V1 Packages Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Define a package (finance only)
+      tags:
+      - payments
+  /api/v1/payments:
+    post:
+      operationId: create_payment_api_v1_payments_post
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Create Payment Api V1 Payments Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Record a payment (cash entry at the desk)
+      tags:
+      - payments
+  /api/v1/payments/{payment_id}/receipt:
+    get:
+      operationId: receipt_api_v1_payments__payment_id__receipt_get
+      parameters:
+      - in: path
+        name: payment_id
+        required: true
+        schema:
+          title: Payment Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Receipt PDF
+      tags:
+      - payments
+  /api/v1/payments/{payment_id}/void:
+    post:
+      operationId: void_api_v1_payments__payment_id__void_post
+      parameters:
+      - in: path
+        name: payment_id
+        required: true
+        schema:
+          title: Payment Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Void Api V1 Payments  Payment Id  Void Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Void (finance only, audited)
+      tags:
+      - payments
+  /api/v1/programs/{program_id}/apply:
+    post:
+      operationId: apply_api_v1_programs__program_id__apply_post
+      parameters:
+      - in: path
+        name: program_id
+        required: true
+        schema:
+          title: Program Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Apply Api V1 Programs  Program Id  Apply Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: 'Approve + apply (C8: after dry-run)'
+      tags:
+      - programs
+  /api/v1/programs/{program_id}/archive:
+    post:
+      operationId: archive_api_v1_programs__program_id__archive_post
+      parameters:
+      - in: path
+        name: program_id
+        required: true
+        schema:
+          title: Program Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Archive Api V1 Programs  Program Id  Archive Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Archive (the undo of apply)
+      tags:
+      - programs
+  /api/v1/programs/{program_id}/dry-run:
+    post:
+      description: Re-validate the stored ops against the member's CURRENT filters.
+      operationId: dry_run_api_v1_programs__program_id__dry_run_post
+      parameters:
+      - in: path
+        name: program_id
+        required: true
+        schema:
+          title: Program Id
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Dry Run Api V1 Programs  Program Id  Dry Run Post
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: 'Dry-run: validate without applying (C8)'
+      tags:
+      - programs
+  /api/v1/reports/dashboard:
+    get:
+      operationId: dashboard_api_v1_reports_dashboard_get
+      parameters:
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Dashboard Api V1 Reports Dashboard Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Gym KPIs (finance roles)
+      tags:
+      - reports
+  /api/v1/reports/expiring:
+    get:
+      operationId: expiring_api_v1_reports_expiring_get
+      parameters:
+      - in: query
+        name: days
+        required: false
+        schema:
+          default: 7
+          maximum: 365
+          minimum: 0
+          title: Days
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Expiring Api V1 Reports Expiring Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Members expiring within N days
+      tags:
+      - automation
+  /api/v1/reports/inactive-members:
+    get:
+      operationId: inactive_api_v1_reports_inactive_members_get
+      parameters:
+      - in: query
+        name: days
+        required: false
+        schema:
+          default: 7
+          maximum: 365
+          minimum: 1
+          title: Days
+          type: integer
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  additionalProperties: true
+                  type: object
+                title: Response Inactive Api V1 Reports Inactive Members Get
+                type: array
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Members not seen in N days
+      tags:
+      - automation
+  /api/v1/sync/delta:
+    get:
+      operationId: delta_api_v1_sync_delta_get
+      parameters:
+      - in: query
+        name: since
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Since
+      - in: header
+        name: authorization
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Authorization
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Delta Api V1 Sync Delta Get
+                type: object
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Rows changed since a cursor (full snapshot if none)
+      tags:
+      - sync
+  /health:
+    get:
+      description: "Report process, database and schema-migration state.\n\nReturns:\n    ``{\"status\"\
+        : \"ok\"|\"degraded\", \"service\", \"version\", \"db\": {...}}``.\n    Never raises: a broken\
+        \ database is reported as ``degraded`` so the\n    Studio shell can show a recovery action instead\
+        \ of a blank screen."
+      operationId: health_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Health Health Get
+                type: object
+          description: Successful Response
+      summary: Core liveness + schema readiness
+      tags:
+      - health

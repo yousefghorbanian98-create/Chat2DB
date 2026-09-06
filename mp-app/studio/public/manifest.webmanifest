@@ -1,0 +1,36 @@
+{
+  "id": "mp-admin",
+  "name": "ماسل پارادایز — استودیو (ادمین و مربی)",
+  "short_name": "MP Studio",
+  "description": "نسخهٔ ادمین و مربی باشگاه ماسل پارادایز: اعضا، ارزیابی JP7، برنامه‌ها، تغذیه، عملیات و پشتیبان‌گیری.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#0b0d10",
+  "theme_color": "#0b0d10",
+  "categories": ["health", "business", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icons/icon-admin-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-admin-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-admin-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

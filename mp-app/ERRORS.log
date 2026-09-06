@@ -1,0 +1,58 @@
+# MP ERRORS.log — Auto Debug Engine record (FINN-LOOP Phase 4)
+# Format: [ISO date] CATEGORY | file:line | root cause | fix | regression test
+# Rule: same error 3x -> add a lint rule or hook to prevent it.
+
+[2026-08-29] TYPE | app/migrations/__init__.py:22 + app/migrations/v001_core.py:10 | ImportError: circular import — the runner package imported v001_core, and v001_core imported Migration back from the package (partially initialized) | moved Migration/MigrationError/MigrationDriftError into leaf module app/migrations/base.py; runner re-exports them | tests/test_migrations.py::test_migrations_run_in_version_order_on_fresh_db + checksum test exercise both modules
+
+[2026-08-29] RUNTIME | app/migrations/v001_core.py (_GYM_AUDIT) | sqlite3.IntegrityError: NOT NULL constraint failed: gyms.gym_id — the audit template gave gyms a NOT NULL tenant column, but a gym row's own id is unknown until insert | gyms.gym_id is now nullable at insert and trg_gyms_self_tenant (AFTER INSERT) sets gym_id = id | tests/test_migrations.py::test_gym_row_is_its_own_tenant_via_trigger
+
+[2026-08-29] QUALITY | app/main.py:118 | DeprecationWarning: on_event("shutdown") deprecated in FastAPI 0.141 | replaced with an asynccontextmanager lifespan passed to FastAPI(lifespan=...) | pytest run went 17 warnings -> 1 warning (remaining one is Starlette's own httpx notice)
+
+[2026-08-29] QUALITY | app/migrations/v001_core.py | self-inflicted: index was written against a non-existent column (measured_at_idx) then string-patched at import time | removed the patch, indexed body_assessments(member_id, created_at) directly | tests/test_migrations.py::test_every_mapped_table_was_created
+
+[2026-08-29] INTEGRATION | app/main.py | uvicorn failed with: Error loading ASGI app. Attribute "app" not found in module "app.main" — the module only exported the create_app() factory, so the documented run command could not boot | added create_app_from_env() (env-driven factory, keeps DB untouched at import time) + backend/run.sh, launched with --factory | manual smoke test on :8751 returned status ok / 25 tables / schema 0001_core, x-request-id + x-response-ms headers present, CORS allowlist rejected https://evil.example
+
+[2026-08-29] LOGIC | tests/test_phase1_api.py (self-inflicted) | asserted body_fat_pct == 21.5437 for female/30y/sum=105mm — that literal was GUESSED, not computed; the implementation returned 21.4259 | recomputed independently with python decimal (BD 1.050006 -> Siri 21.4259) and pinned both body_density and body_fat_pct in the test | test_stored_numbers_match_the_golden_math now asserts the derived value; rule added below
+
+[2026-08-29] LOGIC | app/auth/deps.py | RBAC hole: require_staff included KIOSK, so the kiosk role could create/list members. Map §2.4 says KIOSK is "Scan only" | split into MEMBER_READ_ROLES (OWNER/ADMIN/TRAINER/RECEPTION) and MEMBER_WRITE_ROLES (OWNER/ADMIN/RECEPTION); members router now uses require_member_read / require_member_write | TestRbac: kiosk 403 on create AND on list; trainer read-only; reception can register; MEMBER token 403 on studio surface
+
+# RULE (added after the error above, per Auto Debug step 6):
+# never paste an expected numeric literal you did not compute. Derive it with an
+# independent calculation (python decimal) and cite the derivation in the test.
+
+[2026-08-29] LOGIC | app/auth/scope.py (new) + app/repo/members.py + routers | RBAC hole #2: TRAINER could read/assess EVERY member. staff_can_see_member() existed in the repo layer but no router called it (verified: grep found zero call sites) | added app/auth/scope.py with scope_trainer_id() + ensure_member_visible(); list_members gained a trainer_id filter; unassigned access returns 404 (not 403) so trainers cannot learn a member exists | TestRbac::test_trainer_sees_only_assigned_members (empty list -> 404 -> assign -> visible), test_unassigned_trainer_cannot_touch_injuries_or_assessments
+
+[2026-08-29] LOGIC | tests/test_phase1_api.py | an older test (test_trainer_can_run_assessments) had fossilised the unscoped behaviour and failed once scoping landed | replaced with test_assigned_trainer_can_run_assessments + an assigned_trainer_auth fixture that states the assignment explicitly | suite 132 passed
+
+[2026-08-29] INTEGRATION | mp-app/studio/src/api/client.ts | self-inflicted: the Phase 2 client was written from memory, not from the contract — it called /api/v1/payments/packages (real path is /api/v1/packages because the payments router has no prefix), typed /attendance/today as {count} (server returns {date, check_ins}), and invented dashboard/payment/package field names (revenue_today_rial vs revenue_rial_this_month, missing receipt_no/staff_id, booleans typed as boolean where SQLite returns 0/1) | re-derived every path and payload from mp-app/openapi.yaml, then re-verified live against the running core | GET /packages, /attendance/today, /reports/dashboard, /ai/runtime, /sync/delta all 200 with matching field names; check-in 201 then 409; payment 201 with receipt_no R-1-000001; dashboard moved check_ins_today 0->1 and revenue_rial_this_month 0->1500000
+
+# RULE (added after the error above): a frontend client is generated from the
+# contract (openapi.yaml) or verified against a live response — never written
+# from memory of what the backend "probably" returns.
+
+[2026-08-30] QUALITY | mp-app/studio/src (14 files) | ESLint max-lines-per-function (limit 50) had 21 violations. Sub-component extraction alone did NOT clear it: ResultPanel/SiteForm still landed at 60-66 lines after two extractions each. The real driver was inline style={{...}} object literals counted as JSX lines | fix order that works: (1) hoist every inline style to a module const in styles/blocks.ts, (2) then extract JSX clusters as sub-components, (3) move data fetching into src/hooks/* | ESLint 0 problems, --max-warnings=0 green; 90 tests passed; tsc 0
+
+[2026-08-30] TYPES | studio motion style helpers (4 separate occurrences: MotionButton.buttonStyle, CoreStatus.PILL, ProgramPreview.BANNER, Sync.NOTE) | annotating a hoisted style const as CSSProperties breaks tsc under exactOptionalPropertyTypes when the const feeds a motion.* element (CSSProperties.x?: X<string|number> vs MotionStyle.x) — and the REVERSE also breaks: a MotionStyle const fed to a plain <div>/<form> fails too | type by consumer, not by habit: MotionStyle for motion.*, CSSProperties for plain elements. When one logical style feeds both (Sync NOTE), declare two consts (NOTE + NOTE_CSS) instead of one shared object | tsc --noEmit exit 0 across all 14 refactored files
+
+[2026-08-30] LOGIC | studio/src/components/assessment/ResultPanel.tsx | found by a new test, not by review: the "saved" confirmation was rendered in an `: saved ?` ELSE branch after `preview ?`, and save is only enabled once a preview exists — so the success message was unreachable dead UI in every real flow | render SavedConfirmation alongside the preview (and keep the else-branch for the history-only case) | assessmentJp7.test.tsx "saves through the core and shows the stored confirmation" now passes
+
+[2026-08-30] LOGIC | studio/src/hooks/useNutrition.ts | refactor regression caught by reading the diff, not by tests: the original Login/Coach select handler cleared the stale plan on member change; moving state into a hook dropped that, so switching athlete would have kept showing the previous athlete's macros. No test covered it, so the suite stayed green while the bug existed | selectMember() now clears plan+error+state; same pattern applied to useProgramPlanner.setMemberId | tsc 0, 90 tests green
+
+[2026-08-30] TEST | studio vitest.setup.ts | recharts (BodyFatChart) throws in jsdom because it measures its container with ResizeObserver, which jsdom does not implement — so no test could render AssessmentJp7 at all, leaving the whole assessment page at 0% coverage | added a ResizeObserver stub to vitest.setup.ts | 7 new AssessmentJp7 page tests; coverage 63.92% -> 82.24% statements
+
+[2026-08-30] TEST | studio/src/pages/assessmentJp7.test.tsx | two self-inflicted test bugs in the first draft: (a) input ids were derived by capitalising the site key, but NumberField ids come from SITE_META[key].en and 'abdominal' renders as 'Abdomen', not 'Abdominal'; (b) the loading-skeleton assertion used findByText, but Skeleton exposes its label as aria-label only, and a fast stubbed fetch resolves before findByText can observe it | derive ids from SITE_META itself; assert getByRole('status', {name}) against a never-settling fetch so the load phase is observable | 7/7 pass
+
+# RULE (added after the errors above): when a refactor moves state into a hook,
+# diff the OLD handler bodies against the new ones line by line. Side effects
+# riding along in an event handler (clearing stale results, resetting a flag)
+# are the first thing a rewrite silently drops, and a green suite does not
+# prove they survived.
+
+[2026-08-30] SECURITY | mp-app/backend/app/core/persian.py + requirements.txt | C11 license violation caught at integration: I first installed python-bidi 0.6.11 for RTL reordering, but its dist-info COPYING/COPYING.LESSER show LGPL/GPL v3 — copyleft, and C11 limits the product to permissive licenses (the 0.4.2 "classic" is ALSO LGPL). No permissive bidi exists on PyPI (pybidi UNKNOWN/py33, python-fribidi wraps LGPL fribidi) | wrote an in-house MIT UAX#9 subset (_display) and kept arabic-reshaper (MIT) as the only runtime shaping dep; uninstalled python-bidi and re-verified 224 tests + the rendered PDF without it. python-bidi was kept only as a dev-time ORACLE to prove _display matches on the report's strings (13/14; the 1 diff was end-of-sentence punctuation, sidestepped by rewording the disclaimer to commas) | suite green sans bidi; PDF visually verified
+
+[2026-08-30] INTEGRITY | mp-app/assets/fonts/PersianSans-Regular.ttf | the workspace file named "Vazirmatn-Regular.ttf" (youtube-auto-uploader/resources/fonts/) is actually DejaVu Sans 2.37 per fontTools name table — bundling it while NOTICES.md claimed "Vazirmatn / OFL" would have been a false license claim | renamed the copy to PersianSans-Regular.ttf, verified full Arabic/Persian + presentation-form coverage (0 missing glyphs after reshape), and rewrote NOTICES.md provenance to state DejaVu Sans 2.37 (Bitstream Vera / public-domain) — never Vazirmatn | NOTICES.md corrected; MP_PERSIAN_FONT env lets a real Vazirmatn TTF replace it later
+
+# RULE (added after the two errors above): before adding ANY dependency or
+# asset, read its actual license file (dist-info COPYING / name table), not the
+# package's marketing name or the file's label. LGPL is not "permissive"; a
+# mislabelled font is still a mislabelled font.

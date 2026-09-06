@@ -1,0 +1,440 @@
+[
+  {
+    "key": "ex001",
+    "name_en": "Barbell Back Squat",
+    "name_fa": "اسکوات هالبل از پشت",
+    "equipment": "barbell",
+    "pattern": "squat",
+    "primary_muscles": "quads,glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "deep_squat",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex002",
+    "name_en": "Goblet Squat",
+    "name_fa": "اسکوات جامی",
+    "equipment": "dumbbell",
+    "pattern": "squat",
+    "primary_muscles": "quads,glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "deep_squat",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex003",
+    "name_en": "Conventional Deadlift",
+    "name_fa": "ددلیفت سنتی",
+    "equipment": "barbell",
+    "pattern": "hinge",
+    "primary_muscles": "posterior",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "heavy_deadlift",
+        "severity": "hard_block"
+      }
+    ]
+  },
+  {
+    "key": "ex004",
+    "name_en": "Trap Bar Deadlift",
+    "name_fa": "ددلیفت هالبل ذوزنقه",
+    "equipment": "trap_bar",
+    "pattern": "hinge",
+    "primary_muscles": "posterior",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "heavy_deadlift",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex005",
+    "name_en": "Romanian Deadlift",
+    "name_fa": "ددلیفت رومانیایی",
+    "equipment": "barbell",
+    "pattern": "hinge",
+    "primary_muscles": "hamstrings",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "spinal_flexion",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex006",
+    "name_en": "Bench Press",
+    "name_fa": "پرس سینه هالبل",
+    "equipment": "barbell",
+    "pattern": "push",
+    "primary_muscles": "chest,triceps",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "shoulder",
+        "pattern": "overhead_press",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex007",
+    "name_en": "Push-Up",
+    "name_fa": "شنا سوئدی",
+    "equipment": "bodyweight",
+    "pattern": "push",
+    "primary_muscles": "chest,triceps",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "wrist",
+        "pattern": "wrist_extension",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex008",
+    "name_en": "Overhead Press",
+    "name_fa": "پرس سرشانه هالبل",
+    "equipment": "barbell",
+    "pattern": "overhead",
+    "primary_muscles": "shoulders",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "shoulder",
+        "pattern": "overhead_press",
+        "severity": "hard_block"
+      }
+    ]
+  },
+  {
+    "key": "ex009",
+    "name_en": "Landmine Press",
+    "name_fa": "پرس لندماین",
+    "equipment": "landmine",
+    "pattern": "overhead",
+    "primary_muscles": "shoulders",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex010",
+    "name_en": "Pull-Up",
+    "name_fa": "بارفیکس",
+    "equipment": "bodyweight",
+    "pattern": "pull",
+    "primary_muscles": "lats,biceps",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "shoulder",
+        "pattern": "overhead_pull",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex011",
+    "name_en": "Lat Pulldown",
+    "name_fa": "زیربغل سیم‌کش",
+    "equipment": "cable",
+    "pattern": "pull",
+    "primary_muscles": "lats",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex012",
+    "name_en": "Seated Cable Row",
+    "name_fa": "قایقی سیم‌کش",
+    "equipment": "cable",
+    "pattern": "pull",
+    "primary_muscles": "back",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex013",
+    "name_en": "Bent-Over Row",
+    "name_fa": "زیربخم خم هالبل",
+    "equipment": "barbell",
+    "pattern": "pull",
+    "primary_muscles": "back",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "spinal_flexion",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex014",
+    "name_en": "Biceps Curl",
+    "name_fa": "جلوبازو هالبل",
+    "equipment": "barbell",
+    "pattern": "pull",
+    "primary_muscles": "biceps",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex015",
+    "name_en": "Triceps Pushdown",
+    "name_fa": "پشت‌بازو سیم‌کش",
+    "equipment": "cable",
+    "pattern": "push",
+    "primary_muscles": "triceps",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex016",
+    "name_en": "Leg Press",
+    "name_fa": "پرس پا دستگاه",
+    "equipment": "machine",
+    "pattern": "squat",
+    "primary_muscles": "quads",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "deep_squat",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex017",
+    "name_en": "Leg Extension",
+    "name_fa": "جلورا دستگاه",
+    "equipment": "machine",
+    "pattern": "knee_iso",
+    "primary_muscles": "quads",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "knee_flexion",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex018",
+    "name_en": "Leg Curl",
+    "name_fa": "پشت‌پا دستگاه",
+    "equipment": "machine",
+    "pattern": "knee_iso",
+    "primary_muscles": "hamstrings",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex019",
+    "name_en": "Walking Lunge",
+    "name_fa": "لانگز راه‌رفتنی",
+    "equipment": "dumbbell",
+    "pattern": "single_leg",
+    "primary_muscles": "quads,glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "deep_squat",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex020",
+    "name_en": "Bulgarian Split Squat",
+    "name_fa": "اسکوات بلغاری",
+    "equipment": "dumbbell",
+    "pattern": "single_leg",
+    "primary_muscles": "quads,glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "deep_squat",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex021",
+    "name_en": "Hip Thrust",
+    "name_fa": "هیپ تراست",
+    "equipment": "barbell",
+    "pattern": "hinge",
+    "primary_muscles": "glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex022",
+    "name_en": "Glute Bridge",
+    "name_fa": "پل باسن",
+    "equipment": "bodyweight",
+    "pattern": "hinge",
+    "primary_muscles": "glutes",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex023",
+    "name_en": "Calf Raise",
+    "name_fa": "ساق پا دستگاه",
+    "equipment": "machine",
+    "pattern": "ankle",
+    "primary_muscles": "calves",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "ankle",
+        "pattern": "jump_landing",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex024",
+    "name_en": "Plank",
+    "name_fa": "پلانک",
+    "equipment": "bodyweight",
+    "pattern": "core",
+    "primary_muscles": "core",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "spinal_flexion",
+        "severity": "caution"
+      }
+    ]
+  },
+  {
+    "key": "ex025",
+    "name_en": "Dead Bug",
+    "name_fa": "ددباگ",
+    "equipment": "bodyweight",
+    "pattern": "core",
+    "primary_muscles": "core",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex026",
+    "name_en": "Bird Dog",
+    "name_fa": "بردداگ",
+    "equipment": "bodyweight",
+    "pattern": "core",
+    "primary_muscles": "core",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex027",
+    "name_en": "Side Plank",
+    "name_fa": "پلانک پهلو",
+    "equipment": "bodyweight",
+    "pattern": "core",
+    "primary_muscles": "obliques",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex028",
+    "name_en": "Hanging Leg Raise",
+    "name_fa": "بالا آوردن پا آویزان",
+    "equipment": "bodyweight",
+    "pattern": "core",
+    "primary_muscles": "core",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "lumbar",
+        "pattern": "spinal_flexion",
+        "severity": "swap"
+      }
+    ]
+  },
+  {
+    "key": "ex029",
+    "name_en": "Treadmill Walk",
+    "name_fa": "راه‌رفتن تردمیل",
+    "equipment": "treadmill",
+    "pattern": "cardio",
+    "primary_muscles": "cardio",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": []
+  },
+  {
+    "key": "ex030",
+    "name_en": "Assault Bike",
+    "name_fa": "دوچرخه ایربایک",
+    "equipment": "bike",
+    "pattern": "cardio",
+    "primary_muscles": "cardio",
+    "source": "curated",
+    "source_license": "MIT",
+    "contraindications": [
+      {
+        "body_region": "knee",
+        "pattern": "high_impact",
+        "severity": "caution"
+      }
+    ]
+  }
+]
