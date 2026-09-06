@@ -627,3 +627,18 @@ Format: Keep a Changelog. Versioning: every release must move a measured number
 - Frontend: **153 passed** across 21 files, `npm run gate` exit 0.
 - Entry bundle 6.24 kB gzip; largest chunk `AssessmentJp7` 111.12 kB gzip (open
   issue R15).
+
+### Security (found by the new CI security job on its first run)
+- **CWE-22 path traversal in the updater rollback (HIGH).** `_restore_app` called
+  `tarfile.extractall()` with no member validation. The snapshot is ours, but it
+  sits on disk between backup and restore; a tampered entry named
+  `../../etc/cron.d/x`, or a symlink, would be written anywhere the process can
+  reach while rolling back a failed update. Added `_safe_members()` (rejects
+  links, special files, and any path resolving outside the prefix) plus three
+  tests.
+- **Unrestricted URL scheme in the n8n bridge.** The webhook URL is operator-
+  configurable and `urlopen` honours `file:`/`ftp:`, so `file:///etc/passwd` was
+  an accepted webhook. Added `is_allowed_webhook()` (http/https + host only);
+  `_post` now raises. Eight parametrised tests.
+- `bandit.yaml` records the only two suppressions, each with a written
+  justification, and the security job is a blocking gate.

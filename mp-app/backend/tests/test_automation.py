@@ -8,6 +8,8 @@ import json
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+import pytest
+
 from app.automation import events
 
 
@@ -91,3 +93,33 @@ def test_reports_are_staff_only_and_redacted(seeded, owner_auth, member_auth, me
     rows = inactive.json()
     assert any(r["id"] == member_id for r in rows)
     assert all("clinician_note" not in r and "national_id" not in r for r in rows)
+
+
+@pytest.mark.api
+class TestWebhookSchemeAllowlist:
+    """urlopen honours file:/ftp:; the bridge must only ever speak http(s)."""
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "file:///etc/passwd",
+            "ftp://example.com/x",
+            "gopher://example.com",
+            "http://",          # no host
+            "not-a-url",
+            "",
+        ],
+    )
+    def test_rejects_non_http_urls(self, url: str) -> None:
+        assert events.is_allowed_webhook(url) is False
+
+    @pytest.mark.parametrize(
+        "url",
+        ["http://127.0.0.1:5678/webhook/mp", "https://n8n.gym.lan/webhook/mp"],
+    )
+    def test_accepts_http_and_https(self, url: str) -> None:
+        assert events.is_allowed_webhook(url) is True
+
+    def test_post_refuses_to_open_a_file_url(self) -> None:
+        with pytest.raises(ValueError, match="non-http"):
+            events._post("file:///etc/passwd", b"{}", "sig")

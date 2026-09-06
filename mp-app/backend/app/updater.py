@@ -29,6 +29,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -163,12 +164,34 @@ def _backup_app(app_dir: Path, prefix: Path) -> Path:
     return archive
 
 
+def _safe_members(tar: tarfile.TarFile, dest: Path) -> Iterator[tarfile.TarInfo]:
+    """Yield only members that land inside ``dest`` and are plain files/dirs.
+
+    The rollback archive is written by us, but it sits on disk between the
+    backup and the restore. If anything tampers with it, an entry named
+    ``../../etc/cron.d/x`` or a symlink pointing outside the tree would let
+    ``extractall`` write anywhere the process can reach (CWE-22, "tar slip").
+    Validating members here means a corrupted snapshot fails loudly instead of
+    escaping the prefix.
+    """
+    root = dest.resolve()
+    for member in tar.getmembers():
+        if member.issym() or member.islnk():
+            raise ValueError(f"refusing link member in backup archive: {member.name}")
+        if not (member.isfile() or member.isdir()):
+            raise ValueError(f"refusing special member in backup archive: {member.name}")
+        target = (root / member.name).resolve()
+        if target != root and root not in target.parents:
+            raise ValueError(f"refusing path outside prefix: {member.name}")
+        yield member
+
+
 def _restore_app(archive: Path, prefix: Path) -> None:
     """Roll the app tree back to a snapshot taken by ``_backup_app``."""
     app_dir = prefix / "app"
     shutil.rmtree(app_dir, ignore_errors=True)
     with tarfile.open(archive, "r:gz") as tar:
-        tar.extractall(prefix)  # noqa: S202 - archive was written by us this run
+        tar.extractall(prefix, members=_safe_members(tar, prefix))  # noqa: S202
 
 
 def _copy_tree(source: Path, app_dir: Path, plan: UpdatePlan) -> None:

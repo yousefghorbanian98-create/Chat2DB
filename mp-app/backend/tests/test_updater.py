@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import json
+import tarfile
 from pathlib import Path
 
 import pytest
 
+from app import updater
 from app.updater import (
     MANIFEST_NAME,
     UpdatePlan,
@@ -179,3 +181,55 @@ def test_cli_dry_run_and_error_paths(tmp_path: Path, capsys) -> None:
     empty.mkdir()
     assert main(["--prefix", str(prefix), "--from", str(empty)]) == 2
     assert "not an MP package" in capsys.readouterr().err
+
+
+@pytest.mark.security
+class TestRestoreRejectsUnsafeArchives:
+    """A tampered rollback snapshot must not be able to write outside the prefix."""
+
+    def _archive(self, tmp_path: Path, build) -> Path:
+        archive = tmp_path / "evil.tar.gz"
+        with tarfile.open(archive, "w:gz") as tar:
+            build(tar, tmp_path)
+        return archive
+
+    def test_rejects_path_traversal_member(self, tmp_path: Path) -> None:
+        payload = tmp_path / "payload"
+        payload.write_text("pwned", encoding="utf-8")
+
+        def build(tar, _):
+            tar.add(payload, arcname="../../escaped.txt")
+
+        archive = self._archive(tmp_path, build)
+        prefix = tmp_path / "prefix"
+        prefix.mkdir()
+        with pytest.raises(ValueError, match="outside prefix"):
+            updater._restore_app(archive, prefix)
+        assert not (tmp_path.parent / "escaped.txt").exists()
+
+    def test_rejects_symlink_member(self, tmp_path: Path) -> None:
+        link = tmp_path / "link"
+        link.symlink_to("/etc/passwd")
+
+        def build(tar, _):
+            tar.add(link, arcname="app/link")
+
+        archive = self._archive(tmp_path, build)
+        prefix = tmp_path / "prefix2"
+        prefix.mkdir()
+        with pytest.raises(ValueError, match="link member"):
+            updater._restore_app(archive, prefix)
+
+    def test_still_restores_a_legitimate_snapshot(self, tmp_path: Path) -> None:
+        prefix = tmp_path / "prefix3"
+        app_dir = prefix / "app"
+        app_dir.mkdir(parents=True)
+        (app_dir / "main.py").write_text("v1", encoding="utf-8")
+
+        archive = prefix / "snap.tar.gz"
+        with tarfile.open(archive, "w:gz") as tar:
+            tar.add(app_dir, arcname="app")
+
+        (app_dir / "main.py").write_text("v2-broken", encoding="utf-8")
+        updater._restore_app(archive, prefix)
+        assert (app_dir / "main.py").read_text(encoding="utf-8") == "v1"

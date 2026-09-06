@@ -12,6 +12,7 @@ import hmac
 import json
 import threading
 import time
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from typing import Any
@@ -72,14 +73,32 @@ def build_event(event: str, gym_id: int, data: dict[str, Any]) -> dict[str, Any]
     }
 
 
+#: The bridge posts to an owner-supplied URL. urlopen honours ``file:``,
+#: ``ftp:`` and any custom scheme, so an operator (or anyone who reaches the
+#: config endpoint) could otherwise turn the webhook into a local-file read.
+_ALLOWED_SCHEMES = frozenset({"http", "https"})
+
+
+def is_allowed_webhook(url: str) -> bool:
+    """True when ``url`` is an http(s) URL with a host — the only shape we POST to."""
+    try:
+        parsed = urllib.parse.urlparse(url)
+    except ValueError:
+        return False
+    return parsed.scheme in _ALLOWED_SCHEMES and bool(parsed.hostname)
+
+
 def _post(url: str, body: bytes, signature: str) -> None:
+    if not is_allowed_webhook(url):
+        raise ValueError(f"refusing non-http(s) automation URL: {url!r}")
     req = urllib.request.Request(
         url,
         data=body,
         headers={"Content-Type": "application/json", "X-MP-Signature": signature},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=5) as res:  # noqa: S310 local LAN only
+    # Scheme is validated immediately above, so urlopen cannot reach file:/ftp:.
+    with urllib.request.urlopen(req, timeout=5) as res:  # noqa: S310
         res.read()
 
 

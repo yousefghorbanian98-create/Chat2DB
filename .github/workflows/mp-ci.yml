@@ -126,16 +126,16 @@ jobs:
   security:
     name: Security scan
     runs-on: ubuntu-latest
-    # Advisory while the P0 backlog (rate limiting, audit log) is being cleared;
-    # flip to blocking once mp-app/backend is clean. Tracked as R5.
-    continue-on-error: true
+    # Blocking. The suppressions bandit honours live in mp-app/backend/bandit.yaml,
+    # each with a written justification — a new finding must be fixed or argued
+    # for there, never silently ignored.
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - run: pip install pip-audit bandit
       - run: pip-audit -r mp-app/backend/requirements.txt --strict
-      - run: bandit -q -r mp-app/backend/app -ll
+      - run: bandit -q -c mp-app/backend/bandit.yaml -r mp-app/backend/app -ll
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - run: cd mp-app/studio && npm audit --audit-level=high

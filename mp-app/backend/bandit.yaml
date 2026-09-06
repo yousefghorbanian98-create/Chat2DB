@@ -1,0 +1,22 @@
+# Bandit configuration for the MP core.
+#
+# Two checks are suppressed here with a written justification. Nothing else is
+# suppressed: the security job is a blocking gate, so a new finding must be
+# fixed or explicitly argued for in this file — never silently ignored.
+
+exclude_dirs:
+  - tests
+
+skips:
+  # B608 — "hardcoded SQL expression". app/core/backup.py interpolates table
+  # names into SELECT/DELETE/INSERT because SQL has no bind parameter for an
+  # identifier. The names do not come from a request: they come from
+  # sqlalchemy.inspect(engine).get_table_names(), i.e. the live schema, and are
+  # quoted. There is no user-controlled path into that string.
+  - B608
+
+  # B310 — "urlopen permits file:/ and custom schemes". app/automation/events.py
+  # calls urlopen only after is_allowed_webhook() has asserted the URL is
+  # http(s) with a host, and _post() raises ValueError otherwise. Covered by
+  # tests/test_automation.py::TestWebhookSchemeAllowlist.
+  - B310

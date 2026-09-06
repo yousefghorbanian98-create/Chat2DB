@@ -34,7 +34,7 @@
 
 | سنجه | مقدار | چطور اندازه گرفته شد |
 |------|-------|----------------------|
-| تست بک‌اند | **264 passed / 0 failed** | `pytest --override-ini="addopts="` |
+| تست بک‌اند | **276 passed / 0 failed** | `pytest --override-ini="addopts="` |
 | تست فرانت | **153 passed / 0 failed** (۲۱ فایل) | `npm run gate` |
 | دروازهٔ کامل فرانت | **exit 0** (lint + prettier + tsc + coverage + build) | `npm run gate` |
 | باندل اولیه | **6.24 kB gzip** main + 108 kB chunk مشترک | خروجی `vite build` |
