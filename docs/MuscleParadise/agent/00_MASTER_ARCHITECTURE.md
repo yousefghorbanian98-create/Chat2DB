@@ -190,16 +190,16 @@ LOOP B    LOOP C    LOOP D     LOOP E      ← می‌توانند موازی ب
 | لوپ | سند | تسک | تخمین | وابستگی |
 |---|---|---|---|---|
 | **A** | [`LOOP_A_FOUNDATION.md`](LOOP_A_FOUNDATION.md) | ۱۹ | ۲ هفته | — |
-| **B** | [`LOOP_B_BACKEND.md`](LOOP_B_BACKEND.md) | ۲۴ | ۳ هفته | A |
-| **C** | [`LOOP_C_FRONTEND.md`](LOOP_C_FRONTEND.md) | ۳۶ | ۴ هفته | A |
+| **B** | [`LOOP_B_BACKEND.md`](LOOP_B_BACKEND.md) | ۳۰ | ۴ هفته | A |
+| **C** | [`LOOP_C_FRONTEND.md`](LOOP_C_FRONTEND.md) | ۴۰ | ۴ هفته | A |
 | **D** | [`LOOP_D_SHELL_TAURI.md`](LOOP_D_SHELL_TAURI.md) | ۳۰ | ۴ هفته | A |
 | **E** | [`LOOP_E_CONTENT.md`](LOOP_E_CONTENT.md) | ۱۴ | ۲ هفته | B |
 | **F** | [`LOOP_F_KIOSK.md`](LOOP_F_KIOSK.md) | ۲۴ | ۳ هفته | C, D |
 | **G** | [`LOOP_G_QUALITY.md`](LOOP_G_QUALITY.md) | ۱۶ | ۲ هفته | B, C, D |
 | **H** | [`LOOP_H_RELEASE.md`](LOOP_H_RELEASE.md) | ۱۴ | ۱.۵ هفته | همه |
-| | **مجموع** | **۱۷۷** | | |
+| | **مجموع** | **۱۸۷** | | |
 
-**نقطهٔ ورود:** [`TASK_BOARD.md`](TASK_BOARD.md) — وضعیت زندهٔ همهٔ ۱۷۷ تسک.
+**نقطهٔ ورود:** [`TASK_BOARD.md`](TASK_BOARD.md) — وضعیت زندهٔ همهٔ ۱۸۷ تسک.
 
 ---
 
@@ -361,7 +361,7 @@ SHA256SUMS + امضای cosign + SBOM
 | **`00_MASTER_ARCHITECTURE.md`** | این فایل — نقطهٔ شروع |
 | [`AGENT_PROMPT.md`](AGENT_PROMPT.md) | 🤖 **پرامپت آمادهٔ کپی برای واگذاری به عامل AI** |
 | [`01_LOOP_PROTOCOL.md`](01_LOOP_PROTOCOL.md) | پروتکل اجرایی هر تسک (self-heal / debug) |
-| [`TASK_BOARD.md`](TASK_BOARD.md) | وضعیت زندهٔ ۱۷۷ تسک |
+| [`TASK_BOARD.md`](TASK_BOARD.md) | وضعیت زندهٔ ۱۸۷ تسک |
 | `LOOP_A` … `LOOP_H` | تسک‌های ریز هر بخش |
 | [`../build/`](../build/) | ۱۳ سند مرجع فنی (DB، API، امنیت، …) |
 
