@@ -1,0 +1,146 @@
+Write-Host "=== BUILD TOOLS ==="
+
+$VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+if (Test-Path $VsWhere) {
+  Write-Host "VSWHERE_FOUND=True"
+
+  & $VsWhere -latest -products * 
+    -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 
+    -format json
+}
+else {
+  Write-Host "VSWHERE_FOUND=False"
+}
+
+Write-Host "=== COMPILER ==="
+
+where.exe cl.exe 2>$null
+
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "CL_NOT_IN_PATH"
+}
+
+Write-Host "=== LOCATING HANDOFF ==="
+
+$SearchFolders = @(
+  (Join-Path $HOME "Desktop"),
+  (Join-Path $HOME "Downloads")
+)
+
+Get-ChildItem $SearchFolders 
+  -Filter "slice-b-windows-handoff-bundle*" 
+  -File `
+  -ErrorAction SilentlyContinue |
+  Select-Object FullName, Length
+
+Write-Host "=== CHECK COMPLETE ==="
+
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\Yousef\Desktop> Write-Host "=== BUILD TOOLS ==="
+=== BUILD TOOLS ===
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> $VsWhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> if (Test-Path $VsWhere) {
+>>   Write-Host "VSWHERE_FOUND=True"
+>>
+>>   & $VsWhere -latest -products *
+>>     -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+>>     -format json
+>> }
+PS C:\Users\Yousef\Desktop> else {
+>>   Write-Host "VSWHERE_FOUND=False"
+>> }
+else : The term 'else' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ else {
++ ~~
+    + CategoryInfo          : ObjectNotFound: (else:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> Write-Host "=== COMPILER ==="
+=== COMPILER ===
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> where.exe cl.exe 2>$null
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> if ($LASTEXITCODE -ne 0) {
+>>   Write-Host "CL_NOT_IN_PATH"
+>> }
+CL_NOT_IN_PATH
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> Write-Host "=== LOCATING HANDOFF ==="
+=== LOCATING HANDOFF ===
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> $SearchFolders = @(
+>>   (Join-Path $HOME "Desktop"),
+>>   (Join-Path $HOME "Downloads")
+>> )
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> Get-ChildItem $SearchFolders
+
+
+    Directory: C:\Users\Yousef\Desktop
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----          9/5/2026  11:30 AM                Games
+d-----         6/21/2026  10:34 PM                Lua
+d-----         7/17/2026  10:49 PM                mohr
+d-----          9/6/2026   3:07 AM                MuscleParadise-AgentPack
+-a----         11/6/2023  10:43 AM         912304 DnsJumper.exe
+-a----          9/6/2026   1:49 AM         239604 DnsJumper.ini
+-a----          6/1/2025   1:51 PM            219 Dota 2.url
+-a----         5/28/2026   9:08 AM           2350 Microsoft Edge.lnk
+-a----         3/20/2026   2:48 AM           1751 PacketRaft.lnk
+-a----        10/27/2025  10:45 AM           2052 SpotPlayer.lnk
+-a----         2/17/2026  10:51 PM           1058 SteamTools.lnk
+-a----         1/25/2026   2:41 PM           1035 Telegram.lnk
+-a----         11/2/2025  10:56 AM           1130 TH-U.lnk
+-a----         9/29/2025   2:38 AM            420 This PC.lnk
+-a----          6/5/2025   6:47 AM           1066 WO Mic Client.lnk
+-a----         6/22/2025   4:18 AM           1461 Wondershare Filmora 14.lnk
+
+
+    Directory: C:\Users\Yousef\Downloads
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         8/20/2026  11:43 AM                CuttingEdge-Studio-v0.2.0-full
+d-----          9/9/2026   7:04 AM                Telegram Desktop
+-a----         7/24/2026  11:40 AM         853287 Clair.Obscur.Expedition.33-v1.0.Plus.33.Trainer-Par30Game.rar
+-a----         8/20/2026  11:42 AM          45353 CuttingEdge-Studio-v0.2.0-full.zip
+-a----         8/20/2026  10:35 AM          34998 CuttingEdge-Studio-v0.2.0.bundle
+-a----         8/29/2026   5:08 AM         107264 opencode-debug-20260829T120817.zip
+-a----         8/13/2026   6:20 PM          99725 windows-content-scraper-application.zip
+
+
+PS C:\Users\Yousef\Desktop>   -Filter "slice-b-windows-handoff-bundle*"
+-Filter : The term '-Filter' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:3
++   -Filter "slice-b-windows-handoff-bundle*"
++   ~~~~~
+    + CategoryInfo          : ObjectNotFound: (-Filter:String) [], CommandNotFoundException
+
++ FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\Yousef\Desktop>   -File `
+>>   -ErrorAction SilentlyContinue |
+>>   Select-Object FullName, Length
+-File : The term '-File' is not recognized as the name of a cmdlet, function, script file, or operable program. Check
+the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:3
++   -File `
++   ~~~~~
+    + CategoryInfo          : ObjectNotFound: (-File:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+PS C:\Users\Yousef\Desktop>
+PS C:\Users\Yousef\Desktop> Write-Host "=== CHECK COMPLETE ==="
