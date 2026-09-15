@@ -1,6 +1,10 @@
 name: fetch-geo
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "tools/geo/fetch_geo.py"
+      - ".github/workflows/fetch-geo.yml"
 
 permissions:
   contents: write
