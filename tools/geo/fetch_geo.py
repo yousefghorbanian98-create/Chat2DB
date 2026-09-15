@@ -9,7 +9,7 @@
 import json, math, os, io, time, urllib.request
 
 LAT, LON = 32.6305401, 51.7238816
-OUT = os.path.join(os.path.dirname(__file__), "..", "..", "architecture-plan", "geo")
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "docs", "architecture-plan", "geo")
 os.makedirs(OUT, exist_ok=True)
 UA = {"User-Agent": "arena-arch-plan/1.0 (site analysis; contact: repo owner)"}
 
