@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>نقشه مهندسی معماری — مجتمع مسکونی-تجاری ۴ طبقه روی پیلوت</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+<script src="js/data.js"></script>
+<script src="js/plans.js"></script>
+<script src="js/main.js"></script>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div>
+      <h1>مجتمع مسکونی-تجاری — ۴ طبقه روی پیلوت + ۳ مغازه</h1>
+      <div class="sub">کد املاک ۲-۰۹-۰۲۴۴۷۹-۸ — اصفهان، دوشاخه کوی مصباح — عرصه ≈۶۰۰ m²، مجاز ۵۴۲٫۳۸ m²، مصرف ۵۳۵٫۵ m²</div>
+    </div>
+    <div class="hbtns">
+      <button id="btn-print" class="ghost">🖨 چاپ / PDF</button>
+    </div>
+  </div>
+  <nav>
+    <button id="btn-site" class="active">پلان سایت</button>
+    <button id="btn-pilotis">پیلوت (۳ مغازه + پارکینگ)</button>
+    <button id="btn-typical">پلان تیپ طبقات</button>
+    <button id="btn-v3d">مدل سه‌بعدی</button>
+    <button id="btn-report">گزارش انطباق</button>
+  </nav>
+</header>
+
+<main>
+  <section id="view-site" class="view show">
+    <div class="toolbar"><button id="dl-site" class="ghost">⬇ دانلود SVG</button></div>
+  </section>
+  <section id="view-pilotis" class="view">
+    <div class="toolbar"><button id="dl-pilotis" class="ghost">⬇ دانلود SVG</button></div>
+  </section>
+  <section id="view-typical" class="view">
+    <div class="toolbar"><button id="dl-typical" class="ghost">⬇ دانلود SVG</button></div>
+  </section>
+
+  <section id="view-v3d" class="view">
+    <div class="v3d-bar">
+      <label><input type="checkbox" id="f-pilotis" checked/> پیلوت</label>
+      <label><input type="checkbox" id="f-floors" checked/> ۴ طبقه مسکونی</label>
+      <label><input type="checkbox" id="f-roof" checked/> بام</label>
+      <span class="sep"></span>
+      <button id="btn-reset" class="ghost">نمای ایزومتریک</button>
+      <button id="btn-top" class="ghost">نمای بالا</button>
+      <button id="btn-glb" class="ghost">⬇ خروجی GLB</button>
+      <span class="hint">چرخش: درگ — بزرگنمایی: اسکرول</span>
+    </div>
+    <div id="view3d"></div>
+  </section>
+
+  <section id="view-report" class="view">
+    <div id="report-body" class="report"></div>
+  </section>
+</main>
+
+<footer>پیش‌طرح فاز ۲ — نسخه ۲ (پیلوت + ۴ طبقه + ۳ مغازه) — اوپن‌سورس (SVG + Three.js + DXF). مهر مهندس رسمی الزامی است.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"></script>
+<script src="js/viewer3d.js"></script>
+</body>
+</html>
