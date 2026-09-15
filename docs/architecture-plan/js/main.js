@@ -2,7 +2,7 @@
    main.js — ناوبری، گزارش انطباق (نسخه ۲: پیلوت + ۴ طبقه)
    ============================================================ */
 const $=id=>document.getElementById(id);
-const TABS=["site","pilotis","typical","v3d","report"];
+const TABS=["site","pilotis","typical","geo","v3d","report"];
 
 function renderTab(key){
   TABS.forEach(t=>$("tab-"+t).classList.toggle("active",t===key));

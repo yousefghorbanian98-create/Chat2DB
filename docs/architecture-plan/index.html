@@ -25,6 +25,7 @@
     <button id="btn-site" class="active">پلان سایت</button>
     <button id="btn-pilotis">پیلوت (۳ مغازه + پارکینگ)</button>
     <button id="btn-typical">پلان تیپ طبقات</button>
+    <button id="btn-geo">موقعیت واقعی زمین 🛰</button>
     <button id="btn-v3d">مدل سه‌بعدی</button>
     <button id="btn-report">گزارش انطباق</button>
   </nav>
@@ -39,6 +40,28 @@
   </section>
   <section id="view-typical" class="view">
     <div class="toolbar"><button id="dl-typical" class="ghost">⬇ دانلود SVG</button></div>
+  </section>
+
+  <section id="view-geo" class="view">
+    <div class="geogrid">
+      <figure>
+        <img src="renders/geo-composite.png" alt="جانمایی ژئورفرنس روی تصویر هوایی واقعی"/>
+        <figcaption>جانمایی واقعی طرح روی زمین — تصویر ماهواره‌ای Esri + معابر OpenStreetMap (ژئورفرنس: 32.6305401, 51.7238816)</figcaption>
+      </figure>
+      <figure>
+        <img src="renders/real-aerial-proposal.png" alt="نمای هوایی واقع‌گرایانه ساختمان در محل"/>
+        <figcaption>شبیه‌سازی فوتورئال هوایی — ساختمان ساخته‌شده در پلات واقعی (درون‌ریزی AI از روی جانمایی ژئورفرنس)</figcaption>
+      </figure>
+      <figure>
+        <img src="renders/real-street-view.png" alt="نمای سطح چشم از جاده جنوبی"/>
+        <figcaption>نمای سطح چشم از جاده جنوبی — پیلوت با ۳ مغازه و ویترین شرقی، ۴ طبقه مسکونی با سنگ تراورتن</figcaption>
+      </figure>
+      <figure>
+        <img src="renders/geo-context.png" alt="زمینه محله"/>
+        <figcaption>زمینه محله — کوی مصباح / دولت‌آباد اصفهان (شعاع ≈۱۰۰ متر)</figcaption>
+      </figure>
+    </div>
+    <p class="geonote">⚠ تصاویر «فوتورئال» شبیه‌سازی تبلیغاتی (AI) از روی جانمایی دقیق ژئورفرنس هستند؛ مبنای طراحی همان پلان‌های مهندسی و فایل <code>geo/meta.json</code> است.</p>
   </section>
 
   <section id="view-v3d" class="view">
