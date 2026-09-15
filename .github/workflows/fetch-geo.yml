@@ -20,9 +20,17 @@ jobs:
       - run: pip install pillow --quiet
       - run: python3 tools/geo/fetch_geo.py
       - name: Commit geo data
+        continue-on-error: true
         run: |
           git config user.name "geo-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/architecture-plan/geo/
           git commit -m "geo: real aerial imagery + OSM data for parcel 32.6305401,51.7238816" || echo "nothing to commit"
           git push
+      - name: Upload artifact (fallback)
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-data
+          path: docs/architecture-plan/geo/
+          retention-days: 30
+          compression-level: 6
