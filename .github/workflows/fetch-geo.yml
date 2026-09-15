@@ -1,0 +1,24 @@
+name: fetch-geo
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pillow --quiet
+      - run: python3 tools/geo/fetch_geo.py
+      - name: Commit geo data
+        run: |
+          git config user.name "geo-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/architecture-plan/geo/
+          git commit -m "geo: real aerial imagery + OSM data for parcel 32.6305401,51.7238816" || echo "nothing to commit"
+          git push
