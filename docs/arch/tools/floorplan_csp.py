@@ -129,6 +129,7 @@ def full_score(cells, box, facades, core_side=None, balcony=True):
                 continue
             if other == 'core':
                 if core_side and core_side in touches(c, box): s += 1.2 * wt
+                elif core_side: s -= 6.0 * wt          # درِ واحد باید از هال به پاگرد باز شود
                 continue
             oc = byk.get(other)
             if oc is None: continue
