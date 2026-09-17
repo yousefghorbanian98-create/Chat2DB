@@ -82,3 +82,6 @@ package-lock.json
 /chat2db-community-server/latest_version.json
 .java-version
 derby.log
+
+# خروجی استخراج زیپ (عکس‌های اسناد)
+arch_extract/
