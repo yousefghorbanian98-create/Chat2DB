@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""خروجیِ DXF از پلانِ نهایی (طبقهٔ تیپ + پیلوت) برای مهندسِ طراح
+"""خروجیِ DXF از پلانِ نهایی (طبقهٔ تیپ + همکف + سطحِ انباری/نیم‌طبقه) برای مهندسِ طراح
 دستگاهِ مختصات: X از لبهٔ غربیِ زمینِ خالص، Y از لبهٔ جنوبیِ زمینِ خالص، واحد متر.
 خروجی: docs/arch/final-plan.dxf
 """
@@ -11,6 +11,10 @@ from ezdxf.enums import TextEntityAlignment
 HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 OUT = os.path.join(HERE, "docs", "arch", "final-plan.dxf")
 L = json.load(open(os.path.join(HERE, "docs", "arch", "final-layout.json"), encoding="utf-8"))
+try:
+    V = json.load(open('/tmp/v2.json', encoding='utf-8'))
+except Exception:
+    V = {'nfl': 5, 'fl_h': 2.90, 'pod': 5.40, 'mez_phys': 25.0}
 
 W, D = 40.57, 13.37
 Y0, Y1 = 2.67, 13.37                       # محدودهٔ ساخت (عمق ۱۰.۷۰)
@@ -30,6 +34,8 @@ dwg.layers.add("PLAN-CORE", color=1)
 dwg.layers.add("PLAN-BALC", color=30)
 dwg.layers.add("PLAN-SHOP", color=40)
 dwg.layers.add("PLAN-PARK", color=5)
+dwg.layers.add("PLAN-ANB", color=50)
+dwg.layers.add("PLAN-MEZ", color=42)
 dwg.layers.add("OUTLINE", color=2)
 dwg.layers.add("TEXT", color=3)
 
@@ -88,6 +94,22 @@ for i in range(3):
     label(x0 + 3.25, PY + 10.70 - SHOP_DEEP / 2, f"SHOP {i+1} 45.5", 0.20)
 rect(SHOP_X0, PY, W, PY + 10.70 - SHOP_DEEP, "PLAN-SHOP")
 rect(UW, PY + 5.6, UW + CORE_W, PY + 10.70, "PLAN-CORE")
+
+# ---------------------------------------------------------------- سطحِ انباری و نیم‌طبقه (تراز ۲.۶۰+)
+AY = -44.0
+rect(0, AY, W, AY + 10.70, "OUTLINE")
+for i in range(8):
+    x0 = 0.4 + i * 2.60
+    rect(x0, AY + 0.4, x0 + 2.4, AY + 2.6, "PLAN-ANB")
+    label(x0 + 1.2, AY + 1.5, f"ANBARI {i+1}", 0.18)
+for i in range(3):
+    x0 = SHOP_X0 + i * 6.5
+    rect(x0, AY + 3.2, x0 + 6.5, AY + 7.7, "PLAN-MEZ")
+    label(x0 + 3.25, AY + 5.45, f"MEZZANINE {i+1} 25", 0.20)
+label(SHOP_X0 / 2, AY - 1.2, "LEVEL +2.60 : 8 STORAGE (FAR-EXEMPT) + 3 MEZZANINE (20% OF AREA IN FAR)",
+      0.26)
+label(W / 2, PY - 1.2, "GROUND : 3 SHOPS + 6 PARKING + CORE (clear height 2.40 m)", 0.26)
+label(BLD_W / 2, YS + 3.0, f"TYPICAL FLOOR x{V.get('nfl',5)} : 2 UNITS OF {L['unit']['sale']} m2", 0.30)
 
 # ---------------------------------------------------------------- ابعادِ کلیدی
 def dim(x0, y0, x1, y1, t, off=1.2):
