@@ -267,12 +267,14 @@ def draw_unit_fixtures(sh, offx, mirror=False):
     y0 = PM.ENC_Y0
     rooms = PM.mirrored_rooms(offx) if mirror else PM.unit_rooms(offx)
     # مبلمان و تجهیزات
-    def fx(rx0, ry0, rx1, ry1, fill, out=(120, 120, 120), label=None, size=10):
+    def fx(rx0, ry0, rx1, ry1, fill, out=(120, 120, 120), label=None, size=11):
         a, b = XP(rx0, rx1)
         sh.rect(min(a, b), y0 + ry0, max(a, b), y0 + ry1, fill=fill, outline=out)
         if label:
             m = sh.M((min(a, b) + max(a, b)) / 2, y0 + (ry0 + ry1) / 2)
-            sh.t(m, label, size=size, fill=(90, 90, 90))
+            bw = abs(sh.M(max(a, b), 0)[0] - sh.M(min(a, b), 0)[0]) - 8
+            sh.t(m, label, size=size, fill=(90, 90, 90), max_w=bw if bw > 12 else None,
+                 min_size=9.0)
     # آشپزخانه: کانترِ L
     fx(6.66, 0.30, 9.09, 0.90, (238, 238, 232), label="کانتر")
     fx(8.49, 0.90, 9.09, 3.53, (238, 238, 232))
@@ -296,13 +298,20 @@ def draw_unit_fixtures(sh, offx, mirror=False):
     # هال
     fx(4.20, 4.10, 4.90, 5.30, (240, 240, 236), label="کمد دیواری")
 
-    # برچسبِ اتاق‌ها
+    # برچسبِ اتاق‌ها — فاصلهٔ سطر متناسب با قلم تا نام و مساحت هم‌دیگر را نپوشانند
+    lh = 14 * sh.tscale * 1.18
     for r in rooms:
         cx = (r["x0"] + r["x1"]) / 2
         cy = (r["y0"] + r["y1"]) / 2
         m = sh.M(cx, cy)
-        sh.t((m[0], m[1] + 20), f"{r['area']:.1f} m²", size=12, fill=(80, 80, 80))
-        sh.t((m[0], m[1] + 4), r["name"], size=14, fill=(40, 40, 40), bold=True)
+        rw = abs(sh.M(r["x1"], 0)[0] - sh.M(r["x0"], 0)[0]) - 10
+        mw = rw if rw > 24 else None
+        b = sh.t_free(m, r["name"], size=14, fill=(40, 40, 40), bold=True, max_w=mw)
+        if b:
+            sh.t_free(((b[0] + b[2]) / 2, b[3] + 3), f"{r['area']:.1f} m²", size=11,
+                      fill=(80, 80, 80), anchor="ma", max_w=mw,
+                      cands=[(0, 0), (0, lh), (0, 2 * lh), (0, -1.2 * lh),
+                             (0, 3 * lh), (0, -2.4 * lh)])
     return
 
 
@@ -331,9 +340,11 @@ def draw_core(sh):
     m = sh.M((lb["x0"] + lb["x1"]) / 2, (lb["y0"] + lb["y1"]) / 2)
     sh.t(m, "پاگرد", size=12, fill=(90, 90, 90), rot=90)
     m = sh.M((shf["x0"] + shf["x1"]) / 2, (shf["y0"] + shf["y1"]) / 2)
-    sh.t((m[0], m[1] - 10), "شفتِ نور و تهویه", size=13, fill=(40, 100, 50), bg=(252, 251, 247))
-    sh.t((m[0], m[1] + 10), f"{PM.SH_W:.2f} × {PM.SH_D:.2f} = {PM.SH_W*PM.SH_D:.1f} m²", size=12,
-         fill=(40, 100, 50), bg=(252, 251, 247))
+    _lh = 13 * sh.tscale * 1.18
+    sh.t((m[0], m[1] - 0.42 * _lh), "شفتِ نور و تهویه", size=13, fill=(40, 100, 50),
+         bg=(252, 251, 247))
+    sh.t((m[0], m[1] + 0.58 * _lh), f"{PM.SH_W:.2f} × {PM.SH_D:.2f} = {PM.SH_W*PM.SH_D:.1f} m²",
+         size=11, fill=(40, 100, 50), bg=(252, 251, 247))
     # دیوارِ شفت
     sh.wall(shf["x0"], shf["y0"], shf["x1"], shf["y0"], PM.T_CORE)
     sh.wall(st["x0"] + 2.50, st["y0"], st["x0"] + 2.50, st["y1"], PM.T_INT)
@@ -537,8 +548,10 @@ def sheet_roof():
     shf = z["shaft"]
     sh.rect(shf["x0"], shf["y0"], shf["x1"], shf["y1"], fill=(160, 200, 160), outline=(60, 120, 60), w=2)
     m = sh.M((shf["x0"] + shf["x1"]) / 2, (shf["y0"] + shf["y1"]) / 2)
-    sh.t((m[0], m[1] - 10), "دهانهٔ شفت", size=13, fill=(30, 90, 40), bold=True)
-    sh.t((m[0], m[1] + 10), f"{PM.SH_W:.2f} × {PM.SH_D:.2f}", size=12, fill=(30, 90, 40))
+    _lh = 13 * sh.tscale * 1.18
+    sh.t((m[0], m[1] - 0.42 * _lh), "دهانهٔ شفت", size=13, fill=(30, 90, 40), bold=True)
+    sh.t((m[0], m[1] + 0.58 * _lh), f"{PM.SH_W:.2f} × {PM.SH_D:.2f}", size=11,
+         fill=(30, 90, 40))
     # اتاقکِ پله و آسانسور
     st, lf = z["stair"], z["lift"]
     sh.rect(st["x0"], st["y0"], lf["x1"], st["y1"], fill=(246, 246, 250), outline=(90, 90, 90), w=2)

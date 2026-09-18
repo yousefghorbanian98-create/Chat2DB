@@ -60,27 +60,112 @@ class A3Sheet:
         ox = MARGIN + (DRAW_W - (mx1 - mx0) * self.sc) / 2
         oy = MARGIN + (DRAW_H - (my1 - my0) * self.sc) / 2
         self.ox, self.oy = ox - mx0 * self.sc, oy + my1 * self.sc
-        self.tscale = 2.55
+        self.labels = []                          # جعبه‌هایِ اشغال‌شده
+        self.tscale = DPI / 72.0     # اندازهٔ قلم بر حسبِ نقطه (pt)؛ ۱pt = ۰.۳۵۳ mm
 
     # ---------------------------------------------------------- تبدیل
     def M(self, x, y):
         return (self.ox + x * self.sc, self.oy - y * self.sc)
 
-    # ---------------------------------------------------------- ترسیمِ پایه
-    def t(self, xy, s, size=14, fill=(35, 35, 35), bold=False, anchor="mm", bg=None, rot=0):
+    # ---------------------------------------------------------- چیدمانِ متن
+    def _layout(self, xy, s, size, bold, anchor, max_w, min_size):
+        """محاسبهٔ چیدمانِ متن بدون ترسیم — برای اندازه‌گیری و یافتنِ جایِ خالی"""
+        s2 = fa(str(s))
+        size = float(size)
         f = F(size * self.tscale, bold)
-        s2 = fa(s)
+        lines = [s2]
+        if max_w and max_w > 10 and f.getlength(s2) > max_w:
+            while size > min_size:
+                lines = _wrap_px(s2, f, max_w)
+                if max(f.getlength(l) for l in lines) <= max_w:
+                    break
+                size -= 0.5
+                f = F(size * self.tscale, bold)
+        if size < min_size:
+            return None
+        f = F(size * self.tscale, bold)
+        lh = size * self.tscale * 1.18                      # فاصلهٔ سطر
+        wmax = max(f.getlength(l) for l in lines)
+        htot = lh * len(lines)
+        hh = anchor[0] if len(anchor) == 2 else anchor[0]
+        vv = anchor[1] if len(anchor) == 2 else "m"
+        x0 = xy[0] if hh == "l" else (xy[0] - wmax if hh == "r" else xy[0] - wmax / 2)
+        y0 = (xy[1] if vv in "at" else (xy[1] - htot if vv in "sb" else xy[1] - htot / 2))
+        return (f, lines, lh, x0, y0, wmax, htot)
+
+    def measure(self, xy, s, size=14, bold=False, anchor="mm", max_w=None,
+                min_size=7.0, rot=0):
+        """جعبه‌ای که متن اشغال می‌کند — بدون ترسیم"""
+        L = self._layout(xy, s, size, bold, anchor, max_w, min_size)
+        if L is None:
+            return None
+        f, lines, lh, x0, y0, wmax, htot = L
+        if rot:                                   # پس از چرخش جابه‌جا می‌شود
+            return (xy[0] - htot / 2, xy[1] - wmax / 2, xy[0] + htot / 2, xy[1] + wmax / 2)
+        return (x0, y0, x0 + wmax, y0 + htot)
+
+    def t_free(self, xy, s, size=14, fill=(35, 35, 35), bold=False, anchor="mm",
+               bg=None, rot=0, max_w=None, cands=None, **kw):
+        """ترسیم در نخستین جایِ خالی — تا برچسبی رویِ برچسبِ دیگر نیفتد"""
+        lh = size * self.tscale * 1.18
+        if cands is None:
+            cands = [(0, 0), (0, -lh), (0, lh), (0, -2 * lh), (0, 2 * lh),
+                     (0, -3 * lh), (0, 3 * lh)]
+        for (dx, dy) in cands:
+            p = (xy[0] + dx, xy[1] + dy)
+            b = self.measure(p, s, size=size, bold=bold, anchor=anchor,
+                             max_w=max_w, rot=rot)
+            if b is None:
+                continue
+            if not any(_ovl(b, o) for o in self.labels):
+                return self.t(p, s, size=size, fill=fill, bold=bold, anchor=anchor,
+                              bg=bg, rot=rot, max_w=max_w, **kw)
+        return self.t(xy, s, size=size, fill=fill, bold=bold, anchor=anchor,
+                      bg=bg, rot=rot, max_w=max_w, **kw)
+
+    # ---------------------------------------------------------- ترسیمِ پایه
+    def t(self, xy, s, size=14, fill=(35, 35, 35), bold=False, anchor="mm", bg=None,
+          rot=0, max_w=None, min_size=7.0, pad=5):
+        """ترسیمِ متنِ فارسی — اندازه بر حسبِ «نقطه» (pt)؛ هر نقطه ۰.۳۵۳ میلی‌متر.
+
+        max_w   : پهنایِ مجاز به پیکسل؛ اگر متن عریض‌تر بود سطر می‌شکند و در
+                  صورتِ نیاز قلم کوچک می‌شود تا هرگز از کادر بیرون نزند.
+        min_size: اگر حتی با کوچک کردن هم جا نشد، متن ترسیم نمی‌شود (به‌جایِ
+                  بیرون‌زدگی یا ناخوانایی).
+        برمی‌گرداند: جعبهٔ ترسیم‌شده (x0, y0, x1, y1) یا None
+        """
+        L = self._layout(xy, s, size, bold, anchor, max_w, min_size)
+        if L is None:
+            return None
+        f, lines, lh, x0, y0, wmax, htot = L
+
+        # ---- متنِ چرخیده: بوم به اندازهٔ نیاز (دیگر بریده نمی‌شود) + زمینه
         if rot:
-            tmp = Image.new("RGBA", (900, 260), (0, 0, 0, 0))
-            ImageDraw.Draw(tmp).text((450, 130), s2, font=f,
-                                     fill=tuple(fill) + (255,), anchor="mm")
+            tw = max(f.getlength(l) for l in lines)
+            th = lh * len(lines)
+            cw, ch = int(tw) + 2 * pad, int(th) + 2 * pad
+            tmp = Image.new("RGBA", (cw, ch), tuple(bg) + (255,) if bg else (0, 0, 0, 0))
+            td = ImageDraw.Draw(tmp)
+            for i, l in enumerate(lines):
+                td.text((cw / 2, pad + lh * i + lh / 2), l, font=f,
+                        fill=tuple(fill) + (255,), anchor="mm")
             tmp = tmp.rotate(rot, expand=True, resample=Image.BICUBIC)
-            self.img.paste(tmp, (int(xy[0]) - tmp.width // 2, int(xy[1]) - tmp.height // 2), tmp)
-            return
+            x, y = int(xy[0] - tmp.width / 2), int(xy[1] - tmp.height / 2)
+            self.img.paste(tmp, (x, y), tmp)
+            self.labels.append((x, y, x + tmp.width, y + tmp.height))
+            return (x, y, x + tmp.width, y + tmp.height)
+
+        # ---- متنِ افقی
         if bg:
-            b = self.d.textbbox(xy, s2, font=f, anchor=anchor)
-            self.d.rectangle([b[0] - 6, b[1] - 4, b[2] + 6, b[3] + 4], fill=bg)
-        self.d.text(xy, s2, font=f, fill=fill, anchor=anchor)
+            self.d.rectangle([x0 - pad, y0 - pad * 0.7, x0 + wmax + pad,
+                              y0 + htot + pad * 0.7], fill=bg)
+        for i, l in enumerate(lines):
+            lw = f.getlength(l)
+            lx = x0 + {"l": 0.0, "r": wmax - lw}.get(anchor[0], (wmax - lw) / 2)
+            self.d.text((lx, y0 + lh * i), l, font=f, fill=fill, anchor="la")
+        box = (x0, y0, x0 + wmax, y0 + htot)
+        self.labels.append(box)
+        return box
 
     def rect(self, x0, y0, x1, y1, fill=None, outline=None, w=1):
         a, b = self.M(x0, y1), self.M(x1, y0)
@@ -185,39 +270,49 @@ class A3Sheet:
         self.d.rectangle([x0, y0, x1, y1], fill=(252, 251, 247), outline=(60, 60, 60), width=LW[2])
         self.d.rectangle([x0 + 5, y0 + 5, x1 - 5, y1 - 5], outline=(60, 60, 60), width=LW[1])
         pad = 16
-        cxx = (x0 + x1) / 2
-        cy = y0 + 5 + 34
+        il, ir = x0 + 5 + pad, x1 - 5 - pad        # درونِ نوار: چپ / راست
+        iw = ir - il                               # پهنایِ قابلِ استفاده
+        cy = y0 + 5
         # عنوانِ پروژه
-        self.d.rectangle([x0 + 5, y0 + 5, x1 - 5, y0 + 5 + 70], fill=(238, 241, 246))
-        self.t((cxx, y0 + 5 + 26), "مجتمع مسکونی-تجاری", size=13, fill=(25, 45, 80), bold=True)
-        self.t((cxx, y0 + 5 + 52), "زمین ۵۴۲٫۳۸ m² — اصفهان", size=11, fill=(60, 80, 110))
-        cy = y0 + 5 + 70
-        # ردیف‌ها
-        for i, (k, v) in enumerate(rows):
-            h = 46
+        h_head = 178
+        self.d.rectangle([x0 + 5, y0 + 5, x1 - 5, y0 + 5 + h_head], fill=(238, 241, 246))
+        self.t(((il + ir) / 2, y0 + 5 + 54), "مجتمع مسکونی-تجاری",
+               size=17, fill=(25, 45, 80), bold=True, max_w=iw)
+        self.t(((il + ir) / 2, y0 + 5 + 128), "زمین ۵۴۲٫۳۸ m² — اصفهان",
+               size=12, fill=(60, 80, 110), max_w=iw)
+        cy = y0 + 5 + h_head
+        # ردیف‌هایِ اطلاعات (فاصلهٔ کافی که کلید و مقدار هم‌دیگر را نپوشانند)
+        for k, v in rows:
+            h = 142
             self.d.line([(x0 + 5, cy + h), (x1 - 5, cy + h)], fill=(150, 150, 150), width=LW[1])
-            self.t((x1 - 5 - pad, cy + 15), k, size=10, fill=(95, 95, 95), anchor="rm")
-            self.t((x1 - 5 - pad, cy + 34), v, size=12, fill=(30, 30, 30), anchor="rm", bold=True)
+            self.t((ir, cy + 16), k, size=10, fill=(95, 95, 95), anchor="ra", max_w=iw - 8)
+            self.t((ir, cy + 70), v, size=14, fill=(30, 30, 30), anchor="ra", bold=True,
+                   max_w=iw - 8)
             cy += h
-        # جدولِ فضاها
-        cy += 10
+        # جدولِ فضاها — ستون‌ها با پهنایِ اندازه‌گیری‌شده
+        cy += 16
         if schedule:
-            self.t((x1 - 5 - pad, cy), "جدول فضاها", size=11, fill=(25, 45, 80), bold=True, anchor="rm")
-            cy += 24
+            b = self.t((ir, cy), "جدول فضاها", size=13, fill=(25, 45, 80), bold=True,
+                       anchor="ra", max_w=iw)
+            cy += ((b[3] - b[1]) if b else 30) + 16
             self.d.line([(x0 + 5, cy), (x1 - 5, cy)], fill=(60, 60, 60), width=LW[1])
-            cy += 6
+            cy += 12
             for nm, a, dim in schedule:
-                self.t((x1 - 5 - pad, cy + 10), nm, size=10, fill=(45, 45, 45), anchor="rm")
-                self.t((x0 + 5 + pad + 118, cy + 10), f"{a}", size=10, fill=(60, 60, 60), anchor="rm")
-                self.t((x0 + 5 + pad, cy + 10), dim, size=9, fill=(120, 120, 120), anchor="rm")
-                cy += 21
-        # یادداشت‌ها
-        cy += 14
+                # سطرِ یکم: نام (راست) و مساحت (چپ) — سطرِ دوم: ابعاد
+                b1 = self.t((ir, cy), nm, size=11, fill=(45, 45, 45), anchor="ra",
+                            max_w=0.60 * iw)
+                b2 = self.t((ir - 0.66 * iw, cy), str(a), size=11, fill=(60, 60, 60),
+                            anchor="ra", max_w=0.32 * iw)
+                h1 = max((b[3] - b[1]) for b in (b1, b2) if b) or 26
+                b3 = self.t((ir - 0.05 * iw, cy + h1 + 3), dim, size=10,
+                            fill=(120, 120, 120), anchor="ra", max_w=0.93 * iw)
+                cy += h1 + 3 + ((b3[3] - b3[1]) if b3 else 22) + 13
+        # یادداشت‌ها — شکستنِ سطر بر پایهٔ پهنا
+        cy += 18
         for n in notes:
-            for ln in _wrap(n, 30):
-                self.t((x1 - 5 - pad, cy), ln, size=9, fill=(85, 85, 85), anchor="rm")
-                cy += 15
-            cy += 4
+            b = self.t((ir, cy), n, size=10, fill=(85, 85, 85), anchor="ra", max_w=iw)
+            if b:
+                cy += (b[3] - b[1]) + 14
 
     def frame(self):
         self.d.rectangle([0, 0, A3W - 1, A3H - 1], outline=(70, 70, 70), width=6)
@@ -248,16 +343,27 @@ class A3Sheet:
         return path
 
 
-def _wrap(s, n):
-    w, cur = [], ""
-    for word in s.split():
-        if len(cur + " " + word) > n and cur:
-            w.append(cur); cur = word
+def _ovl(a, b, tol=4.0):
+    """آیا دو جعبه بیش از tol پیکسل هم‌پوشانی دارند؟"""
+    return (min(a[2], b[2]) - max(a[0], b[0]) > tol and
+            min(a[3], b[3]) - max(a[1], b[1]) > tol)
+
+
+def _wrap_px(s, font, max_w):
+    """شکستنِ سطر بر پایهٔ پهنایِ واقعی به پیکسل — نه تعدادِ کاراکتر"""
+    words = s.split()
+    if not words:
+        return [s]
+    lines, cur = [], words[0]
+    for w in words[1:]:
+        trial = cur + " " + w
+        if font.getlength(trial) <= max_w:
+            cur = trial
         else:
-            cur = (cur + " " + word).strip()
-    if cur:
-        w.append(cur)
-    return w
+            lines.append(cur)
+            cur = w
+    lines.append(cur)
+    return lines
 
 
 # ================================================================ برگه‌ها
@@ -272,8 +378,8 @@ def sheet_typical():
         w = liv[4] - liv[2]
         sh.rect(x0, PM.BALC_Y0, x0 + w, PM.ENC_Y0, fill=(252, 246, 224), outline=(170, 130, 40), w=1)
         m = sh.M(x0 + w / 2, (PM.BALC_Y0 + PM.ENC_Y0) / 2)
-        sh.t((m[0], m[1] - 0.28 * sh.sc), "ایوان", size=13, fill=(120, 85, 20), bold=True)
-        sh.t((m[0], m[1] + 0.28 * sh.sc), f"{s['balcony']} m² (۵۰٪ در تراکم)", size=10,
+        sh.t_free((m[0], m[1] - 0.28 * sh.sc), "ایوان", size=13, fill=(120, 85, 20), bold=True)
+        sh.t_free((m[0], m[1] + 0.28 * sh.sc), f"{s['balcony']} m² (۵۰٪ در تراکم)", size=10,
              fill=(120, 85, 20))
         sh.line([(x0, PM.BALC_Y0), (x0 + w, PM.BALC_Y0)], fill=(150, 110, 40), w=3)
     # هسته و واحدها
@@ -325,8 +431,14 @@ def sheet_ground():
                  -2.6, PM.Y0 - 2.4, PM.LAND_W + 2.6, PM.Y1 + 3.0, 150)
     sh.rect(0, PM.Y0, PM.LAND_W, PM.Y1, fill=(255, 255, 255), outline=(120, 120, 120), w=2)
     sh.rect(0, 0, PM.LAND_W, PM.Y0, fill=(228, 242, 228), outline=(120, 170, 120), w=1)
+    sh.dimh(0, PM.BLD_W, PM.Y0 - 0.85, f"{PM.BLD_W:.2f}")
+    sh.dimh(PM.SHOP_X0, PM.LAND_W, PM.Y0 - 0.85, f"{PM.LAND_W-PM.SHOP_X0:.2f}")
+    sh.dimh(0, PM.LAND_W, PM.Y0 - 1.9, f"{PM.LAND_W:.2f}")
+    sh.dimv(PM.Y0, PM.Y1, PM.LAND_W + 0.9, "۱۰.۷۰")
+    sh.dimv(0, PM.Y0, PM.LAND_W + 0.9, "۲.۶۷")
+    sh.level_mark(-1.5, PM.Y1, "±0.00")
     m = sh.M(PM.LAND_W / 2, PM.Y0 / 2)
-    sh.t(m, "فضای باز جنوبی ۲.۶۷ m + حریم دکل فشارقوی ۷.۰۸ m", size=10, fill=(40, 100, 50))
+    sh.t_free(m, "فضای باز جنوبی ۲.۶۷ m + حریم دکل فشارقوی ۷.۰۸ m", size=10, fill=(40, 100, 50))
     sh.rect(0, PM.Y0, PM.SHOP_X0, PM.Y1, fill=(238, 243, 250))
     n = 0
     for bay in (0.6, PM.CORE_X1 + 0.5):
@@ -338,23 +450,23 @@ def sheet_ground():
             sh.rect(x0, PM.Y0 + 0.6, x0 + PM.PARK_W, PM.Y0 + 0.6 + PM.PARK_L,
                     fill=(255, 255, 255), outline=(105, 135, 185), w=1)
             m = sh.M(x0 + 1.25, PM.Y0 + 3.2)
-            sh.t(m, str(n), size=11, fill=(90, 120, 170))
+            sh.t_free(m, str(n), size=11, fill=(90, 120, 170))
     for tx, ty in ((5.0, PM.Y1 - 1.6), (18.5, PM.Y1 - 1.6)):
         m = sh.M(tx, ty)
-        sh.t(m, "مسیر تردد و مانور", size=10, fill=(70, 100, 150))
+        sh.t_free(m, "مسیر تردد و مانور", size=10, fill=(70, 100, 150))
     sh.rect(PM.CORE_X0, PM.Y1 - 5.10, PM.CORE_X1, PM.Y1, fill=(246, 246, 250),
             outline=(90, 90, 90), w=1)
     m = sh.M((PM.CORE_X0 + PM.CORE_X1) / 2, PM.Y1 - 2.5)
-    sh.t(m, "لابی · پله · آسانسور", size=10, fill=(80, 80, 90))
+    sh.t_free(m, "لابی · پله · آسانسور", size=10, fill=(80, 80, 90))
     for i in range(PM.NSHOP):
         x0 = PM.SHOP_X0 + i * PM.SHOP_W
         sh.rect(x0, PM.Y1 - PM.SHOP_DEEP, x0 + PM.SHOP_W, PM.Y1, fill=(253, 243, 224),
                 outline=(165, 115, 45), w=1)
         m = sh.M(x0 + PM.SHOP_W / 2, PM.Y1 - PM.SHOP_DEEP / 2)
-        sh.t((m[0], m[1] - 0.7 * sh.sc), f"مغازه {i+1}", size=12, fill=(120, 80, 20), bold=True)
-        sh.t((m[0], m[1]), f"{s['shop_area']} m²", size=10, fill=(120, 80, 20))
-        sh.t((m[0], m[1] + 0.7 * sh.sc), f"نیم‌طبقه {PM.SHOP_W*PM.MEZ_DEEP:.1f} m² (خط‌چین)",
-             size=9, fill=(150, 110, 50))
+        sh.t_free((m[0], m[1] - 0.92 * sh.sc), f"مغازه {i+1}", size=12, fill=(120, 80, 20), bold=True)
+        sh.t_free((m[0], m[1]), f"{s['shop_area']} m²", size=10, fill=(120, 80, 20))
+        sh.t_free((m[0], m[1] + 0.92 * sh.sc), f"نیم‌طبقه {PM.SHOP_W*PM.MEZ_DEEP:.1f} m² (خط‌چین)",
+             size=10, fill=(150, 110, 50))
         sh.window(x0 + 1.6, PM.Y1, x0 + 1.6 + 2.8, PM.Y1, 0.3)
         for k in range(int(PM.MEZ_DEEP / 0.7)):
             yy = PM.Y1 - PM.SHOP_DEEP + k * 0.7
@@ -369,19 +481,13 @@ def sheet_ground():
     sh.rect(PM.SHOP_X0, PM.Y0, PM.LAND_W, PM.Y1 - PM.SHOP_DEEP, fill=(246, 246, 240),
             outline=(170, 170, 170), w=1)
     m = sh.M((PM.SHOP_X0 + PM.LAND_W) / 2, PM.Y0 + 1.4)
-    sh.t(m, "انبار و سرویس مغازه‌ها", size=10, fill=(90, 90, 90))
+    sh.t_free(m, "انبار و سرویس مغازه‌ها", size=10, fill=(90, 90, 90))
     sh.d.polygon([sh.M(1.4, PM.Y1 + 2.4), sh.M(1.4, PM.Y1), sh.M(4.6, PM.Y1)],
                  outline=(200, 120, 40), width=LW[2])
-    sh.t(sh.M(3.0, PM.Y1 + 3.2), "ورودی خودرو", size=10, fill=(200, 120, 40))
+    sh.t_free(sh.M(3.0, PM.Y1 + 3.2), "ورودی خودرو", size=10, fill=(200, 120, 40))
     sh.d.polygon([sh.M(PM.CORE_X0 + 1.6, PM.Y1 + 2.4), sh.M(PM.CORE_X0 + 1.6, PM.Y1),
                   sh.M(PM.CORE_X0 + 4.2, PM.Y1)], outline=(60, 90, 160), width=LW[2])
-    sh.t(sh.M(PM.CORE_X0 + 3.0, PM.Y1 + 3.2), "ورودی پیاده", size=10, fill=(60, 90, 160))
-    sh.dimh(0, PM.BLD_W, PM.Y0 - 0.85, f"{PM.BLD_W:.2f}")
-    sh.dimh(PM.SHOP_X0, PM.LAND_W, PM.Y0 - 0.85, f"{PM.LAND_W-PM.SHOP_X0:.2f}")
-    sh.dimh(0, PM.LAND_W, PM.Y0 - 1.9, f"{PM.LAND_W:.2f}")
-    sh.dimv(PM.Y0, PM.Y1, PM.LAND_W + 0.9, "۱۰.۷۰")
-    sh.dimv(0, PM.Y0, PM.LAND_W + 0.9, "۲.۶۷")
-    sh.level_mark(-1.5, PM.Y1, "±0.00")
+    sh.t_free(sh.M(PM.CORE_X0 + 3.0, PM.Y1 + 3.2), "ورودی پیاده", size=10, fill=(60, 90, 160))
     sh.frame()
     sh.strip([("عنوان نقشه", "پلان همکف / پیلوت"), ("تراز", "±0.00 متر"),
               ("مقیاس", f"۱:{sh.sd}"), ("شماره برگه", sh.no), ("تاریخ", "۱۴۰۵/۰۶/۲۷"),
@@ -412,24 +518,24 @@ def sheet_mezz():
         sh.rect(x0, PM.Y0 + 0.4, x0 + PM.ANB_W, PM.Y0 + 0.4 + PM.ANB_D, fill=(255, 255, 255),
                 outline=(150, 130, 90), w=1)
         m = sh.M(x0 + PM.ANB_W / 2, PM.Y0 + 1.5)
-        sh.t(m, f"{i+1}", size=10, fill=(120, 100, 60))
+        sh.t_free(m, f"{i+1}", size=10, fill=(120, 100, 60))
     m = sh.M(11.0, PM.Y0 + 4.8)
-    sh.t(m, "راهرو انباری‌ها (۱.۲۰ m)", size=10, fill=(120, 100, 60))
+    sh.t_free(m, "راهرو انباری‌ها (۱.۲۰ m)", size=10, fill=(120, 100, 60))
     m = sh.M(11.0, PM.Y1 - 2.0)
-    sh.t(m, "فضای باز — نورگیر پارکینگ", size=10, fill=(110, 130, 110))
+    sh.t_free(m, "فضای باز — نورگیر پارکینگ", size=10, fill=(110, 130, 110))
     for i in range(PM.NSHOP):
         x0 = PM.SHOP_X0 + i * PM.SHOP_W
         sh.rect(x0, PM.Y1 - PM.MEZ_DEEP, x0 + PM.SHOP_W, PM.Y1, fill=(253, 243, 224),
                 outline=(165, 115, 45), w=1)
         m = sh.M(x0 + PM.SHOP_W / 2, PM.Y1 - PM.MEZ_DEEP / 2)
-        sh.t((m[0], m[1] - 0.5 * sh.sc), f"نیم‌طبقه {i+1}", size=12, fill=(120, 80, 20), bold=True)
-        sh.t((m[0], m[1] + 0.5 * sh.sc), f"{PM.SHOP_W*PM.MEZ_DEEP:.1f} m²", size=10, fill=(120, 80, 20))
+        sh.t_free((m[0], m[1] - 0.5 * sh.sc), f"نیم‌طبقه {i+1}", size=12, fill=(120, 80, 20), bold=True)
+        sh.t_free((m[0], m[1] + 0.5 * sh.sc), f"{PM.SHOP_W*PM.MEZ_DEEP:.1f} m²", size=10, fill=(120, 80, 20))
     sh.rect(PM.SHOP_X0, PM.Y0, PM.LAND_W, PM.Y1 - PM.MEZ_DEEP, fill=(246, 246, 240),
             outline=(170, 170, 170), w=1)
     sh.rect(PM.CORE_X0, PM.Y1 - 5.10, PM.CORE_X1, PM.Y1, fill=(246, 246, 250),
             outline=(90, 90, 90), w=1)
     m = sh.M((PM.CORE_X0 + PM.CORE_X1) / 2, PM.Y1 - 2.5)
-    sh.t(m, "هسته (پله و آسانسور)", size=10, fill=(80, 80, 90))
+    sh.t_free(m, "هسته (پله و آسانسور)", size=10, fill=(80, 80, 90))
     sh.dimh(0, PM.SHOP_X0, PM.Y0 - 0.85, f"{PM.SHOP_X0:.2f}")
     sh.dimh(PM.SHOP_X0, PM.LAND_W, PM.Y0 - 0.85, f"{PM.LAND_W-PM.SHOP_X0:.2f}")
     sh.dimv(PM.Y0, PM.Y1, PM.LAND_W + 0.9, "۱۰.۷۰")
@@ -456,28 +562,28 @@ def sheet_roof():
     sh.rect(0, PM.Y0, PM.LAND_W, PM.Y1, fill=(252, 251, 247), outline=(120, 120, 120), w=2)
     sh.rect(0, PM.ENC_Y0, PM.BLD_W, PM.ENC_Y1, fill=(238, 238, 234), outline=(90, 90, 90), w=2)
     m = sh.M(PM.BLD_W / 2, (PM.ENC_Y0 + PM.ENC_Y1) / 2)
-    sh.t((m[0], m[1] - 0.6 * sh.sc), "بام مسکونی", size=13, fill=(60, 60, 70), bold=True)
-    sh.t((m[0], m[1] + 0.6 * sh.sc), "شیب ۱٪ به سمت آبروهای جنوبی", size=10, fill=(90, 90, 100))
+    sh.t_free((m[0], m[1] - 0.6 * sh.sc), "بام مسکونی", size=13, fill=(60, 60, 70), bold=True)
+    sh.t_free((m[0], m[1] + 0.6 * sh.sc), "شیب ۱٪ به سمت آبروهای جنوبی", size=10, fill=(90, 90, 100))
     sh.rect(PM.BLD_W, PM.Y0, PM.LAND_W, PM.Y1, fill=(224, 240, 224), outline=(90, 130, 90), w=2)
     m = sh.M((PM.BLD_W + PM.LAND_W) / 2, (PM.Y0 + PM.Y1) / 2)
-    sh.t((m[0], m[1] - 0.6 * sh.sc), "تراس پودیوم", size=13, fill=(35, 95, 45), bold=True)
-    sh.t((m[0], m[1] + 0.6 * sh.sc), f"{round((PM.LAND_W-PM.BLD_W)*PM.PODIUM_D)} m²",
+    sh.t_free((m[0], m[1] - 0.6 * sh.sc), "تراس پودیوم", size=13, fill=(35, 95, 45), bold=True)
+    sh.t_free((m[0], m[1] + 0.6 * sh.sc), f"{round((PM.LAND_W-PM.BLD_W)*PM.PODIUM_D)} m²",
          size=10, fill=(35, 95, 45))
     z = {c["kind"]: c for c in PM.core_zones()}
     shf, st, lf = z["shaft"], z["stair"], z["lift"]
     sh.rect(shf["x0"], shf["y0"], shf["x1"], shf["y1"], fill=(160, 200, 160),
             outline=(60, 120, 60), w=2)
     m = sh.M((shf["x0"] + shf["x1"]) / 2, (shf["y0"] + shf["y1"]) / 2)
-    sh.t((m[0], m[1] - 0.4 * sh.sc), "دهانه شفت", size=11, fill=(30, 90, 40), bold=True)
-    sh.t((m[0], m[1] + 0.5 * sh.sc), f"{PM.SH_W:.2f} × {PM.SH_D:.2f}", size=10, fill=(30, 90, 40))
+    sh.t_free((m[0], m[1] - 0.4 * sh.sc), "دهانه شفت", size=11, fill=(30, 90, 40), bold=True)
+    sh.t_free((m[0], m[1] + 0.5 * sh.sc), f"{PM.SH_W:.2f} × {PM.SH_D:.2f}", size=10, fill=(30, 90, 40))
     sh.rect(st["x0"], st["y0"], lf["x1"], st["y1"], fill=(246, 246, 250), outline=(90, 90, 90), w=2)
     m = sh.M((st["x0"] + lf["x1"]) / 2, (st["y0"] + st["y1"]) / 2)
-    sh.t(m, "اتاقک پله و آسانسور", size=11, fill=(70, 70, 90))
+    sh.t_free(m, "اتاقک پله و آسانسور", size=11, fill=(70, 70, 90))
     for (x0, y0, x1, y1) in [(0, PM.ENC_Y0, PM.BLD_W, PM.ENC_Y0), (0, PM.ENC_Y1, PM.BLD_W, PM.ENC_Y1),
                              (0, PM.ENC_Y0, 0, PM.ENC_Y1), (PM.BLD_W, PM.ENC_Y0, PM.BLD_W, PM.ENC_Y1)]:
         sh.wall(x0, y0, x1, y1, 0.25, fill=(90, 90, 90))
     m = sh.M(PM.BLD_W / 2, PM.ENC_Y1 + 0.8)
-    sh.t(m, "جان‌پناه ۱.۰۰ m", size=10, fill=(90, 90, 90))
+    sh.t_free(m, "جان‌پناه ۱.۰۰ m", size=10, fill=(90, 90, 90))
     sh.dimh(0, PM.BLD_W, PM.Y0 - 0.85, f"{PM.BLD_W:.2f}")
     sh.dimh(PM.BLD_W, PM.LAND_W, PM.Y0 - 0.85, f"{PM.LAND_W - PM.BLD_W:.2f}")
     sh.dimv(PM.Y0, PM.Y1, PM.LAND_W + 0.9, "۱۰.۷۰")
