@@ -23,7 +23,11 @@
      --out ../renders     پوشهٔ خروجی
      --save               ذخیرهٔ فایلِ .blend برای ویرایشِ بعدی
 
-نکته: این اسکریپت برای بلندر ۴٫x نوشته شده و در ۵٫x هم باید کار کند.
+راستی‌آزمایی: روی بلندر ۵٫۰٫۱ (هستهٔ bpy، رندرِ CPU با Cycles) اجرا شده و صحنه و
+  هر سه رندر را بدونِ خطا ساخت. در ۴٫x هم کار می‌کند؛ تنها پیام‌ها
+  DeprecationWarningِ use_nodes هستند که تا بلندر ۶٫۰ بی‌ضررند.
+  اگر نسخهٔ بلندرِ شما آسمانِ NISHITA را نداشت، خودکار به MULTIPLE_SCATTERING
+  و سپس HOSEK_WILKIE/PREETHAM می‌افتد.
 """
 import bpy, math, os, sys, random
 from mathutils import Vector
@@ -187,13 +191,13 @@ MONTH, DAY, HOUR = 9, 17, 9.0
 RES_X, RES_Y = 1600, 1000
 SAMPLES = 160
 DEVICE = "auto"
-EXPOSURE = 0.0
+EXPOSURE = -3.5   # نوردهیِ متعادل برایِ آسمانِ روشن و نمایِ روشن (تغییر با --exposure)
 
 # دوربین‌ها: (نام, مکان, هدف, فاصلهٔ کانونی mm)
 CAMERAS = [
     ("نما-خیابان", (46.0, -26.0, 1.7), (18.0, 8.0, 6.0), 26),
     ("نما-سه-رخ", (-12.0, -18.0, 1.7), (18.0, 7.0, 5.0), 28),
-    ("نما-هوایی", (72.0, -58.0, 38.0), (20.0, 14.0, 8.0), 28),
+    ("نما-هوایی", (64.0, -52.0, 62.0), (20.285, 6.685, 4.0), 30),
 ]
 
 
@@ -297,17 +301,29 @@ def setup_sky_and_sun(L):
     nt.nodes.clear()
     out = nt.nodes.new("ShaderNodeOutputWorld")
     bg = nt.nodes.new("ShaderNodeBackground")
+    ok = False
     try:
         sky = nt.nodes.new("ShaderNodeTexSky")
-        sky.sky_type = 'NISHITA'
+        # بلندر ۴٫x: نیشیتا — بلندر ۵٫x: پرتابِ چندگانه/هوزِک
+        for _t in ('NISHITA', 'MULTIPLE_SCATTERING', 'HOSEK_WILKIE', 'PREETHAM'):
+            try:
+                sky.sky_type = _t
+                ok = True
+                break
+            except Exception:
+                continue
+        if not ok:
+            sky.sky_type = sky.bl_rna.properties['sky_type'].default
         sky.sun_elevation = math.asin(max(-1.0, min(1.0, L.z)))
         sky.sun_rotation = math.atan2(L.y, L.x)
-        sky.air_density = 1.0
-        sky.dust_density = 0.55
-        sky.ozone_density = 0.35
+        for _p, _v in (('air_density', 1.0), ('dust_density', 0.55), ('ozone_density', 0.35)):
+            try:
+                setattr(sky, _p, _v)
+            except Exception:
+                pass
         nt.links.new(sky.outputs['Color'], bg.inputs['Color'])
     except Exception as e:
-        print("هشدار: ساختِ آسمانِ نیشیتا ناموفق — پس‌زمینهٔ ساده:", e)
+        print("هشدار: ساختِ آسمانِ واقعی ناموفق — پس‌زمینهٔ ساده:", e)
         bg.inputs['Color'].default_value = (0.30, 0.46, 0.80, 1.0)
     bg.inputs['Strength'].default_value = 1.0
     nt.links.new(bg.outputs['Background'], out.inputs['Surface'])
@@ -322,6 +338,40 @@ def setup_sky_and_sun(L):
     bpy.context.scene.collection.objects.link(o)
     o.rotation_euler = Vector((-L.x, -L.y, -L.z)).to_track_quat('-Z', 'Y').to_euler()
     return o
+
+
+def seg_rect_dist(px, py, qx, qy, x0, y0, x1, y1):
+    """کمترین فاصلهٔ پاره‌خطِ p→q تا مستطیلِ محور-موازی (در صفحهٔ XY)"""
+    cx0, cy0, cx1, cy1 = min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)
+    # اگر پاره‌خط مستطیل را قطع کند، فاصله صفر
+    for t in [i / 64.0 for i in range(65)]:
+        x, y = px + (qx - px) * t, py + (qy - py) * t
+        if cx0 <= x <= cx1 and cy0 <= y <= cy1:
+            return 0.0
+    d = min(math.hypot(px - x, py - y)
+            for x in (cx0, cx1) for y in (cy0, cy1))
+    # فاصله تا اضلاع (تقریبِ کافی برایِ غربال)
+    for t in [i / 64.0 for i in range(65)]:
+        x, y = px + (qx - px) * t, py + (qy - py) * t
+        d = min(d, abs(x - cx0) if cy0 <= y <= cy1 else 1e9,
+                abs(x - cx1) if cy0 <= y <= cy1 else 1e9,
+                abs(y - cy0) if cx0 <= x <= cx1 else 1e9,
+                abs(y - cy1) if cx0 <= x <= cx1 else 1e9,
+                math.hypot(max(cx0 - x, 0, x - cx1), max(cy0 - y, 0, y - cy1)))
+    return d
+
+
+def blocks_view(x0, y0, x1, y1, hgt):
+    """آیا این حجم جلویِ دیدِ یکی از دوربین‌ها را می‌گیرد؟ (دوربین نباید داخلِ حجم باشد)"""
+    for name, loc, tgt, lens in CAMERAS:
+        # دوربین داخلِ حجم (با ۲ متر حاشیه) → حذف
+        if (x0 - 2.0) <= loc[0] <= (x1 + 2.0) and (y0 - 2.0) <= loc[1] <= (y1 + 2.0) \
+                and loc[2] <= hgt + 0.5:
+            return True
+        # در مسیرِ دید (با ۵ متر حاشیه) → حذف
+        if seg_rect_dist(loc[0], loc[1], tgt[0], tgt[1], x0, y0, x1, y1) < 5.0:
+            return True
+    return False
 
 
 def add_neighbors(collection):
@@ -363,7 +413,9 @@ def add_neighbors(collection):
                     fx, fy = ax + px_ * dep, ay + py_ * dep
                     hgt = rng.choice([4.5, 6.0, 7.5, 9.0, 10.5, 12.0])
                     ccx, ccy = (ax + bx + ex + fx) / 4, (ay + by + ey + fy) / 4
-                    if not (-3 < ccx < 43.6 and -3 < ccy < 15.4):
+                    if not (-3 < ccx < 43.6 and -3 < ccy < 15.4) and \
+                            not blocks_view(min(ax, bx, ex, fx), min(ay, by, ey, fy),
+                                            max(ax, bx, ex, fx), max(ay, by, ey, fy), hgt):
                         add_box("NB_%d" % n,
                                 min(ax, bx, ex, fx), min(ay, by, ey, fy), 0.0,
                                 max(ax, bx, ex, fx), max(ay, by, ey, fy), hgt,
@@ -379,7 +431,7 @@ def add_roads_and_walks(collection):
     m_asp.use_nodes = True
     b1 = m_asp.node_tree.nodes.get("Principled BSDF")
     if b1:
-        b1.inputs['Base Color'].default_value = (0.055, 0.055, 0.06, 1.0)
+        b1.inputs['Base Color'].default_value = (0.115, 0.115, 0.125, 1.0)
         b1.inputs['Roughness'].default_value = 0.72
     m_walk = bpy.data.materials.new("SIDEWALK")
     m_walk.use_nodes = True
