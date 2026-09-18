@@ -1,292 +1,228 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""۶ طرحواره برای ساخت روی زمین ۵۴۲.۳۸ m² (۴۰.۵۷ × ۱۳.۳۷)
-هر طرحواره: جانمایی در سایت + پلانِ طبقهٔ تیپ + اعدادِ کلیدی + نقطه‌قوت/ضعف
-خروجی: docs/arch/design-schemes.png
-"""
-import os
+"""ورق‌های A3 برایِ هر دو طرحِ بازسازی‌شده (۳۰۰ DPI، هر طبقه یک ورق)."""
+import os, sys, math
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageDraw, ImageFont
-import arabic_reshaper
-from bidi.algorithm import get_display
+import plan_schemes as PS
+from render_a3 import A3Sheet, LW, MM, A3W, A3H, OUT as A3ROOT
 
-HERE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-OUT = os.path.join(HERE, "docs", "arch", "design-schemes.png")
-FDIR = "/home/user/fonts"
+OUT1 = os.path.join(A3ROOT, "..", "A3-طرح-اول")
+OUT2 = os.path.join(A3ROOT, "..", "A3-طرح-دوم")
+os.makedirs(OUT1, exist_ok=True)
+os.makedirs(OUT2, exist_ok=True)
 
-W, D = 40.57, 13.37          # زمین خالص
-BLD_D, OPEN_D = 8.00, 5.37   # عمق ساختمان / فضای باز جنوبی
-Y0, Y1 = OPEN_D, D           # جای ساختمان در عمق
-
-C_LIV, C_KIT, C_BED, C_SER, C_CIR, C_TER = (
-    (222, 236, 250), (247, 240, 222), (230, 243, 230), (219, 224, 232),
-    (238, 238, 238), (214, 240, 214))
-C_MASS, C_FOOT, C_OPEN = (246, 196, 120), (252, 231, 197), (216, 240, 214)
-
-P = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
-_c = {}
+BG = (252, 251, 247)
 
 
-def fa(t):
-    return get_display(arabic_reshaper.reshape(str(t).translate(P)))
+def new_sheet(title, sub, lvl, no, sd=125):
+    mx0, my0, mx1, my1 = -3.2, PS.Y0 - 3.4, PS.LAND_W + 3.2, PS.LAND_D + 3.6
+    return A3Sheet(title, sub, lvl, no, mx0, my0, mx1, my1, sd)
 
 
-def F(sz, bold=False):
-    if (sz, bold) not in _c:
-        _c[(sz, bold)] = ImageFont.truetype(
-            os.path.join(FDIR, "Vazirmatn-Bold.ttf" if bold else "Vazirmatn-Regular.ttf"), sz)
-    return _c[(sz, bold)]
+def land(sh):
+    sh.rect(0, 0, PS.LAND_W, PS.LAND_D, fill=(250, 249, 245),
+            outline=(120, 120, 120), w=2)
+    sh.rect(0, 0, PS.LAND_W, PS.Y0, fill=(226, 240, 226), outline=(120, 170, 120), w=1)
 
 
-CW, CH = 1900, 2740
-img = Image.new("RGB", (CW, CH), (243, 241, 234))
-dr = ImageDraw.Draw(img)
+def building_outline(sh):
+    sh.rect(0, PS.Y0, PS.BLD_W, PS.Y1, fill=(255, 255, 255), outline=(90, 90, 90), w=2)
+    for (x0, y0, x1, y1) in [(0, PS.Y0, PS.BLD_W, PS.Y0), (0, PS.Y1, PS.BLD_W, PS.Y1),
+                             (0, PS.Y0, 0, PS.Y1), (PS.BLD_W, PS.Y0, PS.BLD_W, PS.Y1)]:
+        sh.wall(x0, y0, x1, y1, 0.30)
 
 
-def txt(xy, t, size=20, fill=(30, 30, 30), bold=False, anchor="mm", bg=None, pad=(6, 4),
-        max_w=None, stroke=None, sw=3):
-    x, y = xy
-    f = F(size, bold)
-    t = fa(t)
-    if max_w:
-        while dr.textbbox((0, 0), t, font=f, stroke_width=sw)[2] > max_w and size > 9:
-            size -= 1
-            f = F(size, bold)
-    b = dr.textbbox((x, y), t, font=f, anchor=anchor, stroke_width=sw)
-    if bg:
-        dr.rectangle([b[0] - pad[0], b[1] - pad[1], b[2] + pad[0], b[3] + pad[1]], fill=bg)
-    if stroke:
-        dr.text((x, y), t, font=f, fill=fill, anchor=anchor, stroke_width=sw, stroke_fill=stroke)
-    else:
-        dr.text((x, y), t, font=f, fill=fill, anchor=anchor)
+def draw_floor(sh, kind):
+    """kind: 'pilotis' | 'residential' | 'roof'"""
+    building_outline(sh)
+    cs = PS.cores(); cr = PS.corridor()
+    for c in cs:
+        sh.rect(c['x0'], c['y0'], c['x1'], c['y1'], fill=(244, 244, 250),
+                outline=(90, 90, 90), w=1)
+    sh.rect(cr['x0'], cr['y0'], cr['x1'], cr['y1'], fill=(248, 246, 240),
+            outline=(170, 160, 140), w=1)
+    if kind == 'residential':
+        for u in PS.unit_boxes():
+            sh.rect(u['x0'], u['y0'], u['x1'], u['y1'], fill=(255, 252, 244),
+                    outline=(140, 140, 140), w=1)
+            sh.rect(u['x0'], u['by0'], u['x1'], u['by1'], fill=(250, 244, 224),
+                    outline=(170, 130, 40), w=1)
+            cx = (u['x0'] + u['x1']) / 2
+            sh.t_free(sh.M(cx, (u['y0'] + u['y1']) / 2 + 0.9), f"واحد {u['i']+1}",
+                      size=13, fill=(40, 40, 40), bold=True, max_w=(u['w'] - 0.5) * sh.sc)
+            sh.t_free(sh.M(cx, (u['y0'] + u['y1']) / 2 - 0.9), f"{u['area']:.1f} m²",
+                      size=11, fill=(90, 90, 90), max_w=(u['w'] - 0.5) * sh.sc)
+            sh.t_free(sh.M(cx, (u['by0'] + u['by1']) / 2), "ایوان", size=10,
+                      fill=(130, 95, 25), max_w=(u['w'] - 0.5) * sh.sc)
+            sh.window(u['x0'] + 0.8, u['by0'], u['x0'] + 2.8, u['by0'], 0.30)
+    m = sh.M((cs[0]['x0'] + cs[0]['x1']) / 2, (cs[0]['y0'] + cs[0]['y1']) / 2)
+    sh.t_free(m, "هسته\nپله و آسانسور", size=10, fill=(70, 70, 95))
+    m = sh.M((cr['x0'] + cr['x1']) / 2, (cr['y0'] + cr['y1']) / 2)
+    sh.t_free(m, f"راهرو {PS.CORR:.2f} m", size=10, fill=(120, 110, 85))
 
 
-# ============================================================ دادهٔ طرحواره‌ها
-def R(x0, y0, x1, y1, lab="", col=(255, 255, 255)):
-    return (x0, y0, x1, y1, lab, col)
+def draw_pilotis(sh, with_shops=False):
+    building_outline(sh)
+    if with_shops:
+        for s in PS.shops(4):
+            sh.rect(s['x0'], s['y0'], s['x1'], s['y1'], fill=(253, 243, 224),
+                    outline=(165, 115, 45), w=1)
+            cx = (s['x0'] + s['x1']) / 2
+            sh.t_free(sh.M(cx, (s['y0'] + s['y1']) / 2 + 0.8), f"مغازه {s['i']+1}",
+                      size=13, fill=(120, 80, 20), bold=True, max_w=(s['w'] - 0.6) * sh.sc)
+            sh.t_free(sh.M(cx, (s['y0'] + s['y1']) / 2 - 0.9), f"{s['area']:.1f} m²",
+                      size=11, fill=(120, 80, 20), max_w=(s['w'] - 0.6) * sh.sc)
+            sh.window(s['x0'] + 1.2, s['y1'], s['x0'] + 3.6, s['y1'], 0.30)
+        sh.rect(0, PS.Y0, PS.BLD_W, PS.Y1 - 6.0, fill=(255, 255, 255),
+                outline=(150, 150, 150), w=1)
+        sh.t_free(sh.M(PS.BLD_W / 2, PS.Y0 + 1.4), "انبار، تأسیسات و پارکینگِ سرپوشیده",
+                  size=12, fill=(90, 90, 90))
+    rows = PS.parking_rows()
+    for r in rows:
+        sh.rect(r['x0'], r['y0'], r['x1'], r['y1'], fill=(255, 255, 255),
+                outline=(105, 135, 185), w=1)
+        sh.t_free(sh.M((r['x0'] + r['x1']) / 2, (r['y0'] + r['y1']) / 2), str(r['n']),
+                  size=11, fill=(90, 120, 170))
+    cs = PS.cores()
+    for c in cs:
+        sh.rect(c['x0'], c['y0'], c['x1'], c['y1'], fill=(244, 244, 250),
+                outline=(90, 90, 90), w=1)
+    m = sh.M((cs[0]['x0'] + cs[0]['x1']) / 2, (cs[0]['y0'] + cs[0]['y1']) / 2)
+    sh.t_free(m, "هسته", size=10, fill=(70, 70, 95))
+    sh.rect(PS.BLD_W - 4.0, PS.Y0, PS.BLD_W, PS.Y0 + 5.6, fill=(246, 246, 240),
+            outline=(150, 150, 150), w=1)
+    sh.t_free(sh.M(PS.BLD_W - 2.0, PS.Y0 + 2.8), "رمپ", size=10, fill=(120, 120, 120))
 
 
-SCHEMES = [
-    dict(n=1, name="نوارِ خطیِ کلاسیک", sub="۴ واحد بزرگ + تراس‌های بسیار بزرگ",
-         masses=[(0, Y0, 24.0, Y1)], steps=None,
-         terr=(24.0, Y0, W, Y1), terrlab="تراس ۱۳۳ m²",
-         rooms=[R(0.2, 0.2, 7.0, 3.2, "نشیمن", C_LIV), R(7.2, 0.2, 12.0, 3.2, "آشپزخانه", C_KIT),
-                R(0.2, 3.4, 5.0, 7.8, "خواب ۱", C_BED), R(5.2, 3.4, 8.6, 7.8, "خواب ۲", C_BED),
-                R(8.8, 3.4, 12.2, 7.8, "خواب ۳", C_BED),
-                R(12.4, 0.2, 15.0, 7.8, "سرویس", C_SER),
-                R(15.2, 0.2, 18.6, 7.8, "هال", C_CIR), R(18.8, 0.2, 20.0, 7.8, "هسته", C_SER),
-                R(20.2, 0.2, 23.8, 7.8, "نشیمن ۲", C_LIV)],
-         bar=24.0,
-         nums=["۴ واحد مسکونی · هر واحد ~۱۶۳ m² مفید (۳ خوابه)",
-               "۳ مغازه ۳۹ m² · زیربنای فروشی ~۸۸۵ m²",
-               "تراسِ هر طبقه ~۱۳۳ m² (جمعاً ۵۳۲ m² فضای باز)",
-               "پارکینگ: نیاز ۱۱ / در پیلوت ۴ ⇒ کمبود ۷"],
-         pro="ساده‌ترین سازه، ارزان‌ترین اجرا، ستون‌ها هم‌محور",
-         con="فروشِ سختِ واحدِ بزرگ + بدون زیرزمین پارکینگ کم است"),
-    dict(n=2, name="دو واحد در طبقه", sub="۸ واحدِ نقدشونده در همان زیربنا",
-         masses=[(0, Y0, 24.0, Y1)], steps=None,
-         terr=(24.0, Y0, W, Y1), terrlab="تراس مشترک ۱۳۳ m²",
-         rooms=[R(0.2, 0.2, 6.2, 6.2, "واحد A", C_BED), R(0.2, 6.4, 11.8, 7.8, "", C_CIR),
-                R(6.4, 0.2, 11.8, 6.2, "واحد A", C_LIV),
-                R(12.4, 0.2, 18.4, 6.2, "واحد B", C_BED), R(12.4, 6.4, 23.8, 7.8, "", C_CIR),
-                R(18.6, 0.2, 23.8, 6.2, "واحد B", C_LIV)],
-         bar=24.0,
-         nums=["۸ واحد · هر واحد ~۸۱ m² مفید (۲ خوابه)",
-               "۳ مغازه ۳۹ m² · زیربنای فروشی ~۸۸۵ m²",
-               "راهروی شمالی ۱.۴ m · هر واحد یک‌نورگیره",
-               "پارکینگ: نیاز ۱۱ / زیرزمین ۱۲ ⇒ کافی"],
-         pro="بهترین نقدشوندگی، فروش مرحله‌ای، ریسکِ سرمایه کم",
-         con="انشعاب و کنتورِ دو برابر؛ راهرو از زیربنا می‌خورد"),
-    dict(n=3, name="تجاریِ حداکثری", sub="همکفِ تماماً تجاری + پارکینگ در زیرزمین",
-         masses=[(0, Y0, 21.2, Y1)], steps=None,
-         terr=(21.2, Y0, W, Y1), terrlab="تراس ۱۵۵ m²",
-         rooms=[R(0.2, 0.2, 6.0, 3.4, "نشیمن", C_LIV), R(6.2, 0.2, 11.0, 3.4, "آشپزخانه", C_KIT),
-                R(0.2, 3.6, 5.2, 7.8, "خواب ۱", C_BED), R(5.4, 3.6, 10.6, 7.8, "خواب ۲", C_BED),
-                R(10.8, 0.2, 13.4, 7.8, "سرویس", C_SER),
-                R(13.6, 0.2, 17.2, 7.8, "هال", C_CIR), R(17.4, 0.2, 18.6, 7.8, "هسته", C_SER),
-                R(18.8, 0.2, 21.0, 7.8, "کار", C_LIV)],
-         bar=21.2,
-         nums=["۴ واحد · هر واحد ~۱۴۴ m² مفید",
-               "۴ مغازه ۵۱ m² (۲۰۴ m² تجاری) · درآمدِ اجاره بالاتر",
-               "زیرزمین ۳۲۵ m² ⇒ ۱۲ پارکینگ + انباری",
-               "پارکینگ: نیاز ۱۱ / تأمین ۱۲ ⇒ کافی"],
-         pro="بیشترین ارزشِ اقتصادی؛ پارکینگ کامل حل می‌شود",
-         con="هزینهٔ گودبرداری، سازهٔ نگهبان و آب‌بندیِ زیرزمین"),
-    dict(n=4, name="حجمِ پلکانی", sub="۴ واحد با تراسِ اختصاصیِ رو به آسمان",
-         masses=[(0, Y0, 31.0, Y1)], steps=[26.5, 22.0, 17.5],
-         terr=(17.5, Y0, W, Y1), terrlab="تراس‌های پلکانی",
-         rooms=[R(0.2, 0.2, 8.0, 3.4, "نشیمن", C_LIV), R(8.2, 0.2, 14.0, 3.4, "آشپزخانه", C_KIT),
-                R(0.2, 3.6, 6.0, 7.8, "خواب ۱", C_BED), R(6.2, 3.6, 12.0, 7.8, "خواب ۲", C_BED),
-                R(12.2, 3.6, 18.0, 7.8, "خواب ۳", C_BED),
-                R(14.2, 0.2, 17.0, 3.4, "سرویس", C_SER), R(17.2, 0.2, 20.0, 7.8, "هال", C_CIR),
-                R(20.2, 0.2, 21.4, 7.8, "هسته", C_SER), R(21.6, 0.2, 26.3, 7.8, "نشیمن ۲", C_LIV)],
-         bar=31.0,
-         nums=["۴ واحدِ متفاوت: ۲۴۸ / ۲۱۲ / ۱۷۶ / ۱۴۰ m² ناخالص",
-               "طبقهٔ آخر = پنت‌هاوس با ~۱۸۵ m² تراس",
-               "۳ مغازه · زیربنای فروشی ~۷۷۶ m² مسکونی",
-               "پارکینگ: نیاز ۱۱ / زیرزمین ۱۲ ⇒ کافی"],
-         pro="نمای پویا، مقیاسِ محله‌ساز، تراسِ بزرگ برای همه",
-         con="دیوارهای غیرهم‌محور ⇒ تیرِ انتقالی و سازه ~۱۵٪ گران‌تر"),
-    dict(n=5, name="دو بلوک + نورگیر", sub="همهٔ واحدها دو‌نورگیره (شمال + جنوب)",
-         masses=[(0, Y0, 11.55, Y1), (13.55, Y0, 25.1, Y1)], steps=None,
-         terr=(25.1, Y0, W, Y1), terrlab="تراس ۱۲۳ m²",
-         rooms=[R(0.2, 0.2, 6.0, 3.6, "نشیمن A", C_LIV), R(6.2, 0.2, 11.35, 3.6, "آشپزخانه A", C_KIT),
-                R(0.2, 3.8, 5.6, 7.8, "خواب A1", C_BED), R(5.8, 3.8, 11.35, 7.8, "خواب A2", C_BED),
-                R(13.75, 0.2, 19.55, 3.6, "نشیمن B", C_LIV), R(19.75, 0.2, 24.9, 3.6, "آشپزخانه B", C_KIT),
-                R(13.75, 3.8, 19.15, 7.8, "خواب B1", C_BED), R(19.35, 3.8, 24.9, 7.8, "خواب B2", C_BED)],
-         bar=25.1,
-         nums=["۸ واحد · هر واحد ~۷۸ m² مفید (۲ خوابه)",
-               "نورگیر مرکزی ۲ m ⇒ نور و تهویهٔ دوطرفه",
-               "هسته در میانه با پلِ ارتباطی",
-               "پارکینگ: نیاز ۱۱ / زیرزمین ۱۲ ⇒ کافی"],
-         pro="هیچ واحدی تاریک نیست؛ تهویهٔ متقاطع در اقلیم اصفهان",
-         con="نورگیر از زیربنا می‌خورد؛ نما و دیوارِ بیشتر"),
-    dict(n=6, name="دوبلکسِ خانوادگی", sub="۲ واحدِ دوطبقه با حسِ خانهٔ ویلایی",
-         masses=[(0, Y0, 24.0, Y1)], steps=None,
-         terr=(24.0, Y0, W, Y1), terrlab="تراس ۱۳۳ m²",
-         rooms=[R(0.2, 0.2, 7.5, 3.4, "نشیمن (همکفِ واحد)", C_LIV),
-                R(7.7, 0.2, 13.5, 3.4, "آشپزخانه", C_KIT),
-                R(0.2, 3.6, 6.5, 7.8, "خواب مهمان", C_BED),
-                R(6.7, 3.6, 11.0, 7.8, "پلهٔ داخلی", C_CIR),
-                R(11.2, 0.2, 14.0, 7.8, "سرویس", C_SER),
-                R(14.2, 0.2, 18.0, 7.8, "هال", C_CIR), R(18.2, 0.2, 19.4, 7.8, "هسته", C_SER),
-                R(19.6, 0.2, 23.8, 7.8, "خواب والدین (بالا)", C_BED)],
-         bar=24.0,
-         nums=["۲ واحد دوبلکس · هر واحد ~۳۲۷ m² مفید",
-               "طبقات ۱-۲ و ۳-۴ با پلهٔ داخلی",
-               "۳ مغازه · زیربنای فروشی ~۷۶۸ m²",
-               "پارکینگ: نیاز ۷ / زیرزمین ۱۲ ⇒ کافی"],
-         pro="کمترین تعداد واحد برای مدیریت؛ ارزشِ هر واحد بالا",
-         con="سخت‌ترین فروش؛ پلهٔ داخلی ~۱۶ m² از هر واحد می‌خورد"),
-]
-
-# ============================================================ سربرگ
-dr.rectangle([0, 0, CW, 104], fill=(26, 40, 58))
-txt((CW // 2, 38), "۶ طرحواره برای ساخت روی زمین شما — اصفهان، منطقهٔ ۴", size=34, bold=True,
-    fill=(255, 255, 255))
-txt((CW // 2, 76), "زمین خالص ۵۴۲.۳۸ m² (۴۰.۵۷ × ۱۳.۳۷) | سطح اشغال ۶۰٪ = ۳۲۵ m² | "
-                   "تراکم فرضی ۱۸۰٪ = ۹۷۶ m² | عقب‌نشینی: شمال ۸ m، شرق/جنوب ۷.۰۸ m",
-    size=19, fill=(194, 210, 232))
-
-# ============================================================ سلول‌ها
-CELL_W, CELL_H = 930, 760
-SX = 10.6          # پیکسل بر متر برای پلان‌های کوچک (عرض ۴۰.۵۷ m → ۴۳۰ px)
+def draw_roof(sh):
+    building_outline(sh)
+    sh.rect(0, PS.Y0, PS.BLD_W, PS.Y1, fill=(238, 238, 234), outline=(90, 90, 90), w=2)
+    sh.t_free(sh.M(PS.BLD_W / 2, (PS.Y0 + PS.Y1) / 2 + 1.2), "بام", size=15,
+              fill=(60, 60, 70), bold=True)
+    sh.t_free(sh.M(PS.BLD_W / 2, (PS.Y0 + PS.Y1) / 2 - 1.0),
+              "شیب ۱٪ به سمتِ آبروهایِ جنوبی", size=11, fill=(90, 90, 100))
+    cs = PS.cores()
+    sh.rect(cs[0]['x0'], cs[0]['y0'], cs[0]['x1'], cs[0]['y1'], fill=(246, 246, 250),
+            outline=(90, 90, 90), w=2)
+    sh.t_free(sh.M((cs[0]['x0'] + cs[0]['x1']) / 2, (cs[0]['y0'] + cs[0]['y1']) / 2),
+              "اتاقکِ پله و آسانسور", size=10, fill=(70, 70, 90))
+    for (x0, y0, x1, y1) in [(0, PS.Y0, PS.BLD_W, PS.Y0), (0, PS.Y1, PS.BLD_W, PS.Y1),
+                             (0, PS.Y0, 0, PS.Y1), (PS.BLD_W, PS.Y0, PS.BLD_W, PS.Y1)]:
+        sh.wall(x0, y0, x1, y1, 0.25, fill=(100, 100, 100))
+    sh.t_free(sh.M(PS.BLD_W / 2, PS.Y1 + 1.0), "جان‌پناه ۱.۰۰ m", size=10,
+              fill=(100, 100, 100))
 
 
-def draw_cell(i, s):
-    cx = 20 + (i % 2) * (CELL_W + 20)
-    cy = 124 + (i // 2) * (CELL_H + 16)
-    dr.rectangle([cx, cy, cx + CELL_W, cy + CELL_H], fill=(253, 252, 248),
-                 outline=(150, 150, 145), width=2)
-    dr.rectangle([cx, cy, cx + CELL_W, cy + 52], fill=(228, 233, 240), outline=(150, 150, 145), width=2)
-    txt((cx + 18, cy + 26), f"طرحوارهٔ {s['n']} — {s['name']}", size=23, bold=True,
-        fill=(24, 42, 64), anchor="lm")
-    txt((cx + CELL_W - 18, cy + 26), s['sub'], size=17, fill=(95, 105, 122), anchor="rm",
-        max_w=430)
-
-    # ---- سایت‌پلان کوچک
-    ox, oy = cx + 20, cy + 74
-    sy = oy + D * SX
-    dr.rectangle([ox, oy, ox + W * SX, sy], fill=(255, 255, 255), outline=(200, 60, 60), width=2)
-    dr.rectangle([ox, sy - OPEN_D * SX, ox + W * SX, sy], fill=C_OPEN)          # فضای باز
-    dr.rectangle([ox, oy, ox + W * SX, sy - OPEN_D * SX], fill=C_FOOT)          # ردپا
-    for (x0, y0, x1, y1) in s['masses']:
-        a = (ox + x0 * SX, sy - y1 * SX)
-        b = (ox + x1 * SX, sy - y0 * SX)
-        dr.rectangle([a[0], a[1], b[0], b[1]], fill=C_MASS, outline=(150, 95, 20), width=2)
-    if s.get('steps'):
-        for L in s['steps']:
-            a = (ox, sy - Y1 * SX)
-            b = (ox + L * SX, sy - Y0 * SX)
-            dr.rectangle([a[0], a[1], b[0], b[1]], outline=(150, 95, 20), width=1)
-    if s.get('terr'):
-        x0, y0, x1, y1 = s['terr']
-        a = (ox + x0 * SX, sy - y1 * SX)
-        b = (ox + x1 * SX, sy - y0 * SX)
-        dr.rectangle([a[0], a[1], b[0], b[1]], fill=C_TER, outline=(70, 140, 80), width=2)
-        txt(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), s['terrlab'], size=13, fill=(35, 95, 45),
-            max_w=(b[0] - a[0]) - 6)
-    txt((ox + W * SX / 2, oy - 14), "سایت‌پلان (شمال بالا)", size=14, fill=(90, 90, 90))
-
-    # ---- پلان طبقهٔ تیپ
-    fx, fy = cx + 480, cy + 74
-    fy2 = fy + BLD_D * SX
-    dr.rectangle([fx, fy, fx + W * SX, fy2], fill=(255, 255, 255), outline=(120, 120, 120), width=2)
-    bar = s['bar']
-    dr.rectangle([fx + bar * SX, fy, fx + W * SX, fy2], fill=C_TER, outline=(70, 140, 80), width=2)
-    txt((fx + (bar + W) / 2 * SX, (fy + fy2) / 2), "تراس", size=13, fill=(35, 95, 45),
-        max_w=(W - bar) * SX - 6)
-    for (x0, y0, x1, y1, lab, col) in s['rooms']:
-        a = (fx + x0 * SX, fy2 - y1 * SX)
-        b = (fx + x1 * SX, fy2 - y0 * SX)
-        dr.rectangle([a[0], a[1], b[0], b[1]], fill=col, outline=(140, 140, 140), width=1)
-        if lab and (b[0] - a[0]) > 26:
-            txt(((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), lab, size=11, fill=(45, 45, 45),
-                max_w=(b[0] - a[0]) - 4)
-    txt((fx + W * SX / 2, fy - 14), "پلان طبقهٔ تیپ (مقیاس یکسان)", size=14, fill=(90, 90, 90))
-
-    # ---- اعداد
-    ny = cy + 74 + int(D * SX) + 30
-    for k, line in enumerate(s['nums']):
-        txt((cx + 26, ny + k * 30), f"▪ {line}", size=18, fill=(38, 48, 62), anchor="lm",
-            max_w=CELL_W - 52)
-    ny += len(s['nums']) * 30 + 14
-    dr.rectangle([cx + 20, ny, cx + CELL_W - 20, ny + 34], fill=(226, 244, 226))
-    txt((cx + 32, ny + 17), f"+ {s['pro']}", size=18, fill=(28, 88, 44), anchor="lm",
-        max_w=CELL_W - 64)
-    dr.rectangle([cx + 20, ny + 38, cx + CELL_W - 20, ny + 72], fill=(250, 230, 228))
-    txt((cx + 32, ny + 55), f"− {s['con']}", size=18, fill=(150, 45, 40), anchor="lm",
-        max_w=CELL_W - 64)
+def dims(sh):
+    sh.dimh(0, PS.CORE_W, PS.Y0 - 1.0, f"{PS.CORE_W:.2f}")
+    sh.dimh(PS.CORE_W, PS.BLD_W, PS.Y0 - 1.0, f"{PS.BLD_W-PS.CORE_W:.2f}")
+    sh.dimh(0, PS.BLD_W, PS.Y0 - 2.2, f"{PS.BLD_W:.2f}")
+    sh.dimh(0, PS.LAND_W, PS.Y0 - 3.0, f"{PS.LAND_W:.2f}")
+    sh.dimv(0, PS.Y0, PS.LAND_W + 1.0, f"{PS.Y0:.2f}")
+    sh.dimv(PS.Y0, PS.Y1, PS.LAND_W + 1.0, f"{PS.DEEP:.2f}")
+    for i, x in enumerate([0, PS.BLD_W / 2, PS.BLD_W]):
+        sh.axis(x, PS.LAND_D + 1.6, ["A", "B", "C"][i])
 
 
-for i, s in enumerate(SCHEMES):
-    draw_cell(i, s)
+def sheet_pilotis(out, no, title, sub, lvl, with_shops):
+    sh = new_sheet(title, sub, lvl, no)
+    land(sh)
+    draw_pilotis(sh, with_shops)
+    dims(sh)
+    sh.level_mark(-1.8, PS.Y1, lvl)
+    sh.frame()
+    s = PS.summary('shops' if with_shops else 'pilotis', nshop=(4 if with_shops else 0))
+    sched = [("پارکینگ", f"{s['park_have']} فضا", "۲.۵۰×۵.۰۰"),
+             ("هسته", f"{s['core']:.1f}", f"{PS.CORE_W:.2f}×{PS.CORE_D:.2f}"),
+             ("راهرو", f"{s['corr']:.1f}", f"{PS.CORR:.2f} m عرض")]
+    if with_shops:
+        sched.insert(0, ("مغازه (۴ واحد)", f"{s['com']:.1f}", "۶.۰۰ m عمق"))
+    sh.strip([("عنوان نقشه", title), ("تراز", lvl), ("مقیاس", f"۱:{sh.sd}"),
+              ("شماره برگه", no), ("تاریخ", "۱۴۰۵/۰۶/۲۷"),
+              ("زیربنای این سطح", f"{s['foot']:.1f} m²")], sched,
+             [notes_block(s, with_shops)])
+    return sh.save(os.path.join(out, f"A3-{no}.png"))
 
-# ============================================================ جدول مقایسه
-TY = 124 + 3 * (CELL_H + 16) + 6
-dr.rectangle([20, TY, CW - 20, TY + 300], fill=(253, 252, 248), outline=(150, 150, 145), width=2)
-txt((CW // 2, TY + 30), "جدول مقایسهٔ طرحواره‌ها", size=26, bold=True, fill=(24, 42, 64))
-cols = ["طرحواره", "تعداد واحد", "مفید هر واحد", "تجاری", "زیربنای مسکونی",
-        "پارکینگ (نیاز/تأمین)", "نقدشوندگی", "سختی اجرا"]
-rows = [
-    ["۱ — نوار خطی", "۴", "~۱۶۳ m²", "۳ مغازه (۱۱۷)", "۷۶۸", "۱۱ / ۴ ⚠", "کم", "کم"],
-    ["۲ — دو واحد در طبقه", "۸", "~۸۱ m²", "۳ مغازه (۱۱۷)", "۷۶۸", "۱۱ / ۱۲ ✓", "زیاد", "متوسط"],
-    ["۳ — تجاری حداکثری", "۴", "~۱۴۴ m²", "۴ مغازه (۲۰۴)", "۶۷۹", "۱۱ / ۱۲ ✓", "متوسط", "زیاد"],
-    ["۴ — حجم پلکانی", "۴", "۱۱۹–۲۱۱ m²", "۳ مغازه (۱۱۷)", "۷۷۶", "۱۱ / ۱۲ ✓", "متوسط", "زیاد"],
-    ["۵ — دو بلوک + نورگیر", "۸", "~۷۸ m²", "۳ مغازه (۱۱۷)", "۷۳۹", "۱۱ / ۱۲ ✓", "زیاد", "متوسط"],
-    ["۶ — دوبلکس", "۲", "~۳۲۷ m²", "۳ مغازه (۱۱۷)", "۷۶۸", "۷ / ۱۲ ✓", "بسیار کم", "کم"],
-]
-x0, y0 = 40, TY + 58
-colw = [250, 110, 150, 165, 165, 185, 130, 120]
-rh = 34
-for j, c in enumerate(cols):
-    cx = x0 + sum(colw[:j])
-    dr.rectangle([cx, y0, cx + colw[j], y0 + rh], fill=(228, 233, 240), outline=(170, 170, 170))
-    txt((cx + colw[j] / 2, y0 + rh / 2), c, size=16, bold=True, fill=(24, 42, 64),
-        max_w=colw[j] - 8)
-for i, r in enumerate(rows):
-    for j, v in enumerate(r):
-        cx = x0 + sum(colw[:j])
-        yy = y0 + rh + i * rh
-        dr.rectangle([cx, yy, cx + colw[j], yy + rh], fill=(255, 255, 255), outline=(200, 200, 200))
-        col = (30, 30, 30)
-        if "⚠" in v:
-            col = (170, 45, 40)
-        elif "✓" in v:
-            col = (25, 95, 45)
-        txt((cx + colw[j] / 2, yy + rh / 2), v, size=16, fill=col, max_w=colw[j] - 8)
 
-# ============================================================ پانوشت
-FY = TY + 310
-dr.rectangle([20, FY, CW - 20, FY + 96], fill=(233, 238, 244), outline=(150, 150, 145), width=2)
-txt((40, FY + 26), "مفروضات: سطح اشغال ۶۰٪ و تراکم ۱۸۰٪ (باید با شهرداری منطقهٔ ۴ تأیید شود) · "
-                   "پیلوت و زیرزمینِ پارکینگ معاف از تراکم · عمق ساختمان ۸ m + فضای باز جنوبی ۵.۳۵ m",
-    size=17, fill=(40, 50, 65), anchor="lm", max_w=CW - 80)
-txt((40, FY + 56), "ترجیحِ من: «طرحوارهٔ ۲» برای فروشِ مطمئن، یا «طرحوارهٔ ۳» اگر زیرزمین ممکن باشد "
-                   "(بیشترین ارزش تجاری + پارکینگ کامل). طرحوارهٔ ۵ از نظر کیفیتِ زندگی بهترین است.",
-    size=17, fill=(40, 50, 65), anchor="lm", max_w=CW - 80)
-txt((40, FY + 82), "هشدار: تعداد طبقات تابع عرض معبر است (۸ m شمالی در برابر ۲۶–۲۹ m شرقی) و "
-                   "حریمِ دکل برق ممکن است محدودیتِ ارتفاع هم اضافه کند — قبل از هر هزینه‌ای استعلام کنید.",
-    size=17, fill=(150, 45, 40), anchor="lm", max_w=CW - 80)
+def sheet_typical(out, no, title, lvl, with_shops):
+    sh = new_sheet(title, "طبقات ۱ تا ۳ — ۴ واحد در هر طبقه", lvl, no)
+    land(sh)
+    draw_floor(sh, 'residential')
+    dims(sh)
+    sh.level_mark(-1.8, PS.Y1, lvl)
+    sh.frame()
+    s = PS.summary('shops' if with_shops else 'pilotis', nshop=(4 if with_shops else 0))
+    sched = [(f"واحد {u['i']+1}", f"{u['area']:.1f}", f"{u['w']:.2f}×{PS.ENC_D:.2f}")
+             for u in PS.unit_boxes()]
+    sched += [(f"ایوان {u['i']+1}", f"{u['barea']:.1f}", f"{u['w']:.2f}×{PS.BALC:.2f}")
+              for u in PS.unit_boxes()[:2]]
+    sched += [("هسته", f"{s['core']:.1f}", f"{PS.CORE_W:.2f}×{PS.CORE_D:.2f}"),
+              ("راهرو", f"{s['corr']:.1f}", f"{PS.CORR:.2f} m")]
+    sh.strip([("عنوان نقشه", title), ("تراز", lvl), ("مقیاس", f"۱:{sh.sd}"),
+              ("شماره برگه", no), ("تاریخ", "۱۴۰۵/۰۶/۲۷"),
+              ("زیربنای طبقه", f"{s['cnt_per_floor']:.1f} m²")], sched,
+             [f"هر طبقه {PS.UPF} واحد · هر واحد {s['unit_area']:.1f} m² بسته + ایوان",
+              f"تراکمِ کل {s['far']:.1f}٪ · مازاد بر ۱۸۰٪: {s['exc180']:.0f} m²",
+              f"مجموعِ واحدها {s['units']} واحد · ارتفاع {s['height']:.2f} m"])
+    return sh.save(os.path.join(out, f"A3-{no}.png"))
 
-img.save(OUT)
-print("saved:", OUT, img.size)
+
+def sheet_roof(out, no, title, lvl, with_shops):
+    sh = new_sheet(title, "عایق‌کاری، شیب‌بندی و جان‌پناه", lvl, no)
+    land(sh)
+    draw_roof(sh)
+    dims(sh)
+    sh.level_mark(-1.8, PS.Y1, lvl)
+    sh.frame()
+    s = PS.summary('shops' if with_shops else 'pilotis', nshop=(4 if with_shops else 0))
+    sh.strip([("عنوان نقشه", title), ("تراز", lvl), ("مقیاس", f"۱:{sh.sd}"),
+              ("شماره برگه", no), ("تاریخ", "۱۴۰۵/۰۶/۲۷"),
+              ("ارتفاع کل", f"{s['height']:.2f} m")],
+             [("بام", f"{PS.BLD_W*PS.DEEP:.1f}", f"{PS.BLD_W:.2f}×{PS.DEEP:.2f}"),
+              ("اتاقکِ پله/آسانسور", f"{s['core']:.1f}", "—")],
+             [f"ارتفاع تمام‌شده {s['height']:.2f} m",
+              "موتورخانه و منبع با ارتفاعِ مفید زیر ۲.۲۰ ⇒ معاف از تراکم"])
+    return sh.save(os.path.join(out, f"A3-{no}.png"))
+
+
+def notes_block(s, with_shops):
+    if with_shops:
+        return (f"مغازه‌ها در نوارِ شمالی · پارکینگ در زیرزمین و فضایِ باز · "
+                f"تراکم {s['far']:.1f}٪")
+    return (f"پیلوت با ارتفاعِ مفید ۲.۶۰ m ⇒ معاف از تراکم · "
+            f"{s['park_have']} فضایِ پارکینگ")
+
+
+def build(out, prefix, with_shops):
+    s = PS.summary('shops' if with_shops else 'pilotis', nshop=(4 if with_shops else 0))
+    lv = PS.levels('shops' if with_shops else 'pilotis')
+    p = []
+    p.append(sheet_pilotis(out, f"{prefix}-۱",
+                           "پلان همکف — مغازه" if with_shops else "پلان پیلوت — پارکینگ",
+                           "تراز ۰.۰۰" if with_shops else "تراز ۰.۰۰", "±0.00", with_shops))
+    p.append(sheet_typical(out, f"{prefix}-۲", "پلان طبقهٔ تیپ", f"{lv[1][1]:+.2f}", with_shops))
+    p.append(sheet_roof(out, f"{prefix}-۳", "پلان بام", f"{lv[-1][1]:+.2f}", with_shops))
+    from reportlab.lib.pagesizes import A3, landscape
+    from reportlab.pdfgen import canvas as _c
+    from reportlab.lib.utils import ImageReader
+    W, H = landscape(A3)
+    pdf = os.path.join(out, f"تمام-برگه‌ها-{prefix}.pdf")
+    cv = _c.Canvas(pdf, pagesize=landscape(A3))
+    cv.setTitle("پلان‌های A3")
+    for f in p:
+        cv.drawImage(ImageReader(f), 0, 0, width=W, height=H)
+        cv.showPage()
+    cv.save()
+    for f in p:
+        cv = _c.Canvas(f.replace(".png", ".pdf"), pagesize=landscape(A3))
+        cv.drawImage(ImageReader(f), 0, 0, width=W, height=H)
+        cv.showPage(); cv.save()
+    print(f"  {os.path.basename(out)}: {len(p)} ورق + PDF")
+    return p
+
+
+if __name__ == "__main__":
+    print("ساختِ ورق‌های A3 برایِ هر دو طرح:")
+    build(OUT2, "دوم", False)
+    build(OUT1, "اول", True)
