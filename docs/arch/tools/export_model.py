@@ -13,70 +13,76 @@ OUT = os.path.join(HERE, "docs", "arch", "model")
 os.makedirs(OUT, exist_ok=True)
 
 # گروه‌ها بر حسبِ مصالح — در برنامهٔ مقصد به‌همین نام‌ها دیده می‌شوند
-GROUP = {}
-verts, faces = [], []
+BOXES = []          # منبعِ واحد: (نام, x0,y0,z0, x1,y1,z1, مصالح) — یکا متر، Z رو به بالا
 
 
-def add_box(name, x0, y0, z0, x1, y1, z1, mat):
-    base = len(verts)
-    p = [(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0),
-         (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)]
-    verts.extend(p)
-    quads = [(1, 2, 6, 5), (2, 3, 7, 6), (3, 4, 8, 7), (4, 1, 5, 8), (5, 6, 7, 8), (4, 3, 2, 1)]
-    for q in quads:
-        a, b, c, d = [base + i - 1 for i in q]
-        faces.append((name, mat, (a, b, c), (a, c, d)))
+def box(name, x0, y0, z0, x1, y1, z1, mat):
+    BOXES.append((name, x0, y0, z0, x1, y1, z1, mat))
+
+
+def tessellate(boxes):
+    """تبدیلِ جعبه‌ها به رأس و وجه برای خروجیِ OBJ"""
+    verts, faces = [], []
+    for (name, x0, y0, z0, x1, y1, z1, mat) in boxes:
+        base = len(verts)
+        verts.extend([(x0, y0, z0), (x1, y0, z0), (x1, y1, z0), (x0, y1, z0),
+                      (x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)])
+        for q in [(1, 2, 6, 5), (2, 3, 7, 6), (3, 4, 8, 7), (4, 1, 5, 8),
+                  (5, 6, 7, 8), (4, 3, 2, 1)]:
+            a, b, c, d = [base + i - 1 for i in q]
+            faces.append((name, mat, (a, b, c), (a, c, d)))
+    return verts, faces
 
 
 def build():
     z = {c["kind"]: c for c in PM.core_zones()}
     shf = z["shaft"]
     # سایت
-    add_box("SITE_PLOT", 0, 0, -0.02, PM.LAND_W, PM.LAND_D, 0.0, "site")
+    box("SITE_PLOT", 0, 0, -0.02, PM.LAND_W, PM.LAND_D, 0.0, "site")
     # پودیوم
-    add_box("PODIUM_PARKING", 0, PM.Y0, 0, PM.SHOP_X0, PM.Y1, PM.POD_H, "concrete")
-    add_box("PODIUM_SHOPS", PM.SHOP_X0, PM.Y0, 0, PM.LAND_W, PM.Y1, PM.POD_H, "shopfront")
-    add_box("PODIUM_TERRACE", PM.BLD_W, PM.Y0, PM.POD_H - 0.30, PM.LAND_W, PM.Y1, PM.POD_H, "terrace")
+    box("PODIUM_PARKING", 0, PM.Y0, 0, PM.SHOP_X0, PM.Y1, PM.POD_H, "concrete")
+    box("PODIUM_SHOPS", PM.SHOP_X0, PM.Y0, 0, PM.LAND_W, PM.Y1, PM.POD_H, "shopfront")
+    box("PODIUM_TERRACE", PM.BLD_W, PM.Y0, PM.POD_H - 0.30, PM.LAND_W, PM.Y1, PM.POD_H, "terrace")
     # حجمِ مسکونی
     liv = [r for r in PM.ROOMS if r[1] == "living"][0]
     for f in range(PM.NFL):
         z0 = PM.POD_H + f * PM.FL_H
         z1 = z0 + PM.FL_H
-        add_box(f"FLOOR_{f+1}_WEST_WING", 0, PM.ENC_Y0, z0, PM.UW, PM.ENC_Y1, z1, "facade")
-        add_box(f"FLOOR_{f+1}_EAST_WING", PM.UNIT_B_X, PM.ENC_Y0, z0, PM.BLD_W, PM.ENC_Y1, z1,
+        box(f"FLOOR_{f+1}_WEST_WING", 0, PM.ENC_Y0, z0, PM.UW, PM.ENC_Y1, z1, "facade")
+        box(f"FLOOR_{f+1}_EAST_WING", PM.UNIT_B_X, PM.ENC_Y0, z0, PM.BLD_W, PM.ENC_Y1, z1,
                 "facade")
-        add_box(f"FLOOR_{f+1}_CORE", PM.CORE_X0, PM.ENC_Y0, z0, PM.CORE_X1,
+        box(f"FLOOR_{f+1}_CORE", PM.CORE_X0, PM.ENC_Y0, z0, PM.CORE_X1,
                 PM.ENC_Y1 - PM.SH_D, z1, "core")
-        add_box(f"FLOOR_{f+1}_SLAB_W", 0, PM.BALC_Y0, z0 - 0.30, PM.UW, PM.ENC_Y1, z0, "slab")
-        add_box(f"FLOOR_{f+1}_SLAB_E", PM.UNIT_B_X, PM.BALC_Y0, z0 - 0.30, PM.BLD_W, PM.ENC_Y1,
+        box(f"FLOOR_{f+1}_SLAB_W", 0, PM.BALC_Y0, z0 - 0.30, PM.UW, PM.ENC_Y1, z0, "slab")
+        box(f"FLOOR_{f+1}_SLAB_E", PM.UNIT_B_X, PM.BALC_Y0, z0 - 0.30, PM.BLD_W, PM.ENC_Y1,
                 z0, "slab")
         # ایوان
-        add_box(f"FLOOR_{f+1}_BALCONY_W", liv[2], PM.BALC_Y0, z0 - 0.30, liv[4], PM.ENC_Y0, z0,
+        box(f"FLOOR_{f+1}_BALCONY_W", liv[2], PM.BALC_Y0, z0 - 0.30, liv[4], PM.ENC_Y0, z0,
                 "balcony")
         bx0, bx1 = PM.BLD_W - liv[4], PM.BLD_W - liv[2]
-        add_box(f"FLOOR_{f+1}_BALCONY_E", bx0, PM.BALC_Y0, z0 - 0.30, bx1, PM.ENC_Y0, z0,
+        box(f"FLOOR_{f+1}_BALCONY_E", bx0, PM.BALC_Y0, z0 - 0.30, bx1, PM.ENC_Y0, z0,
                 "balcony")
-        add_box(f"FLOOR_{f+1}_RAIL_W", liv[2], PM.BALC_Y0, z0, liv[4], PM.BALC_Y0 + 0.12, z1,
+        box(f"FLOOR_{f+1}_RAIL_W", liv[2], PM.BALC_Y0, z0, liv[4], PM.BALC_Y0 + 0.12, z1,
                 "railing")
-        add_box(f"FLOOR_{f+1}_RAIL_E", bx0, PM.BALC_Y0, z0, bx1, PM.BALC_Y0 + 0.12, z1, "railing")
+        box(f"FLOOR_{f+1}_RAIL_E", bx0, PM.BALC_Y0, z0, bx1, PM.BALC_Y0 + 0.12, z1, "railing")
     # دیواره‌های شفت
-    add_box("SHAFT_WALL_W", shf["x0"] - 0.15, shf["y0"], PM.POD_H, shf["x0"], shf["y1"], PM.TOP,
+    box("SHAFT_WALL_W", shf["x0"] - 0.15, shf["y0"], PM.POD_H, shf["x0"], shf["y1"], PM.TOP,
             "core")
-    add_box("SHAFT_WALL_E", shf["x1"], shf["y0"], PM.POD_H, shf["x1"] + 0.15, shf["y1"], PM.TOP,
+    box("SHAFT_WALL_E", shf["x1"], shf["y0"], PM.POD_H, shf["x1"] + 0.15, shf["y1"], PM.TOP,
             "core")
-    add_box("SHAFT_WALL_S", shf["x0"], shf["y0"] - 0.15, PM.POD_H, shf["x1"], shf["y0"], PM.TOP,
+    box("SHAFT_WALL_S", shf["x0"], shf["y0"] - 0.15, PM.POD_H, shf["x1"], shf["y0"], PM.TOP,
             "core")
     # بام
-    add_box("ROOF_SLAB", 0, PM.ENC_Y0, PM.TOP - 0.30, PM.BLD_W, PM.ENC_Y1, PM.TOP, "roof")
-    add_box("ROOF_PARAPET", 0, PM.ENC_Y1 - 0.25, PM.TOP, PM.BLD_W, PM.ENC_Y1, PM.TOP + PM.PARAPET,
+    box("ROOF_SLAB", 0, PM.ENC_Y0, PM.TOP - 0.30, PM.BLD_W, PM.ENC_Y1, PM.TOP, "roof")
+    box("ROOF_PARAPET", 0, PM.ENC_Y1 - 0.25, PM.TOP, PM.BLD_W, PM.ENC_Y1, PM.TOP + PM.PARAPET,
             "parapet")
-    add_box("TERRACE_RAIL", PM.BLD_W, PM.Y0, PM.POD_H, PM.LAND_W, PM.Y0 + 0.15,
+    box("TERRACE_RAIL", PM.BLD_W, PM.Y0, PM.POD_H, PM.LAND_W, PM.Y0 + 0.15,
             PM.POD_H + 1.10, "railing")
-    add_box("ENTRANCE_CANOPY", PM.CORE_X0, PM.Y1, 0, PM.CORE_X0 + 2.6, PM.Y1 + 2.5, 3.20,
+    box("ENTRANCE_CANOPY", PM.CORE_X0, PM.Y1, 0, PM.CORE_X0 + 2.6, PM.Y1 + 2.5, 3.20,
             "concrete")
     for i in range(PM.NSHOP):
         x0 = PM.SHOP_X0 + i * PM.SHOP_W
-        add_box(f"SHOP_{i+1}_SIGN", x0, PM.Y1 - 0.10, 3.40, x0 + PM.SHOP_W, PM.Y1 + 1.60, 3.55,
+        box(f"SHOP_{i+1}_SIGN", x0, PM.Y1 - 0.10, 3.40, x0 + PM.SHOP_W, PM.Y1 + 1.60, 3.55,
                 "sign")
 
 
@@ -98,6 +104,7 @@ MTL = {
 
 if __name__ == "__main__":
     build()
+    verts, faces = tessellate(BOXES)
     obj = os.path.join(OUT, "model.obj")
     with open(obj, "w", encoding="utf-8") as f:
         f.write("# مدل سه‌بعدی — زمین ۵۴۲٫۳۸ m² اصفهان\n")
