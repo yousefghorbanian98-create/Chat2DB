@@ -45,7 +45,7 @@ SCHEMES = [
 ]
 
 ROOT_DOCS = ["سقف-طبقه-بازنگری.md", "مذاکره-طرح-دوم.md", "PROMPT-MASTER.md",
-             "regulations-compendium.md"]
+             "regulations-compendium.md", "maket-طرح-اول.md"]
 
 
 
