@@ -1,6 +1,6 @@
 # Gh Protocol — سند جامع وضعیت و راه‌اندازی (HANDOFF)
 
-**تاریخ:** ۳۰ مهر ۱۴۰۵ (2026-10-22) · **وضعیت:** P0 کامل و آماده push · **مسدودشده بر:** دسترسی نوشتن GitHub-App به ریپوی `gh-protocol` (ارور موقتی GitHub در Arena — کاربر قرار است بعد از رفع، reconnect/افزودن app را انجام دهد)
+**تاریخ:** ۳۰ مهر ۴۰۵ (2026-10-22) · **وضعیت: G0 سبز ✅** — P0 در زیرمجلد `gh-protocol/` همین ریپوی (Chat2DB) build می‌شود و سبز است · **باقی‌مانده:** دسترسی نوشتن GitHub-App به ریپوی جدا `gh-protocol` برای مهاجرت نهایی (کاربر ارور موقتی GitHub در Arena را گزارش داد؛ بعد از رفع، reconnect/افزودن app)
 
 > این سند برای «بقا» نوشته شده: اگر workspace پاک شود و تنها چیزی که مانده باشد همین ریپوی باشد،
 > با خواندن این فایل + فایل‌های همین پوشه، کل پروژه به‌طور کامل بازسازی و ادامه می‌شود.
@@ -32,11 +32,14 @@ App ID `com.ghprotocol.app`، minSdk 26 / targetSdk 35، لایسنس MIT (خو�
 | اپ HTML یک‌کلیک (deliverable اول) | ✅ `/home/user/serverless-iran/index.html` (53,204 B) + `lib/qrcode.js` — سرویس پیش‌نمایش: `python3 -m http.server 8321 --bind 0.0.0.0` در cwd آن پوشه |
 | اسکلت P0 (32 فایل) | ✅ کامل در workspace: `/home/user/gh-protocol` (git commit محلی `72ba997` روی بوش `main`) + **کپی این پوشه** |
 | Keystore release | ✅ تولیدشده (EC P-256، 25 ساله، alias `ghprotocol`) — فایل‌ها: `/home/user/.ghprotocol-keystore.b64` و `/home/user/.ghprotocol-keystore-pass` (⚠️ خارج از Git — اگر پاک شدند، بخش ۷ روش بازسازی را اجرا کنید؛ چون هنوز release‌ای امضا نشده، بازسازی **بدون هیچ هزینه‌ای** است) |
-| ریپوی `gh-protocol` | ✅ ساخته‌شده توسط کاربر (public، خالی) |
-| Push به `gh-protocol` | ❌ **مسدود** — GitHub-App اتصال Arena فقط روی ریپوی‌های قدیمی نصب است؛ read دارد، write ندارد (403). کاربر قرار است reconnect کند یا app را به ریپوی اضافه کند |
-| push به بوش سشن Chat2db (`arena/7324330b-chat2db`) | ✅ سالم — همین سند با push این بوش ماندگار می‌شود |
+| ریپوی `gh-protocol` (جدا) | ✅ ساخته‌شده توسط کاربر (public، خالی) — منتظر مهاجرت |
+| Push به `gh-protocol` (جدا) | ❌ مسدود — app فقط read دارد (403). بعد از reconnect/افزودن app با write، مهاجرت = یک commit |
+| **build واقعی (P0)** | ✅ **در `Chat2DB/gh-protocol/`** — workflow ریشه: `.github/workflows/gh-protocol.yml` (paths-filtered) · run سبز: [39834413232](https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/39834413232) (4m22s) |
+| **Release** | ✅ [`gh-protocol-P0-test`](https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/gh-protocol-P0-test) با artifact `apk-p0` (15.5 MB: دو APK + SHA256SUMS) |
+| امضای release در CI | ⚠️ **ephemeral keystore به‌ازای هر run** (app دسترسی secrets هم ندارد — 403)؛ به‌محض set شدن `KEYSTORE_PKCS12`+`KEYSTORE_PASS` در Secrets، خودکار به کلید دائمی سوییچ می‌کند |
+| لاگ‌های CI از داخل sandbox | ⚠️ results-receiver و blob.core.windows.net در allowlist شبکه‌ی sandbox نیستند → لاگ از طریق بوش خودکار `ci-diag` (step شکست، tail لاگ gradle را آنجا commit می‌کند) |
 
-**تک‌گلوئی (single point) فعلی:** فقط «دسترسی نوشتن app به gh-protocol». بعد از رفع آن، همه‌چیز خودکار است (بخش ۶).
+**تک‌گلوئی فعلی:** فقط «دسترسی نوشتن+secrets به ریپوی جدا gh-protocol» — و این فقط برای **مهاجرت نهایی و کلید دائمی** است؛ ساخت و تست هر روز از همین‌جا خودکار ادامه دارد (بخش ۶).
 
 ---
 
@@ -156,7 +159,9 @@ Wikipedia: 2026_Internet_blackout_in_Iran · arXiv 2603.28753 و 2605.00187 (م�
 
 ---
 
-## ۶. راهنمای اجرا بعد از بازگشت GitHub (دقیق، قدم‌به‌قدم)
+## ۶. راهنمای اجرا (دقیق، قدم‌به‌قدم)
+
+**وضعیت کنونی (بعد از G0):** build روزمره در `Chat2DB/gh-protocol/` است و سبز؛ دو کاربرد برای ریپوی جدا `gh-protocol` باقی است: (الف) کلید دائمی (secrets) و (ب) هویت مستقل محصول. هر دو بعد از برقراری دسترسی نوشتن+secrets انجام می‌شود:
 
 **پیش‌نیاز:** کاربر اتصال GitHub در Arena را reconnect کرده (یا app را روی `gh-protocol` با دسترسی نوشتن نصب کرده). تست سریع:
 ```bash
