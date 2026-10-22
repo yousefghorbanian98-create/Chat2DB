@@ -1,0 +1,84 @@
+# Gh Protocol — Android build (lives in gh-protocol/ subdirectory while the
+# dedicated repo `gh-protocol` is not yet reachable by the CI app. Migrates
+# wholesale to that repo later; see gh-protocol/HANDOFF.md section 6.)
+#
+# Signing (P0): the CI app cannot manage repo secrets yet, so a throwaway
+# keystore is generated per run (random key, zero continuity cost — no
+# release has been signed yet). Once the app gains secrets access, set
+# KEYSTORE_PKCS12 (base64 PKCS12) + KEYSTORE_PASS and the step below
+# switches to the persistent key automatically.
+name: gh-protocol-build
+
+on:
+  push:
+    paths:
+      - 'gh-protocol/**'
+      - '.github/workflows/gh-protocol.yml'
+  pull_request:
+    paths:
+      - 'gh-protocol/**'
+      - '.github/workflows/gh-protocol.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gh-protocol-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build + test (APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          working-directory: gh-protocol
+
+      - name: Provide release keystore
+        env:
+          KEYSTORE_PKCS12: ${{ secrets.KEYSTORE_PKCS12 }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+        run: |
+          mkdir -p gh-protocol/build/keystore
+          if [ -n "$KEYSTORE_PKCS12" ]; then
+            echo "::group::Using persistent keystore from Secrets"
+            echo "$KEYSTORE_PKCS12" | base64 -d > gh-protocol/build/keystore/release.keystore
+            echo "KEYSTORE_PASS=$KEYSTORE_PASS" >> "$GITHUB_ENV"
+          else
+            echo "::group::Generating ephemeral keystore (P0 — no secrets access yet)"
+            PW=$(openssl rand -hex 16)
+            keytool -genkeypair -alias ghprotocol -keyalg EC -keysize 256 -validity 3650 \
+              -keystore gh-protocol/build/keystore/release.keystore -storetype PKCS12 \
+              -storepass "$PW" -keypass "$PW" \
+              -dname "CN=Gh Protocol (CI ephemeral), O=Gh Protocol, C=IR"
+            echo "KEYSTORE_PASS=$PW" >> "$GITHUB_ENV"
+            echo "ephemeral keystore ready (random per run)"
+          fi
+
+      - name: Build (debug + release) and run tests
+        working-directory: gh-protocol
+        run: ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace
+
+      - name: SHA-256 of outputs
+        working-directory: gh-protocol
+        run: |
+          find app/build/outputs/apk -name '*.apk' -print0 | xargs -0 sha256sum > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-p0
+          path: |
+            gh-protocol/app/build/outputs/apk/**/*.apk
+            gh-protocol/SHA256SUMS
+          retention-days: 3
