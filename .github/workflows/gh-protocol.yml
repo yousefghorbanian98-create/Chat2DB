@@ -41,7 +41,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          working-directory: gh-protocol
+          # wrapper lives in gh-protocol/ subdir; pin the same version explicitly
+          gradle-version: '8.10.2'
 
       - name: Provide release keystore
         env:
