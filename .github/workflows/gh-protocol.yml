@@ -68,7 +68,24 @@ jobs:
 
       - name: Build (debug + release) and run tests
         working-directory: gh-protocol
-        run: ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace 2>&1 | tee gradle-build.log
+
+      - name: Publish failure log to ci-diag branch
+        if: failure()
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git checkout -B ci-diag
+          mkdir -p gh-protocol
+          { echo "## gh-protocol build failure — $(date -u +%FT%TZ)"; echo; tail -c 150000 gh-protocol/gradle-build.log 2>/dev/null || echo "(no gradle log captured)"; } > gh-protocol/ci-failure.log
+          git add gh-protocol/ci-failure.log
+          git commit -m "ci-diag: build failure tail $(date -u +%Y%m%d-%H%M%S)"
+          git push origin HEAD:ci-diag --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: SHA-256 of outputs
         working-directory: gh-protocol
