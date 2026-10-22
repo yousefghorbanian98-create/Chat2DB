@@ -8,6 +8,7 @@
 # KEYSTORE_PKCS12 (base64 PKCS12) + KEYSTORE_PASS and the step below
 # switches to the persistent key automatically.
 name: gh-protocol-build
+# runbook: see gh-protocol/HANDOFF.md §6 (v2: after setup-gradle fix)
 
 on:
   push:
