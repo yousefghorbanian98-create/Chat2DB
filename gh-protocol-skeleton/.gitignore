@@ -1,0 +1,13 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+build/
+!gradle/wrapper/gradle-wrapper.jar
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk.idsig
+# decoded keystore never committed
+build/keystore/

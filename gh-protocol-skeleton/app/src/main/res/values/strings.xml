@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Gh Protocol</string>
+    <string name="tagline">Stay connected.</string>
+    <string name="connect_p1">Connect</string>
+    <string name="status_skeleton">P0 skeleton — connectivity lands in P1</string>
+    <string name="version">v%1$s · open source</string>
+</resources>
