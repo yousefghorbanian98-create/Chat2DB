@@ -43,6 +43,6 @@ fun GhNavHost(
         composable(Routes.BALANCER) { BalancerScreen() }
         composable(Routes.PREP) { PrepScreen() }
         composable(Routes.ABOUT) { AboutScreen() }
-        composable(Routes.QR) { QrScreen(viewModel = viewModel) }
+        composable(Routes.QR) { QrScreen() }
     }
 }

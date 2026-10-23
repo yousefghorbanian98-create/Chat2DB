@@ -45,11 +45,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     fun refreshConfig() {
         viewModelScope.launch {
             _ui.update { it.copy(isUpdating = true, configError = null) }
-            when (val r = repository.update()) {
-                is Result.Success -> _ui.update {
+            val r = repository.update()
+            _ui.update {
+                if (r.isSuccess) {
                     it.copy(isUpdating = false, subscription = r.getOrNull())
-                }
-                is Result.Failure -> _ui.update {
+                } else {
                     it.copy(
                         isUpdating = false,
                         subscription = it.subscription ?: repository.cachedAnyAge(),

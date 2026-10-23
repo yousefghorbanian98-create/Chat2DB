@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +33,7 @@ import com.google.zxing.MultiFormatWriter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QrScreen(modifier: Modifier = Modifier) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -45,15 +47,17 @@ fun QrScreen(modifier: Modifier = Modifier) {
                 val w = matrix.width
                 val h = matrix.height
                 val pixels = IntArray(w * h)
-                for (y in 0 until h) {
-                    for (x in 0 until w) {
-                        pixels[y * w + x] = if (matrix.get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+                val black = 0xFF000000.toInt()
+                val white = 0xFFFFFFFF.toInt()
+                for (row in 0 until h) {
+                    for (col in 0 until w) {
+                        pixels[row * w + col] = if (matrix.get(col, row)) black else white
                     }
                 }
-                android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888).apply {
-                    setPixels(pixels, 0, w, 0, 0)
-                }
-            } catch (e: Exception) {
+                val bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
+                bmp.setPixels(pixels, 0, w, 0, 0)
+                bmp
+} catch (e: Exception) {
                 null
             }
         }

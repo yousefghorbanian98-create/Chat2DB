@@ -45,7 +45,7 @@ object SubscriptionParser {
             }
             entries.add(EntryInfo(remarks, minCore, port, features.distinct()))
         }
-        return SubscriptionInfo(entries, System.currentTimeMillis(), SUBSCRIPTION_URL, raw)
+        return SubscriptionInfo(entries, System.currentTimeMillis(), Subscription.SUBSCRIPTION_URL, raw)
     }
 }
 
