@@ -32,10 +32,12 @@ private val LightColors = lightColorScheme(
 @Composable
 fun GhProtocolTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    forceDark: Boolean? = null,
     content: @Composable () -> Unit
 ) {
+    val isDark = forceDark ?: darkTheme
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = if (isDark) DarkColors else LightColors,
         typography = GhTypography,
         content = content
     )

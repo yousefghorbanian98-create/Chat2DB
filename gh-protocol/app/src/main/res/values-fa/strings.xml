@@ -75,4 +75,13 @@
     <string name="about_honest">ما فقط راستی را وعده می‌دهیم: بیشترین احتمال اتصال در هر وضعیتی به‌جز قطع کامل — و صداقت در خودِ قطع کامل.</string>
     <string name="qr_help">این QR را با دیگران به اشتراک بگذارید — یک اسکن = اشتراك رسمی.</string>
     <string name="share">اشتراک‌گذاری</string>
+    <string name="settings">تنظیمات</string>
+    <string name="settings_theme">پوسته</string>
+    <string name="settings_language">زبان</string>
+    <string name="opt_system">سیستم</string>
+    <string name="opt_light">روشن</string>
+    <string name="opt_dark">تیره</string>
+    <string name="opt_fa">فارسی</string>
+    <string name="opt_en">English</string>
+    <string name="settings_note">پوسته بلافاصله اعمال می‌شود. زبان در اجرای بعدی اعمال می‌شود.</string>
 </resources>

@@ -20,6 +20,13 @@ on:
       - 'gh-protocol/**'
       - '.github/workflows/gh-protocol.yml'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "Roborazzi goldens: verify (CI gate) or generate (produce reference PNGs)"
+        required: false
+        default: verify
+        type: choice
+        options: [verify, generate]
 
 concurrency:
   group: gh-protocol-${{ github.ref }}
@@ -71,6 +78,37 @@ jobs:
         run: |
           set -o pipefail
           ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace 2>&1 | tee gradle-build.log
+
+      - name: Golden screenshots (Roborazzi)
+        working-directory: gh-protocol
+        run: |
+          MODE="${{ inputs.mode || 'verify' }}"
+          if [ "$MODE" = "generate" ]; then
+            echo "::group::Generating reference goldens"
+            ./gradlew --no-daemon :app:captureRoboImages --stacktrace 2>&1 | tail -20
+            echo "::endgroup::"
+          else
+            if [ -d app/src/test/snapshots ]; then
+              echo "::group::Verifying goldens"
+              ./gradlew --no-daemon :app:roborazziVerify --stacktrace 2>&1 | tail -20
+              echo "::endgroup::"
+            else
+              echo "::notice::No golden references yet — skipping verify (run with mode=generate first)"
+            fi
+          fi
+
+      - name: Return golden PNGs (generate mode)
+        if: inputs.mode == 'generate'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git checkout -B ci-diag-goldens
+          git add -A
+          git commit -m "goldens $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag-goldens --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish failure log to ci-diag branch
         if: failure()

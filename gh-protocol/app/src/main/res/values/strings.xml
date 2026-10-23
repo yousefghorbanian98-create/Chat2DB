@@ -73,4 +73,13 @@
     <string name="about_honest">We only promise truth: the highest chance of connection in every state except a full cutoff — and honesty in the cutoff itself.</string>
     <string name="qr_help">Share this QR with others — one scan = the official subscription.</string>
     <string name="share">Share</string>
+    <string name="settings">Settings</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_language">Language</string>
+    <string name="opt_system">System</string>
+    <string name="opt_light">Light</string>
+    <string name="opt_dark">Dark</string>
+    <string name="opt_fa">فارسی</string>
+    <string name="opt_en">English</string>
+    <string name="settings_note">Theme applies instantly. Language applies on next app launch.</string>
 </resources>

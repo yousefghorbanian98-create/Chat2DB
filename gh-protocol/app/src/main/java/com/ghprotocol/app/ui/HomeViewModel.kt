@@ -23,10 +23,11 @@ data class HomeUiState(
     val connectPhase: ConnectPhase = ConnectPhase.IDLE
 )
 
-class HomeViewModel(app: Application) : AndroidViewModel(app) {
-
-    val repository = SubscriptionRepository(app)
-    val monitor = NetworkMonitor()
+class HomeViewModel(
+    app: Application,
+    val repository: SubscriptionRepository = SubscriptionRepository(app),
+    val monitor: NetworkMonitor = NetworkMonitor()
+) : AndroidViewModel(app) {
 
     private val _ui = MutableStateFlow(HomeUiState(subscription = repository.cachedAnyAge()))
     val ui: StateFlow<HomeUiState> = _ui.asStateFlow()

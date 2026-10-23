@@ -5,6 +5,7 @@ import com.ghprotocol.app.domain.NetworkState
 import com.ghprotocol.app.domain.ProbeResult
 import com.ghprotocol.app.domain.Probes
 import com.ghprotocol.app.domain.Prober
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

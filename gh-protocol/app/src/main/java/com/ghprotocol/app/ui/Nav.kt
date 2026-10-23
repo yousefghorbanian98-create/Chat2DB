@@ -16,6 +16,7 @@ object Routes {
     const val PREP = "prep"
     const val ABOUT = "about"
     const val QR = "qr"
+    const val SETTINGS = "settings"
 }
 
 @Composable
@@ -33,7 +34,8 @@ fun GhNavHost(
                 onOpenQr = { nav.navigate(Routes.QR) },
                 onOpenScanner = { nav.navigate(Routes.SCANNER) },
                 onOpenBalancer = { nav.navigate(Routes.BALANCER) },
-                onOpenPrep = { nav.navigate(Routes.PREP) }
+                onOpenPrep = { nav.navigate(Routes.PREP) },
+                onOpenSettings = { nav.navigate(Routes.SETTINGS) }
             )
         }
         composable(Routes.FIRST_RUN) { FirstRunScreen(onGetStarted = { nav.popBackStack() }) }
@@ -44,5 +46,6 @@ fun GhNavHost(
         composable(Routes.PREP) { PrepScreen() }
         composable(Routes.ABOUT) { AboutScreen() }
         composable(Routes.QR) { QrScreen() }
+        composable(Routes.SETTINGS) { SettingsScreen() }
     }
 }
