@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
@@ -46,7 +47,7 @@ import com.ghprotocol.app.ui.theme.GhBlue
 private val Amber = Color(0xFFF5A524)
 private val Red = Color(0xFFE5484D)
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -114,13 +115,13 @@ fun HomeScreen(
             }
 
             Spacer(Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 OutlinedButton(onClick = onOpenConfig) { Text(stringResource(R.string.config_source)) }
                 OutlinedButton(onClick = onOpenGuide) { Text(stringResource(R.string.guide)) }
                 OutlinedButton(onClick = onOpenQr) { Text(stringResource(R.string.qr_share)) }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(onClick = onOpenScanner) { Text(stringResource(R.string.clean_ip_short)) }
                 OutlinedButton(onClick = onOpenBalancer) { Text(stringResource(R.string.routes_short)) }
                 OutlinedButton(onClick = onOpenPrep) { Text(stringResource(R.string.blackout_prep_short)) }

@@ -38,6 +38,12 @@ class HomeViewModel(
         monitor.start(viewModelScope) {
             viewModelScope.launch { refreshConfig() }
         }
+        // F-11: surface the live network state in the UI
+        viewModelScope.launch {
+            monitor.state.collect { net ->
+                _ui.update { it.copy(network = net) }
+            }
+        }
         if (_ui.value.subscription == null) {
             viewModelScope.launch { refreshConfig() }
         }
