@@ -7,7 +7,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.test.core.app.ApplicationProvider
-import com.github.takahirom.roborazzi.CompareOptions
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.RoborazziComposeCaptureOption
 import com.github.takahirom.roborazzi.RoborazziComposeOptions
@@ -81,7 +80,7 @@ class GoldenScreensTest {
     val roborazziRule = RoborazziRule(
         options = RoborazziRule.Options(
             roborazziOptions = RoborazziOptions(
-                compareOptions = CompareOptions(resultValidator = ThresholdValidator(0.005f))
+                compareOptions = RoborazziOptions.CompareOptions(resultValidator = ThresholdValidator(0.005f))
             )
         )
     )
@@ -117,6 +116,7 @@ class GoldenScreensTest {
         return vm
     }
 
+    @Composable
     private fun themed(dark: Boolean, content: @Composable () -> Unit) =
         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
             GhProtocolTheme(forceDark = dark) { content() }
@@ -144,76 +144,76 @@ class GoldenScreensTest {
     }
 
     // --- 360x640 ---
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_connected_360x640() = home("home_connected", 3, 1)
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_degraded_360x640() = home("home_degraded", 1, 2)
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_cutoff_360x640() = home("home_cutoff", 0, 1)
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun first_run_360x640() = plain("first_run") { FirstRunScreen(onGetStarted = {}) }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun settings_360x640() = plain("settings") { SettingsScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun config_360x640() = plain("config") { ConfigScreen(viewModel = homeVm(3, 1)) }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun scanner_360x640() = plain("scanner") { ScannerScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun balancer_360x640() = plain("balancer") { BalancerScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun prep_360x640() = plain("prep") { PrepScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun guide_360x640() = plain("guide") { GuideScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun about_360x640() = plain("about") { AboutScreen() }
 
-    @Test @Config(width = 360, height = 640) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun qr_360x640() = plain("qr") { QrScreen() }
 
     // --- 1080x1920 ---
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_connected_1080x1920() = home("home_connected", 3, 1)
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_degraded_1080x1920() = home("home_degraded", 1, 2)
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun home_cutoff_1080x1920() = home("home_cutoff", 0, 1)
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun first_run_1080x1920() = plain("first_run") { FirstRunScreen(onGetStarted = {}) }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun settings_1080x1920() = plain("settings") { SettingsScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun config_1080x1920() = plain("config") { ConfigScreen(viewModel = homeVm(3, 1)) }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun scanner_1080x1920() = plain("scanner") { ScannerScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun balancer_1080x1920() = plain("balancer") { BalancerScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun prep_1080x1920() = plain("prep") { PrepScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun guide_1080x1920() = plain("guide") { GuideScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun about_1080x1920() = plain("about") { AboutScreen() }
 
-    @Test @Config(width = 1080, height = 1920) @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun qr_1080x1920() = plain("qr") { QrScreen() }
 }
