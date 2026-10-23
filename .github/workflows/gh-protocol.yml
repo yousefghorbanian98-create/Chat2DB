@@ -80,25 +80,26 @@ jobs:
           ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace 2>&1 | tee gradle-build.log
 
       - name: Golden screenshots (Roborazzi)
+        id: golden
         working-directory: gh-protocol
         run: |
           MODE="${{ inputs.mode || 'verify' }}"
-          if [ "$MODE" = "generate" ]; then
-            echo "::group::Generating reference goldens"
+          # auto-record on first ever run (no committed references yet); otherwise verify
+          if [ "$MODE" = "generate" ] || { [ ! -d app/src/test/snapshots ]; }; then
+            echo "recorded=true" >> "$GITHUB_OUTPUT"
+            echo "::group::Generating reference goldens (record mode)"
             ./gradlew --no-daemon :app:recordRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
             echo "::endgroup::"
+          elif [ -d app/src/test/snapshots ]; then
+            echo "::group::Verifying goldens"
+            ./gradlew --no-daemon :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
+            echo "::endgroup::"
           else
-            if [ -d app/src/test/snapshots ]; then
-              echo "::group::Verifying goldens"
-              ./gradlew --no-daemon :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
-              echo "::endgroup::"
-            else
-              echo "::notice::No golden references yet — skipping verify (run with mode=generate first)"
-            fi
+            echo "::notice::No golden references yet"
           fi
 
-      - name: Return golden PNGs (generate mode)
-        if: inputs.mode == 'generate'
+      - name: Return golden PNGs (record mode)
+        if: steps.golden.outputs.recorded == 'true'
         run: |
           cd "$GITHUB_WORKSPACE"
           git config user.name "gh-protocol-ci"
