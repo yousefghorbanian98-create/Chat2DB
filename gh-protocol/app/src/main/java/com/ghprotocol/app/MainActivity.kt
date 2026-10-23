@@ -2,7 +2,7 @@ package com.ghprotocol.app
 
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Configuration
+import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
