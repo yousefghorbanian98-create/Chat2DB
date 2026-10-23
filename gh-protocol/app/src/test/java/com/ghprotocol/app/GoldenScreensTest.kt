@@ -33,6 +33,8 @@ import com.ghprotocol.app.ui.SettingsScreen
 import com.ghprotocol.app.ui.theme.GhProtocolTheme
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
@@ -73,6 +75,7 @@ private const val SEED_JSON = """
  *   - record: :app:recordRoborazziDebug  (produces references in app/src/test/snapshots)
  *   - verify: :app:verifyRoborazziDebug  (compares, fails beyond 0.5%)
  */
+@RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalRoborazziApi::class)
 class GoldenScreensTest {
 
