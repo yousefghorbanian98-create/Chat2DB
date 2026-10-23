@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.ghprotocol.app.ui.HomeScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ghprotocol.app.ui.GhNavHost
+import com.ghprotocol.app.ui.HomeViewModel
 import com.ghprotocol.app.ui.theme.GhProtocolTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +15,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GhProtocolTheme {
-                HomeScreen()
+                val vm: HomeViewModel = viewModel()
+                GhNavHost(viewModel = vm)
             }
         }
     }
