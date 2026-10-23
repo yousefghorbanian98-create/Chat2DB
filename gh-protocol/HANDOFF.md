@@ -57,8 +57,9 @@ App ID `com.ghprotocol.app`، minSdk 26 / targetSdk 35، لایسنس MIT (خو�
 | F-8 راهنمای فارسی (3 قدم + نکات رسمی) | ✅ `GuideScreen` |
 | F-14 جایگزین‌ها (اینترنت پرو/سیم/استارلینک/مکمل‌ها) | ✅ بخش آخر `GuideScreen` |
 | تنظیمات (تم + زبان fa/en) | ✅ `SettingsScreen` + `SettingsStore` + اعمال در `MainActivity` |
-| 12 صفحه golden | 🔄 harness نوشته شده (`GoldenScreensTest`، Roborazzi 1.49.0 + Robolectric 4.14.1) — منتظر run سبز برای generate |
-| web-preview | ✅ `web/index.html` (تک‌فایل 40KB، بدون CDN، qrcodejs MIT) + بوش `gh-pages` — **فعال‌سازی Pages = 1 کلیک دستی** (App اجازه‌ی Pages-API ندارد — محدودیت پلتفرم GitHub) |
+| 12 صفحه golden | ✅ **48 PNG مرجع commit شده** (12 صفحه × 2 تم × 360×640+1080×1920، RTL، آستانه‌ی 0.5٪) — هر build با `:app:verifyRoborazziDebug` در برابر آن‌ها verify می‌شود؛ بدون snapshots، خودکار record می‌کند و PNGها را به بوش `ci-diag-goldens` برمی‌گرداند. run سبز verify: [40021593264](https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/40021593264) |
+| web-preview | ✅ `web/index.html` (تک‌فایل 40KB، بدون CDN، qrcodejs MIT، RTL) + بوش `gh-pages` — **فعال‌سازی Pages = 1 کلیک دستی توسط کاربر**: repo Settings → Pages → Deploy from a branch → `gh-pages` / root (GitHub-App اجازه‌ی Pages-API ندارد — محدودیت پلتفرم GitHub، نه خطای ما) |
+| **G1** | ✅ **دسترسی به گیت**: F-1/5/7/8/9/11/12/14 + golden 12 صفحه + web-preview آماده (فقط کلید Pages باقی) |
 
 **کانال‌های بازگردانی از CI (مهم برای بازسازی):**
 - لاگ شکست: بوش `ci-diag` ← `gh-protocol/ci-failure.log` (step شکست، tail 150KB)
@@ -66,14 +67,18 @@ App ID `com.ghprotocol.app`، minSdk 26 / targetSdk 35، لایسنس MIT (خو�
 - **محدودیت‌های شبکه‌ی sandbox** (دوباره امتحان نکنید): results-receiver + blob.core.windows.net مسدود → لاگ/آرته‌فکت مستقیم نمی‌آید؛ `gh run download` قدیمی (بدون -o/-d)
 
 **زنجیره‌ی commit‌های کلیدی (branch `arena/7324330b-chat2db`):**
-`b53f006` (fix P0 compile) → `44bad44` (G0 docs) → `933f972` (P1 core) → `d203305` (fix: Result.isSuccess, QrScreen, OptIn, phase2Card) → `35626a9` (fix: setPixels 7-arg API35, آیکون‌های core) → `60023b9` (P1b: Settings, Roborazzi harness, CI generate/verify) → `351ec29` (fix Configuration import) → `e4e2126` (roborazzi 1.49.0)
+`b53f006` (fix P0 compile) → `44bad44` (G0 docs) → `933f972` (P1 core) → `d203305` (fix: Result.isSuccess, QrScreen, OptIn, phase2Card) → `35626a9` (fix: setPixels 7-arg API35, آیکون‌های core) → `60023b9` (P1b: Settings, Roborazzi harness, CI generate/verify) → `351ec29` (fix Configuration import) → `e4e2126` (roborazzi 1.49.0) → `9d0e4ba`/`38b5127`/`392e3e8` (API 1.49 واقعی + @RunWith + org.json — run سبز 40016638780) → `c599569` (auto-record) → `03d0185` (نام‌گذاری per-size) → `aaa7266`/`4002a9f`/`7c01bbb` (fix فایده‌ی F-11 merge + FlowRow + import) → `10cf25b` (48 golden — run verify سبز 40021593264)
 
 **دانش‌های فنی سخت‌کسب (سازگاری):**
 - `Bitmap.setPixels` در compileSdk 35 **7 پارامتری** شده (+width,+height) — نسخه‌ی 5 پارامتری نیست
 - material-icons-**core** آیکون‌های کم دارد: `Lan`/`Wifi` نیست؛ `CheckCircle`/`Warning`/`Close`/`Refresh`/`Settings`/`Check` هست
 - `TopAppBar` M3 نیاز به `@OptIn(ExperimentalMaterial3Api::class)` دارد
 - `Result.Success`/`Result.Failure` در stdlib **internal** هستند — `isSuccess`/`getOrNull` بکارید
-- Roborazzi: 1.38.0 روی classpath unresolved ماند (علت نامشخص) → 1.49.0 = Kotlin 2.0.21 دقیق (1.77.0 = Kotlin 2.3 = غیرقابل‌خواندن برای ما)
+- Roborazzi 1.38/1.49: **package Kotlin = `com.github.takahirom.roborazzi`** ولی group Maven = `io.github.takahirom.roborazzi` (این دو را قاطی نکنید)؛ `@Config` کلاسیک روپورازی حذف شده — سایز صفحه = `org.robolectric.annotation.Config(qualifiers="w360dp-h640dp")`؛ taskها = `:app:recordRoborazziDebug` / `:app:verifyRoborazziDebug` (نه captureRoboImages/roborazziVerify)؛ آستانه = `RoborazziOptions.CompareOptions(resultValidator = ThresholdValidator(0.005f))`؛ capture compose = تابع توپ‌لول `captureRoboImage("name.png") { content }` که خودش activity می‌سازد؛ **تست‌ها حتماً `@RunWith(RobolectricTestRunner::class)`** (بدون آن NPE در ConfigurationRegistry)؛ تست‌های plain-JVM برای org.json نیاز به `testImplementation("org.json:json:20240303")` دارند
+- `HomeViewModel` باید `monitor.state` را به `_ui` merge کند (bug واقعی G1: کارت وضعیت همیشه «Detecting» می‌ماند) — در `init` با `monitor.state.collect`
+- دکمه‌های pill در Row با `spacedBy` در عرض باریک crush می‌شوند → `FlowRow` (material3، @ExperimentalLayoutApi)
+- `gh workflow run` برای GitHub-App **403** است (dispatch permission نیست) → workflow با auto-record روی push طراحی شد
+- Robolectric 4.14.1 SDK 35 + `@GraphicsMode(NATIVE)` = رندر compose واقعی روی JVM (فونت‌های res/font هم load می‌شوند)
 - `advanceTimeBy` در coroutines-test نیاز به import جداگانه دارد
 
 ---
