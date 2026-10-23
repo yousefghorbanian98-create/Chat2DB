@@ -13,7 +13,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
@@ -121,9 +122,9 @@ private fun StatusCard(state: NetworkState, modifier: Modifier = Modifier) {
     val spec = when (state) {
         NetworkState.CONNECTED -> StatusSpec(Icons.Filled.CheckCircle, GhBlue, R.string.st_connected, R.string.st_connected_body)
         NetworkState.DEGRADED -> StatusSpec(Icons.Filled.Warning, Amber, R.string.st_degraded, R.string.st_degraded_body)
-        NetworkState.CUTOFF -> StatusSpec(Icons.Filled.Wifi, Red, R.string.st_cutoff, R.string.st_cutoff_body)
-        NetworkState.OFFLINE -> StatusSpec(Icons.Filled.Wifi, Red, R.string.st_offline, R.string.st_offline_body)
-        NetworkState.UNKNOWN -> StatusSpec(Icons.Filled.Wifi, Color(0xFF9AA7C0), R.string.st_unknown, R.string.st_unknown_body)
+        NetworkState.CUTOFF -> StatusSpec(Icons.Filled.Close, Red, R.string.st_cutoff, R.string.st_cutoff_body)
+        NetworkState.OFFLINE -> StatusSpec(Icons.Filled.Close, Red, R.string.st_offline, R.string.st_offline_body)
+        NetworkState.UNKNOWN -> StatusSpec(Icons.Filled.Refresh, Color(0xFF9AA7C0), R.string.st_unknown, R.string.st_unknown_body)
     }
     Card(
         modifier = modifier.fillMaxWidth(),

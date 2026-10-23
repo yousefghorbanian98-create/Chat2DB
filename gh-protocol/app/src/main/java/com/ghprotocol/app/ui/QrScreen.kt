@@ -55,7 +55,7 @@ fun QrScreen(modifier: Modifier = Modifier) {
                     }
                 }
                 val bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
-                bmp.setPixels(pixels, 0, w, 0, 0)
+                bmp.setPixels(pixels, 0, w, 0, 0, w, h)
                 bmp
 } catch (e: Exception) {
                 null
