@@ -79,7 +79,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.49.0")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.49.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-junit-rule:1.49.0")
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.compose.ui:ui-test-junit4")
     testImplementation("androidx.test:core:1.6.1")
+}
+
+roborazzi {
+    outputDir.set(file("src/test/snapshots"))
 }

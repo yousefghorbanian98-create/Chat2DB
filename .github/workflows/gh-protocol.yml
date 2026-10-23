@@ -85,12 +85,12 @@ jobs:
           MODE="${{ inputs.mode || 'verify' }}"
           if [ "$MODE" = "generate" ]; then
             echo "::group::Generating reference goldens"
-            ./gradlew --no-daemon :app:captureRoboImages --stacktrace 2>&1 | tail -20
+            ./gradlew --no-daemon :app:recordRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
             echo "::endgroup::"
           else
             if [ -d app/src/test/snapshots ]; then
               echo "::group::Verifying goldens"
-              ./gradlew --no-daemon :app:roborazziVerify --stacktrace 2>&1 | tail -20
+              ./gradlew --no-daemon :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
               echo "::endgroup::"
             else
               echo "::notice::No golden references yet — skipping verify (run with mode=generate first)"

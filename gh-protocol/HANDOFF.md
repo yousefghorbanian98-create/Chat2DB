@@ -1,6 +1,6 @@
 # Gh Protocol — سند جامع وضعیت و راه‌اندازی (HANDOFF)
 
-**تاریخ:** ۳۰ مهر ۴۰۵ (2026-10-22) · **وضعیت: G0 سبز ✅** — P0 در زیرمجلد `gh-protocol/` همین ریپوی (Chat2DB) build می‌شود و سبز است · **باقی‌مانده:** دسترسی نوشتن GitHub-App به ریپوی جدا `gh-protocol` برای مهاجرت نهایی (کاربر ارور موقتی GitHub در Arena را گزارش داد؛ بعد از رفع، reconnect/افزودن app)
+**تاریخ:** ۳۱ مهر ۴۰۵ (2026-10-23) · **وضعیت: G0 سبز ✅ → P1 در جریان (G1)** — P0 در زیرمجلد `gh-protocol/` همین ریپوی (Chat2DB) build می‌شود و سبز است · **باقی‌مانده:** دسترسی نوشتن GitHub-App به ریپوی جدا `gh-protocol` برای مهاجرت نهایی (کاربر ارور موقتی GitHub در Arena را گزارش داد؛ بعد از رفع، reconnect/افزودن app)
 
 > این سند برای «بقا» نوشته شده: اگر workspace پاک شود و تنها چیزی که مانده باشد همین ریپوی باشد،
 > با خواندن این فایل + فایل‌های همین پوشه، کل پروژه به‌طور کامل بازسازی و ادامه می‌شود.
@@ -40,6 +40,41 @@ App ID `com.ghprotocol.app`، minSdk 26 / targetSdk 35، لایسنس MIT (خو�
 | لاگ‌های CI از داخل sandbox | ⚠️ results-receiver و blob.core.windows.net در allowlist شبکه‌ی sandbox نیستند → لاگ از طریق بوش خودکار `ci-diag` (step شکست، tail لاگ gradle را آنجا commit می‌کند) |
 
 **تک‌گلوئی فعلی:** فقط «دسترسی نوشتن+secrets به ریپوی جدا gh-protocol» — و این فقط برای **مهاجرت نهایی و کلید دائمی** است؛ ساخت و تست هر روز از همین‌جا خودکار ادامه دارد (بخش ۶).
+
+---
+
+## ۲ب. P1 — قابلیت‌های همراه (G1) — وضعیت
+
+**گیت G1 (از پلن):** F-1، F-5، F-7، F-8، F-9، F-11، F-12، F-14 + **12 صفحه golden** (Roborazzi، JVM بدون امولاتور: 12 صفحه × 2 تم × 360×640 و 1080×1920، آستانه‌ی 0.5٪، RTL) + **web-preview**.
+
+| قابلیت | وضعیت |
+|---|---|
+| F-1 اتصال یک‌تپ (تا مرحله‌ی تونل — تونل خود P2 است، صادقانه) | ✅ `HomeViewModel.onConnectTap` + UI |
+| F-5/F-11 وضعیت شبکه‌ی صادقانه (4 حالت: CONNECTED/DEGRADED/CUTOFF/OFFLINE) | ✅ `domain/NetworkState.kt` (classify خالص + تست‌شده) + `NetworkMonitor` (3 پروب بین‌المللی + 2 داخلی، 15 دقیقه) |
+| F-12 بازسازی لینک → به‌روزرسانی فوری کانفیگ | ✅ hook `onLinkRecovered` → `refreshConfig` |
+| F-9 منبع کانفیگ + کش + mirror failover + خودکار 12h | ✅ `SubscriptionRepository` + `ConfigScreen` |
+| F-7 QR + Share | ✅ `QrScreen` (ZXing core 3.5.3) |
+| F-8 راهنمای فارسی (3 قدم + نکات رسمی) | ✅ `GuideScreen` |
+| F-14 جایگزین‌ها (اینترنت پرو/سیم/استارلینک/مکمل‌ها) | ✅ بخش آخر `GuideScreen` |
+| تنظیمات (تم + زبان fa/en) | ✅ `SettingsScreen` + `SettingsStore` + اعمال در `MainActivity` |
+| 12 صفحه golden | 🔄 harness نوشته شده (`GoldenScreensTest`، Roborazzi 1.49.0 + Robolectric 4.14.1) — منتظر run سبز برای generate |
+| web-preview | ✅ `web/index.html` (تک‌فایل 40KB، بدون CDN، qrcodejs MIT) + بوش `gh-pages` — **فعال‌سازی Pages = 1 کلیک دستی** (App اجازه‌ی Pages-API ندارد — محدودیت پلتفرم GitHub) |
+
+**کانال‌های بازگردانی از CI (مهم برای بازسازی):**
+- لاگ شکست: بوش `ci-diag` ← `gh-protocol/ci-failure.log` (step شکست، tail 150KB)
+- golden PNGs: workflow_dispatch با `mode=generate` ← بوش `ci-diag-goldens` (کل `app/src/test/snapshots/`) — سپس از sandbox با contents API (base64) برداشت و commit به branch اصلی
+- **محدودیت‌های شبکه‌ی sandbox** (دوباره امتحان نکنید): results-receiver + blob.core.windows.net مسدود → لاگ/آرته‌فکت مستقیم نمی‌آید؛ `gh run download` قدیمی (بدون -o/-d)
+
+**زنجیره‌ی commit‌های کلیدی (branch `arena/7324330b-chat2db`):**
+`b53f006` (fix P0 compile) → `44bad44` (G0 docs) → `933f972` (P1 core) → `d203305` (fix: Result.isSuccess, QrScreen, OptIn, phase2Card) → `35626a9` (fix: setPixels 7-arg API35, آیکون‌های core) → `60023b9` (P1b: Settings, Roborazzi harness, CI generate/verify) → `351ec29` (fix Configuration import) → `e4e2126` (roborazzi 1.49.0)
+
+**دانش‌های فنی سخت‌کسب (سازگاری):**
+- `Bitmap.setPixels` در compileSdk 35 **7 پارامتری** شده (+width,+height) — نسخه‌ی 5 پارامتری نیست
+- material-icons-**core** آیکون‌های کم دارد: `Lan`/`Wifi` نیست؛ `CheckCircle`/`Warning`/`Close`/`Refresh`/`Settings`/`Check` هست
+- `TopAppBar` M3 نیاز به `@OptIn(ExperimentalMaterial3Api::class)` دارد
+- `Result.Success`/`Result.Failure` در stdlib **internal** هستند — `isSuccess`/`getOrNull` بکارید
+- Roborazzi: 1.38.0 روی classpath unresolved ماند (علت نامشخص) → 1.49.0 = Kotlin 2.0.21 دقیق (1.77.0 = Kotlin 2.3 = غیرقابل‌خواندن برای ما)
+- `advanceTimeBy` در coroutines-test نیاز به import جداگانه دارد
 
 ---
 
