@@ -49,13 +49,13 @@ jobs:
           ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tee gradle-build.log | tail -15
           ls -la app/build/outputs/apk/debug/
 
-      - name: Cache Android system image (1.5GB — skips dl.google.com on retry)
-        uses: actions/cache@v4
+      - name: Restore Android system image cache (1.5GB — skips dl.google.com)
+        uses: actions/cache/restore@v4
         with:
           path: /usr/local/lib/android/sdk/system-images
-          key: gh-protocol-android-34-x86_64-v1
+          key: gh-protocol-android-34-x86_64-v1-${{ github.run_id }}
           restore-keys: |
-            gh-protocol-android-34-x86_64-
+            gh-protocol-android-34-x86_64-v1-
 
       - name: "Pre-flight: KVM check + pre-install emulator SDK (diagnostic)"
         # Known failure mode (observed 2026-10-24): runners without /dev/kvm make
@@ -105,6 +105,14 @@ jobs:
             exit 1
           fi
           echo "pre-flight OK" >> "$DIAG"
+
+      # Save the (now complete) image even if the later E2E step fails, so the
+      # retry attempt — and future runs — skip the 1.5GB download.
+      - name: Save Android system image cache
+        uses: actions/cache/save@v4
+        with:
+          path: /usr/local/lib/android/sdk/system-images
+          key: gh-protocol-android-34-x86_64-v1-${{ github.run_id }}
 
       - name: Run E2E on emulator
         uses: reactivecircus/android-emulator-runner@v2
