@@ -40,9 +40,22 @@ class MainActivity : ComponentActivity() {
                     else -> null
                 }
             ) {
-                val vm: HomeViewModel = viewModel()
+                // The default AndroidViewModelFactory can't build a ViewModel with
+                // >2 constructor params — use an explicit factory for HomeViewModel.
+                val vm: HomeViewModel = viewModel(factory = HomeViewModelFactory(application))
                 GhNavHost(viewModel = vm)
             }
+        }
+    }
+
+    private class HomeViewModelFactory(private val app: android.app.Application) :
+        androidx.lifecycle.ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+                return HomeViewModel(app) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel: ${modelClass.name}")
         }
     }
 
