@@ -66,18 +66,18 @@ object Socks5 {
         else 0
 
     /**
-     * Source port of the transport segment within a FULL IPv4 packet
-     * (20B IP header). UDP src at +20, TCP src at +22.
+     * Source port within a FULL IPv4 packet (20B IP header + segment).
+     * UDP and TCP both start the segment with the source port: offset 20.
      */
-    fun transportSrcPort(packet: ByteArray, proto: Int): Int =
-        transportPortAt(packet, 20 + if (proto == 17) 0 else 2)
+    fun transportSrcPort(packet: ByteArray, proto: Int = 17): Int =
+        transportPortAt(packet, 20)
 
     /**
-     * Destination port of the transport segment within a FULL IPv4 packet
-     * (20B IP header). UDP dst at +22, TCP dst at +24.
+     * Destination port within a FULL IPv4 packet.
+     * UDP and TCP both put the destination port at segment offset 2: offset 22.
      */
-    fun transportDstPort(packet: ByteArray, proto: Int): Int =
-        transportPortAt(packet, 22 + if (proto == 17) 0 else 2)
+    fun transportDstPort(packet: ByteArray, proto: Int = 17): Int =
+        transportPortAt(packet, 22)
 
     private fun transportPortAt(packet: ByteArray, o: Int): Int =
         if (packet.size >= o + 2)
