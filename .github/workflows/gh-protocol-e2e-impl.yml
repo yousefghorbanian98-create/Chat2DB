@@ -1,0 +1,89 @@
+# P2b: reusable E2E implementation — invoked by gh-protocol-e2e.yml
+# (attempt 1) and, on failure, by its retry job (attempt 2).
+name: gh-protocol-e2e-impl (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+
+  e2e:
+    name: Emulator E2E (x86_64, real VPN)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # wrapper lives in gh-protocol/ subdir; pin the same version explicitly
+          gradle-version: '8.10.2'
+
+      - name: Fetch Xray-core (official release, SHA-256 verified)
+        working-directory: gh-protocol
+        run: bash ci-fetch-xray.sh
+
+      - name: Fetch subscription (host-side, for E2E cache seeding)
+        # The runner has full internet; the emulator's QEMU NAT may not reach
+        # GitHub. ci-e2e.sh probes the emulator; if it can't reach the sub host,
+        # it pre-seeds the app cache with this file (tunnel test stays valid).
+        run: |
+          curl -fSL --retry 3 --retry-delay 2 -o gh-protocol/sub.json \
+            "https://raw.githubusercontent.com/patterniha/Serverless-for-Iran/refs/heads/main/Subscription/Serverless-for-Iran.json" \
+            || curl -fSL --retry 3 --retry-delay 2 -o gh-protocol/sub.json \
+            "https://github.com/patterniha/Serverless-for-Iran/raw/main/Subscription/Serverless-for-Iran.json" \
+            || { echo "FATAL: host-side subscription fetch failed"; exit 1; }
+          echo "sub.json: $(wc -c < gh-protocol/sub.json) bytes"
+
+      - name: Build debug APK
+        working-directory: gh-protocol
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tee gradle-build.log | tail -15
+          ls -la app/build/outputs/apk/debug/
+
+      - name: Run E2E on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          working-directory: gh-protocol
+          script: bash ci-e2e.sh
+
+      - name: Return E2E logs (always)
+        if: always()
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
+          mkdir -p gh-protocol
+          {
+            echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
+            echo
+            if [ -f gh-protocol/gradle-build.log ]; then echo "### gradle-build.log (tail)"; tail -c 60000 gh-protocol/gradle-build.log; fi
+            echo
+            if [ -f gh-protocol/e2e.log ]; then echo "### e2e.log"; cat gh-protocol/e2e.log; fi
+            echo
+            if [ -f gh-protocol/e2e-crash.log ]; then echo "### e2e-crash.log (crash buffer, tail)"; tail -c 30000 gh-protocol/e2e-crash.log; fi
+            echo
+            if [ -f gh-protocol/e2e-logcat.log ]; then echo "### e2e-logcat.log (crashes + app + vpn, tail)"; grep -E "AndroidRuntime|FATAL|ghprotocol|GhVpnTunnel|GhDiag|VpnService|xray" gh-protocol/e2e-logcat.log | tail -c 30000; fi
+            echo
+            if [ -f gh-protocol/e2e-xray-err.log ]; then echo "### e2e-xray-err.log (Xray core)"; cat gh-protocol/e2e-xray-err.log; fi
+            echo
+            if [ -f gh-protocol/e2e-vpn.log ]; then echo "### e2e-vpn.log (GhVpnTunnel)"; cat gh-protocol/e2e-vpn.log; fi
+          } > gh-protocol/e2e-log.md
+          git add gh-protocol/e2e-log.md
+          git commit -m "ci-diag: e2e log $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
