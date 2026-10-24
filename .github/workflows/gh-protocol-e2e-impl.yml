@@ -49,6 +49,14 @@ jobs:
           ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tee gradle-build.log | tail -15
           ls -la app/build/outputs/apk/debug/
 
+      - name: Cache Android system image (1.5GB — skips dl.google.com on retry)
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/lib/android/sdk/system-images
+          key: gh-protocol-android-34-x86_64-v1
+          restore-keys: |
+            gh-protocol-android-34-x86_64-
+
       - name: "Pre-flight: KVM check + pre-install emulator SDK (diagnostic)"
         # Known failure mode (observed 2026-10-24): runners without /dev/kvm make
         # the action fall back to software emulation (-accel off), which always
@@ -56,14 +64,17 @@ jobs:
         # fast with a clear ci-diag instead; the retry job gets a fresh runner.
         # Also pre-installs the exact SDK components the action needs (its own
         # sdkmanager download is a common flake — dl.google.com ~1.5GB image).
+        # NB: no `pipefail` here — `yes | sdkmanager` + pipefail = false SIGPIPE
+        # failure (observed 2026-10-24: install completed 100%, rc=141 from `yes`).
         run: |
-          set -uo pipefail
+          set -u
           DIAG=gh-protocol/pre-flight-diag.log
           : > "$DIAG"
           {
             echo "== pre-flight $(date -u +%FT%TZ) =="
             echo "runner: $(uname -m), nproc=$(nproc), mem=$(free -g | awk '/Mem:/{print $2}')G"
             echo "kvm: $(ls -la /dev/kvm 2>&1)"
+            echo "ANDROID_HOME=${ANDROID_HOME:-unset}"
           } >> "$DIAG"
           CODE=$(curl -sI -o /dev/null -w '%{http_code}' --max-time 20 https://dl.google.com/android/repository/repository2-3.xml || echo 000)
           echo "dl.google.com repo xml: HTTP $CODE" >> "$DIAG"
@@ -72,18 +83,21 @@ jobs:
           if [ ! -x "$SM" ]; then
             echo "cmdline-tools missing — downloading" >> "$DIAG"
             mkdir -p "$ANDROID_HOME/cmdline-tools"
-            curl -fSL -o /tmp/ct.zip https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip >> "$DIAG" 2>&1 \
+            curl -fSL -o /tmp/ct.zip https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip 2>> "$DIAG" \
               || { echo "FATAL: cmdline-tools download failed" >> "$DIAG"; exit 1; }
-            unzip -q /tmp/ct.zip -d "$ANDROID_HOME/cmdline-tools" >> "$DIAG" 2>&1
+            unzip -q /tmp/ct.zip -d "$ANDROID_HOME/cmdline-tools" 2>> "$DIAG"
             mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
           fi
-          yes | "$SM" --licenses >> "$DIAG" 2>&1 || true
-          if yes | "$SM" --install \
-              'build-tools;37.0.0' platform-tools "platforms;android-34" \
-              'emulator' 'system-images;android-34;default;x86_64' >> "$DIAG" 2>&1; then
+          yes | "$SM" --licenses > /dev/null 2>&1 || true
+          "$SM" --install \
+            'build-tools;37.0.0' platform-tools "platforms;android-34" \
+            'emulator' 'system-images;android-34;default;x86_64' > /tmp/sm.log 2>&1
+          RC=$?
+          if [ $RC -eq 0 ]; then
             echo "sdk pre-install OK: $(du -sh "$ANDROID_HOME/system-images" 2>/dev/null | cut -f1) system-images" >> "$DIAG"
           else
-            echo "PREFLIGHT FAILED: sdk pre-install (see above)" >> "$DIAG"
+            echo "PREFLIGHT FAILED: sdkmanager rc=$RC (tail):" >> "$DIAG"
+            tail -25 /tmp/sm.log >> "$DIAG"
             exit 1
           fi
           if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
