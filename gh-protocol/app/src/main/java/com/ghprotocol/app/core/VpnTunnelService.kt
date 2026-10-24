@@ -5,8 +5,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import android.net.VpnService
-import java.io.FileDescriptor
-import java.io.InputStream
+import android.os.ParcelFileDescriptor
 import java.net.Socket
 
 /**
@@ -24,7 +23,7 @@ class VpnTunnelService : VpnService() {
         const val MTU = 1500
     }
 
-    private var vpnFd: FileDescriptor? = null
+    private var vpnFd: ParcelFileDescriptor? = null
     private var running = false
     private val conns = HashMap<String, Pair<Socket, Long>>()
 
@@ -75,11 +74,12 @@ class VpnTunnelService : VpnService() {
         super.onDestroy()
     }
 
-    private fun loop(fd: FileDescriptor) {
+    private fun loop(fd: ParcelFileDescriptor) {
+        val input = fd.newInputStream()
         val buf = ByteArray(MTU)
         while (running) {
             val n = try {
-                fd.read(buf)
+                input.read(buf)
             } catch (e: Exception) {
                 if (running) Log.w(TAG, "fd read error: ${e.message}")
                 break
@@ -124,31 +124,33 @@ class VpnTunnelService : VpnService() {
     }
 
     /** SOCKS5 handshake -> connected socket (or null). */
-    private fun openSocks5(dstIp: String, dstPort: Int): Socket? = try {
-        val s = Socket()
-        s.connect(java.net.InetSocketAddress(PROXY_HOST, PROXY_PORT), 2000)
-        s.tcpNoDelay = true
-        val out = s.getOutputStream()
-        val din = java.io.DataInputStream(s.getInputStream())
-        out.write(Socks5.GREETING)
-        val reply = ByteArray(2)
-        din.readFully(reply, 0, 2)
-        if (!Socks5.greetingReplyOk(reply)) { s.close(); return null }
-        out.write(Socks5.connectRequest(dstIp, dstPort))
-        val head = ByteArray(4)
-        din.readFully(head, 0, 4)
-        if (!Socks5.connectReplyOk(head)) { s.close(); return null }
-        val atyp = head[3].toInt() and 0xFF
-        when (atyp) {
-            1 -> din.skipNBytes(4)
-            4 -> din.skipNBytes(16)
-            else -> din.skipNBytes(1 + (din.readByte().toInt() and 0xFF))
+    private fun openSocks5(dstIp: String, dstPort: Int): Socket? {
+        return try {
+            val s = Socket()
+            s.connect(java.net.InetSocketAddress(PROXY_HOST, PROXY_PORT), 2000)
+            s.tcpNoDelay = true
+            val out = s.getOutputStream()
+            val din = java.io.DataInputStream(s.getInputStream())
+            out.write(Socks5.GREETING)
+            val reply = ByteArray(2)
+            din.readFully(reply, 0, 2)
+            if (!Socks5.greetingReplyOk(reply)) { s.close(); return null }
+            out.write(Socks5.connectRequest(dstIp, dstPort))
+            val head = ByteArray(4)
+            din.readFully(head, 0, 4)
+            if (!Socks5.connectReplyOk(head)) { s.close(); return null }
+            val atyp = head[3].toInt() and 0xFF
+            when (atyp) {
+                1 -> din.skipNBytes(4)
+                4 -> din.skipNBytes(16)
+                else -> din.skipNBytes(1 + (din.readByte().toInt() and 0xFF))
+            }
+            din.skipNBytes(2)
+            s
+        } catch (e: Exception) {
+            Log.w(TAG, "socks5 connect failed: ${e.message}")
+            null
         }
-        din.skipNBytes(2)
-        s
-    } catch (e: Exception) {
-        Log.w(TAG, "socks5 connect failed: ${e.message}")
-        null
     }
 
     private fun sendUdp(dstIp: String, dstPort: Int, udpSegment: ByteArray) {

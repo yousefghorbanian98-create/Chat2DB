@@ -135,7 +135,9 @@ class HomeViewModel(
         val ctx = getApplication<Application>().filesDir
         val cfg = File(ctx, "xray-config.json")
         return try {
-            val patched = sub.raw.patchesCleanEgress()
+            val cleanIp = ctx.getSharedPreferences("gh-settings", Context.MODE_PRIVATE)
+                .getString("clean_ip", null)
+            val patched = sub.rawJson.patchesCleanEgress(cleanIp)
             cfg.writeText(patched)
             cfg
         } catch (e: Exception) {
@@ -171,12 +173,13 @@ class HomeViewModel(
     }
 }
 
-/** F-17 + F-15 applied to the raw subscription JSON (best-effort, pure). */
-private fun String.patchesCleanEgress(): String {
+/** F-17 (clean egress) + F-15 (TCP-first) applied to the raw subscription JSON (best-effort, pure). */
+private fun String.patchesCleanEgress(cleanIp: String?): String {
     return try {
         val arr = org.json.JSONArray(this)
         for (i in 0 until arr.length()) {
             val c = arr.getJSONObject(i)
+            if (cleanIp != null) ConfigPatcher.patchCleanEgress(c, cleanIp)
             ConfigPatcher.tcpFirstProfile(c)
         }
         arr.toString()

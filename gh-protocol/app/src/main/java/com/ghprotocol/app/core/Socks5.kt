@@ -11,7 +11,7 @@ import java.net.InetSocketAddress
  */
 object Socks5 {
 
-    const val GREETING = byteArrayOf(0x05, 0x01, 0x00)
+    val GREETING = byteArrayOf(0x05, 0x01, 0x00)
 
     /** Parse the server greeting reply: 05 00 (no auth) => true. */
     fun greetingReplyOk(reply: ByteArray): Boolean =

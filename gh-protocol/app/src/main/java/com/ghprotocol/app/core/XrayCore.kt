@@ -29,18 +29,20 @@ class XrayCore(private val context: Context) {
     data class Info(val path: File, val version: String)
 
     /** Extract asset -> verify executable -> report version. */
-    fun ensureInstalled(): Result<Info> = try {
-        if (!binary.exists()) {
-            dir.mkdirs()
-            extractAssets()
+    fun ensureInstalled(): Result<Info> {
+        return try {
+            if (!binary.exists()) {
+                dir.mkdirs()
+                extractAssets()
+            }
+            if (!binary.exists()) return Result.failure(IllegalStateException("Xray binary missing after extraction"))
+            binary.setExecutable(true, false)
+            val v = version()
+            if (v == "unknown") return Result.failure(IllegalStateException("Xray version unreadable"))
+            Result.success(Info(binary, v))
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-        if (!binary.exists()) return Result.failure(IllegalStateException("Xray binary missing after extraction"))
-        binary.setExecutable(true, false)
-        val v = version()
-        if (v == "unknown") return Result.failure(IllegalStateException("Xray version unreadable"))
-        Result.success(Info(binary, v))
-    } catch (e: Exception) {
-        Result.failure(e)
     }
 
     /** `Xray version` -> "Xray 26.10.21 (android...) ..." */
@@ -56,16 +58,18 @@ class XrayCore(private val context: Context) {
     fun isRunning(): Boolean = process?.let { it.isAlive } ?: false
 
     /** F-2/F-3: start the core with the given config. */
-    fun start(configPath: File): Result<Process> = try {
-        if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
-        if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
-        val p = Runtime.getRuntime().exec(
-            arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath), null, dir
-        )
-        process = p
-        Result.success(p)
-    } catch (e: Exception) {
-        Result.failure(e)
+    fun start(configPath: File): Result<Process> {
+        return try {
+            if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
+            if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
+            val p = Runtime.getRuntime().exec(
+                arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath), null, dir
+            )
+            process = p
+            Result.success(p)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /** F-4: stop < 3s (kill + wait with timeout). */

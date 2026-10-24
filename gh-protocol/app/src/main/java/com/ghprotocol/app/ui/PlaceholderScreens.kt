@@ -23,8 +23,6 @@ import com.ghprotocol.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun ScannerScreen(modifier: Modifier = Modifier) {
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.clean_ip_title)) }) }, modifier = modifier) { padding ->
         Column(

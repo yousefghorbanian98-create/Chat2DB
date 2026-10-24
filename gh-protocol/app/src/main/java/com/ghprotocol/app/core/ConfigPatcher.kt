@@ -54,7 +54,7 @@ object ConfigPatcher {
         val tagged = list.map { r ->
             val out = r.optJSONArray("outboundTag")
             val tags = (0 until (out?.length() ?: 0)).map { out!!.getString(it) }
-            (r, tags)
+            r to tags
         }
         val scored = tagged.map { (r, tags) ->
             val score = when {
@@ -62,7 +62,7 @@ object ConfigPatcher {
                 tags.any { it.startsWith("udp-") } -> 1
                 else -> 2
             }
-            (score, r)
+            score to r
         }
         val ordered = scored.sortedBy { it.first }.map { it.second }
         val newRules = JSONArray()
