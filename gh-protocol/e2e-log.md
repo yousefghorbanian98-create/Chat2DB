@@ -1,15 +1,23 @@
-## gh-protocol E2E log — 2026-10-24T19:41:32Z
+## gh-protocol E2E log — 2026-10-24T19:50:33Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-24T19:41:14Z ==
+== pre-flight 2026-10-24T19:47:09Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 19:37 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 19:44 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 1.7G system-images
 kvm device present + sudo OK — emulator will run as root
 pre-flight OK
 
+### emulator-console.log (tail)
+INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+ERROR        | Unknown AVD name [gh_test], use -list-avds to see valid list.
+ERROR        | HOME is defined but there is no file gh_test.ini in $HOME/.android/avd
+ERROR        | (Note: Directories are searched in the order $ANDROID_AVD_HOME, $ANDROID_SDK_HOME/avd and $HOME/.android/avd)
+* daemon not running; starting now at tcp:5037
+* daemon started successfully
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -31,43 +39,41 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
 > Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:generateDebugBuildConfig
 > Task :app:generateDebugResources
 > Task :app:extractDeepLinksDebug
 > Task :app:packageDebugResources
-> Task :app:parseDebugLocalResources
 > Task :app:mapDebugSourceSetPaths
-> Task :app:javaPreCompileDebug
+> Task :app:parseDebugLocalResources
 > Task :app:checkDebugAarMetadata
-> Task :app:mergeDebugShaders
+> Task :app:javaPreCompileDebug
 > Task :app:desugarDebugFileDependencies
-> Task :app:compileDebugShaders NO-SOURCE
-> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:mergeDebugShaders
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:processDebugManifestForPackage
-> Task :app:mergeDebugJniLibFolders
 > Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugAssets
+> Task :app:mergeDebugJniLibFolders
 > Task :app:mergeDebugResources
-> Task :app:mergeDebugNativeLibs
+> Task :app:mergeDebugAssets
 > Task :app:compressDebugAssets
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugNativeLibs
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:mergeExtDexDebug
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:processDebugResources
-> Task :app:mergeLibDexDebug
 
 > Task :app:compileDebugKotlin
-e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:
-    1. Kotlin compile daemon is ready
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
 > Task :app:processDebugJavaRes
@@ -79,9 +85,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792870728430.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792871093813.json
 
-BUILD SUCCESSFUL in 2m 26s
+BUILD SUCCESSFUL in 2m 18s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
