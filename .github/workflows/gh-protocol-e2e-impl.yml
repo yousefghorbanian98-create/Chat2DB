@@ -175,7 +175,7 @@ jobs:
           sudo env HOME=/root ANDROID_AVD_HOME="$AVD_HOME" "$ANDROID_HOME/emulator/emulator" \
             -avd "$AVD" -port 5554 \
             -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim \
-            -memory 2048M -cores 2 > emulator-console.log 2>&1 &
+            -memory 2048 -cores 2 > emulator-console.log 2>&1 &
           # wait for boot (up to 10 min)
           adb start-server >> emulator-console.log 2>&1
           timeout 180 adb wait-for-device >> emulator-console.log 2>&1 || true
