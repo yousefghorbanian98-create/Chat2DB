@@ -44,6 +44,7 @@ class VpnTunnelService : VpnService() {
 
     /** F-3: establish (call after user granted VpnService.prepare()). */
     fun startTunnel(): Boolean {
+        Log.d("GhDiag", "tunnel: startTunnel called (running=$running)")
         if (running) return true
         val builder = Builder()
         builder.setSession("gh-protocol")
@@ -63,6 +64,7 @@ class VpnTunnelService : VpnService() {
         }
         vpnFd = fd
         running = true
+        Log.d("GhDiag", "tunnel: established fd=$fd — relay loop started")
         Thread({ loop(fd) }, "gh-vpn-loop").apply { isDaemon = true; start() }
         return true
     }

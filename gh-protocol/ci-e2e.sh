@@ -133,6 +133,12 @@ done
   adb shell "ps -A" | grep -E "$PKG|xray|NAME" >> "$LOG" 2>&1
   adb shell "netstat -ltn" >> "$LOG" 2>&1
   adb shell "dumpsys activity activities" 2>/dev/null | grep -B2 -A8 -i "ghprotocol" >> "$LOG" 2>&1 || true
+  say "app filesDir/xray:"
+  adb shell "run-as $PKG ls -la files/xray 2>/dev/null" >> "$LOG" 2>&1
+  say "xray-err.log:"
+  adb shell "run-as $PKG cat files/xray/xray-err.log 2>/dev/null" >> "$LOG" 2>&1
+  say "GhDiag (connect-flow trace):"
+  adb logcat -d -s GhDiag >> "$LOG" 2>&1
   adb logcat -d > "$D/e2e-logcat.log" 2>/dev/null || true
   adb logcat -d -b crash >> "$D/e2e-logcat.log" 2>/dev/null || true
   report "tunnel not up (xray/:10808)"
@@ -175,6 +181,7 @@ if grep -E "FATAL EXCEPTION" "$(dirname "$LOG")/e2e-logcat.log" 2>/dev/null | gr
 fi
 adb logcat -d -s GhVpnTunnel > "$(dirname "$LOG")/e2e-vpn.log" 2>/dev/null || true
 cat "$(dirname "$LOG")/e2e-vpn.log" >>"$LOG" 2>/dev/null || true
+adb logcat -d -s GhDiag >> "$LOG" 2>/dev/null || true
 if grep -q "establish failed" "$(dirname "$LOG")/e2e-vpn.log" 2>/dev/null; then
   report "vpn establish failed in logcat"
 fi

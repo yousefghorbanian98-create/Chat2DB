@@ -88,19 +88,26 @@ class HomeViewModel(
      * TUNNELING (patched config written + Xray started) → vpnPending
      * (Activity establishes VpnService) → CONNECTED.
      */
+    private fun diag(msg: String) = android.util.Log.d("GhDiag", msg)
+
     fun onConnectTap() {
         if (_ui.value.connectPhase != ConnectPhase.IDLE && _ui.value.connectPhase != ConnectPhase.FAILED) return
         viewModelScope.launch {
+            diag("connect: tap -> CHECKING (have sub=${_ui.value.subscription != null})")
             _ui.update { it.copy(connectPhase = ConnectPhase.CHECKING, isUpdating = true, tunnelError = null) }
             val sub = if (_ui.value.subscription == null ||
                 System.currentTimeMillis() - (_ui.value.subscription?.fetchedAt ?: 0) >
                 Subscription.STALE_AFTER_MS
             ) {
-                repository.update().getOrNull() ?: _ui.value.subscription
+                diag("connect: fetching subscription (primary+mirror, timeouts 20s/30s)")
+                val r = repository.update()
+                diag("connect: fetch result=${r.isSuccess} ${r.exceptionOrNull()?.message ?: ""}")
+                r.getOrNull() ?: _ui.value.subscription
             } else {
                 _ui.value.subscription
             }
             if (sub == null) {
+                diag("connect: FAILED — no subscription available")
                 _ui.update {
                     it.copy(isUpdating = false, connectPhase = ConnectPhase.FAILED,
                         configError = "config_update_failed",
@@ -108,10 +115,14 @@ class HomeViewModel(
                 }
                 return@launch
             }
+            diag("connect: sub ok entries=${sub.entries.size} -> PREPARING (core extract+version)")
 
             _ui.update { it.copy(connectPhase = ConnectPhase.PREPARING) }
-            val info = core.ensureInstalled().getOrNull()
+            val infoR = core.ensureInstalled()
+            val info = infoR.getOrNull()
+            diag("connect: ensureInstalled=${infoR.isSuccess} version=${info?.version} err=${infoR.exceptionOrNull()?.message}")
             if (info == null || !xrayVersionOk(info.version, sub.entries.firstOrNull()?.minCoreVersion ?: "26.6.27")) {
+                diag("connect: FAILED — core unavailable/old (min=${sub.entries.firstOrNull()?.minCoreVersion})")
                 _ui.update {
                     it.copy(connectPhase = ConnectPhase.FAILED,
                         coreVersion = info?.version,
@@ -122,7 +133,9 @@ class HomeViewModel(
 
             _ui.update { it.copy(connectPhase = ConnectPhase.TUNNELING, coreVersion = info.version) }
             val cfgFile = writeRuntimeConfig(sub)
+            diag("connect: config written bytes=${try { cfgFile.length() } catch (e: Exception) { -1L }} path=${cfgFile.path}")
             val started = core.start(cfgFile)
+            diag("connect: core.start=${started.isSuccess} ${started.exceptionOrNull()?.message ?: ""}")
             if (started.isSuccess) {
                 _ui.update { it.copy(vpnPending = true) }
             } else {
