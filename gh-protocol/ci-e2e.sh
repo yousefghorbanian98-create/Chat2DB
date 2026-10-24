@@ -14,22 +14,8 @@ APK="$(dirname "$LOG")/app/build/outputs/apk/debug/app-debug.apk"
 say() { echo "$@"; echo "$@" >> "$LOG"; }
 
 report() {
+  # Log publication happens in the workflow's "always()" step (keeps this script simple).
   say "=== E2E FAILED: $1 ==="
-  cd "$(dirname "$LOG")" || exit 1
-  {
-    echo "## gh-protocol E2E failure — $(date -u +%FT%TZ) — $1"
-    echo
-    cat "$LOG"
-  } > ci-failure.log
-  git config user.name "gh-protocol-ci"
-  git config user.email "gh-protocol-ci@users.noreply.github.com"
-  git checkout -B ci-diag >>"$LOG" 2>&1 || true
-  mkdir -p gh-protocol
-  cp ci-failure.log gh-protocol/ci-failure.log 2>/dev/null || true
-  [ -f e2e-vpn.log ] && cp e2e-vpn.log gh-protocol/ 2>/dev/null || true
-  git add gh-protocol/ci-failure.log gh-protocol/e2e-vpn.log 2>/dev/null || true
-  git commit -m "ci-diag: e2e failure $(date -u +%Y%m%d-%H%M%S)" --allow-empty >>"$LOG" 2>&1 || true
-  git push origin HEAD:ci-diag --force >>"$LOG" 2>&1 || true
   exit 1
 }
 
@@ -111,7 +97,16 @@ else
   say "no curl on emulator — skipping HTTPS probe (DNS + tunnel are the core signal)"
 fi
 
-say "== logcat sanity (GhVpnTunnel) =="
+say "== Xray core stderr (from app filesDir) =="
+adb shell "run-as $PKG cat files/xray/xray-err.log 2>/dev/null" > "$(dirname "$LOG")/e2e-xray-err.log" 2>/dev/null || true
+tail -40 "$(dirname "$LOG")/e2e-xray-err.log" >> "$LOG" 2>/dev/null || true
+
+say "== logcat sanity (crashes + GhVpnTunnel) =="
+adb logcat -d > "$(dirname "$LOG")/e2e-logcat.log" 2>/dev/null || true
+grep -E "AndroidRuntime|FATAL" "$(dirname "$LOG")/e2e-logcat.log" 2>/dev/null | grep -i "$PKG\|ghprotocol" >> "$LOG" || true
+if grep -E "FATAL EXCEPTION" "$(dirname "$LOG")/e2e-logcat.log" 2>/dev/null | grep -qi "ghprotocol"; then
+  report "app crashed (FATAL EXCEPTION in logcat)"
+fi
 adb logcat -d -s GhVpnTunnel > "$(dirname "$LOG")/e2e-vpn.log" 2>/dev/null || true
 cat "$(dirname "$LOG")/e2e-vpn.log" >>"$LOG" 2>/dev/null || true
 if grep -q "establish failed" "$(dirname "$LOG")/e2e-vpn.log" 2>/dev/null; then

@@ -57,14 +57,15 @@ class XrayCore(private val context: Context) {
 
     fun isRunning(): Boolean = process?.let { it.isAlive } ?: false
 
-    /** F-2/F-3: start the core with the given config. */
+    /** F-2/F-3: start the core with the given config (stderr -> filesDir/xray/xray-err.log). */
     fun start(configPath: File): Result<Process> {
         return try {
             if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
             if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
-            val p = Runtime.getRuntime().exec(
-                arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath), null, dir
-            )
+            val pb = ProcessBuilder(arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
+                .directory(dir)
+            pb.redirectError(ProcessBuilder.Redirect.appendTo(File(dir, "xray-err.log")))
+            val p = pb.start()
             process = p
             Result.success(p)
         } catch (e: Exception) {

@@ -55,3 +55,26 @@ jobs:
           profile: pixel_6
           working-directory: gh-protocol
           script: bash ci-e2e.sh
+
+      - name: Return E2E logs (always)
+        if: always()
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git checkout -B ci-diag
+          mkdir -p gh-protocol
+          {
+            echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
+            echo
+            if [ -f gh-protocol/e2e.log ]; then echo "### e2e.log"; cat gh-protocol/e2e.log; fi
+            echo
+            if [ -f gh-protocol/e2e-xray-err.log ]; then echo "### e2e-xray-err.log (Xray core)"; cat gh-protocol/e2e-xray-err.log; fi
+            echo
+            if [ -f gh-protocol/e2e-vpn.log ]; then echo "### e2e-vpn.log (GhVpnTunnel)"; cat gh-protocol/e2e-vpn.log; fi
+          } > gh-protocol/e2e-log.md
+          git add gh-protocol/e2e-log.md
+          git commit -m "ci-diag: e2e log $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
