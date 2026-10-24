@@ -1,4 +1,4 @@
-## gh-protocol build failure — 2026-10-24T13:43:00Z
+## gh-protocol build failure — 2026-10-24T14:13:17Z
 
 ### Xray fetch diag:
 == tools ==
@@ -14,11 +14,11 @@ UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
- 18 13.5M   18 2604k    0     0  7322k      0  0:00:01 --:--:--  0:00:01 7322k100 13.5M  100 13.5M    0     0  32.6M      0 --:--:-- --:--:-- --:--:--  184M
+100 13.5M  100 13.5M    0     0  29.3M      0 --:--:-- --:--:-- --:--:-- 29.3M
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   299  100   299    0     0   1309      0 --:--:-- --:--:-- --:--:--  1309
+100   299  100   299    0     0   1445      0 --:--:-- --:--:-- --:--:--  1445
 dgst file: MD5= 687f7c35e92247c9fbf0e692b2911df8|SHA1= d3baecf3f45ec8b5f6625bc6e97ca67e97145c36|SHA2-256= d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9|SHA2-512= e5a0758728b6509645feb2d41c41effe760825eb64492c1df14617528cca5473fd32576cfaa80f50ac71b4bc3e224e6c6db74ae8436056fa1b9059a8921b2268|
 expected=d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9 actual=d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9
 sha256 verified Xray-android-arm64-v8a.zip
@@ -34,11 +34,11 @@ installed Xray-android-arm64-v8a.zip -> app/src/main/assets/xray/Xray-arm64-v8a
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 14.7M  100 14.7M    0     0  36.4M      0 --:--:-- --:--:-- --:--:-- 36.4M
+100 14.7M  100 14.7M    0     0  41.3M      0 --:--:-- --:--:-- --:--:-- 41.3M
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   299  100   299    0     0   1129      0 --:--:-- --:--:-- --:--:--  1129
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   299  100   299    0     0   1272      0 --:--:-- --:--:-- --:--:--  1272
 dgst file: MD5= 8df0efc5b53db5f9f2a39b500210dfed|SHA1= 13feb022200c8ba1aff11f0c2827ae7ee4da3b68|SHA2-256= 58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934|SHA2-512= bd66ad67d8f7c99a57b45788dbcac494919d5b78830a7a694884a1656b72fc004151480a3e8d3d981d998490b204eafbf0c039d1c5e3563fb9ab1d15259a30c9|
 expected=58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934 actual=58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934
 sha256 verified Xray-android-amd64.zip
@@ -67,25 +67,28 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug assembleRelease test
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preReleaseBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:buildKotlinToolingMetadata
-> Task :app:generateDebugResValues
+> Task :app:extractProguardFiles
 > Task :app:generateDebugBuildConfig
+> Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugResources
+> Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
 > Task :app:extractDeepLinksDebug
 > Task :app:packageDebugResources
+> Task :app:checkDebugAarMetadata
 > Task :app:parseDebugLocalResources
-> Task :app:mapDebugSourceSetPaths
-> Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
+> Task :app:desugarDebugFileDependencies
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
@@ -93,7 +96,7 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugNativeLibs
-> Task :app:compressDebugAssets
+> Task :app:mergeLibDexDebug
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
@@ -101,14 +104,12 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:preReleaseBuild UP-TO-DATE
 > Task :app:generateReleaseBuildConfig
-> Task :app:mergeDebugResources
-> Task :app:mergeLibDexDebug
+> Task :app:checkReleaseAarMetadata
 > Task :app:generateReleaseResValues FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:generateReleaseResources
-> Task :app:checkReleaseAarMetadata
+> Task :app:compressDebugAssets
 > Task :app:packageReleaseResources
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
@@ -117,38 +118,47 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:processReleaseManifest
 > Task :app:processReleaseManifestForPackage
 > Task :app:javaPreCompileRelease FROM-CACHE
-> Task :app:extractProguardFiles
 > Task :app:mergeReleaseJniLibFolders
-> Task :app:processDebugResources
-> Task :app:mergeReleaseResources
 > Task :app:mergeReleaseNativeLibs
+> Task :app:processDebugResources
 
 > Task :app:stripReleaseDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
 > Task :app:extractReleaseNativeSymbolTables
 > Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:mergeReleaseResources
 > Task :app:checkReleaseDuplicateClasses
 > Task :app:desugarReleaseFileDependencies
 > Task :app:mergeReleaseStartupProfile
-> Task :app:processReleaseResources
 > Task :app:mergeExtDexDebug
+> Task :app:processReleaseResources
+> Task :app:compileDebugKotlin
+> Task :app:mergeExtDexRelease
+> Task :app:mergeReleaseArtProfile
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
 
 > Task :app:compileDebugKotlin FAILED
-e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:65:22 None of the following candidates is applicable:
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:69:22 None of the following candidates is applicable:
 constructor(p0: (MutableList<String!>..List<String!>?)): ProcessBuilder
 constructor(vararg p0: String!): ProcessBuilder
-e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:66:18 Unresolved reference 'directory'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:70:26 Unresolved reference 'environment'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:73:16 Unresolved reference 'redirectError'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:74:24 Unresolved reference 'start'.
 
-> Task :app:mergeExtDexRelease
 > Task :app:compileReleaseKotlin
-e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:65:22 None of the following candidates is applicable:
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:69:22 None of the following candidates is applicable:
 constructor(p0: (MutableList<String!>..List<String!>?)): ProcessBuilder
 constructor(vararg p0: String!): ProcessBuilder
-e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:66:18 Unresolved reference 'directory'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:70:26 Unresolved reference 'environment'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:73:16 Unresolved reference 'redirectError'.
+e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/XrayCore.kt:74:24 Unresolved reference 'start'.
 
+> Task :app:mergeReleaseAssets
 > Task :app:compileReleaseKotlin FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792849245662.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792851049391.json
 
 FAILURE: Build completed with 2 failures.
 
@@ -195,6 +205,35 @@ org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:com
 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
@@ -324,6 +363,35 @@ Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionExcept
 	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:303)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
 	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:138)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:123)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.DryRunBuildExecutionAction.execute(DryRunBuildExecutionAction.java:51)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:209)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:204)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:66)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:166)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:59)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:53)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$10(DefaultBuildLifecycleController.java:313)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:266)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$8(StateTransitionController.java:177)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:44)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:177)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:304)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:263)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:127)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:181)
+	at org.gradle.composite.internal.DefaultBuildController.access$000(DefaultBuildController.java:50)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:198)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:85)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:198)
 	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilation error. See log for more details
@@ -580,6 +648,6 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 
 ==============================================================================
 
-BUILD FAILED in 2m 21s
-55 actionable tasks: 51 executed, 4 from cache
+BUILD FAILED in 2m 39s
+58 actionable tasks: 54 executed, 4 from cache
 Configuration cache entry stored.
