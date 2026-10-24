@@ -37,6 +37,7 @@ adb devices >> "$LOG" 2>&1
 [ "$STATE" = "device" ] && [ "$BOOTED" = "1" ] || report "emulator not ready (state=$STATE boot=$BOOTED)"
 
 say "== install APK =="
+[ -f "$APK" ] || { ls -R app/build/outputs 2>&1 | head -20 >> "$LOG"; report "APK not found at $APK"; }
 adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"
 
 say "== launch app =="

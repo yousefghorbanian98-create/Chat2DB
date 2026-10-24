@@ -45,7 +45,10 @@ jobs:
 
       - name: Build debug APK
         working-directory: gh-protocol
-        run: ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tail -15
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tee gradle-build.log | tail -15
+          ls -la app/build/outputs/apk/debug/
 
       - name: Run E2E on emulator
         uses: reactivecircus/android-emulator-runner@v2
@@ -67,6 +70,8 @@ jobs:
           mkdir -p gh-protocol
           {
             echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
+            echo
+            if [ -f gh-protocol/gradle-build.log ]; then echo "### gradle-build.log (tail)"; tail -c 60000 gh-protocol/gradle-build.log; fi
             echo
             if [ -f gh-protocol/e2e.log ]; then echo "### e2e.log"; cat gh-protocol/e2e.log; fi
             echo

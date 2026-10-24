@@ -57,13 +57,19 @@ class XrayCore(private val context: Context) {
 
     fun isRunning(): Boolean = process?.let { it.isAlive } ?: false
 
-    /** F-2/F-3: start the core with the given config (stderr -> filesDir/xray/xray-err.log). */
+    /**
+     * F-2/F-3: start the core with the given config (stderr -> filesDir/xray/xray-err.log).
+     * Android's ProcessBuilder has no directory(); Xray resolves geo assets from the
+     * XRAY_LOCATION_ASSET env (falls back to the executable dir — same place here).
+     */
     fun start(configPath: File): Result<Process> {
         return try {
             if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
             if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
             val pb = ProcessBuilder(arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
-                .directory(dir)
+            val env = pb.environment()
+            env["XRAY_LOCATION_ASSET"] = dir.absolutePath
+            env["xray.location.asset"] = dir.absolutePath
             pb.redirectError(ProcessBuilder.Redirect.appendTo(File(dir, "xray-err.log")))
             val p = pb.start()
             process = p
