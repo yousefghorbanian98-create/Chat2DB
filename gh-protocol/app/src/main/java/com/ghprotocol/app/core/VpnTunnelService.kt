@@ -93,21 +93,20 @@ class VpnTunnelService : VpnService() {
             }
             if (n < 0) break
             if (n < 20) continue
-            val ip = Socks5.parseIp4(buf.copyOfRange(0, n)) ?: continue
+            val pkt = buf.copyOfRange(0, n)
+            val ip = Socks5.parseIp4(pkt) ?: continue
             val (proto, dstIp, totalLen) = ip
             val len: Int = if (totalLen < n) totalLen else n
             if (proto == 17) {
                 // UDP: DNS to the tunnel gateway is relayed into Xray's dns inbound;
                 // other UDP is dropped in v1 (F-15 TCP-first profile anyway).
-                val seg = buf.copyOfRange(20, len)
-                val port = Socks5.segmentDstPort(seg)
+                val port = Socks5.transportDstPort(pkt, 17)
                 if (port == 53 && dstIp == TUNNEL_GW) {
-                    sendUdp(seg, Socks5.segmentSrcIp(seg), Socks5.segmentSrcPort(seg, udp = true))
+                    sendUdp(pkt, Socks5.ipSrcIp(pkt), Socks5.transportSrcPort(pkt, 17))
                 }
             } else if (proto == 6) {
-                val seg = buf.copyOfRange(20, len)
-                val port = Socks5.segmentDstPort(seg)
-                handleTcp(dstIp, port, seg)
+                val port = Socks5.transportDstPort(pkt, 6)
+                handleTcp(dstIp, port, buf.copyOfRange(20, len))
             }
         }
     }
@@ -169,15 +168,16 @@ class VpnTunnelService : VpnService() {
      * DNS relay: client query (dst 10.8.0.1:53) -> Xray dns inbound (127.0.0.1:53)
      * -> response routed back to the client address via the tunnel.
      */
-    private fun sendUdp(udpSegment: ByteArray, clientIp: String, clientPort: Int) {
-        if (udpSegment.size < 8 || clientIp.isEmpty() || clientPort == 0) return
+    private fun sendUdp(udpPacket: ByteArray, clientIp: String, clientPort: Int) {
+        // udpPacket = full IPv4+UDP packet (IP header 20B + UDP header 8B + payload)
+        if (udpPacket.size < 28 || clientIp.isEmpty() || clientPort == 0) return
         Thread {
             var ds: java.net.DatagramSocket? = null
             var out: java.net.DatagramSocket? = null
             try {
                 ds = java.net.DatagramSocket()
                 ds.soTimeout = 2500
-                val payload = udpSegment.copyOfRange(8, udpSegment.size)
+                val payload = udpPacket.copyOfRange(28, udpPacket.size)
                 ds.send(java.net.DatagramPacket(
                     payload, payload.size,
                     java.net.InetAddress.getByName(DNS_UPSTREAM_HOST), DNS_UPSTREAM_PORT

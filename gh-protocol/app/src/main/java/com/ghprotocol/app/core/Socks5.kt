@@ -60,24 +60,33 @@ object Socks5 {
         return Triple(protocol, dst, totalLen)
     }
 
-    /** Port from a TCP (offset 2) or UDP (offset 0) segment. */
+    /** Destination port from a TCP segment (segment = bytes after the IP header). */
     fun segmentDstPort(segment: ByteArray): Int =
         if (segment.size >= 4) ((segment[2].toInt() and 0xFF) shl 8) or (segment[3].toInt() and 0xFF)
         else 0
 
-    /** Source IP (IPv4) from a segment (offset 12). */
-    fun segmentSrcIp(segment: ByteArray): String =
-        if (segment.size >= 16)
-            listOf(segment[12], segment[13], segment[14], segment[15])
+    /**
+     * Destination port of the transport segment within a FULL IPv4 packet
+     * (20B IP header). UDP port at +20, TCP at +22.
+     */
+    fun transportDstPort(packet: ByteArray, proto: Int): Int =
+        transportPortAt(packet, 20 + if (proto == 17) 0 else 2)
+
+    /** Source port of the transport segment within a FULL IPv4 packet. */
+    fun transportSrcPort(packet: ByteArray, proto: Int): Int =
+        transportPortAt(packet, 20 + if (proto == 17) 0 else 2)
+
+    private fun transportPortAt(packet: ByteArray, o: Int): Int =
+        if (packet.size >= o + 2)
+            ((packet[o].toInt() and 0xFF) shl 8) or (packet[o + 1].toInt() and 0xFF)
+        else 0
+
+    /** Source IP (IPv4) from a full packet (IP header offset 12). */
+    fun ipSrcIp(packet: ByteArray): String =
+        if (packet.size >= 16)
+            listOf(packet[12], packet[13], packet[14], packet[15])
                 .joinToString(".") { (it.toInt() and 0xFF).toString() }
         else ""
-
-    /** Source port from a UDP (offset 0) or TCP (offset 2) segment. */
-    fun segmentSrcPort(segment: ByteArray, udp: Boolean): Int =
-        if (segment.size >= 4) {
-            val o = if (udp) 0 else 2
-            ((segment[o].toInt() and 0xFF) shl 8) or (segment[o + 1].toInt() and 0xFF)
-        } else 0
 
     /**
      * Build an IPv4+UDP packet (20B IP header, no checksum, 8B UDP header) for

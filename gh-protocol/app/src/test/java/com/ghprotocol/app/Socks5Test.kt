@@ -45,13 +45,14 @@ class Socks5Test {
         packet[9] = 6.toByte()      // TCP
         packet[3] = 42.toByte()     // total length = 42
         packet[16] = 1.toByte(); packet[17] = 2.toByte(); packet[18] = 3.toByte(); packet[19] = 4.toByte()  // dst 1.2.3.4
-        packet[23] = (443 shr 8).toByte()
-        packet[24] = (443 and 0xFF).toByte()  // TCP dst port 443
+        packet[22] = (443 shr 8).toByte()   // TCP dst port high
+        packet[23] = (443 and 0xFF).toByte() // TCP dst port low
         val (proto, dst, len) = Socks5.parseIp4(packet)!!
         assertEquals(6, proto)
         assertEquals("1.2.3.4", dst)
         assertEquals(42, len)
         assertEquals(443, Socks5.segmentDstPort(packet.copyOfRange(20, 42)))
+        assertEquals(443, Socks5.transportDstPort(packet, 6))
     }
 
     @Test fun parseIp4RejectsV6OrShort() {
@@ -67,23 +68,27 @@ class Socks5Test {
         // IPv4 header sanity
         assertEquals(0x45, pkt[0].toInt())
         assertEquals(17, pkt[9].toInt() and 0xFF)
-        assertEquals("10.8.0.1", Socks5.segmentSrcIp(pkt))
+        assertEquals("10.8.0.1", Socks5.ipSrcIp(pkt))
         assertEquals("10.8.0.5", Socks5.parseIp4(pkt)!!.second)
-        // UDP header
-        assertEquals(53, Socks5.segmentSrcPort(pkt, udp = true))
-        assertEquals(41000, Socks5.segmentDstPort(pkt))
+        // UDP header (full-packet offsets)
+        assertEquals(53, Socks5.transportSrcPort(pkt, 17))
+        assertEquals(41000, Socks5.transportDstPort(pkt, 17))
         // payload intact
         assertEquals(payload.toList(), pkt.copyOfRange(28, 28 + payload.size).toList())
     }
 
-    @Test fun segmentSrcOnRawUdp() {
-        // src 10.8.0.7:5353, dst 10.8.0.1:53, 8-byte UDP header, 4-byte payload
-        val seg = ByteArray(28)
-        seg[0] = (5353 shr 8).toByte(); seg[1] = (5353 and 0xFF).toByte()  // src port 5353
-        seg[2] = (53 shr 8).toByte(); seg[3] = (53 and 0xFF).toByte()      // dst port 53
-        seg[12] = 10.toByte(); seg[13] = 8.toByte(); seg[14] = 0.toByte(); seg[15] = 7.toByte()  // src 10.8.0.7
-        assertEquals("10.8.0.7", Socks5.segmentSrcIp(seg))
-        assertEquals(5353, Socks5.segmentSrcPort(seg, udp = true))
-        assertEquals(53, Socks5.segmentDstPort(seg))
+    @Test fun fullPacketUdpSrcDst() {
+        // full 28B packet: src 10.8.0.7:5353 -> dst 10.8.0.1:53
+        val pkt = ByteArray(28)
+        pkt[0] = 0x45.toByte()
+        pkt[3] = 28.toByte()
+        pkt[9] = 17.toByte()
+        pkt[12] = 10.toByte(); pkt[13] = 8.toByte(); pkt[14] = 0.toByte(); pkt[15] = 7.toByte()  // src
+        pkt[16] = 10.toByte(); pkt[17] = 8.toByte(); pkt[18] = 0.toByte(); pkt[19] = 1.toByte()  // dst
+        pkt[20] = (5353 shr 8).toByte(); pkt[21] = (5353 and 0xFF).toByte()  // udp src port
+        pkt[22] = (53 shr 8).toByte(); pkt[23] = (53 and 0xFF).toByte()      // udp dst port
+        assertEquals("10.8.0.7", Socks5.ipSrcIp(pkt))
+        assertEquals(5353, Socks5.transportSrcPort(pkt, 17))
+        assertEquals(53, Socks5.transportDstPort(pkt, 17))
     }
 }
