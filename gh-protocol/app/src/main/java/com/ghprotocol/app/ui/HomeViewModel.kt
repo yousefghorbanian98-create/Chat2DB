@@ -130,14 +130,19 @@ class HomeViewModel(
         }
     }
 
-    /** F-17/F-15: write the runtime config (official JSON + clean egress + TCP-first). */
+    /**
+     * F-17/F-15 + single-active-entry: write the runtime config for the ACTIVE
+     * subscription entry only (both entries bind mixed-in :10808 — running them
+     * together would conflict). Injects the loopback DNS inbound for the tunnel.
+     */
     fun writeRuntimeConfig(sub: SubscriptionInfo): File {
         val app = getApplication<Application>()
         val cfg = File(app.filesDir, "xray-config.json")
         return try {
-            val cleanIp = app.getSharedPreferences("gh-settings", Context.MODE_PRIVATE)
-                .getString("clean_ip", null)
-            val patched = sub.rawJson.patchesCleanEgress(cleanIp)
+            val prefs = app.getSharedPreferences("gh-settings", Context.MODE_PRIVATE)
+            val cleanIp = prefs.getString("clean_ip", null)
+            val active = prefs.getInt("active_entry", 0)
+            val patched = sub.rawJson.activeEntryConfigJson(active, cleanIp)
             cfg.writeText(patched)
             cfg
         } catch (e: Exception) {
@@ -173,16 +178,18 @@ class HomeViewModel(
     }
 }
 
-/** F-17 (clean egress) + F-15 (TCP-first) applied to the raw subscription JSON (best-effort, pure). */
-private fun String.patchesCleanEgress(cleanIp: String?): String {
+/**
+ * Extract entry [index] from the subscription array and apply F-17 (clean egress),
+ * F-15 (TCP-first) and the loopback DNS inbound. Best-effort, pure.
+ */
+private fun String.activeEntryConfigJson(index: Int, cleanIp: String?): String {
     return try {
         val arr = org.json.JSONArray(this)
-        for (i in 0 until arr.length()) {
-            val c = arr.getJSONObject(i)
-            if (cleanIp != null) ConfigPatcher.patchCleanEgress(c, cleanIp)
-            ConfigPatcher.tcpFirstProfile(c)
-        }
-        arr.toString()
+        val c = arr.getJSONObject(index.coerceIn(0, (arr.length() - 1).coerceAtLeast(0)))
+        if (cleanIp != null) ConfigPatcher.patchCleanEgress(c, cleanIp)
+        ConfigPatcher.tcpFirstProfile(c)
+        ConfigPatcher.addLocalDnsInbound(c)
+        c.toString()
     } catch (e: Exception) {
         this
     }

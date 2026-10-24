@@ -65,6 +65,47 @@ object Socks5 {
         if (segment.size >= 4) ((segment[2].toInt() and 0xFF) shl 8) or (segment[3].toInt() and 0xFF)
         else 0
 
+    /** Source IP (IPv4) from a segment (offset 12). */
+    fun segmentSrcIp(segment: ByteArray): String =
+        if (segment.size >= 16)
+            listOf(segment[12], segment[13], segment[14], segment[15])
+                .joinToString(".") { (it.toInt() and 0xFF).toString() }
+        else ""
+
+    /** Source port from a UDP (offset 0) or TCP (offset 2) segment. */
+    fun segmentSrcPort(segment: ByteArray, udp: Boolean): Int =
+        if (segment.size >= 4) {
+            val o = if (udp) 0 else 2
+            ((segment[o].toInt() and 0xFF) shl 8) or (segment[o + 1].toInt() and 0xFF)
+        } else 0
+
+    /**
+     * Build an IPv4+UDP packet (20B IP header, no checksum, 8B UDP header) for
+     * injection into the tun — used to route DNS responses back to clients.
+     */
+    fun buildUdpSegment(
+        srcIp: String, srcPort: Int,
+        dstIp: String, dstPort: Int,
+        payload: ByteArray, payloadOff: Int = 0, payloadLen: Int = payload.size
+    ): ByteArray {
+        val total = 20 + 8 + payloadLen
+        val ip = ByteArray(20)
+        ip[0] = 0x45
+        ip[2] = (total shr 8).toByte()
+        ip[3] = (total and 0xFF).toByte()
+        ip[8] = 64.toByte()   // TTL
+        ip[9] = 17.toByte()   // UDP
+        val src = Inet4Address.getByName(srcIp).address
+        val dst = Inet4Address.getByName(dstIp).address
+        System.arraycopy(src, 0, ip, 12, 4)
+        System.arraycopy(dst, 0, ip, 16, 4)
+        val udp = ByteArray(8)
+        udp[0] = (srcPort shr 8).toByte(); udp[1] = (srcPort and 0xFF).toByte()
+        udp[2] = (dstPort shr 8).toByte(); udp[3] = (dstPort and 0xFF).toByte()
+        udp[4] = 8.toByte(); udp[5] = 8.toByte() // len
+        return ip + udp + payload.copyOfRange(payloadOff, payloadOff + payloadLen)
+    }
+
     /** 4-tuple key for connection reuse. */
     fun connKey(dstIp: String, dstPort: Int, proto: Int): String = "$proto|$dstIp|$dstPort"
 

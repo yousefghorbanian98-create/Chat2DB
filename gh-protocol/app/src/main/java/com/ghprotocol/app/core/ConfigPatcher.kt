@@ -52,8 +52,12 @@ object ConfigPatcher {
         val rules = routing.optJSONArray("rules") ?: return false
         val list = (0 until rules.length()).map { rules.getJSONObject(it) }
         val tagged = list.map { r ->
-            val out = r.optJSONArray("outboundTag")
-            val tags = (0 until (out?.length() ?: 0)).map { out!!.getString(it) }
+            val outArr = r.optJSONArray("outboundTag")
+            val tags: List<String> = when {
+                outArr != null -> (0 until outArr.length()).map { outArr.getString(it) }
+                r.has("outboundTag") -> listOf(r.getString("outboundTag"))
+                else -> emptyList()
+            }
             r to tags
         }
         val scored = tagged.map { (r, tags) ->
@@ -68,6 +72,22 @@ object ConfigPatcher {
         val newRules = JSONArray()
         ordered.forEach { newRules.put(it) }
         routing.put("rules", newRules)
+        return true
+    }
+
+    /**
+     * Inject a loopback DNS inbound (127.0.0.1:53, tag `dns-in`) so the VpnService
+     * can relay client DNS queries into Xray's own resolver (fakedns + DoH).
+     * Idempotent: returns false if a DNS inbound already exists.
+     */
+    fun addLocalDnsInbound(json: JSONObject): Boolean {
+        val inbounds = json.optJSONArray("inbounds") ?: return false
+        for (i in 0 until inbounds.length()) {
+            val ib = inbounds.getJSONObject(i)
+            if (ib.optString("tag") == "dns-in") return false
+            if (ib.optString("protocol") == "dns" && ib.optInt("port", -1) == 53) return false
+        }
+        inbounds.put(JSONObject().put("tag", "dns-in").put("protocol", "dns").put("listen", "127.0.0.1").put("port", 53))
         return true
     }
 

@@ -21,6 +21,9 @@ class VpnTunnelService : VpnService() {
         const val PROXY_HOST = "127.0.0.1"
         const val PROXY_PORT = 10808
         const val MTU = 1500
+        const val TUNNEL_GW = "10.8.0.1"
+        const val DNS_UPSTREAM_HOST = "127.0.0.1"
+        const val DNS_UPSTREAM_PORT = 53
     }
 
     private var vpnFd: ParcelFileDescriptor? = null
@@ -94,11 +97,13 @@ class VpnTunnelService : VpnService() {
             val (proto, dstIp, totalLen) = ip
             val len: Int = if (totalLen < n) totalLen else n
             if (proto == 17) {
-                // UDP: DNS (port 53) via associate; others via per-packet TCP is wrong —
-                // non-DNS UDP is dropped in v1 (F-15 TCP-first anyway).
+                // UDP: DNS to the tunnel gateway is relayed into Xray's dns inbound;
+                // other UDP is dropped in v1 (F-15 TCP-first profile anyway).
                 val seg = buf.copyOfRange(20, len)
                 val port = Socks5.segmentDstPort(seg)
-                if (port == 53) sendUdp(dstIp, 53, seg)
+                if (port == 53 && dstIp == TUNNEL_GW) {
+                    sendUdp(seg, Socks5.segmentSrcIp(seg), Socks5.segmentSrcPort(seg, udp = true))
+                }
             } else if (proto == 6) {
                 val seg = buf.copyOfRange(20, len)
                 val port = Socks5.segmentDstPort(seg)
@@ -157,9 +162,35 @@ class VpnTunnelService : VpnService() {
         }
     }
 
-    private fun sendUdp(dstIp: String, dstPort: Int, udpSegment: ByteArray) {
-        // v1: loopback DNS forwarding placeholder — Xray handles DNS in its own
-        // config; forward the packet best-effort over a per-packet associate.
-        // (Full UDP associate channel lands with the instrumented E2E in P2b.)
+    /**
+     * DNS relay: client query (dst 10.8.0.1:53) -> Xray dns inbound (127.0.0.1:53)
+     * -> response routed back to the client address via the tunnel.
+     */
+    private fun sendUdp(udpSegment: ByteArray, clientIp: String, clientPort: Int) {
+        if (udpSegment.size < 8 || clientIp.isEmpty() || clientPort == 0) return
+        Thread {
+            var ds: java.net.DatagramSocket? = null
+            var out: java.net.DatagramSocket? = null
+            try {
+                ds = java.net.DatagramSocket()
+                ds.soTimeout = 2500
+                val payload = udpSegment.copyOfRange(8, udpSegment.size)
+                ds.send(java.net.DatagramPacket(
+                    payload, payload.size,
+                    java.net.InetAddress.getByName(DNS_UPSTREAM_HOST), DNS_UPSTREAM_PORT
+                ))
+                val respBuf = ByteArray(1500)
+                val resp = java.net.DatagramPacket(respBuf, 0, respBuf.size)
+                ds.receive(resp)
+                val reply = Socks5.buildUdpSegment(TUNNEL_GW, DNS_UPSTREAM_PORT, clientIp, clientPort, resp.data, resp.offset, resp.length)
+                out = java.net.DatagramSocket()
+                out.send(java.net.DatagramPacket(reply, 0, reply.size, java.net.InetAddress.getByName(clientIp), clientPort))
+            } catch (e: Exception) {
+                Log.w(TAG, "dns relay failed: ${e.message}")
+            } finally {
+                try { ds?.close() } catch (_: Exception) {}
+                try { out?.close() } catch (_: Exception) {}
+            }
+        }.apply { isDaemon = true }.start()
     }
 }

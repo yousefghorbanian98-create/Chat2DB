@@ -4,6 +4,7 @@ import com.ghprotocol.app.core.ConfigPatcher
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -54,6 +55,36 @@ class ConfigPatcherTest {
         assertEquals("tcp-fragment", first.getJSONArray("outboundTag").getString(0))
         val second = rules.getJSONObject(1)
         assertEquals("udp-noises", second.getJSONArray("outboundTag").getString(0))
+    }
+
+    @Test fun localDnsInboundInjectedOnce() {
+        val c = JSONObject("""{"inbounds": [{"tag": "mixed-in", "port": 10808, "protocol": "mixed"}]}""")
+        assertTrue(ConfigPatcher.addLocalDnsInbound(c))
+        val ibs = c.getJSONArray("inbounds")
+        assertEquals(2, ibs.length())
+        val dnsIn = ibs.getJSONObject(1)
+        assertEquals("dns", dnsIn.getString("protocol"))
+        assertEquals(53, dnsIn.getInt("port"))
+        assertEquals("127.0.0.1", dnsIn.getString("listen"))
+        // idempotent
+        assertFalse(ConfigPatcher.addLocalDnsInbound(c))
+        assertEquals(2, c.getJSONArray("inbounds").length())
+        // existing dns:53 inbound not duplicated
+        val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 53, "protocol": "dns"}]}""")
+        assertFalse(ConfigPatcher.addLocalDnsInbound(c2))
+    }
+
+    @Test fun stringOutboundTagReorder() {
+        val c = JSONObject(
+            """{"routing": {"rules": [
+                {"outboundTag": "udp-noises", "type": "field"},
+                {"outboundTag": "tcp-fragment-tls", "type": "field"},
+                {"outboundTag": "block", "type": "field"}
+            ]}}"""
+        )
+        assertTrue(ConfigPatcher.tcpFirstProfile(c))
+        val rules = c.getJSONObject("routing").getJSONArray("rules")
+        assertEquals("tcp-fragment-tls", rules.getJSONObject(0).getString("outboundTag"))
     }
 
     @Test fun importValidation() {

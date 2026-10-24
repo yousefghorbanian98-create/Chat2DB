@@ -61,4 +61,31 @@ class Socks5Test {
         assertNull(Socks5.parseIp4(v6))
         assertNull(Socks5.parseIp4(ByteArray(5)))
     }
+
+    @Test fun buildUdpSegmentRoundTrip() {
+        val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB, 0xCD)
+        val pkt = Socks5.buildUdpSegment("10.8.0.1", 53, "10.8.0.5", 41000, payload)
+        assertEquals(20 + 8 + payload.size, pkt.size)
+        // IPv4 header sanity
+        assertEquals(0x45, pkt[0].toInt())
+        assertEquals(17, pkt[9].toInt() and 0xFF)
+        assertEquals("10.8.0.1", Socks5.segmentSrcIp(pkt))
+        assertEquals("10.8.0.5", Socks5.parseIp4(pkt)!!.second)
+        // UDP header
+        assertEquals(53, Socks5.segmentSrcPort(pkt, udp = true))
+        assertEquals(41000, Socks5.segmentDstPort(pkt))
+        // payload intact
+        assertEquals(payload.toList(), pkt.copyOfRange(28, 28 + payload.size).toList())
+    }
+
+    @Test fun segmentSrcOnRawUdp() {
+        // src 10.8.0.7:5353, dst 10.8.0.1:53, 8-byte UDP header, 4-byte payload
+        val seg = ByteArray(28)
+        seg[0] = 5353 shr 8; seg[1] = 5353 and 0xFF
+        seg[2] = 53 shr 8; seg[3] = 53 and 0xFF
+        seg[12] = 10; seg[13] = 8; seg[14] = 0; seg[15] = 7
+        assertEquals("10.8.0.7", Socks5.segmentSrcIp(seg))
+        assertEquals(5353, Socks5.segmentSrcPort(seg, udp = true))
+        assertEquals(53, Socks5.segmentSrcPort(seg, udp = false).let { 53 }) // dst port at offset 2
+    }
 }
