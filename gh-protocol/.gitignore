@@ -8,6 +8,15 @@ build/
 captures/
 .externalNativeBuild/
 .cxx/
+# CI-generated / transient (never commit)
+app/src/main/assets/xray/
+sub.json
+e2e.log
+e2e-*.log
+e2e-log.md
+fetch-diag.log
+ci-failure.log
+gradle-build.log
 *.apk.idsig
 # decoded keystore never committed
 build/keystore/

@@ -43,6 +43,18 @@ jobs:
         working-directory: gh-protocol
         run: bash ci-fetch-xray.sh
 
+      - name: Fetch subscription (host-side, for E2E cache seeding)
+        # The runner has full internet; the emulator's QEMU NAT may not reach
+        # GitHub. ci-e2e.sh probes the emulator; if it can't reach the sub host,
+        # it pre-seeds the app cache with this file (tunnel test stays valid).
+        run: |
+          curl -fSL --retry 3 --retry-delay 2 -o gh-protocol/sub.json \
+            "https://raw.githubusercontent.com/patterniha/Serverless-for-Iran/refs/heads/main/Subscription/Serverless-for-Iran.json" \
+            || curl -fSL --retry 3 --retry-delay 2 -o gh-protocol/sub.json \
+            "https://github.com/patterniha/Serverless-for-Iran/raw/main/Subscription/Serverless-for-Iran.json" \
+            || { echo "FATAL: host-side subscription fetch failed"; exit 1; }
+          echo "sub.json: $(wc -c < gh-protocol/sub.json) bytes"
+
       - name: Build debug APK
         working-directory: gh-protocol
         run: |
