@@ -1,23 +1,22 @@
-## gh-protocol E2E log — 2026-10-24T19:56:39Z
+## gh-protocol E2E log — 2026-10-24T20:02:53Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-24T19:53:20Z ==
+== pre-flight 2026-10-24T20:02:25Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 19:50 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 19:58 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 1.7G system-images
 kvm device present + sudo OK — emulator will run as root
 pre-flight OK
 
-### emulator-console.log (tail)
-INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
-INFO         | Graphics backend: gfxstream
-ERROR        | Unknown AVD name [gh_test], use -list-avds to see valid list.
-ERROR        | HOME is defined but there is no file gh_test.ini in $HOME/.android/avd
-ERROR        | (Note: Directories are searched in the order $ANDROID_AVD_HOME, $ANDROID_SDK_HOME/avd and $HOME/.android/avd)
-* daemon not running; starting now at tcp:5037
-* daemon started successfully
+### avd-create.log (tail)
+Loading local repository...                                                     [=========                              ] 25% Loading local repository...       [=========                              ] 25% Fetch remote repository...        [=======================================] 100% Fetch remote repository...       
+Auto-selecting single ABI x86_64
+total 8
+drwxr-xr-x 2 runner runner 4096 Oct 24 20:02 .
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:02 ..
+
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -35,34 +34,35 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug
-> Task :app:preBuild UP-TO-DATE
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
+> Task :app:generateDebugResValues
 > Task :app:generateDebugBuildConfig
-> Task :app:extractDeepLinksDebug
 > Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:mapDebugSourceSetPaths
-> Task :app:parseDebugLocalResources
 > Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:extractDeepLinksDebug
 > Task :app:checkDebugAarMetadata
+> Task :app:packageDebugResources
 > Task :app:mergeDebugShaders
-> Task :app:desugarDebugFileDependencies
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeDebugJniLibFolders
+> Task :app:parseDebugLocalResources
+> Task :app:desugarDebugFileDependencies
 > Task :app:mergeDebugResources
-> Task :app:checkDebugDuplicateClasses
+> Task :app:processDebugManifest
+> Task :app:mergeDebugJniLibFolders
 > Task :app:mergeDebugAssets
+> Task :app:processDebugManifestForPackage
+> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugNativeLibs
-> Task :app:compressDebugAssets
+> Task :app:processDebugResources
 > Task :app:mergeLibDexDebug
+> Task :app:compressDebugAssets
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
@@ -70,9 +70,7 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
-
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
@@ -85,9 +83,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792871463470.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792872029321.json
 
-BUILD SUCCESSFUL in 2m 16s
+BUILD SUCCESSFUL in 1m 55s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
