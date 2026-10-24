@@ -88,6 +88,12 @@ jobs:
         working-directory: gh-protocol
         run: |
           MODE="${{ inputs.mode || 'verify' }}"
+          echo "workdir=$(pwd) mode=$MODE"
+          ls app/src/test/snapshots 2>/dev/null | head -3 || echo "SNAPSHOTS DIR MISSING"
+          if [ ! -d app/src/test/snapshots ]; then
+            echo "restoring snapshots from HEAD"
+            git checkout HEAD -- app/src/test/snapshots 2>&1 | tail -3 || true
+          fi
           # auto-record on first ever run (no committed references yet); otherwise verify
           if [ "$MODE" = "generate" ] || { [ ! -d app/src/test/snapshots ]; }; then
             echo "recorded=true" >> "$GITHUB_OUTPUT"
@@ -121,7 +127,8 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git config user.name "gh-protocol-ci"
           git config user.email "gh-protocol-ci@users.noreply.github.com"
-          git checkout -B ci-diag
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
           mkdir -p gh-protocol
           {
             echo "## gh-protocol build failure — $(date -u +%FT%TZ)"

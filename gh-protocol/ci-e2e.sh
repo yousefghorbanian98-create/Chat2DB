@@ -21,7 +21,20 @@ report() {
 
 say "== adb devices =="
 adb devices
-adb state device >/dev/null 2>&1 || report "emulator not in device state"
+
+say "== wait for emulator to reach device state =="
+STATE=""
+for i in $(seq 1 90); do
+  STATE=$(adb get-state 2>/dev/null | tr -d '\r' || true)
+  BOOTED=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)
+  if [ "$STATE" = "device" ] && [ "$BOOTED" = "1" ]; then
+    say "emulator ready after ~$((i * 4))s"
+    break
+  fi
+  sleep 4
+done
+adb devices >> "$LOG" 2>&1
+[ "$STATE" = "device" ] && [ "$BOOTED" = "1" ] || report "emulator not ready (state=$STATE boot=$BOOTED)"
 
 say "== install APK =="
 adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"

@@ -62,7 +62,8 @@ jobs:
           cd "$GITHUB_WORKSPACE"
           git config user.name "gh-protocol-ci"
           git config user.email "gh-protocol-ci@users.noreply.github.com"
-          git checkout -B ci-diag
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
           mkdir -p gh-protocol
           {
             echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
