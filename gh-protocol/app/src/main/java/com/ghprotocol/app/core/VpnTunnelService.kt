@@ -82,7 +82,7 @@ class VpnTunnelService : VpnService() {
         val input = java.io.FileInputStream(fd.fileDescriptor)
         val buf = ByteArray(MTU)
         while (running) {
-            val n = try {
+            val n: Int = try {
                 input.read(buf)
             } catch (e: Exception) {
                 if (running) Log.w(TAG, "fd read error: ${e.message}")
@@ -92,7 +92,7 @@ class VpnTunnelService : VpnService() {
             if (n < 20) continue
             val ip = Socks5.parseIp4(buf.copyOfRange(0, n)) ?: continue
             val (proto, dstIp, totalLen) = ip
-            val len = kotlin.math.minOf(totalLen, n)
+            val len: Int = if (totalLen < n) totalLen else n
             if (proto == 17) {
                 // UDP: DNS (port 53) via associate; others via per-packet TCP is wrong —
                 // non-DNS UDP is dropped in v1 (F-15 TCP-first anyway).
@@ -146,7 +146,7 @@ class VpnTunnelService : VpnService() {
             val atyp = head[3].toInt() and 0xFF
             when (atyp) {
                 1 -> din.skipNBytes(4)
-                4 -> din.skipNBytes(16)
+                4 -> din.skipNBytes(16L)
                 else -> din.skipNBytes(1 + (din.readByte().toInt() and 0xFF))
             }
             din.skipNBytes(2)
