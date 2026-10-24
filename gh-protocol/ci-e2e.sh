@@ -44,15 +44,22 @@ D="$(dirname "$LOG")"
 
 say "== wait for emulator external network (needed for subscription fetch) =="
 NETOK=0
-for i in $(seq 1 30); do
-  if adb shell "toybox ping -c 1 -W 2 8.8.8.8" 2>/dev/null | grep -q "64 bytes"; then
+for i in $(seq 1 60); do
+  ICMP=$(adb shell "toybox ping -c 1 -W 2 8.8.8.8 2>&1" | tr -d '\r' || true)
+  TCP=$(adb shell "toybox nc -z -w 3 8.8.8.8 53 2>&1" | tr -d '\r' || true)
+  VAL=$(adb shell "dumpsys connectivity 2>/dev/null | grep -c 'VALIDATED'" | tr -d '\r' || true)
+  if echo "$ICMP" | grep -q "64 bytes from" || [ "${VAL:-0}" -ge 1 ] 2>/dev/null; then
     NETOK=1
-    say "emulator has network after ~$((i * 4))s"
+    say "emulator has network after ~$((i * 4))s (icmp=$([ "$(echo "$ICMP" | grep -c '64 bytes')" -ge 1 ] && echo yes || echo no) validated=$VAL)"
     break
   fi
   sleep 4
 done
-[ "$NETOK" = "1" ] || report "emulator has no external network — E2E impossible (environment issue)"
+if [ "$NETOK" != "1" ]; then
+  say "connectivity dump:"
+  adb shell "dumpsys connectivity" 2>/dev/null | grep -E "NetworkAgentInfo|state=|mNetworkInfo|WIFI|VALIDATED|CONNECTED" | head -40 >> "$LOG"
+  report "emulator has no external network after 4 min — E2E impossible (environment issue)"
+fi
 
 say "== launch app (am start, up to 3 tries) =="
 LAUNCHED=0
