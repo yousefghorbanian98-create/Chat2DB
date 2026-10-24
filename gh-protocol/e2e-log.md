@@ -1,4 +1,4 @@
-## gh-protocol E2E log — 2026-10-24T17:40:29Z
+## gh-protocol E2E log — 2026-10-24T18:20:47Z
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -23,36 +23,37 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResources
 > Task :app:extractDeepLinksDebug
-> Task :app:packageDebugResources
-> Task :app:parseDebugLocalResources
+> Task :app:generateDebugResources
 > Task :app:mapDebugSourceSetPaths
+> Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies
+> Task :app:packageDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
+> Task :app:desugarDebugFileDependencies
+> Task :app:parseDebugLocalResources
 > Task :app:mergeDebugJniLibFolders
-> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugResources
-> Task :app:mergeDebugNativeLibs
 > Task :app:mergeDebugAssets
-> Task :app:mergeLibDexDebug
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugNativeLibs
+> Task :app:processDebugResources
+> Task :app:compressDebugAssets
+> Task :app:mergeExtDexDebug
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:validateSigningDebug
+> Task :app:mergeLibDexDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:processDebugResources
-> Task :app:compressDebugAssets
-> Task :app:mergeExtDexDebug
+> Task :app:validateSigningDebug
+
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
@@ -65,9 +66,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792861847505.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792863828109.json
 
-BUILD SUCCESSFUL in 2m 14s
+BUILD SUCCESSFUL in 2m 31s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -81,55 +82,52 @@ emulator-5554	device
 == install APK ==
 Performing Streamed Install
 Success
-== wait for emulator external network (needed for subscription fetch) ==
-emulator has network after ~4s (icmp=no validated=8)
+== probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 60s) ==
+WARN: emulator CANNOT reach raw.githubusercontent.com (runner NAT) — pre-seeding app cache
+cp: bad '/sdcard/ghsub.json': Permission denied
+seeded cache:  bytes, meta=1792864601304
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 2356)
+app up (try 1, pid 2777)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
 WARN: consent dialog never seen
 USER           PID  PPID        VSZ    RSS WCHAN            ADDR S NAME                       
-u0_a141       2356   326   13801068 169452 0                   0 S com.ghprotocol.app
+u0_a141       2777   329   13785540 172172 0                   0 S com.ghprotocol.app
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State      
 tcp6       0      0 [::]:5555               [::]:*                  LISTEN     
-tcp6      25      0 ::ffff:10.0.2.15:50128  ::ffff:140.82.114.3:443 CLOSE_WAIT 
-tcp6       0      0 ::ffff:10.0.2.15:38106  ::ffff:142.251.154.:443 ESTABLISHED
-tcp6       0      0 ::ffff:10.0.2.15:38102  ::ffff:142.251.154.:443 ESTABLISHED
-tcp6      32      0 ::ffff:10.0.2.15:49004  ::ffff:5.106.4.1:443    CLOSE_WAIT 
-tcp6       1      0 ::ffff:10.0.2.15:57840  ::ffff:172.217.118.:443 CLOSE_WAIT 
-tcp6      25      0 ::ffff:10.0.2.15:36512  ::ffff:140.82.114.3:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.15:48394  ::ffff:172.217.116.:443 CLOSE_WAIT 
 ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)
 Display #0 (activities from top to bottom):
-  * Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
-    mLastPausedActivity: ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
-    mLastNonFullscreenBounds=Rect(297, 660 - 783, 1740)
+  * Task{2942839 #8 type=standard A=10141:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+    mLastPausedActivity: ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity t8}
+    mLastNonFullscreenBounds=Rect(269, 661 - 812, 1741)
     isSleeping=false
-    topResumedActivity=ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
-    * Hist  #1: ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
+    topResumedActivity=ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
+    * Hist  #1: ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
       packageName=com.ghprotocol.app processName=com.ghprotocol.app
       launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
-      app=ProcessRecord{4ed36eb 2356:com.ghprotocol.app/u0a141}
+      app=ProcessRecord{a805660 2777:com.ghprotocol.app/u0a141}
       Intent { act=android.intent.action.VIEW dat=ghprotocol://connect flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
-      rootOfTask=false task=Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
+      rootOfTask=false task=Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
       taskAffinity=10141:com.ghprotocol.app
       mActivityComponent=com.ghprotocol.app/.MainActivity
-      baseDir=/data/app/~~IHgX50Xa7dJ4kTlsXALuCA==/com.ghprotocol.app-7mQO6OwX5ygJeWUGiAfUxw==/base.apk
+      baseDir=/data/app/~~-YY_p0VOkBTnc9PhGhiJZA==/com.ghprotocol.app-xEeftIfljHgHIbnkhKJXbA==/base.apk
       dataDir=/data/user/0/com.ghprotocol.app
       stateNotNeeded=false componentSpecified=false mActivityType=standard
       compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
       mLastReportedConfigurations:
-        mGlobalConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.5 s.117 fontWeightAdjustment=0}
-        mOverrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.5 s.4 fontWeightAdjustment=0}
-      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.5 s.4 fontWeightAdjustment=0}
-      RequestedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} as.5 ?fontWeightAdjustment}
+        mGlobalConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.115 fontWeightAdjustment=0}
+        mOverrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.4 fontWeightAdjustment=0}
+      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.4 fontWeightAdjustment=0}
+      RequestedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} as.4 ?fontWeightAdjustment}
       taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff212121
 --
       mActivityType=standard
       mImeInsetsFrozenUntilStartInput=false
-      windows=[Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windows=[Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
       windowType=2
       mOccludesParent=true
       overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
@@ -137,32 +135,32 @@ Display #0 (activities from top to bottom):
       mVisibleRequested=true mVisible=true mClientVisible=true reportedDrawn=true reportedVisible=true
       mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
       startingData=null firstWindowDrawn=true mIsExiting=false
-      nowVisible=true lastVisibleTime=-17m28s577ms
+      nowVisible=true lastVisibleTime=-20m59s382ms
 --
       mCameraCompatControlState=hidden
       mCameraCompatControlEnabled=false
-    * Hist  #0: ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
+    * Hist  #0: ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity t8}
       packageName=com.ghprotocol.app processName=com.ghprotocol.app
       launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
-      app=ProcessRecord{4ed36eb 2356:com.ghprotocol.app/u0a141}
+      app=ProcessRecord{a805660 2777:com.ghprotocol.app/u0a141}
       Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
-      rootOfTask=true task=Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
+      rootOfTask=true task=Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
       taskAffinity=10141:com.ghprotocol.app
       mActivityComponent=com.ghprotocol.app/.MainActivity
-      baseDir=/data/app/~~IHgX50Xa7dJ4kTlsXALuCA==/com.ghprotocol.app-7mQO6OwX5ygJeWUGiAfUxw==/base.apk
+      baseDir=/data/app/~~-YY_p0VOkBTnc9PhGhiJZA==/com.ghprotocol.app-xEeftIfljHgHIbnkhKJXbA==/base.apk
       dataDir=/data/user/0/com.ghprotocol.app
       stateNotNeeded=false componentSpecified=false mActivityType=standard
       compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
       mLastReportedConfigurations:
-        mGlobalConfig={1.0 ?mcc0mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.3 s.51 fontWeightAdjustment=0}
-        mOverrideConfig={1.0 ?mcc0mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.3 s.1 fontWeightAdjustment=0}
-      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.5 s.5 fontWeightAdjustment=0}
-      RequestedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=standard mAlwaysOnTop=undefined mRotation=undefined} as.5 ?fontWeightAdjustment}
+        mGlobalConfig={1.0 ?mcc0mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.46 fontWeightAdjustment=0}
+        mOverrideConfig={1.0 ?mcc0mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.1 fontWeightAdjustment=0}
+      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.4 fontWeightAdjustment=0}
+      RequestedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=standard mAlwaysOnTop=undefined mRotation=undefined} as.4 ?fontWeightAdjustment}
       taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff212121
 --
       mActivityType=standard
       mImeInsetsFrozenUntilStartInput=true
-      windows=[Window{ea3aa95 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windows=[Window{ce1319b u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
       windowType=2
       mOccludesParent=true
       overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
@@ -174,25 +172,25 @@ Display #0 (activities from top to bottom):
 --
 
   Resumed activities in task display areas (from top to bottom):
-    Resumed: ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
+    Resumed: ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
 
-  ResumedActivity: ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
+  ResumedActivity: ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
 
 ActivityTaskSupervisor state:
-  topDisplayFocusedRootTask=Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
+  topDisplayFocusedRootTask=Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
   Display: mDisplayId=0 (organized)
     init=1080x2400 420dpi mMinSizeOfResizeableTaskDp=220 cur=1080x2400 app=1080x2146 rng=1080x1017-2146x2146
     deferred=false mLayoutNeeded=false mTouchExcludeRegion=SkRegion((0,0,1080,2400))
 
-  mLastOrientationSource=WindowedMagnification:0:31@23894351
-  deepestLastOrientationSource=ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
-  overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.5 s.117 fontWeightAdjustment=0}
-  mLayoutSeq=118
-  mCurrentFocus=Window{ce933a3 u0 Application Not Responding: system}
-  mFocusedApp=ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
+  mLastOrientationSource=WindowedMagnification:0:31@2560310
+  deepestLastOrientationSource=ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
+  overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h818dp 420dpi nrml long port finger qwerty/v/v -nav/h winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 128 - 1080, 2274) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.4 s.115 fontWeightAdjustment=0}
+  mLayoutSeq=123
+  mCurrentFocus=Window{453b4d8 u0 Application Not Responding: system}
+  mFocusedApp=ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
 
   mHoldScreenWindow=null
-  mObscuringWindow=Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+  mObscuringWindow=Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
   mLastWakeLockHoldingWindow=null
   mLastWakeLockObscuringWindow=null
 
@@ -204,32 +202,32 @@ ActivityTaskSupervisor state:
 --
     TaskDisplayArea DefaultTaskDisplayArea
       overrideConfig={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
-      mPreferredTopFocusableRootTask=Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
-      mLastFocusedRootTask=Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
+      mPreferredTopFocusableRootTask=Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
+      mLastFocusedRootTask=Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
       Application tokens in top down Z order:
-      * Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+      * Task{2942839 #8 type=standard A=10141:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
         bounds=[0,0][1080,2400]
-        * ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity t8}
-        * ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
-      * Task{f9e7de5 #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        * ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity t8}
+        * ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity t8}
+      * Task{468a1a4 #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
         bounds=[0,0][1080,2400]
-        * Task{e1539c0 #7 type=home I=com.android.launcher3/.uioverrides.QuickstepLauncher U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        * Task{8c6a845 #7 type=home I=com.android.launcher3/.uioverrides.QuickstepLauncher U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
           bounds=[0,0][1080,2400]
-          * ActivityRecord{29aaf43 u0 com.android.launcher3/.uioverrides.QuickstepLauncher t7}
-      * Task{8dd7961 #2 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+          * ActivityRecord{5a264af u0 com.android.launcher3/.uioverrides.QuickstepLauncher t7}
+      * Task{c88f6c #2 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
         bounds=[0,0][1080,2400]
-        * Task{82622e3 #4 type=undefined U=0 rootTaskId=2 visible=false visibleRequested=false mode=multi-window translucent=true sz=0}
+        * Task{5e0df3b #4 type=undefined U=0 rootTaskId=2 visible=false visibleRequested=false mode=multi-window translucent=true sz=0}
 --
-    mBottomGestureHost=Window{6d80540 u0 NavigationBar0}
-    mFocusedWindow=Window{ce933a3 u0 Application Not Responding: system}
-    mTopFullscreenOpaqueWindowState=Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
-    mNavBarColorWindowCandidate=Window{ce933a3 u0 Application Not Responding: system}
-    mNavBarBackgroundWindow=Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mBottomGestureHost=Window{4d0d099 u0 NavigationBar0}
+    mFocusedWindow=Window{453b4d8 u0 Application Not Responding: system}
+    mTopFullscreenOpaqueWindowState=Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mNavBarColorWindowCandidate=Window{453b4d8 u0 Application Not Responding: system}
+    mNavBarBackgroundWindow=Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
     mLastStatusBarAppearanceRegions=
       AppearanceRegion{ bounds=[0,0][1080,2400]}
     mLastLetterboxDetails=
     mStatusBarBackgroundWindows=
-      Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+      Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
     mTopIsFullscreen=false
     mForceShowNavigationBarEnabled=false mAllowLockscreenWhenOn=false
     mRemoteInsetsControllerControlsSystemBars=false
@@ -239,266 +237,264 @@ ActivityTaskSupervisor state:
       ROTATION_180={nonDecorInsets=[0,0][0,254], configInsets=[0,63][0,254], nonDecorFrame=[0,0][1080,2146], configFrame=[0,63][1080,2146]}
       ROTATION_270={nonDecorInsets=[126,0][128,0], configInsets=[126,63][128,0], nonDecorFrame=[126,0][2272,1080], configFrame=[126,63][2272,1080]}
 --
-        (multi-window) Task{3193947 #3 type=undefined}
-        (multi-window) Task{82622e3 #4 type=undefined}
-        (fullscreen) Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
+        (multi-window) Task{6bde1ca #3 type=undefined}
+        (multi-window) Task{5e0df3b #4 type=undefined}
+        (fullscreen) Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
 
-  VisibleActivityProcess:[ ProcessRecord{4ed36eb 2356:com.ghprotocol.app/u0a141}]
-  NumNonAppVisibleWindowUidMap:[ 10117:4 1000:2]
+  VisibleActivityProcess:[ ProcessRecord{a805660 2777:com.ghprotocol.app/u0a141}]
+  NumNonAppVisibleWindowUidMap:[ 10118:4 1000:2]
 app filesDir/xray:
 xray-err.log:
 GhDiag (connect-flow trace):
 --------- beginning of main
-10-24 17:21:40.534  2356  2356 D GhDiag  : connect: tap -> CHECKING (have sub=false)
-10-24 17:21:40.535  2356  2356 D GhDiag  : connect: fetching subscription (primary+mirror, timeouts 20s/30s)
-10-24 17:22:06.962  2356  2356 D GhDiag  : connect: fetch result=false subscription update failed (primary + mirror)
-10-24 17:22:06.973  2356  2356 D GhDiag  : connect: FAILED — no subscription available
+10-24 17:57:49.722  2777  2777 D GhDiag  : connect: tap -> CHECKING (have sub=false)
+10-24 17:57:49.728  2777  2777 D GhDiag  : connect: fetching subscription (primary+mirror, timeouts 20s/30s)
+10-24 17:58:28.783  2777  2777 D GhDiag  : connect: fetch result=false subscription update failed (primary + mirror)
+10-24 17:58:28.797  2777  2777 D GhDiag  : connect: FAILED — no subscription available
 === E2E FAILED: tunnel not up (xray/:10808) ===
 
 
 ### e2e-logcat.log (crashes + app + vpn, tail)
-.369   534  1096 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW dat=ghprotocol://connect/... flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
-10-24 17:21:03.596   534   561 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
-10-24 17:21:03.646   534   561 W ActivityTaskManager: Activity pause timeout for ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
-10-24 17:21:04.405   917   950 V WindowManagerShell: onTransitionReady android.os.BinderProxy@b9c11a5: {id=8 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=STARTING_WINDOW_TRANSFER|FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity)/@0xee67ea3 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity)/@0x7cbc5a0 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-24 17:21:05.102   534   558 V WindowManager: Sent Transition #8 createdAt=10-24 17:21:02.943 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=437183 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ef05482 Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 128 - 0, 0) topActivityInfo=ActivityInfo{9abf031 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-24 17:21:05.147   534   558 V WindowManager:     info={id=8 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=STARTING_WINDOW_TRANSFER|FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{c60ef60 u0 com.ghprotocol.app/.MainActivity)/@0xfe710f2 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity)/@0xa117bfd sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-24 17:21:06.417  2356  2356 W .ghprotocol.app: Verification of java.lang.Object kotlin.text.StringsKt__StringNumberConversionsJVMKt.screenFloatValue$StringsKt__StringNumberConversionsJVMKt(java.lang.String, kotlin.jvm.functions.Function1) took 119.445ms (200.93 bytecodes/s) (2168B approximate peak alloc)
-10-24 17:21:10.485   534   593 I AppsFilter: interaction: PackageSetting{98cafe9 com.ghprotocol.app/10141} -> PackageSetting{5b6146e com.android.inputmethod.latin/10108} BLOCKED
-10-24 17:21:15.704   534   593 I AppsFilter: interaction: PackageSetting{98cafe9 com.ghprotocol.app/10141} -> PackageSetting{e34abea com.android.calendar/10101} BLOCKED
-10-24 17:21:16.325   534   561 W ActivityTaskManager: Activity stop timeout for ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8}
-10-24 17:21:17.130  2356  2490 W .ghprotocol.app: Long monitor contention with owner DefaultDispatcher-worker-1 (2488) at javax.net.SocketFactory javax.net.ssl.SSLSocketFactory.getDefault()(SSLSocketFactory.java:156) waiters=0 in javax.net.SocketFactory javax.net.ssl.SSLSocketFactory.getDefault() for 452ms
-10-24 17:21:18.474   534   593 I AppsFilter: interaction: PackageSetting{98cafe9 com.ghprotocol.app/10141} -> PackageSetting{1814238 com.android.camera2/10105} BLOCKED
-10-24 17:21:18.731  2356  2356 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-24 17:21:18.731  2356  2356 W .ghprotocol.app: Common causes for lock verification issues are non-optimized dex code
-10-24 17:21:18.731  2356  2356 W .ghprotocol.app: and incorrect proguard optimizations.
-10-24 17:21:18.741  2356  2356 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
-10-24 17:21:18.742  2356  2356 W .ghprotocol.app: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-24 17:21:18.743  2356  2356 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-24 17:21:18.755  2356  2356 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
-10-24 17:21:22.564  2356  2356 W .ghprotocol.app: Verification of void androidx.compose.runtime.snapshots.SnapshotStateObserver$ObservedScopeMap.notifyInvalidatedScopes() took 100.819ms (1170.41 bytecodes/s) (4256B approximate peak alloc)
-10-24 17:21:22.750  2356  2356 W .ghprotocol.app: Verification of boolean androidx.compose.runtime.snapshots.SnapshotStateObserver$ObservedScopeMap.recordInvalidation(java.util.Set) took 184.057ms (13615.31 bytecodes/s) (69232B approximate peak alloc)
-10-24 17:21:23.649   534   980 D CoreBackPreview: Window{ea3aa95 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@c3dc72d, mPriority=0, mIsAnimationCallback=false}
-10-24 17:21:24.572  2356  2356 W .ghprotocol.app: Verification of void androidx.compose.material3.ComposableSingletons$AppBarKt.<clinit>() took 184.962ms (1313.78 bytecodes/s) (4280B approximate peak alloc)
-10-24 17:21:26.275  2356  2356 W .ghprotocol.app: Verification of void androidx.compose.material3.IconButtonKt.FilledTonalIconToggleButton(boolean, kotlin.jvm.functions.Function1, androidx.compose.ui.Modifier, boolean, androidx.compose.ui.graphics.Shape, androidx.compose.material3.IconToggleButtonColors, androidx.compose.foundation.interaction.MutableInteractionSource, kotlin.jvm.functions.Function2, androidx.compose.runtime.Composer, int, int) took 194.527ms (3104.96 bytecodes/s) (17000B approximate peak alloc)
-10-24 17:21:27.644  2356  2356 W .ghprotocol.app: Verification of long androidx.compose.ui.draw.PainterNode.modifyConstraints-ZezNO4M(long) took 132.796ms (1460.89 bytecodes/s) (4912B approximate peak alloc)
-10-24 17:21:28.501  2356  2356 W .ghprotocol.app: Verification of void androidx.compose.foundation.layout.RowMeasurePolicy$placeHelper$1$1.invoke(androidx.compose.ui.layout.Placeable$PlacementScope) took 264.846ms (252.98 bytecodes/s) (2824B approximate peak alloc)
-10-24 17:21:29.598  2356  2365 I .ghprotocol.app: Background concurrent copying GC freed 14930(1518KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 3975KB/7950KB, paused 97.460ms,76us total 5.715s
-10-24 17:21:29.731  2535  2535 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:21:29.969  2535  2535 I AndroidRuntime: Using default boot image
-10-24 17:21:29.973  2535  2535 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:21:30.967  2356  2356 W .ghprotocol.app: Verification of void com.ghprotocol.app.ui.HomeScreenKt$StatusCard$1.invoke(androidx.compose.foundation.layout.ColumnScope, androidx.compose.runtime.Composer, int) took 112.539ms (7846.17 bytecodes/s) (19656B approximate peak alloc)
-10-24 17:21:35.828   534   561 I BLASTSyncEngine: Unfinished container: Task{8731a1f #8 type=standard A=10141:com.ghprotocol.app}
-10-24 17:21:35.904  2535  2535 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:21:40.046  2535  2535 D AndroidRuntime: Shutting down VM
-10-24 17:21:40.534  2356  2356 D GhDiag  : connect: tap -> CHECKING (have sub=false)
-10-24 17:21:40.535  2356  2356 D GhDiag  : connect: fetching subscription (primary+mirror, timeouts 20s/30s)
-10-24 17:21:42.881   534  2226 D CoreBackPreview: Window{c043513 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@e32ad7d, mPriority=0, mIsAnimationCallback=false}
-10-24 17:21:43.621   534  2559 E ActivityManager:   51% 2356/com.ghprotocol.app: 35% user + 15% kernel / faults: 405 minor
-10-24 17:21:50.459   534  1557 I WindowManager: finishDrawing of relaunch: Window{c043513 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity} 19398ms
-10-24 17:21:50.767   534   558 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +48s231ms
-10-24 17:21:51.539   534  1559 W InputManager-JNI: Input channel object 'd5612b8 Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
-10-24 17:21:51.618   534   593 I AppsFilter: interaction: PackageSetting{d36fb1c com.ghprotocol.app/10141} -> PackageSetting{493a325 com.android.rkpdapp/10139} BLOCKED
-10-24 17:21:52.587  2356  2693 D ProfileInstaller: Installing profile for com.ghprotocol.app
-10-24 17:21:52.973   534  1559 D CoreBackPreview: Window{c043513 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback null
-10-24 17:21:52.988  2356  2693 W .ghprotocol.app: Verification of androidx.profileinstaller.ProfileVerifier$CompilationStatus androidx.profileinstaller.ProfileVerifier.writeProfileVerification(android.content.Context, boolean) took 165.869ms (1694.11 bytecodes/s) (10000B approximate peak alloc)
-10-24 17:21:52.998   534  1559 W InputManager-JNI: Input channel object 'c043513 com.ghprotocol.app/com.ghprotocol.app.MainActivity (client)' was disposed without first being removed with the input manager!
-10-24 17:21:53.155  2356  2693 W .ghprotocol.app: Verification of java.lang.Object androidx.concurrent.futures.AbstractResolvableFuture.get() took 147.348ms (699.02 bytecodes/s) (3912B approximate peak alloc)
-10-24 17:21:53.829   534   593 I AppsFilter: interaction: PackageSetting{d36fb1c com.ghprotocol.app/10141} -> PackageSetting{df65e6f com.android.rkpdapp/10139} BLOCKED
-10-24 17:21:54.535   534  1508 I ActivityTaskManager: Activity reported stop, but no longer stopping: ActivityRecord{d4269be u0 com.ghprotocol.app/.MainActivity t8} STOPPED
-10-24 17:21:58.124   534  1508 D CoreBackPreview: Window{583c2bd u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@3d66955, mPriority=0, mIsAnimationCallback=false}
-10-24 17:22:06.962  2356  2356 D GhDiag  : connect: fetch result=false subscription update failed (primary + mirror)
-10-24 17:22:06.973  2356  2356 D GhDiag  : connect: FAILED — no subscription available
-10-24 17:22:13.776  2762  2762 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:22:14.018  2762  2762 I AndroidRuntime: Using default boot image
-10-24 17:22:14.019  2762  2762 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:22:18.946   534  2783 E ActivityManager:   37% 2356/com.ghprotocol.app: 21% user + 15% kernel / faults: 7264 minor 1 major
-10-24 17:22:19.394  2762  2762 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:22:23.171  2762  2762 D AndroidRuntime: Shutting down VM
-10-24 17:22:51.604  2934  2934 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:22:51.804  2934  2934 I AndroidRuntime: Using default boot image
-10-24 17:22:51.805  2934  2934 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:22:56.782  2934  2934 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:22:59.233  2934  2934 D AndroidRuntime: Shutting down VM
-10-24 17:23:08.727  2824  2824 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:23:29.729  3098  3098 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:23:29.978  3098  3098 I AndroidRuntime: Using default boot image
-10-24 17:23:29.985  3098  3098 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:23:35.184  3098  3098 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:23:37.184  3098  3098 D AndroidRuntime: Shutting down VM
-10-24 17:23:49.776  3007  3007 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:24:08.118  3190  3190 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:24:08.265  3190  3190 I AndroidRuntime: Using default boot image
-10-24 17:24:08.265  3190  3190 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:24:13.367  3190  3190 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:24:16.511  3190  3190 D AndroidRuntime: Shutting down VM
-10-24 17:24:17.212   534   593 I AppsFilter: interaction: PackageSetting{d36fb1c com.ghprotocol.app/10141} -> PackageSetting{bb1d428 com.android.cellbroadcastreceiver.module/10137} BLOCKED
-10-24 17:24:44.810  3279  3279 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:24:45.027  3279  3279 I AndroidRuntime: Using default boot image
-10-24 17:24:45.032  3279  3279 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:24:50.608  3279  3279 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:24:53.073  3279  3279 D AndroidRuntime: Shutting down VM
-10-24 17:25:24.192  3387  3387 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:25:24.565  3387  3387 I AndroidRuntime: Using default boot image
-10-24 17:25:24.566  3387  3387 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:25:28.774  3387  3387 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:25:31.038  3387  3387 D AndroidRuntime: Shutting down VM
-10-24 17:26:00.509  3513  3513 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:26:00.646  3513  3513 I AndroidRuntime: Using default boot image
-10-24 17:26:00.650  3513  3513 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:26:04.433  3513  3513 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:26:07.480  3513  3513 D AndroidRuntime: Shutting down VM
-10-24 17:26:11.026  3455  3455 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:26:36.308  3618  3618 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:26:36.883  3618  3618 I AndroidRuntime: Using default boot image
-10-24 17:26:36.897  3618  3618 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:26:38.304  3540  3540 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:26:42.291  3618  3618 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:26:44.721  3618  3618 D AndroidRuntime: Shutting down VM
-10-24 17:27:07.028  3624  3624 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:27:13.119  3723  3723 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:27:13.311  3723  3723 I AndroidRuntime: Using default boot image
-10-24 17:27:13.318  3723  3723 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:27:17.114  3723  3723 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:27:19.062  3723  3723 D AndroidRuntime: Shutting down VM
-10-24 17:27:34.154  3725  3725 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:27:49.423  3868  3868 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:27:49.610  3868  3868 I AndroidRuntime: Using default boot image
-10-24 17:27:49.611  3868  3868 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:27:54.322  3868  3868 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:27:56.576  3868  3868 D AndroidRuntime: Shutting down VM
-10-24 17:28:00.617  3816  3816 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:28:25.820  3901  3901 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:28:26.615  3969  3969 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:28:26.903  3969  3969 I AndroidRuntime: Using default boot image
-10-24 17:28:26.909  3969  3969 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:28:31.561  3969  3969 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:28:33.966  3969  3969 D AndroidRuntime: Shutting down VM
-10-24 17:28:57.848  3974  3974 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:29:01.569  4067  4067 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:29:01.742  4067  4067 I AndroidRuntime: Using default boot image
-10-24 17:29:01.742  4067  4067 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:29:07.245  4067  4067 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:29:09.819  4067  4067 D AndroidRuntime: Shutting down VM
-10-24 17:29:29.424  4070  4070 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:29:41.172  4191  4191 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:29:41.542  4191  4191 I AndroidRuntime: Using default boot image
-10-24 17:29:41.542  4191  4191 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:29:45.540  4191  4191 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:29:48.457  4191  4191 D AndroidRuntime: Shutting down VM
-10-24 17:29:54.418  4155  4155 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:30:18.582  4308  4308 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:30:18.771  4308  4308 I AndroidRuntime: Using default boot image
-10-24 17:30:18.771  4308  4308 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:30:23.409  4240  4240 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:30:23.579  4308  4308 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:30:26.388  4308  4308 D AndroidRuntime: Shutting down VM
-10-24 17:30:45.893  4328  4328 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:30:55.477  4413  4413 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:30:55.661  4413  4413 I AndroidRuntime: Using default boot image
-10-24 17:30:55.661  4413  4413 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:30:59.521  4413  4413 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:31:02.555  4413  4413 D AndroidRuntime: Shutting down VM
-10-24 17:31:12.143  4396  4396 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:31:34.110  4542  4542 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:31:34.289  4542  4542 I AndroidRuntime: Using default boot image
-10-24 17:31:34.289  4542  4542 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:31:37.879  4542  4542 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:31:40.706  4542  4542 D AndroidRuntime: Shutting down VM
-10-24 17:31:42.627  4476  4476 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:32:07.161  4637  4637 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:32:07.282  4637  4637 I AndroidRuntime: Using default boot image
-10-24 17:32:07.282  4637  4637 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:32:08.977  4571  4571 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:32:13.047  4637  4637 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:32:15.341  4637  4637 D AndroidRuntime: Shutting down VM
-10-24 17:32:35.636  4642  4642 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:32:45.514  4752  4752 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:32:45.762  4752  4752 I AndroidRuntime: Using default boot image
-10-24 17:32:45.765  4752  4752 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:32:51.394  4752  4752 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:32:53.965  4752  4752 D AndroidRuntime: Shutting down VM
-10-24 17:33:01.263  4734  4734 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:33:23.655  4880  4880 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:33:23.967  4880  4880 I AndroidRuntime: Using default boot image
-10-24 17:33:23.979  4880  4880 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:33:26.747  4816  4816 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:33:28.302  4880  4880 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:33:30.817  4880  4880 D AndroidRuntime: Shutting down VM
-10-24 17:33:47.663  4896  4896 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:33:58.356  5012  5012 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:33:58.530  5012  5012 I AndroidRuntime: Using default boot image
-10-24 17:33:58.531  5012  5012 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:34:03.368  5012  5012 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:34:05.523  5012  5012 D AndroidRuntime: Shutting down VM
-10-24 17:34:10.818  4967  4967 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:34:32.772  5124  5124 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:34:33.018  5124  5124 I AndroidRuntime: Using default boot image
-10-24 17:34:33.018  5124  5124 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:34:37.664  5049  5049 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:34:38.315  5124  5124 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:34:41.029  5124  5124 D AndroidRuntime: Shutting down VM
-10-24 17:35:02.407  5144  5144 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:35:08.583  5223  5223 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:35:08.750  5223  5223 I AndroidRuntime: Using default boot image
-10-24 17:35:08.756  5223  5223 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:35:13.695  5223  5223 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:35:15.664  5223  5223 D AndroidRuntime: Shutting down VM
-10-24 17:35:33.771  5212  5212 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:35:44.158  5324  5324 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:35:44.295  5324  5324 I AndroidRuntime: Using default boot image
-10-24 17:35:44.295  5324  5324 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:35:47.830  5324  5324 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:35:50.069  5324  5324 D AndroidRuntime: Shutting down VM
-10-24 17:35:58.523  5308  5308 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:36:17.818  5462  5462 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:36:18.008  5462  5462 I AndroidRuntime: Using default boot image
-10-24 17:36:18.013  5462  5462 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:36:20.870  5395  5395 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:36:22.474  5462  5462 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:36:24.427  5462  5462 D AndroidRuntime: Shutting down VM
-10-24 17:36:43.245  5483  5483 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:36:52.785  5573  5573 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:36:53.186  5573  5573 I AndroidRuntime: Using default boot image
-10-24 17:36:53.186  5573  5573 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:36:56.558  5573  5573 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:36:59.791  5573  5573 D AndroidRuntime: Shutting down VM
-10-24 17:37:05.548  5556  5556 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:37:14.876  2356  2365 W .ghprotocol.app: Suspending all threads took: 19.502ms
-10-24 17:37:15.065  2356  2365 W .ghprotocol.app: Cleared Reference was only reachable from finalizer (only reported once)
-10-24 17:37:15.265  2356  2365 I .ghprotocol.app: Background young concurrent copying GC freed 42859(1989KB) AllocSpace objects, 0(0B) LOS objects, 25% free, 5907KB/7950KB, paused 875us,20.064ms total 1.911s
-10-24 17:37:24.619  2356  2365 I .ghprotocol.app: Background young concurrent copying GC freed 36639(1440KB) AllocSpace objects, 0(0B) LOS objects, 21% free, 6261KB/7950KB, paused 213us,436us total 1.037s
-10-24 17:37:29.223  5726  5726 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:37:29.450  5726  5726 I AndroidRuntime: Using default boot image
-10-24 17:37:29.456  5726  5726 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:37:33.595  5726  5726 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:37:36.956  5726  5726 D AndroidRuntime: Shutting down VM
-10-24 17:37:37.272  5642  5642 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:37:40.121  2356  2365 W .ghprotocol.app: Suspending all threads took: 17.048ms
-10-24 17:37:40.141  2356  2365 I .ghprotocol.app: Background young concurrent copying GC freed 30497(1264KB) AllocSpace objects, 0(0B) LOS objects, 15% free, 6680KB/7950KB, paused 10.709ms,17.636ms total 673.801ms
-10-24 17:37:46.988  2356  2365 W .ghprotocol.app: Suspending all threads took: 7.637ms
-10-24 17:37:47.025  2356  2365 I .ghprotocol.app: Background young concurrent copying GC freed 22151(867KB) AllocSpace objects, 2(40KB) LOS objects, 11% free, 7070KB/7950KB, paused 17.281ms,8.064ms total 757.045ms
-10-24 17:37:49.761  2356  2365 I .ghprotocol.app: Background young concurrent copying GC freed 15513(627KB) AllocSpace objects, 2(40KB) LOS objects, 8% free, 7308KB/7950KB, paused 8.578ms,4.106ms total 440.941ms
-10-24 17:38:05.595  5846  5846 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:38:05.743  5846  5846 I AndroidRuntime: Using default boot image
-10-24 17:38:05.744  5846  5846 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:38:10.319  5846  5846 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:38:10.995  5758  5758 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:38:11.982  5846  5846 D AndroidRuntime: Shutting down VM
-10-24 17:38:31.046  5864  5864 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:38:39.467  5965  5965 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:38:39.643  5965  5965 I AndroidRuntime: Using default boot image
-10-24 17:38:39.643  5965  5965 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:38:44.185  5965  5965 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:38:46.782  5965  5965 D AndroidRuntime: Shutting down VM
-10-24 17:38:53.261  5946  5946 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:39:14.139  6040  6040 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:39:15.573  6115  6115 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-24 17:39:15.786  6115  6115 I AndroidRuntime: Using default boot image
-10-24 17:39:15.794  6115  6115 I AndroidRuntime: Leaving lock profiling enabled
-10-24 17:39:20.603  6115  6115 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-24 17:39:23.025  6115  6115 D AndroidRuntime: Shutting down VM
-10-24 17:39:44.120  6119  6119 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
-10-24 17:40:14.957  6222  6222 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+pshots.MutableSnapshot, androidx.compose.runtime.snapshots.MutableSnapshot, androidx.compose.runtime.snapshots.SnapshotIdSet) took 143.557ms (2486.81 bytecodes/s) (8968B approximate peak alloc)
+10-24 17:57:08.791   543   566 V WindowManager: Sent Transition #8 createdAt=10-24 17:57:05.195 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=625176 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ab4fc1 Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=Rect(0, 128 - 0, 0) topActivityInfo=ActivityInfo{4727e66 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-24 17:57:08.887   543   566 V WindowManager:     info={id=8 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=STARTING_WINDOW_TRANSFER|FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity)/@0xa85c7cb sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity)/@0xd59d29a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-24 17:57:09.630   957   995 V WindowManagerShell: onTransitionReady android.os.BinderProxy@7af798e: {id=8 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=STARTING_WINDOW_TRANSFER|FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{83edf39 u0 com.ghprotocol.app/.MainActivity)/@0x4d0c08 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK|IS_BEHIND_STARTING_WINDOW leash=Surface(name=ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity)/@0xa8bfa1 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-24 17:57:10.577  2658  2658 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 17:57:16.383  2777  2777 W .ghprotocol.app: Verification of java.lang.Object kotlinx.coroutines.flow.FlowKt__ReduceKt.firstOrNull(kotlinx.coroutines.flow.Flow, kotlin.jvm.functions.Function2, kotlin.coroutines.Continuation) took 142.823ms (812.19 bytecodes/s) (4176B approximate peak alloc)
+10-24 17:57:16.606  2777  2777 W .ghprotocol.app: Verification of void androidx.compose.ui.platform.AndroidComposeView.<init>(android.content.Context, kotlin.coroutines.CoroutineContext) took 102.735ms (8351.58 bytecodes/s) (30440B approximate peak alloc)
+10-24 17:57:19.962   543  2832 E ActivityManager:   46% 2777/com.ghprotocol.app: 27% user + 18% kernel / faults: 237 minor
+10-24 17:57:24.015  2777  2777 I .ghprotocol.app: Waiting for a blocking GC ClassLinker
+10-24 17:57:24.085  2777  2791 I .ghprotocol.app: Background concurrent copying GC freed 8469(993KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 3171KB/6342KB, paused 97.190ms,185us total 2.650s
+10-24 17:57:24.087  2777  2777 I .ghprotocol.app: WaitForGcToComplete blocked ClassLinker on Background for 72.247ms
+10-24 17:57:27.942   543   570 W ActivityTaskManager: Activity stop timeout for ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity t8}
+10-24 17:57:28.302  2777  2777 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-24 17:57:28.302  2777  2777 W .ghprotocol.app: Common causes for lock verification issues are non-optimized dex code
+10-24 17:57:28.302  2777  2777 W .ghprotocol.app: and incorrect proguard optimizations.
+10-24 17:57:28.311  2777  2777 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-24 17:57:28.323  2777  2777 W .ghprotocol.app: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-24 17:57:28.384  2777  2777 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-24 17:57:28.386  2777  2777 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-24 17:57:32.753  2777  2777 W .ghprotocol.app: Verification of void androidx.compose.material3.AppBarKt.SingleRowTopAppBar-cJHQLPU(androidx.compose.ui.Modifier, kotlin.jvm.functions.Function2, androidx.compose.ui.text.TextStyle, boolean, kotlin.jvm.functions.Function2, kotlin.jvm.functions.Function3, float, androidx.compose.foundation.layout.WindowInsets, androidx.compose.material3.TopAppBarColors, androidx.compose.material3.TopAppBarScrollBehavior, androidx.compose.runtime.Composer, int, int) took 113.573ms (8628.81 bytecodes/s) (28840B approximate peak alloc)
+10-24 17:57:32.871   543  2269 D CoreBackPreview: Window{ce1319b u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@4fe0689, mPriority=0, mIsAnimationCallback=false}
+10-24 17:57:34.091  2777  2777 W .ghprotocol.app: Verification of void androidx.compose.foundation.text.BasicTextKt.BasicText-VhcvRP8(java.lang.String, androidx.compose.ui.Modifier, androidx.compose.ui.text.TextStyle, kotlin.jvm.functions.Function1, int, boolean, int, int, androidx.compose.ui.graphics.ColorProducer, androidx.compose.runtime.Composer, int, int) took 103.343ms (12066.53 bytecodes/s) (33864B approximate peak alloc)
+10-24 17:57:36.453   543   570 I BLASTSyncEngine: Unfinished container: Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
+10-24 17:57:37.412  2777  2777 W .ghprotocol.app: Verification of void androidx.compose.ui.text.android.TextLayout.<init>(java.lang.CharSequence, float, android.text.TextPaint, int, android.text.TextUtils$TruncateAt, int, float, float, boolean, boolean, int, int, int, int, int, int, int[], int[], androidx.compose.ui.text.android.LayoutIntrinsics) took 132.574ms (3477.28 bytecodes/s) (12048B approximate peak alloc)
+10-24 17:57:39.136  2889  2889 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 17:57:39.498  2889  2889 I AndroidRuntime: Using default boot image
+10-24 17:57:39.498  2889  2889 I AndroidRuntime: Leaving lock profiling enabled
+10-24 17:57:42.529  2777  2777 W .ghprotocol.app: Verification of androidx.compose.ui.draw.DrawResult androidx.compose.foundation.BorderKt.access$drawContentWithoutBorder(androidx.compose.ui.draw.CacheDrawScope) took 684.380ms (7.31 bytecodes/s) (1344B approximate peak alloc)
+10-24 17:57:45.572  2777  2777 W .ghprotocol.app: Verification of java.lang.Object androidx.compose.foundation.layout.FlowLayoutKt$breakDownItems$nextSize$1$1.invoke(java.lang.Object) took 152.688ms (58.94 bytecodes/s) (1456B approximate peak alloc)
+10-24 17:57:46.593  2889  2889 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 17:57:49.722  2777  2777 D GhDiag  : connect: tap -> CHECKING (have sub=false)
+10-24 17:57:49.728  2777  2777 D GhDiag  : connect: fetching subscription (primary+mirror, timeouts 20s/30s)
+10-24 17:57:50.842  2889  2889 D AndroidRuntime: Shutting down VM
+10-24 17:57:52.257   543  2723 D CoreBackPreview: Window{845f3b3 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@500d4c1, mPriority=0, mIsAnimationCallback=false}
+10-24 17:57:53.395   543  2946 E ActivityManager:   66% 2777/com.ghprotocol.app: 52% user + 14% kernel / faults: 363 minor
+10-24 17:57:59.140  2777  2791 W .ghprotocol.app: Suspending all threads took: 5.340ms
+10-24 17:58:00.198  2777  2791 I .ghprotocol.app: Background young concurrent copying GC freed 17057(1226KB) AllocSpace objects, 0(0B) LOS objects, 22% free, 4884KB/6342KB, paused 44.087ms,24.235ms total 3.877s
+10-24 17:58:02.808  2777  2777 W .ghprotocol.app: Verification of androidx.compose.ui.graphics.colorspace.ColorSpace androidx.compose.ui.graphics.ColorSpaceVerificationHelper.composeColorSpace(android.graphics.ColorSpace) took 100.912ms (4776.42 bytecodes/s) (9840B approximate peak alloc)
+10-24 17:58:03.437   543  1651 I WindowManager: finishDrawing of relaunch: Window{845f3b3 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity} 29330ms
+10-24 17:58:03.726   543   566 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +59s724ms
+10-24 17:58:04.136   543  2245 D CoreBackPreview: Window{aa278c7 u0 Splash Screen com.ghprotocol.app}: Setting back callback null
+10-24 17:58:04.146   543  1651 W InputManager-JNI: Input channel object 'aa278c7 Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
+10-24 17:58:05.141  2777  3017 W .ghprotocol.app: Verification of boolean androidx.profileinstaller.ProfileInstaller.transcodeAndWrite(android.content.res.AssetManager, java.lang.String, android.content.pm.PackageInfo, java.io.File, java.lang.String, java.util.concurrent.Executor, androidx.profileinstaller.ProfileInstaller$DiagnosticsCallback) took 116.797ms (470.90 bytecodes/s) (2464B approximate peak alloc)
+10-24 17:58:05.276  2777  3017 D ProfileInstaller: Installing profile for com.ghprotocol.app
+10-24 17:58:06.643   543  2245 D CoreBackPreview: Window{845f3b3 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback null
+10-24 17:58:06.830   543  2269 W InputManager-JNI: Input channel object '845f3b3 com.ghprotocol.app/com.ghprotocol.app.MainActivity (client)' was disposed without first being removed with the input manager!
+10-24 17:58:17.980   543  1651 D CoreBackPreview: Window{fca637 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@2689977, mPriority=0, mIsAnimationCallback=false}
+10-24 17:58:20.951   543  3045 E ActivityManager:   35% 2777/com.ghprotocol.app: 20% user + 15% kernel / faults: 5967 minor
+10-24 17:58:28.783  2777  2777 D GhDiag  : connect: fetch result=false subscription update failed (primary + mirror)
+10-24 17:58:28.797  2777  2777 D GhDiag  : connect: FAILED — no subscription available
+10-24 17:58:29.329   543  2178 I ActivityTaskManager: Activity reported stop, but no longer stopping: ActivityRecord{108d800 u0 com.ghprotocol.app/.MainActivity t8} STOPPED
+10-24 17:58:30.091  3051  3051 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 17:58:30.388  3051  3051 I AndroidRuntime: Using default boot image
+10-24 17:58:30.400  3051  3051 I AndroidRuntime: Leaving lock profiling enabled
+10-24 17:58:36.766  3051  3051 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 17:58:39.938  3051  3051 D AndroidRuntime: Shutting down VM
+10-24 17:59:15.647  3220  3220 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 17:59:16.157  3220  3220 I AndroidRuntime: Using default boot image
+10-24 17:59:16.158  3220  3220 I AndroidRuntime: Leaving lock profiling enabled
+10-24 17:59:23.047  3220  3220 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 17:59:25.998  3220  3220 D AndroidRuntime: Shutting down VM
+10-24 17:59:40.840   543   570 I BLASTSyncEngine: Unfinished container: Task{2942839 #8 type=standard A=10141:com.ghprotocol.app}
+10-24 17:59:55.986   543   603 I AppsFilter: interaction: PackageSetting{1400cb5 com.ghprotocol.app/10141} -> PackageSetting{522bf4a com.android.cellbroadcastreceiver.module/10131} BLOCKED
+10-24 18:00:02.587  3254  3254 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:00:02.987  3354  3354 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:00:03.418  3354  3354 I AndroidRuntime: Using default boot image
+10-24 18:00:03.419  3354  3354 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:00:11.487  3354  3354 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:00:14.789  3354  3354 D AndroidRuntime: Shutting down VM
+10-24 18:00:53.500  3474  3474 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:00:53.733  3474  3474 I AndroidRuntime: Using default boot image
+10-24 18:00:53.734  3474  3474 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:00:58.795  3474  3474 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:01:01.246  3474  3474 D AndroidRuntime: Shutting down VM
+10-24 18:01:32.241  3631  3631 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:01:32.440  3631  3631 I AndroidRuntime: Using default boot image
+10-24 18:01:32.442  3631  3631 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:01:38.763  3631  3631 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:01:42.814  3631  3631 D AndroidRuntime: Shutting down VM
+10-24 18:01:46.600  3492  3492 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:02:21.671  3726  3726 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:02:21.859  3726  3726 I AndroidRuntime: Using default boot image
+10-24 18:02:21.864  3726  3726 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:02:23.714  3653  3653 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:02:28.867  3726  3726 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:02:31.256  3726  3726 D AndroidRuntime: Shutting down VM
+10-24 18:02:51.090  3730  3730 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:03:03.985  3833  3833 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:03:04.419  3833  3833 I AndroidRuntime: Using default boot image
+10-24 18:03:04.433  3833  3833 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:03:12.151  3833  3833 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:03:14.915  3833  3833 D AndroidRuntime: Shutting down VM
+10-24 18:03:21.438  3812  3812 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:03:48.455  3972  3972 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:03:48.677  3972  3972 I AndroidRuntime: Using default boot image
+10-24 18:03:48.678  3972  3972 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:03:54.974  3972  3972 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:03:58.427  3972  3972 D AndroidRuntime: Shutting down VM
+10-24 18:04:02.925  3900  3900 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:04:32.001  4073  4073 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:04:32.238  4073  4073 I AndroidRuntime: Using default boot image
+10-24 18:04:32.238  4073  4073 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:04:38.054  4073  4073 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:04:39.355  3999  3999 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:04:40.615  4073  4073 D AndroidRuntime: Shutting down VM
+10-24 18:05:08.595  4093  4093 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:05:10.335  4163  4163 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:05:10.555  4163  4163 I AndroidRuntime: Using default boot image
+10-24 18:05:10.555  4163  4163 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:05:14.791  4163  4163 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:05:17.246  4163  4163 D AndroidRuntime: Shutting down VM
+10-24 18:05:40.449  4168  4168 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:05:50.437  4263  4263 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:05:50.641  4263  4263 I AndroidRuntime: Using default boot image
+10-24 18:05:50.642  4263  4263 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:05:57.016  4263  4263 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:05:59.643  4263  4263 D AndroidRuntime: Shutting down VM
+10-24 18:06:16.232  4247  4247 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:06:34.730  4383  4383 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:06:35.016  4383  4383 I AndroidRuntime: Using default boot image
+10-24 18:06:35.018  4383  4383 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:06:41.381  4383  4383 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:06:45.031  4383  4383 D AndroidRuntime: Shutting down VM
+10-24 18:06:46.999  4337  4337 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:07:14.519  4417  4417 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:07:18.834  4488  4488 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:07:19.015  4488  4488 I AndroidRuntime: Using default boot image
+10-24 18:07:19.021  4488  4488 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:07:24.273  4488  4488 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:07:27.391  4488  4488 D AndroidRuntime: Shutting down VM
+10-24 18:07:48.249  4491  4491 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:08:03.901  4611  4611 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:08:04.126  4611  4611 I AndroidRuntime: Using default boot image
+10-24 18:08:04.127  4611  4611 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:08:10.562  4611  4611 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:08:13.274  4611  4611 D AndroidRuntime: Shutting down VM
+10-24 18:08:17.963  4571  4571 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:08:46.833  4733  4733 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:08:47.118  4733  4733 I AndroidRuntime: Using default boot image
+10-24 18:08:47.123  4733  4733 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:08:50.878  4658  4658 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:08:54.045  4733  4733 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:08:56.185  4733  4733 D AndroidRuntime: Shutting down VM
+10-24 18:09:16.302  4741  4741 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:09:32.016  4845  4845 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:09:32.233  4845  4845 I AndroidRuntime: Using default boot image
+10-24 18:09:32.234  4845  4845 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:09:37.266  4845  4845 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:09:41.244  4845  4845 D AndroidRuntime: Shutting down VM
+10-24 18:09:47.139  4824  4824 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:10:15.999  4970  4970 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:10:16.360  4970  4970 I AndroidRuntime: Using default boot image
+10-24 18:10:16.361  4970  4970 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:10:23.314  4904  4904 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:10:23.669  4970  4970 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:10:26.517  4970  4970 D AndroidRuntime: Shutting down VM
+10-24 18:11:02.654  5071  5071 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:11:03.028  5071  5071 I AndroidRuntime: Using default boot image
+10-24 18:11:03.029  5071  5071 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:11:03.135  4995  4995 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:11:08.619  5071  5071 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:11:10.815  5071  5071 D AndroidRuntime: Shutting down VM
+10-24 18:11:34.429  5078  5078 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:11:43.873  5179  5179 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:11:44.092  5179  5179 I AndroidRuntime: Using default boot image
+10-24 18:11:44.094  5179  5179 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:11:50.655  5179  5179 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:11:53.181  5179  5179 D AndroidRuntime: Shutting down VM
+10-24 18:12:16.592  5165  5165 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:12:27.475  5280  5280 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:12:27.883  5280  5280 I AndroidRuntime: Using default boot image
+10-24 18:12:27.883  5280  5280 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:12:35.739  5280  5280 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:12:38.023  5280  5280 D AndroidRuntime: Shutting down VM
+10-24 18:12:49.126  5264  5264 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:13:15.506  5426  5426 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:13:15.782  5426  5426 I AndroidRuntime: Using default boot image
+10-24 18:13:15.788  5426  5426 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:13:19.727  5350  5350 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:13:21.799  5426  5426 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:13:24.162  5426  5426 D AndroidRuntime: Shutting down VM
+10-24 18:13:36.998  2777  2791 W .ghprotocol.app: Suspending all threads took: 9.978ms
+10-24 18:13:37.247  2777  2791 W .ghprotocol.app: Cleared Reference was only reachable from finalizer (only reported once)
+10-24 18:13:37.679  2777  2791 I .ghprotocol.app: Background concurrent copying GC freed 23254(1049KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 5689KB/11MB, paused 13.266ms,11.547ms total 3.359s
+10-24 18:13:47.340  2777  5498 W .ghprotocol.app: Long monitor contention with owner DefaultDispatcher-worker-1 (2875) at void sun.security.provider.X509Factory.addToCache(sun.security.util.Cache, byte[], java.lang.Object)(X509Factory.java:232) waiters=0 in sun.security.x509.X509CertImpl sun.security.provider.X509Factory.intern(java.security.cert.X509Certificate) for 157ms
+10-24 18:13:52.477  2777  2875 W .ghprotocol.app: Long monitor contention with owner DefaultDispatcher-worker-2 (2873) at java.lang.Object sun.security.provider.X509Factory.getFromCache(sun.security.util.Cache, byte[])(X509Factory.java:219) waiters=0 in sun.security.x509.X509CertImpl sun.security.provider.X509Factory.intern(java.security.cert.X509Certificate) for 142ms
+10-24 18:13:54.133  5441  5441 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:14:03.771  5536  5536 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:14:03.965  5536  5536 I AndroidRuntime: Using default boot image
+10-24 18:14:03.966  5536  5536 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:14:13.615  5536  5536 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:14:16.308  5536  5536 D AndroidRuntime: Shutting down VM
+10-24 18:14:17.417  2777  2791 W .ghprotocol.app: Suspending all threads took: 8.159ms
+10-24 18:14:17.705  2777  2791 I .ghprotocol.app: Background young concurrent copying GC freed 102614(3919KB) AllocSpace objects, 4(80KB) LOS objects, 38% free, 6997KB/11MB, paused 20.838ms,8.669ms total 1.649s
+10-24 18:14:27.682  5529  5529 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:14:52.284  5624  5624 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:14:53.109  5687  5687 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:14:53.499  5687  5687 I AndroidRuntime: Using default boot image
+10-24 18:14:53.505  5687  5687 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:14:58.909  5687  5687 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:15:01.067  5687  5687 D AndroidRuntime: Shutting down VM
+10-24 18:15:21.542  5693  5693 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:15:33.373  5807  5807 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:15:33.652  5807  5807 I AndroidRuntime: Using default boot image
+10-24 18:15:33.652  5807  5807 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:15:39.515  5807  5807 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:15:41.666  5807  5807 D AndroidRuntime: Shutting down VM
+10-24 18:15:51.826  5785  5785 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:16:14.561  5941  5941 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:16:14.805  5941  5941 I AndroidRuntime: Using default boot image
+10-24 18:16:14.806  5941  5941 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:16:20.583  5878  5878 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:16:21.501  5941  5941 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:16:23.679  5941  5941 D AndroidRuntime: Shutting down VM
+10-24 18:16:42.242  5964  5964 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:17:00.817  6086  6086 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:17:01.151  6086  6086 I AndroidRuntime: Using default boot image
+10-24 18:17:01.157  6086  6086 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:17:08.763  6086  6086 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:17:12.446  6086  6086 D AndroidRuntime: Shutting down VM
+10-24 18:17:12.794  6030  6030 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:17:45.381  6162  6162 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:17:45.555  6162  6162 I AndroidRuntime: Using default boot image
+10-24 18:17:45.555  6162  6162 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:17:50.582  6162  6162 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:17:52.689  6162  6162 D AndroidRuntime: Shutting down VM
+10-24 18:18:11.109  6166  6166 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:18:23.477  6305  6305 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:18:23.869  6305  6305 I AndroidRuntime: Using default boot image
+10-24 18:18:23.869  6305  6305 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:18:29.819  6305  6305 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:18:32.478  6305  6305 D AndroidRuntime: Shutting down VM
+10-24 18:18:41.870  6283  6283 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:19:06.198  6439  6439 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-24 18:19:06.506  6439  6439 I AndroidRuntime: Using default boot image
+10-24 18:19:06.507  6439  6439 I AndroidRuntime: Leaving lock profiling enabled
+10-24 18:19:11.686  6376  6376 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:19:12.222  6439  6439 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-24 18:19:14.400  6439  6439 D AndroidRuntime: Shutting down VM
+10-24 18:19:36.425  6459  6459 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
+10-24 18:20:07.278  6538  6538 I AndroidRuntime: VM exiting with result code 0, cleanup skipped.
 
 
