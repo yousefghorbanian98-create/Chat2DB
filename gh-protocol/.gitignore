@@ -20,3 +20,4 @@ gradle-build.log
 *.apk.idsig
 # decoded keystore never committed
 build/keystore/
+pre-flight-diag.log

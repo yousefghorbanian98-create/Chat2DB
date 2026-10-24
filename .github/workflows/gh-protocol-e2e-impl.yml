@@ -49,6 +49,49 @@ jobs:
           ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tee gradle-build.log | tail -15
           ls -la app/build/outputs/apk/debug/
 
+      - name: "Pre-flight: KVM check + pre-install emulator SDK (diagnostic)"
+        # Known failure mode (observed 2026-10-24): runners without /dev/kvm make
+        # the action fall back to software emulation (-accel off), which always
+        # exceeds the 600s boot timeout after ~10 min of silent failure. Fail
+        # fast with a clear ci-diag instead; the retry job gets a fresh runner.
+        # Also pre-installs the exact SDK components the action needs (its own
+        # sdkmanager download is a common flake — dl.google.com ~1.5GB image).
+        run: |
+          set -uo pipefail
+          DIAG=gh-protocol/pre-flight-diag.log
+          : > "$DIAG"
+          {
+            echo "== pre-flight $(date -u +%FT%TZ) =="
+            echo "runner: $(uname -m), nproc=$(nproc), mem=$(free -g | awk '/Mem:/{print $2}')G"
+            echo "kvm: $(ls -la /dev/kvm 2>&1)"
+          } >> "$DIAG"
+          CODE=$(curl -sI -o /dev/null -w '%{http_code}' --max-time 20 https://dl.google.com/android/repository/repository2-3.xml || echo 000)
+          echo "dl.google.com repo xml: HTTP $CODE" >> "$DIAG"
+          export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          SM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SM" ]; then
+            echo "cmdline-tools missing — downloading" >> "$DIAG"
+            mkdir -p "$ANDROID_HOME/cmdline-tools"
+            curl -fSL -o /tmp/ct.zip https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip >> "$DIAG" 2>&1 \
+              || { echo "FATAL: cmdline-tools download failed" >> "$DIAG"; exit 1; }
+            unzip -q /tmp/ct.zip -d "$ANDROID_HOME/cmdline-tools" >> "$DIAG" 2>&1
+            mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+          fi
+          yes | "$SM" --licenses >> "$DIAG" 2>&1 || true
+          if yes | "$SM" --install \
+              'build-tools;37.0.0' platform-tools "platforms;android-34" \
+              'emulator' 'system-images;android-34;default;x86_64' >> "$DIAG" 2>&1; then
+            echo "sdk pre-install OK: $(du -sh "$ANDROID_HOME/system-images" 2>/dev/null | cut -f1) system-images" >> "$DIAG"
+          else
+            echo "PREFLIGHT FAILED: sdk pre-install (see above)" >> "$DIAG"
+            exit 1
+          fi
+          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
+            echo "KVM UNAVAILABLE — action would use -accel off (software emulation, guaranteed 600s boot timeout). Failing fast; retry job gets a fresh runner." >> "$DIAG"
+            exit 1
+          fi
+          echo "pre-flight OK" >> "$DIAG"
+
       - name: Run E2E on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -69,6 +112,8 @@ jobs:
           mkdir -p gh-protocol
           {
             echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
+            echo
+            if [ -f gh-protocol/pre-flight-diag.log ]; then echo "### pre-flight-diag.log (KVM/SDK)"; cat gh-protocol/pre-flight-diag.log; fi
             echo
             if [ -f gh-protocol/gradle-build.log ]; then echo "### gradle-build.log (tail)"; tail -c 60000 gh-protocol/gradle-build.log; fi
             echo
