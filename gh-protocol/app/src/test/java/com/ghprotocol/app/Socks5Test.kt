@@ -61,7 +61,7 @@ class Socks5Test {
     }
 
     @Test fun buildUdpSegmentRoundTrip() {
-        val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB, 0xCD)
+        val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB.toByte(), 0xCD.toByte())
         val pkt = Socks5.buildUdpSegment("10.8.0.1", 53, "10.8.0.5", 41000, payload)
         assertEquals(20 + 8 + payload.size, pkt.size)
         // IPv4 header sanity
