@@ -69,9 +69,16 @@ else
   SUB="$D/sub.json"
   [ -s "$SUB" ] || report "no sub.json for seeding (host-side fetch step must have produced it)"
   TS=$(python3 -c 'import time; print(int(time.time() * 1000))' 2>/dev/null || echo "$(date +%s)000")
-  adb push "$SUB" /sdcard/ghsub.json >/dev/null 2>&1 || report "adb push sub.json failed"
-  adb shell "run-as $PKG sh -c 'cp /sdcard/ghsub.json files/subscription.json && echo $TS > files/subscription.meta'" >> "$LOG" 2>&1
-  say "seeded cache: $(adb shell "run-as $PKG sh -c 'wc -c < files/subscription.json'" | tr -d '\r') bytes, meta=$TS"
+  # Stream into the app's filesDir via run-as stdin — SELinux blocks app reads
+  # of /sdcard files pushed by adb (shell_data_file) on API 30+.
+  adb shell "run-as $PKG sh -c 'cat > files/subscription.json'" < "$SUB" >> "$LOG" 2>&1 \
+    || report "seed: writing subscription.json failed (see log above)"
+  adb shell "run-as $PKG sh -c 'echo $TS > files/subscription.meta'" >> "$LOG" 2>&1 \
+    || report "seed: writing subscription.meta failed"
+  SEEDBYTES=$(adb shell "run-as $PKG sh -c 'wc -c < files/subscription.json'" | tr -d '\r \n')
+  { [ -n "$SEEDBYTES" ] && [ "$SEEDBYTES" -gt 1000 ] 2>/dev/null; } \
+    || report "seed verification failed (bytes=${SEEDBYTES:-none})"
+  say "seeded cache: $SEEDBYTES bytes, meta=$TS"
 fi
 
 say "== launch app (am start, up to 3 tries) =="
