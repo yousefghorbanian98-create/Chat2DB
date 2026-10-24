@@ -4,6 +4,16 @@ name: gh-protocol-e2e (P2b)
 
 on:
   workflow_dispatch:
+  # Self-iterating: runs only when the E2E assets themselves change (emulator jobs are expensive)
+  push:
+    branches: [arena/7324330b-chat2db]
+    paths:
+      - .github/workflows/gh-protocol-e2e.yml
+      - gh-protocol/ci-e2e.sh
+      - gh-protocol/app/src/main/java/com/ghprotocol/app/core/**
+      - gh-protocol/app/src/main/java/com/ghprotocol/app/ui/HomeViewModel.kt
+      - gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt
+      - gh-protocol/app/src/main/AndroidManifest.xml
 
 concurrency:
   group: gh-protocol-e2e
