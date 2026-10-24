@@ -4,7 +4,6 @@
     <string name="tagline">Stay connected.</string>
     <string name="connect">Connect</string>
     <string name="connect_checking">Updating config…</string>
-    <string name="connect_tunnel_p2">Config ready. The tunnel itself lands in the next phase (P2).</string>
     <string name="connect_tunnel_pending">Establishing tunnel…</string>
     <string name="config_update_failed">Couldn\'t update config (offline or source blocked). Using cached version.</string>
     <string name="retry">Retry</string>
@@ -82,4 +81,15 @@
     <string name="opt_fa">فارسی</string>
     <string name="opt_en">English</string>
     <string name="settings_note">Theme applies instantly. Language applies on next app launch.</string>
+    <string name="connect_preparing">Preparing core…</string>
+    <string name="connect_tunneling">Starting tunnel…</string>
+    <string name="connect_connected">Tunnel active — browse as usual.</string>
+    <string name="connect_failed">Connection failed. Retry, or check the status above.</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="clean_ip_feature">F-17 · Clean IP recovery</string>
+    <string name="f17_ready">Engine ready — scans 12 Cloudflare egress IPs (TCP/TLS :443), swaps the egress address only.</string>
+    <string name="routes_feature">F-18 · Smart balancer</string>
+    <string name="f18_ready">Engine ready — 3x-ping health, 15-min refresh, auto-rotate on route death.</string>
+    <string name="prep_feature">F-13 · Prep for cutoff</string>
+    <string name="f13_ready">Engine ready — verifies core + cached config before the cutoff hits.</string>
 </resources>

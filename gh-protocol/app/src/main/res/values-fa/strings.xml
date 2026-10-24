@@ -4,7 +4,6 @@
     <string name="tagline">همیشه متصل.</string>
     <string name="connect">اتصال</string>
     <string name="connect_checking">در حال به‌روزرسانی کانفیگ…</string>
-    <string name="connect_tunnel_p2">کانفیگ آماده است. خود تونل در فاز بعدی (P2) فعال می‌شود.</string>
     <string name="connect_tunnel_pending">در حال برقراری تونل…</string>
     <string name="config_update_failed">به‌روزرسانی کانفیگ ممکن نشد (آفلاین یا منبع مسدود). از نسخه‌ی کش‌شده استفاده می‌شود.</string>
     <string name="retry">تلاش دوباره</string>
@@ -84,4 +83,15 @@
     <string name="opt_fa">فارسی</string>
     <string name="opt_en">English</string>
     <string name="settings_note">پوسته بلافاصله اعمال می‌شود. زبان در اجرای بعدی اعمال می‌شود.</string>
+    <string name="connect_preparing">در حال آماده‌سازی هسته…</string>
+    <string name="connect_tunneling">در حال راه‌اندازی تونل…</string>
+    <string name="connect_connected">تونل فعال است — مثل‌همیشه مرور کنید.</string>
+    <string name="connect_failed">اتصال ناموفق بود. دوباره تلاش کنید یا وضعیت بالا را ببینید.</string>
+    <string name="disconnect">قطع اتصال</string>
+    <string name="clean_ip_feature">F-17 · بازیابی IP تمیز</string>
+    <string name="f17_ready">موتور آماده — 12 IP خروجی Cloudflare را اسکن می‌کند (TCP/TLS :443) و فقط آدرس خروجی را عوض می‌کند.</string>
+    <string name="routes_feature">F-18 · بالانسر هوشمند</string>
+    <string name="f18_ready">موتور آماده — سلامت‌سنجی 3x پینگ، تازه‌سازی هر 15 دقیقه، چرخش خودکار در مرگ مسیر.</string>
+    <string name="prep_feature">F-13 · آمادگی برای قطعی</string>
+    <string name="f13_ready">موتور آماده — هسته + کانفیگ کش‌شده را پیش از قطعی چک می‌کند.</string>
 </resources>

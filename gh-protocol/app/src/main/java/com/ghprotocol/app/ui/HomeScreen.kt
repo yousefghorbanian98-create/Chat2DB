@@ -17,8 +17,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
@@ -62,6 +66,32 @@ fun HomeScreen(
     onOpenSettings: () -> Unit = {}
 ) {
     val ui by viewModel.ui.collectAsState()
+    val context = LocalContext.current
+    val vpnLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            context.startService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
+            viewModel.onVpnEstablished()
+        } else {
+            viewModel.onVpnFailed("vpn_denied")
+        }
+    }
+    LaunchedEffect(ui.vpnPending) {
+        if (ui.vpnPending) {
+            val prep = try {
+                android.net.VpnService.prepare(context)
+            } catch (e: Exception) {
+                null
+            }
+            if (prep == null) {
+                context.startService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
+                viewModel.onVpnEstablished()
+            } else {
+                vpnLauncher.launch(prep)
+            }
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -91,7 +121,11 @@ fun HomeScreen(
                 phase = ui.connectPhase,
                 isUpdating = ui.isUpdating,
                 hasConfig = ui.subscription != null,
-                onTap = { viewModel.onConnectTap() }
+                onTap = { viewModel.onConnectTap() },
+                onDisconnect = {
+                    context.stopService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
+                    viewModel.disconnect()
+                }
             )
 
             if (ui.configError != null) {
@@ -166,32 +200,48 @@ private data class StatusSpec(
 )
 
 @Composable
+private fun PhaseSpinner(text: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        CircularProgressIndicator()
+        Spacer(Modifier.height(12.dp))
+        Text(text, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
 private fun ConnectArea(
     phase: ConnectPhase,
     isUpdating: Boolean,
     hasConfig: Boolean,
-    onTap: () -> Unit
+    onTap: () -> Unit,
+    onDisconnect: () -> Unit
 ) {
     when (phase) {
-        ConnectPhase.CHECKING -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
-            Spacer(Modifier.height(12.dp))
-            Text(stringResource(R.string.connect_checking), style = MaterialTheme.typography.bodyMedium)
-        }
-        ConnectPhase.READY -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = {}, enabled = false) { Text(stringResource(R.string.connect)) }
+        ConnectPhase.CHECKING -> PhaseSpinner(stringResource(R.string.connect_checking))
+        ConnectPhase.PREPARING -> PhaseSpinner(stringResource(R.string.connect_preparing))
+        ConnectPhase.TUNNELING -> PhaseSpinner(stringResource(R.string.connect_tunneling))
+        ConnectPhase.CONNECTED -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Button(onClick = onDisconnect, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.disconnect), style = MaterialTheme.typography.titleMedium)
+            }
             Spacer(Modifier.height(8.dp))
             Text(
-                stringResource(R.string.connect_tunnel_p2),
+                stringResource(R.string.connect_connected),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
-        ConnectPhase.TUNNEL_PENDING -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
+        ConnectPhase.FAILED -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                stringResource(R.string.connect_failed),
+                color = Red,
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(Modifier.height(12.dp))
-            Text(stringResource(R.string.connect_tunnel_pending), style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onTap, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.retry), style = MaterialTheme.typography.titleMedium)
+            }
         }
         ConnectPhase.IDLE -> Button(
             onClick = onTap,

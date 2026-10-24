@@ -23,8 +23,10 @@ import com.ghprotocol.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun phase2Card(title: String, body: String, feature: String, modifier: Modifier = Modifier) {
-    Scaffold(topBar = { TopAppBar(title = { Text(title) }) }, modifier = modifier) { padding ->
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScannerScreen(modifier: Modifier = Modifier) {
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.clean_ip_title)) }) }, modifier = modifier) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -35,25 +37,63 @@ private fun phase2Card(title: String, body: String, feature: String, modifier: M
         ) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(feature, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.clean_ip_feature), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.height(12.dp))
-                    Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-                    Spacer(Modifier.height(12.dp))
-                    Text(stringResource(R.string.phase2_badge), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                    Text(stringResource(R.string.clean_ip_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                    Text(stringResource(R.string.f17_ready), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScannerScreen(modifier: Modifier = Modifier) =
-    phase2Card(stringResource(R.string.clean_ip_title), stringResource(R.string.clean_ip_body), "F-17", modifier)
+fun BalancerScreen(modifier: Modifier = Modifier) {
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.routes_title)) }) }, modifier = modifier) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.routes_feature), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(12.dp))
+                    Text(stringResource(R.string.routes_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                    Text(stringResource(R.string.f18_ready), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                }
+            }
+        }
+    }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BalancerScreen(modifier: Modifier = Modifier) =
-    phase2Card(stringResource(R.string.routes_title), stringResource(R.string.routes_body), "F-18", modifier)
-
-@Composable
-fun PrepScreen(modifier: Modifier = Modifier) =
-    phase2Card(stringResource(R.string.blackout_prep_title), stringResource(R.string.blackout_prep_body), "F-13", modifier)
+fun PrepScreen(modifier: Modifier = Modifier) {
+    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.blackout_prep_title)) }) }, modifier = modifier) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.prep_feature), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.height(12.dp))
+                    Text(stringResource(R.string.blackout_prep_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                    Text(stringResource(R.string.f13_ready), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline)
+                }
+            }
+        }
+    }
+}

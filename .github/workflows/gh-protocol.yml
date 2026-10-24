@@ -52,6 +52,28 @@ jobs:
           # wrapper lives in gh-protocol/ subdir; pin the same version explicitly
           gradle-version: '8.10.2'
 
+      - name: Fetch Xray-core (official release, SHA-256 verified)
+        working-directory: gh-protocol
+        run: |
+          set -e
+          VERSION=v26.10.21
+          mkdir -p app/src/main/assets/xray
+          for ABI in arm64-v8a amd64; do
+            ZIP="Xray-android-${ABI}.zip"
+            curl -sSL --retry 3 -o "/tmp/${ZIP}" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}"
+            curl -sSL --retry 3 -o "/tmp/${ZIP}.dgst" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}.dgst"
+            EXPECTED=$(awk '{print $1}' "/tmp/${ZIP}.dgst")
+            ACTUAL=$(sha256sum "/tmp/${ZIP}" | awk '{print $1}')
+            if [ "$EXPECTED" != "$ACTUAL" ]; then echo "SHA-256 MISMATCH for ${ZIP}"; exit 1; fi
+            echo "verified ${ZIP} (${ACTUAL})"
+            rm -rf "/tmp/xray-${ABI}" && mkdir -p "/tmp/xray-${ABI}"
+            unzip -o -j "/tmp/${ZIP}" -d "/tmp/xray-${ABI}" >/dev/null
+            cp "/tmp/xray-${ABI}/Xray" "app/src/main/assets/xray/Xray-${ABI}"
+            for f in "/tmp/xray-${ABI}"/*.dat; do [ -f "$f" ] && cp "$f" app/src/main/assets/xray/ || true; done
+          done
+          chmod 755 app/src/main/assets/xray/Xray-arm64-v8a app/src/main/assets/xray/Xray-amd64
+          ls -la app/src/main/assets/xray
+
       - name: Provide release keystore
         env:
           KEYSTORE_PKCS12: ${{ secrets.KEYSTORE_PKCS12 }}

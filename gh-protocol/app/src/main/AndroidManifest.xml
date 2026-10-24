@@ -25,10 +25,9 @@
             </intent-filter>
         </activity>
 
-        <!-- P0 placeholder: real VpnService lands in P2 (F-3). Declared now so
-             the permission surface is fixed from day one. -->
+        <!-- F-3: real VpnService tunnel (P2): protected fd -> SOCKS5 -> Xray :10808 -->
         <service
-            android:name=".service.GhVpnService"
+            android:name=".core.VpnTunnelService"
             android:exported="false"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
