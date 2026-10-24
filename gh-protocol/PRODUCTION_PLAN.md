@@ -248,6 +248,23 @@ stateDiagram-v2
 | **G4** | P5 | Strix: صفر High/Critical + **MobSF/mobsfscan: صفر High** + چک‌لیست OWASP MASVS | گزارش‌های Strix + MobSF |
 | **G5** | Release | DoD ۱۳/۱۳ (§۱.۶) | checklist خودکار در CI + اعلان |
 
+### ۳.۵.۱ لاگ اجرایی P2a — وضعیت (به‌روز: ۲۴ اکتبر ۲۰۲۶)
+
+**P2a (بخش قابل‌اعتبارسنجی-CI) کامل شد — CI سبز (run f2de808 → 4221092):**
+- **F-2:** `XrayCore` — هسته‌ی رسمی XTLS/Xray-core **v26.10.21** (android arm64-v8a + amd64) در CI با **SHA-256 verify** (فایل `.dgst` = بلوک `MD5=/SHA1=/SHA2-256=/SHA2-512=`؛ مقدار از خط `SHA2-256=` با حذف فاصله) دانلود و در `assets/xray/Xray-<abi>` + `geosite.dat` جا می‌شود. اسکریپت `ci-fetch-xray.sh` با `trap` خود-تشخیصی (در هر شکست، diag روی شاخه‌ی `ci-diag` می‌آید). نام باینری در زیپ **`xray` (کوچک)** — `find -iname`.
+- **F-3:** `VpnTunnelService` (VpnService واقعی): fd تانل ← `FileInputStream` ← لوپ بسته‌ها؛ TCP به ۴-توپل با reuse + idle ۶۰s؛ **DNS واقعی**: query کاربر (10.8.0.1:53) → inbound DNS لوکال Xray (127.0.0.1:53) → پاسخ با بسته‌ی IPv4+UDP ساخته‌شده (`buildUdpSegment`) به آدرس کلاینت برمی‌گردد (kernel از تانل راوت می‌کند).
+- **F-4:** teardown < ۳s (kill + waitFor 2s + destroyForcibly).
+- **F-17:** `ConfigPatcher.patchCleanEgress` — **فقط `settings.address`** (SNI/Host/Path/finalmask دست‌نخورده) + `CleanIpScanner` (۱۲ IP Cloudflare، پروب TCP/TLS:443).
+- **F-15:** `tcpFirstProfile` — Reorder قواعد routing (TCP-fragment قبل از UDP-noises)؛ هم string و هم array `outboundTag` پشتیبانی.
+- **F-18:** `RouteBalancer` (refresh ۱۵m، pickBest، onRouteDead → rotate، udpDegraded).
+- **F-16:** `validateImport` (آرایه‌ی کانفیگ دلخواه).
+- **یافته‌ی طراحی P0:** هر دو entry سابسکریپشن **mixed-in :10808** bind می‌کنند → کانفیگ runtime = **فقط entry فعال** (نه آرایه) + تزریق inbound `dns-in` روی 127.0.0.1:53 (fakedns/DoH کانفیگ سرور خودش زنده می‌ماند).
+- **UI:** صفحات Scanner/Balancer/Prep واقعی + فازهای اتصال (IDLE→CHECKING→PREPARING→TUNNELING→CONNECTED/FAILED) + 48 golden جدید (re-record).
+- **۵۵ تست JVM سبز** (Socks5/ConfigPatcher/RouteBalancer/XrayVersion + قبلی‌ها).
+- دروس CI ثبت‌شده: `skipNBytes(int)` در استاب‌های Android ندارد (readFully/readShort به‌جای آن)؛ بایتهای >۰x7F در `byteArrayOf` نیاز به `.toByte()`؛ `ParcelFileDescriptor` (نه FileDescriptor) + null-guard روی `establish()`.
+
+**باقی‌مانده‌ی P2 = P2b (اتصال واقعی instrumented روی emulator):** VPN grant روی emulator، E2E (DNS + HTTPS از داخل emulator)، تله‌متری شبکه، سبز کردن G2 (F-2..F-18 + اتصال واقعی).
+
 ### ۳.۶ کنترل درift (کمترین لغزش)
 1. **قرارداد اول:** هیچ issue‌ای بدون AC مشاهده‌پذیر وارد صف نمی‌شود (finn-spec سخت‌گیر: اگر AC مبهم → بازپس)
 2. **بازرس تازه در هر round** — حافظه‌ی سازنده به بازرس منتقل نمی‌شود (قانون اصلی Finn-loop)
