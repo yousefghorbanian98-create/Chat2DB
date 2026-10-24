@@ -75,6 +75,10 @@ jobs:
             echo
             if [ -f gh-protocol/e2e.log ]; then echo "### e2e.log"; cat gh-protocol/e2e.log; fi
             echo
+            if [ -f gh-protocol/e2e-crash.log ]; then echo "### e2e-crash.log (crash buffer, tail)"; tail -c 30000 gh-protocol/e2e-crash.log; fi
+            echo
+            if [ -f gh-protocol/e2e-logcat.log ]; then echo "### e2e-logcat.log (crashes + app + vpn, tail)"; grep -E "AndroidRuntime|FATAL|ghprotocol|GhVpnTunnel|VpnService|xray" gh-protocol/e2e-logcat.log | tail -c 30000; fi
+            echo
             if [ -f gh-protocol/e2e-xray-err.log ]; then echo "### e2e-xray-err.log (Xray core)"; cat gh-protocol/e2e-xray-err.log; fi
             echo
             if [ -f gh-protocol/e2e-vpn.log ]; then echo "### e2e-vpn.log (GhVpnTunnel)"; cat gh-protocol/e2e-vpn.log; fi

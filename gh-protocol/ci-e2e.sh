@@ -40,20 +40,48 @@ say "== install APK =="
 [ -f "$APK" ] || { ls -R app/build/outputs 2>&1 | head -20 >> "$LOG"; report "APK not found at $APK"; }
 adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"
 
+D="$(dirname "$LOG")"
+
 say "== launch app =="
 adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >>"$LOG" 2>&1 || report "app launch failed"
-sleep 20 # first launch: subscription fetch + UI settle
+sleep 15
+
+say "== app alive? =="
+ALIVE=$(adb shell "pidof $PKG" 2>/dev/null | tr -d '\r')
+say "pid after launch: ${ALIVE:-<none>}"
+if [ -z "$ALIVE" ]; then
+  adb logcat -d -b crash > "$D/e2e-crash.log" 2>/dev/null || true
+  tail -60 "$D/e2e-crash.log" >> "$LOG" 2>/dev/null || true
+  report "app process not alive after launch (crash log attached)"
+fi
 
 say "== trigger connect via deep link =="
 adb shell am start -a android.intent.action.VIEW -d "ghprotocol://connect" >>"$LOG" 2>&1 || report "deep link failed"
 
-say "== VPN consent dialog (tap Allow) =="
+say "== wait for tunnel; tap VPN consent when it appears (up to 6 min) =="
+TUNNEL=0
 CONSENT=0
-for i in $(seq 1 25); do
-  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
-  adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
-  if [ -s /tmp/ui.xml ] && grep -qi "vpn" /tmp/ui.xml; then
-    COORDS=$(python3 - <<'PY'
+for i in $(seq 1 90); do
+  if adb shell "ps -A" 2>/dev/null | grep -qi "xray" && adb shell "netstat -ltn" 2>/dev/null | grep -q ":10808"; then
+    TUNNEL=1
+    say "tunnel up after ~$((i * 4))s"
+    break
+  fi
+  # app must stay alive
+  if [ $((i % 5)) -eq 0 ]; then
+    ALIVE=$(adb shell "pidof $PKG" 2>/dev/null | tr -d '\r')
+    if [ -z "$ALIVE" ]; then
+      say "app died during connect flow (iter $i)"
+      adb logcat -d > "$D/e2e-logcat.log" 2>/dev/null || true
+      report "app process died during connect flow (logcat attached)"
+    fi
+  fi
+  # consent dialog?
+  if [ "$CONSENT" != "1" ] && [ $((i % 3)) -eq 0 ]; then
+    adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+    adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
+    if [ -s /tmp/ui.xml ] && grep -qi "vpn" /tmp/ui.xml; then
+      COORDS=$(python3 - <<'PY'
 import re
 x = open('/tmp/ui.xml', encoding='utf-8', errors='ignore').read()
 for m in re.finditer(r'text="([^"]*)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', x):
@@ -63,28 +91,24 @@ for m in re.finditer(r'text="([^"]*)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]
         break
 PY
 )
-    if [ -n "${COORDS:-}" ]; then
-      adb shell input tap $COORDS >>"$LOG" 2>&1
-      say "tapped consent at: $COORDS"
-      CONSENT=1
-      break
+      if [ -n "${COORDS:-}" ]; then
+        adb shell input tap $COORDS >>"$LOG" 2>&1
+        say "tapped VPN consent at: $COORDS (iter $i)"
+        CONSENT=1
+      fi
     fi
   fi
-  sleep 2
+  sleep 4
 done
-[ "$CONSENT" = "1" ] || say "WARN: consent dialog not seen (may have been auto-granted or missed)"
-
-say "== wait for tunnel (Xray process + :10808 listening) =="
-TUNNEL=0
-for i in $(seq 1 40); do
-  if adb shell "ps -A" 2>/dev/null | grep -qi "xray" && adb shell "netstat -ltn" 2>/dev/null | grep -q ":10808"; then
-    TUNNEL=1
-    say "tunnel up after ~$((i * 3))s"
-    break
-  fi
-  sleep 3
-done
-[ "$TUNNEL" = "1" ] || { adb shell "ps -A" >>"$LOG" 2>&1; adb shell "netstat -ltn" >>"$LOG" 2>&1; report "tunnel not up (xray/:10808)"; }
+[ "$CONSENT" = "1" ] || say "WARN: consent dialog never seen"
+[ "$TUNNEL" = "1" ] || {
+  adb shell "ps -A" | grep -E "$PKG|xray|NAME" >> "$LOG" 2>&1
+  adb shell "netstat -ltn" >> "$LOG" 2>&1
+  adb shell "dumpsys activity activities" 2>/dev/null | grep -B2 -A8 -i "ghprotocol" >> "$LOG" 2>&1 || true
+  adb logcat -d > "$D/e2e-logcat.log" 2>/dev/null || true
+  adb logcat -d -b crash >> "$D/e2e-logcat.log" 2>/dev/null || true
+  report "tunnel not up (xray/:10808)"
+}
 
 say "== DNS resolution THROUGH the tunnel =="
 DNS_OK=0
