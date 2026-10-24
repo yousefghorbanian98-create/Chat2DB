@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-24T20:33:12Z
+## gh-protocol E2E log — 2026-10-24T20:39:39Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-24T20:29:47Z ==
+== pre-flight 2026-10-24T20:36:18Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 20:24 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 20:32 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 1.7G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:30 .
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:30 ..
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:30 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 24 20:30 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:36 .
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:36 ..
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:36 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 24 20:36 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -48,39 +48,39 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResValues
 > Task :app:extractDeepLinksDebug
 > Task :app:generateDebugResources
-> Task :app:packageDebugResources
 > Task :app:mapDebugSourceSetPaths
-> Task :app:parseDebugLocalResources
 > Task :app:checkDebugAarMetadata
-> Task :app:mergeDebugShaders
 > Task :app:javaPreCompileDebug
-> Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:processDebugMainManifest
+> Task :app:packageDebugResources
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
+> Task :app:desugarDebugFileDependencies
+> Task :app:parseDebugLocalResources
 > Task :app:mergeDebugJniLibFolders
 > Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugAssets
 > Task :app:mergeDebugResources
-> Task :app:processDebugResources
-> Task :app:compressDebugAssets
 > Task :app:mergeDebugNativeLibs
+> Task :app:mergeLibDexDebug
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:mergeLibDexDebug
+> Task :app:mergeExtDexDebug
+> Task :app:compressDebugAssets
+> Task :app:processDebugResources
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:mergeExtDexDebug
-> Task :app:validateSigningDebug
 
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
@@ -94,9 +94,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792873662770.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792874025039.json
 
-BUILD SUCCESSFUL in 2m 7s
+BUILD SUCCESSFUL in 2m 36s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
