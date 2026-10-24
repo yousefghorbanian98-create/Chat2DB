@@ -137,19 +137,21 @@ jobs:
           export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
           AVD=gh_test
-          # Everything emulator-side runs as root with HOME=/root (deterministic
-          # despite sudo env_reset): AVD lives in /root/.android/avd, and root
-          # has KVM access even when the runner user is not in the kvm group.
-          # NOTE: sudo resets PATH to secure_path — always absolute paths under sudo.
-          AVDMAN="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
-          if ! sudo env HOME=/root "$AVDMAN" list avd 2>/dev/null | grep -q "^Name: $AVD$"; then
-            echo "Creating AVD $AVD (pixel_6 / api34 / x86_64) as root…"
-            echo no | sudo env HOME=/root "$AVDMAN" create avd -n "$AVD" \
+          # AVD: created by the runner user (standard env — no sudo PATH/Java
+          # quirks). The root-launched emulator is pointed at it via
+          # ANDROID_AVD_HOME (root reads/writes the runner's AVD dir fine).
+          AVD_HOME="$HOME/.android/avd"
+          mkdir -p "$AVD_HOME"
+          if ! avdmanager list avd 2>/dev/null | grep -q "Name: $AVD"; then
+            echo "Creating AVD $AVD (pixel_6 / api34 / x86_64)…"
+            echo no | avdmanager create avd -n "$AVD" \
               -k "system-images;android-34;default;x86_64" -d pixel_6 > avd-create.log 2>&1 \
               || { echo "AVD create failed:"; tail -30 avd-create.log; exit 1; }
           fi
+          ls -la "$AVD_HOME" >> avd-create.log 2>&1
+          [ -d "$AVD_HOME/$AVD.avd" ] || { echo "AVD dir missing after create:"; cat avd-create.log; exit 1; }
           echo "Launching emulator as root (KVM), console -> emulator-console.log"
-          sudo env HOME=/root "$ANDROID_HOME/emulator/emulator" \
+          sudo env HOME=/root ANDROID_AVD_HOME="$AVD_HOME" "$ANDROID_HOME/emulator/emulator" \
             -avd "$AVD" -port 5554 \
             -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-first-window \
             -memory 2048M -cores 2 > emulator-console.log 2>&1 &
@@ -190,6 +192,8 @@ jobs:
             echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
             echo
             if [ -f gh-protocol/pre-flight-diag.log ]; then echo "### pre-flight-diag.log (KVM/SDK)"; cat gh-protocol/pre-flight-diag.log; fi
+            echo
+            if [ -f gh-protocol/avd-create.log ]; then echo "### avd-create.log (tail)"; tail -c 6000 gh-protocol/avd-create.log; fi
             echo
             if [ -f gh-protocol/emulator-console.log ]; then echo "### emulator-console.log (tail)"; tail -c 20000 gh-protocol/emulator-console.log; fi
             echo
