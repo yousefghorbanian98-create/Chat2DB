@@ -66,7 +66,7 @@ class XrayCore(private val context: Context) {
         return try {
             if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
             if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
-            val pb = ProcessBuilder(arrayOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
+            val pb = ProcessBuilder(listOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
             val env = pb.environment()
             env["XRAY_LOCATION_ASSET"] = dir.absolutePath
             env["xray.location.asset"] = dir.absolutePath
