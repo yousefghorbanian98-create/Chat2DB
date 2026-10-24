@@ -100,10 +100,20 @@ jobs:
             tail -25 /tmp/sm.log >> "$DIAG"
             exit 1
           fi
-          if [ ! -r /dev/kvm ] || [ ! -w /dev/kvm ]; then
-            echo "KVM UNAVAILABLE — action would use -accel off (software emulation, guaranteed 600s boot timeout). Failing fast; retry job gets a fresh runner." >> "$DIAG"
+          # NOTE: check device existence + sudo (root gets KVM access even when
+          # the runner user is not in the kvm group — the common GH case).
+          # Existence check only: the device node being present means root can
+          # open it (root bypasses the root:kvm 660 group check). The runner
+          # USER often can't, which is exactly why we launch the emulator as root.
+          if [ ! -e /dev/kvm ]; then
+            echo "KVM DEVICE ABSENT — no hardware virtualization on this host. Failing fast; retry job gets a fresh runner." >> "$DIAG"
             exit 1
           fi
+          if ! sudo -n true 2>/dev/null; then
+            echo "SUDO UNAVAILABLE — cannot launch emulator as root (KVM workaround). Failing fast." >> "$DIAG"
+            exit 1
+          fi
+          echo "kvm device present + sudo OK — emulator will run as root" >> "$DIAG"
           echo "pre-flight OK" >> "$DIAG"
 
       # Save the (now complete) image even if the later E2E step fails, so the
@@ -114,14 +124,56 @@ jobs:
           path: /usr/local/lib/android/sdk/system-images
           key: gh-protocol-android-34-x86_64-v1-${{ github.run_id }}
 
-      - name: Run E2E on emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          arch: x86_64
-          profile: pixel_6
-          working-directory: gh-protocol
-          script: bash ci-e2e.sh
+      # Custom (not reactivecircus/android-emulator-runner): on GH runners the
+      # process user frequently LACKS access to /dev/kvm (mode 660 root:kvm,
+      # user not in kvm group) even though the device exists — the action's
+      # auto-check then silently switches to -accel off (software emulation),
+      # which always dies at the 600s boot timeout. Root always has KVM access,
+      # so we drive the emulator directly as root.
+      - name: Run E2E on emulator (root launch for KVM)
+        working-directory: gh-protocol
+        run: |
+          set -uo pipefail
+          export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
+          AVD=gh_test
+          # Everything emulator-side runs as root with HOME=/root (deterministic
+          # despite sudo env_reset): AVD lives in /root/.android/avd, and root
+          # has KVM access even when the runner user is not in the kvm group.
+          if ! sudo env HOME=/root avdmanager list avd 2>/dev/null | grep -q "^Name: $AVD$"; then
+            echo "Creating AVD $AVD (pixel_6 / api34 / x86_64) as root…"
+            echo no | sudo env HOME=/root avdmanager create avd -n "$AVD" \
+              -k "system-images;android-34;default;x86_64" -d pixel_6 > avd-create.log 2>&1 \
+              || { echo "AVD create failed:"; tail -30 avd-create.log; exit 1; }
+          fi
+          echo "Launching emulator as root (KVM), console -> emulator-console.log"
+          sudo env HOME=/root "$ANDROID_HOME/emulator/emulator" \
+            -avd "$AVD" -port 5554 \
+            -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-first-window \
+            -memory 2048M -cores 2 > emulator-console.log 2>&1 &
+          # wait for boot (up to 10 min)
+          adb start-server >> emulator-console.log 2>&1
+          timeout 180 adb wait-for-device >> emulator-console.log 2>&1 || true
+          BOOTED=0
+          for i in $(seq 1 150); do
+            B=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+            [ "$B" = "1" ] && { BOOTED=1; break; }
+            sleep 4
+          done
+          if [ "$BOOTED" != "1" ]; then
+            echo "emulator did not reach boot_completed in 10 min"
+            tail -60 emulator-console.log
+            sudo pkill -f "qemu.*$AVD" 2>/dev/null || true
+            exit 1
+          fi
+          echo "emulator booted — zeroing animation scales"
+          adb shell settings put global window_animation_scale 0.0
+          adb shell settings put global transition_animation_scale 0.0
+          adb shell settings put global animator_duration_scale 0.0
+          bash ci-e2e.sh
+          RC=$?
+          sudo pkill -f "qemu.*$AVD" 2>/dev/null || true
+          exit $RC
 
       - name: Return E2E logs (always)
         if: always()
@@ -136,6 +188,8 @@ jobs:
             echo "## gh-protocol E2E log — $(date -u +%FT%TZ)"
             echo
             if [ -f gh-protocol/pre-flight-diag.log ]; then echo "### pre-flight-diag.log (KVM/SDK)"; cat gh-protocol/pre-flight-diag.log; fi
+            echo
+            if [ -f gh-protocol/emulator-console.log ]; then echo "### emulator-console.log (tail)"; tail -c 20000 gh-protocol/emulator-console.log; fi
             echo
             if [ -f gh-protocol/gradle-build.log ]; then echo "### gradle-build.log (tail)"; tail -c 60000 gh-protocol/gradle-build.log; fi
             echo

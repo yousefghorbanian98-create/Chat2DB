@@ -21,3 +21,5 @@ gradle-build.log
 # decoded keystore never committed
 build/keystore/
 pre-flight-diag.log
+emulator-console.log
+avd-create.log
