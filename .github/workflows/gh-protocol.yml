@@ -54,34 +54,7 @@ jobs:
 
       - name: Fetch Xray-core (official release, SHA-256 verified)
         working-directory: gh-protocol
-        run: |
-          {
-            set -e
-            VERSION=v26.10.21
-            mkdir -p app/src/main/assets/xray
-            for ABI in arm64-v8a amd64; do
-              ZIP="Xray-android-${ABI}.zip"
-              echo "== downloading ${ZIP}"
-              curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}"
-              curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}.dgst" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}.dgst"
-              EXPECTED=$(grep "^SHA2-256=" "/tmp/${ZIP}.dgst" | cut -d= -f2 | tr -d " " | tr "[:upper:]" "[:lower:]")
-              ACTUAL=$(sha256sum "/tmp/${ZIP}" | awk '{print $1}')
-              echo "dgst=${EXPECTED} actual=${ACTUAL}"
-              if [ "$EXPECTED" != "$ACTUAL" ]; then echo "SHA-256 MISMATCH for ${ZIP}"; exit 1; fi
-              echo "verified ${ZIP}"
-              rm -rf "/tmp/xray-${ABI}" && mkdir -p "/tmp/xray-${ABI}"
-              unzip -o -j "/tmp/${ZIP}" -d "/tmp/xray-${ABI}" || { echo "unzip failed"; ls -la "/tmp/${ZIP}"; head -c 300 "/tmp/${ZIP}"; exit 1; }
-              ls -la "/tmp/xray-${ABI}"
-              BIN=$(find "/tmp/xray-${ABI}" -maxdepth 1 -type f -name 'Xray*' | head -1)
-              if [ -z "$BIN" ]; then echo "no Xray binary found in ${ZIP}"; exit 1; fi
-              cp "$BIN" "app/src/main/assets/xray/Xray-${ABI}"
-              for f in "/tmp/xray-${ABI}"/*.dat; do [ -f "$f" ] && cp "$f" app/src/main/assets/xray/ || true; done
-            done
-            chmod 755 app/src/main/assets/xray/Xray-arm64-v8a app/src/main/assets/xray/Xray-amd64
-            ls -la app/src/main/assets/xray
-            echo "fetch OK"
-          } > fetch-diag.log 2>&1 || { echo "::error::Xray fetch failed — full log in ci-diag (gh-protocol/fetch-diag.log)"; tail -30 fetch-diag.log; exit 1; }
-          tail -3 fetch-diag.log
+        run: bash ci-fetch-xray.sh
 
       - name: Provide release keystore
         env:
