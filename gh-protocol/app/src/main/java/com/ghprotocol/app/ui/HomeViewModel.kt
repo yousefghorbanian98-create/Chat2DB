@@ -132,16 +132,16 @@ class HomeViewModel(
 
     /** F-17/F-15: write the runtime config (official JSON + clean egress + TCP-first). */
     fun writeRuntimeConfig(sub: SubscriptionInfo): File {
-        val ctx = getApplication<Application>().filesDir
-        val cfg = File(ctx, "xray-config.json")
+        val app = getApplication<Application>()
+        val cfg = File(app.filesDir, "xray-config.json")
         return try {
-            val cleanIp = ctx.getSharedPreferences("gh-settings", Context.MODE_PRIVATE)
+            val cleanIp = app.getSharedPreferences("gh-settings", Context.MODE_PRIVATE)
                 .getString("clean_ip", null)
             val patched = sub.rawJson.patchesCleanEgress(cleanIp)
             cfg.writeText(patched)
             cfg
         } catch (e: Exception) {
-            File(ctx, "missing.json")
+            File(app.filesDir, "missing.json")
         }
     }
 

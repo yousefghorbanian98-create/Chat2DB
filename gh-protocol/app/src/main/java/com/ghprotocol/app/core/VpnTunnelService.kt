@@ -54,6 +54,10 @@ class VpnTunnelService : VpnService() {
             Log.e(TAG, "establish failed", e)
             return false
         }
+        if (fd == null) {
+            Log.e(TAG, "establish returned null fd")
+            return false
+        }
         vpnFd = fd
         running = true
         Thread({ loop(fd) }, "gh-vpn-loop").apply { isDaemon = true; start() }
@@ -75,7 +79,7 @@ class VpnTunnelService : VpnService() {
     }
 
     private fun loop(fd: ParcelFileDescriptor) {
-        val input = fd.newInputStream()
+        val input = java.io.FileInputStream(fd.fileDescriptor)
         val buf = ByteArray(MTU)
         while (running) {
             val n = try {
