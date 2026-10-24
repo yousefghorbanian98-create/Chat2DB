@@ -140,9 +140,11 @@ jobs:
           # Everything emulator-side runs as root with HOME=/root (deterministic
           # despite sudo env_reset): AVD lives in /root/.android/avd, and root
           # has KVM access even when the runner user is not in the kvm group.
-          if ! sudo env HOME=/root avdmanager list avd 2>/dev/null | grep -q "^Name: $AVD$"; then
+          # NOTE: sudo resets PATH to secure_path — always absolute paths under sudo.
+          AVDMAN="$ANDROID_HOME/cmdline-tools/latest/bin/avdmanager"
+          if ! sudo env HOME=/root "$AVDMAN" list avd 2>/dev/null | grep -q "^Name: $AVD$"; then
             echo "Creating AVD $AVD (pixel_6 / api34 / x86_64) as root…"
-            echo no | sudo env HOME=/root avdmanager create avd -n "$AVD" \
+            echo no | sudo env HOME=/root "$AVDMAN" create avd -n "$AVD" \
               -k "system-images;android-34;default;x86_64" -d pixel_6 > avd-create.log 2>&1 \
               || { echo "AVD create failed:"; tail -30 avd-create.log; exit 1; }
           fi
