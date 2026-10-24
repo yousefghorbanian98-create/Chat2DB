@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-24T20:47:10Z
+## gh-protocol E2E log — 2026-10-24T20:52:38Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-24T20:45:18Z ==
+== pre-flight 2026-10-24T20:50:40Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 20:40 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 24 20:46 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 1.7G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:45 .
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:45 ..
-drwxr-xr-x 3 runner runner 4096 Oct 24 20:45 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 24 20:45 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:51 .
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:51 ..
+drwxr-xr-x 3 runner runner 4096 Oct 24 20:51 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 24 20:51 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -50,7 +50,8 @@ USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (a
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3033
+ERROR        | Unable to connect to adb daemon on port: 5037
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3050
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -120,7 +121,7 @@ INFO         |   androidboot.vbmeta.digest=8bee4f6105b6acd7de887b1ee6629ab07066d
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7f1108201000 as it is in the protected range from 0x7f1008200000 to 0x7f1108400000
+WARNING: cannnot unmap ptr 0x7f89d2a01000 as it is in the protected range from 0x7f88d2a00000 to 0x7f89d2c00000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
 INFO         | Successfully initialized netsim WiFi
@@ -131,7 +132,7 @@ INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 29870 ms
+INFO         | Boot completed in 31145 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
 
 ### gradle-build.log (tail)
@@ -150,12 +151,12 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugResValues
+> Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
 > Task :app:extractDeepLinksDebug
 > Task :app:generateDebugResources
@@ -167,27 +168,24 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:packageDebugResources
 > Task :app:processDebugMainManifest
-> Task :app:mergeDebugAssets
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
 > Task :app:desugarDebugFileDependencies
-> Task :app:parseDebugLocalResources
-> Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs
-> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugResources
-> Task :app:compressDebugAssets
-> Task :app:stripDebugDebugSymbols
-> Task :app:mergeExtDexDebug
-> Task :app:processDebugResources
+> Task :app:mergeDebugJniLibFolders
+> Task :app:parseDebugLocalResources
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugNativeLibs
 > Task :app:mergeLibDexDebug
-
+> Task :app:compressDebugAssets
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
-
-> Task :app:writeDebugAppMetadata
-> Task :app:validateSigningDebug
-> Task :app:writeDebugSigningConfigVersions
 
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
@@ -201,9 +199,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792874571005.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792874883651.json
 
-BUILD SUCCESSFUL in 2m 30s
+BUILD SUCCESSFUL in 2m 43s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
