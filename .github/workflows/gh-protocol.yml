@@ -64,7 +64,7 @@ jobs:
               echo "== downloading ${ZIP}"
               curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}"
               curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}.dgst" "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}.dgst"
-              EXPECTED=$(awk '{print $1}' "/tmp/${ZIP}.dgst")
+              EXPECTED=$(grep "^SHA2-256=" "/tmp/${ZIP}.dgst" | cut -d= -f2 | tr "[:upper:]" "[:lower:]")
               ACTUAL=$(sha256sum "/tmp/${ZIP}" | awk '{print $1}')
               echo "dgst=${EXPECTED} actual=${ACTUAL}"
               if [ "$EXPECTED" != "$ACTUAL" ]; then echo "SHA-256 MISMATCH for ${ZIP}"; exit 1; fi
