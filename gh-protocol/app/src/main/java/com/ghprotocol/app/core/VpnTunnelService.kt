@@ -148,13 +148,16 @@ class VpnTunnelService : VpnService() {
             val head = ByteArray(4)
             din.readFully(head, 0, 4)
             if (!Socks5.connectReplyOk(head)) { s.close(); return null }
+            // consume the bound-address block (ATYP: 1=IPv4 4B, 4=IPv6 16B, 3=domain)
             val atyp = head[3].toInt() and 0xFF
-            when (atyp) {
-                1 -> din.skipNBytes(4)
-                4 -> din.skipNBytes(16L)
-                else -> din.skipNBytes(1 + (din.readByte().toInt() and 0xFF))
+            val bindAddrLen = when (atyp) {
+                1 -> 4
+                4 -> 16
+                3 -> 1 + (din.readByte().toInt() and 0xFF)
+                else -> 0
             }
-            din.skipNBytes(2)
+            din.readFully(ByteArray(bindAddrLen))
+            din.readShort() // bound port — consumed
             s
         } catch (e: Exception) {
             Log.w(TAG, "socks5 connect failed: ${e.message}")
