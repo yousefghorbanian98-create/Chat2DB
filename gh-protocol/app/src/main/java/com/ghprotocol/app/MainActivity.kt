@@ -14,8 +14,18 @@ import com.ghprotocol.app.ui.theme.GhProtocolTheme
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val ACTION_CONNECT = "com.ghprotocol.app.action.CONNECT"
+        /** Set by the deep-link (ghprotocol://connect / ACTION_CONNECT) — consumed once by HomeViewModel. */
+        @Volatile
+        var pendingConnect: Boolean = false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null && wantsConnect(intent)) {
+            pendingConnect = true
+        }
         enableEdgeToEdge()
         val settings = SettingsStore(this)
         when (settings.language) {
@@ -34,6 +44,16 @@ class MainActivity : ComponentActivity() {
                 GhNavHost(viewModel = vm)
             }
         }
+    }
+
+    private fun wantsConnect(intent: android.content.Intent?): Boolean {
+        if (intent == null) return false
+        if (intent.action == ACTION_CONNECT) return true
+        if (intent.action == android.content.Intent.ACTION_VIEW) {
+            val data = intent.data
+            if (data != null && data.scheme == "ghprotocol" && data.host == "connect") return true
+        }
+        return false
     }
 
     private fun applyLocale(locale: Locale) {

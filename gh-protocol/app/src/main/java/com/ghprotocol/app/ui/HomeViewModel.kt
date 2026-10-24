@@ -57,6 +57,11 @@ class HomeViewModel(
         if (_ui.value.subscription == null) {
             viewModelScope.launch { refreshConfig() }
         }
+        // Deep-link connect (E2E + share-to-connect): fire once, after first layout
+        if (com.ghprotocol.app.MainActivity.pendingConnect) {
+            com.ghprotocol.app.MainActivity.pendingConnect = false
+            viewModelScope.launch { onConnectTap() }
+        }
     }
 
     fun refreshConfig() {

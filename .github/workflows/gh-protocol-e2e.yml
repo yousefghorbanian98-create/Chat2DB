@@ -1,0 +1,47 @@
+# P2b: instrumented E2E — real VPN connection on an x86_64 emulator.
+# Manual trigger only (emulator jobs are expensive): gh workflow run gh-protocol-e2e.yml
+name: gh-protocol-e2e (P2b)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: gh-protocol-e2e
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Emulator E2E (x86_64, real VPN)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # wrapper lives in gh-protocol/ subdir; pin the same version explicitly
+          gradle-version: '8.10.2'
+
+      - name: Fetch Xray-core (official release, SHA-256 verified)
+        working-directory: gh-protocol
+        run: bash ci-fetch-xray.sh
+
+      - name: Build debug APK
+        working-directory: gh-protocol
+        run: ./gradlew --no-daemon assembleDebug --stacktrace 2>&1 | tail -15
+
+      - name: Run E2E on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel_6
+          working-directory: gh-protocol
+          script: bash ci-e2e.sh
