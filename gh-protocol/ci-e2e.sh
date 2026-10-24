@@ -71,7 +71,8 @@ else
   TS=$(python3 -c 'import time; print(int(time.time() * 1000))' 2>/dev/null || echo "$(date +%s)000")
   # Stream into the app's filesDir via run-as stdin — SELinux blocks app reads
   # of /sdcard files pushed by adb (shell_data_file) on API 30+.
-  adb shell "run-as $PKG sh -c 'cat > files/subscription.json'" < "$SUB" >> "$LOG" 2>&1 \
+  # NB: app files/ dir only exists after first launch — create it first.
+  adb shell "run-as $PKG sh -c 'mkdir -p files && cat > files/subscription.json'" < "$SUB" >> "$LOG" 2>&1 \
     || report "seed: writing subscription.json failed (see log above)"
   adb shell "run-as $PKG sh -c 'echo $TS > files/subscription.meta'" >> "$LOG" 2>&1 \
     || report "seed: writing subscription.meta failed"
