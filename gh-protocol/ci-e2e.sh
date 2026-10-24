@@ -42,17 +42,38 @@ adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"
 
 D="$(dirname "$LOG")"
 
-say "== launch app =="
-adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1 >>"$LOG" 2>&1 || report "app launch failed"
-sleep 15
+say "== wait for emulator external network (needed for subscription fetch) =="
+NETOK=0
+for i in $(seq 1 30); do
+  if adb shell "toybox ping -c 1 -W 2 8.8.8.8" 2>/dev/null | grep -q "64 bytes"; then
+    NETOK=1
+    say "emulator has network after ~$((i * 4))s"
+    break
+  fi
+  sleep 4
+done
+[ "$NETOK" = "1" ] || report "emulator has no external network — E2E impossible (environment issue)"
 
-say "== app alive? =="
-ALIVE=$(adb shell "pidof $PKG" 2>/dev/null | tr -d '\r')
-say "pid after launch: ${ALIVE:-<none>}"
-if [ -z "$ALIVE" ]; then
+say "== launch app (am start, up to 3 tries) =="
+LAUNCHED=0
+for i in 1 2 3; do
+  adb shell am start -n "$PKG/.MainActivity" >>"$LOG" 2>&1 || true
+  sleep 8
+  ALIVE=$(adb shell "pidof $PKG" 2>/dev/null | tr -d '\r')
+  if [ -n "$ALIVE" ]; then
+    LAUNCHED=1
+    say "app up (try $i, pid $ALIVE)"
+    break
+  fi
+  say "try $i: app not alive — capturing logcat"
+  adb logcat -d | grep -E "ghprotocol|AndroidRuntime|FATAL" | tail -40 >> "$LOG" 2>/dev/null || true
+  sleep 7
+done
+if [ "$LAUNCHED" != "1" ]; then
   adb logcat -d -b crash > "$D/e2e-crash.log" 2>/dev/null || true
+  adb logcat -d > "$D/e2e-logcat.log" 2>/dev/null || true
   tail -60 "$D/e2e-crash.log" >> "$LOG" 2>/dev/null || true
-  report "app process not alive after launch (crash log attached)"
+  report "app not alive after 3 launch attempts (crash+logcat attached)"
 fi
 
 say "== trigger connect via deep link =="
