@@ -67,7 +67,8 @@ for ABI in arm64-v8a amd64; do
     head -c 300 "/tmp/${ZIP}" | od -c | head -5 >> "$DIAG" 2>&1
     exit 44
   fi
-  BIN=$(find "/tmp/xray-${ABI}" -type f -name "Xray*" | head -n 1)
+  BIN=$(find "/tmp/xray-${ABI}" -type f -iname "xray*" ! -name "*.dat" ! -name "*.json" ! -name "*.txt" -perm -u+x | head -n 1)
+  [ -n "$BIN" ] || BIN=$(find "/tmp/xray-${ABI}" -type f -iname "xray*" ! -name "*.dat" ! -name "*.json" ! -name "*.txt" | head -n 1)
   if [ -z "$BIN" ]; then
     log "FATAL: no Xray binary in ${ZIP}; extracted files:"
     find "/tmp/xray-${ABI}" -type f | head -20 >> "$DIAG" 2>&1
