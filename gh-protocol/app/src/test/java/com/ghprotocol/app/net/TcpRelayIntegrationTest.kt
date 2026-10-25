@@ -146,6 +146,89 @@ class TcpRelayIntegrationTest {
         }
     }
 
+    /**
+     * Requirement 5: the numbers a user sees must describe *application* traffic. The in-tunnel
+     * self-test injects a synthetic flow into the same relay, so its bytes have to be reported
+     * apart — never silently added to Up/Down/ActiveTCP.
+     */
+    @Test
+    fun selfTestBytesAreReportedApartFromApplicationBytes() {
+        TestNet.EchoServer().use { echo ->
+            TestNet.SocksServer().use { socks ->
+                val sink = RecordingSink()
+                val relay = TcpRelay(sink, TestNet.connectorFor(socks), Events(), config())
+                try {
+                    // 1) A real application flow (source 10.8.0.2, the tunnel address).
+                    val payload = "hello-app".toByteArray()
+                    runFlow(relay, sink, echo.port, clientIp, 40000, payload)
+
+                    val appOnly = relay.stats().applicationOnly()
+                    assertEquals("app up bytes must be exactly what the app sent", payload.size.toLong(), appOnly.bytesUp)
+                    assertEquals(payload.size.toLong(), appOnly.bytesDown)
+                    assertEquals(0L, relay.stats().probeBytesUp)
+                    assertEquals(0L, relay.stats().probeBytesDown)
+
+                    // 2) The in-tunnel self-test against the same relay instance.
+                    val selfTest = com.ghprotocol.app.core.net.TunnelSelfTest(relay)
+                    val result = selfTest.run(
+                        targetIp = "127.0.0.1",
+                        targetPort = echo.port,
+                        request = "GET /selftest HTTP/1.0\r\n\r\n".toByteArray(),
+                        expected = { bytes -> bytes.isNotEmpty() },
+                        timeoutMs = 5000
+                    )
+                    assertTrue("self-test must pass against the echo server: ${result.stage}/${result.detail}", result.ok)
+
+                    val stats = relay.stats()
+                    assertTrue("probe bytes must be recorded", stats.probeBytesUp > 0 && stats.probeBytesDown > 0)
+                    val visible = stats.applicationOnly()
+                    assertEquals(
+                        "self-test bytes must never leak into the displayed Up counter",
+                        payload.size.toLong(),
+                        visible.bytesUp
+                    )
+                    assertEquals(
+                        "self-test bytes must never leak into the displayed Down counter",
+                        payload.size.toLong(),
+                        visible.bytesDown
+                    )
+                    assertEquals("probe flows must not be counted as app flows", stats.probeFlowsOpened, 1L)
+                } finally {
+                    relay.shutdown()
+                }
+            }
+        }
+    }
+
+    /** Runs one complete app flow (handshake, payload, ACK) and returns the received bytes. */
+    private fun runFlow(
+        relay: TcpRelay,
+        sink: RecordingSink,
+        originPort: Int,
+        srcIp: String,
+        srcPort: Int,
+        payload: ByteArray
+    ) {
+        val isn = 7000L
+        relay.onPacket(
+            TestNet.clientPacket(4, srcIp, srcPort, "127.0.0.1", originPort, isn, 0, PacketCodec.FLAG_SYN)
+        )
+        val synAck = sink.await { it.isSyn && it.isAck && it.dstPort == srcPort } ?: error("no SYN-ACK")
+        val serverNext = PacketCodec.seqAdd(synAck.seq, 1)
+        relay.onPacket(
+            TestNet.clientPacket(4, srcIp, srcPort, "127.0.0.1", originPort, isn + 1, serverNext, PacketCodec.FLAG_ACK)
+        )
+        relay.onPacket(
+            TestNet.clientPacket(
+                4, srcIp, srcPort, "127.0.0.1", originPort,
+                isn + 1, serverNext, PacketCodec.FLAG_PSH or PacketCodec.FLAG_ACK, payload
+            )
+        )
+        val response = sink.await { it.payload.isNotEmpty() && it.dstPort == srcPort }
+        assertNotNull("no payload came back for $srcIp:$srcPort", response)
+        assertEquals(String(payload), String(response?.payload ?: ByteArray(0)))
+    }
+
     @Test
     fun multiSegmentPayloadArrivesIntactThroughEchoServer() {
         TestNet.EchoServer().use { echo ->
@@ -295,10 +378,17 @@ class TcpRelayIntegrationTest {
                     relay.onPacket(
                         TestNet.clientPacket(4, clientIp, clientPort, "127.0.0.1", silent.port, 401, PacketCodec.seqAdd(synAck.seq, 1), PacketCodec.FLAG_ACK)
                     )
+                    // closeFlow() removes the flow from the map *before* it reports the event, so
+                    // polling activeFlows alone is a race on a slow runner: wait for the event.
                     val deadline = System.currentTimeMillis() + 4000
-                    while (relay.stats().activeFlows > 0 && System.currentTimeMillis() < deadline) Thread.sleep(20)
+                    while (!events.closed.contains("idle_timeout") && System.currentTimeMillis() < deadline) {
+                        Thread.sleep(20)
+                    }
                     assertEquals("idle flow must be torn down", 0, relay.stats().activeFlows)
-                    assertTrue("teardown must be reported", events.closed.contains("idle_timeout"))
+                    assertTrue(
+                        "teardown must be reported, got=${events.closed}",
+                        events.closed.contains("idle_timeout")
+                    )
                 } finally {
                     relay.shutdown()
                 }

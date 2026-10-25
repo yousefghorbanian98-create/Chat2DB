@@ -5,6 +5,7 @@ import java.io.OutputStream
 import java.net.Socket
 import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 
 /** Output side of the tunnel (the TUN file descriptor in production, a recorder in tests). */
@@ -27,7 +28,14 @@ data class RelayConfig(
     val advertisedWindow: Int = 65535,
     val tickerIntervalMs: Long = 100,
     /** Time a half-closed flow is kept around so the peer can finish its FIN exchange. */
-    val halfCloseGraceMs: Long = 5_000
+    val halfCloseGraceMs: Long = 5_000,
+    /**
+     * Source addresses used by the in-tunnel **self-test** ([TunnelSelfTest]). Their bytes are
+     * real but they are not application traffic, so they are counted separately: the UI shows
+     * [RelayStats.applicationOnly] values and the self-test reads the [RelayStats.probeBytesUp]
+     * fields, which is what makes "Up/Down" mean "traffic the apps really sent".
+     */
+    val probeSourceIps: Set<String> = setOf("10.8.0.99")
 )
 
 data class RelayStats(
@@ -43,8 +51,22 @@ data class RelayStats(
     val retransmits: Long = 0,
     val droppedFragments: Long = 0,
     val parseFailures: Long = 0,
-    val closeReasons: Map<String, Long> = emptyMap()
-)
+    val closeReasons: Map<String, Long> = emptyMap(),
+    /** Bytes/flows produced by the in-tunnel self-test, included in the totals above. */
+    val probeBytesUp: Long = 0,
+    val probeBytesDown: Long = 0,
+    val probeFlowsOpened: Long = 0,
+    val probeActiveFlows: Int = 0
+) {
+    /**
+     * The counters a user is shown: application traffic only. `activeFlows` is already
+     * app-only, so only the byte totals have to drop the self-test share.
+     */
+    fun applicationOnly(): RelayStats = copy(
+        bytesUp = (bytesUp - probeBytesUp).coerceAtLeast(0),
+        bytesDown = (bytesDown - probeBytesDown).coerceAtLeast(0)
+    )
+}
 
 /** Observability hooks — implementations must never throw into the data path. */
 interface RelayEvents {
@@ -119,6 +141,9 @@ class TcpRelay(
         val writerSignal = Object()
         val ackSignal = Object()
         var writerStop = false
+
+        /** Synthetic flow injected by [TunnelSelfTest]: counted apart from app traffic. */
+        val isProbe: Boolean = key.srcIp in config.probeSourceIps
     }
 
     private class DownSegment(
@@ -141,6 +166,10 @@ class TcpRelay(
     private val droppedFragments = AtomicLong()
     private val parseFailures = AtomicLong()
     private val closeReasons = ConcurrentHashMap<String, AtomicLong>()
+    private val probeBytesUp = AtomicLong()
+    private val probeBytesDown = AtomicLong()
+    private val probeFlowsOpened = AtomicLong()
+    private val probeActiveFlows = AtomicInteger()
 
     @Volatile
     private var closed = false
@@ -158,7 +187,7 @@ class TcpRelay(
         flowsEstablished = flowsEstablished.get(),
         flowsClosed = flowsClosed.get(),
         connectFailures = connectFailures.get(),
-        activeFlows = flows.size,
+        activeFlows = (flows.size - probeActiveFlows.get()).coerceAtLeast(0),
         bytesUp = upTotal.get(),
         bytesDown = downTotal.get(),
         segmentsUp = segmentsUp.get(),
@@ -166,7 +195,11 @@ class TcpRelay(
         retransmits = retransmits.get(),
         droppedFragments = droppedFragments.get(),
         parseFailures = parseFailures.get(),
-        closeReasons = closeReasons.mapValues { it.value.get() }
+        closeReasons = closeReasons.mapValues { it.value.get() },
+        probeBytesUp = probeBytesUp.get(),
+        probeBytesDown = probeBytesDown.get(),
+        probeFlowsOpened = probeFlowsOpened.get(),
+        probeActiveFlows = probeActiveFlows.get()
     )
 
     /**
@@ -231,6 +264,10 @@ class TcpRelay(
         )
         flows[key] = flow
         flowsOpened.incrementAndGet()
+        if (flow.isProbe) {
+            probeFlowsOpened.incrementAndGet()
+            probeActiveFlows.incrementAndGet()
+        }
         events.onFlowOpened(key.toString(), packet.dstIp, packet.dstPort)
         startTicker()
         publishStats(force = true)
@@ -320,6 +357,7 @@ class TcpRelay(
         flow.pendingUp.addLast(packet.payload)
         flow.bufferedUpBytes += packet.payload.size
         upTotal.addAndGet(packet.payload.size.toLong())
+        if (flow.isProbe) probeBytesUp.addAndGet(packet.payload.size.toLong())
         segmentsUp.incrementAndGet()
         flow.upBytes += packet.payload.size
         synchronized(flow.writerSignal) { flow.writerSignal.notifyAll() }
@@ -394,6 +432,7 @@ class TcpRelay(
                 flow.lastActivityMs = clock()
                 flow.downQueue.add(DownSegment(seq, chunk, clock(), 0))
                 downTotal.addAndGet(chunkSize.toLong())
+                if (flow.isProbe) probeBytesDown.addAndGet(chunkSize.toLong())
                 segmentsDown.incrementAndGet()
                 flow.downBytes += chunkSize
                 writeTun(packet)
@@ -603,6 +642,7 @@ class TcpRelay(
             flow.writerStop = true
         }
         flows.remove(flow.key)
+        if (flow.isProbe) probeActiveFlows.decrementAndGet()
         closeReasons.getOrPut(reason) { AtomicLong() }.incrementAndGet()
         flowsClosed.incrementAndGet()
         if (sendRst) {

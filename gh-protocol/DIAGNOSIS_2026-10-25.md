@@ -137,26 +137,65 @@ Everything else stays `TUNNELING`/`DEGRADED` with the failing stage in the log.
 
 ## 5. Verification performed in this change
 
-53 hermetic JVM tests (loopback only, no external network):
+54 hermetic JVM tests (loopback only, no external network):
 
 | suite | what it proves |
 |---|---|
-| `TcpRelayIntegrationTest` (8) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes |
-| `DnsResolverTest` (11) | DoH over TLS handshake + HTTP exchange, transaction/question validation, budget enforcement, cache TTL, real SERVFAIL, **no synthesised AAAA** |
+| `TcpRelayIntegrationTest` (9) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes, **self-test bytes never leak into the app counters** |
+| `DnsResolverTest` (12) | DoH over TLS handshake + HTTP exchange, transaction/question validation, budget enforcement, cache TTL, real SERVFAIL, **no synthesised AAAA** |
 | `DnsMessageTest` (7) | RFC 1035 parse/validate, SERVFAIL/TC construction |
 | `PacketCodecTest` (9) | IPv4/IPv6 TCP/UDP checksums, sequence wrap, MAS options, fragment rejection |
 | `CleanIpProbeTest` (6) | only full TLS+HTTP+CF marker is healthy; private/invalid IPs never probed |
 | `TunnelSelfTestTest` (4) | self-test needs real payload and moves the relay's counters |
-| `TunnelVerifierTest` (6) | stages, bare-connect is not success, `combine` requires tunnel payload |
+| `TunnelVerifierTest` (7) | stages, bare-connect is not success, `combine` requires tunnel payload |
 
-## 6. What still requires the phone (cannot be substituted by CI)
+## 6. D6 — the shown `Up/Down/ActiveTCP` included the self-test's own bytes  **[proven]**
+
+`TunnelSelfTest` injects a synthetic flow (`10.8.0.99:41234 → target`) into the **same**
+`TcpRelay` instance that carries app traffic, so `RelayStats.bytesUp/bytesDown/flowsOpened`
+counted probe bytes. That is why a device with no app traffic could still report
+`Up=3.4 KB` while `ActiveTCP=0`: the counter was real, but it was not *application* traffic.
+
+Fix (tested): `RelayConfig.probeSourceIps` marks probe sources, the relay keeps
+`probeBytesUp/probeBytesDown/probeFlowsOpened/probeActiveFlows` separately, and the service
+publishes `RelayStats.applicationOnly()` to the UI. `TcpRelayIntegrationTest
+.selfTestBytesAreReportedApartFromApplicationBytes` asserts that a 9-byte app flow shows up as
+`appUp=appDown=9` even after a successful self-test ran through the same relay.
+
+## 7. CI-only unit-test failure (4 tests) — root cause and fix  **[proven by A/B on the runner]**
+
+Runs `40226735052` / `40227146538` / `40227598599` failed on `testDebugUnitTest` /
+`testReleaseUnitTest` only, always the same four:
+`CleanIpProbeTest.acceptsOnlyTlsHttpWithCloudflareMarker`,
+`...rejectsServerWithoutCloudflareMarker`,
+`DnsResolverTest.dohTransportCompletesRealTlsHandshakeAndHttpExchange`,
+`...dohTransportSurvivesWrongPathAndReportsFailure`, with `http:no_http_response` /
+`127.0.0.1:no_http_headers` — while all 18 tests passed locally and even a green
+`testDebugUnitTest` run on the runner was followed by a red `testReleaseUnitTest`.
+
+Cause: both in-test TLS servers relied on the *implicit* handshake of
+`SSLServerSocket.accept()` (the handshake only happens on the first read from the accepted
+socket) and `TlsHttpServer` did a **single** `input.read(buffer)` before answering. On a loaded
+runner the accepted socket then answered with nothing.
+
+Fix: the test servers now accept on a plain loopback `ServerSocket`, wrap the accepted socket
+with the server-side `SSLSocketFactory`, set `useClientMode=false`, force TLSv1.2, call
+`startHandshake()` inside the worker thread, read the request up to the header terminator, write
++ flush the response, and close via `shutdownOutput()` + bounded drain (a close with unread data
+would emit RST and discard the response). Each connection records `stage`, `bytesWritten` and
+`lastError`, and every assertion prints them.
+
+Evidence: run `40240521661` — 123 tests, 0 failures, release APK produced, on the same runner
+that failed the identical test bodies minutes earlier.
+
+## 8. What still requires the phone (cannot be substituted by CI)
 
 Run the build, connect with `fragB` + `CleanIP=auto`, then:
 
 ```
 adb logcat -c && adb logcat -s GhDiag GhVpnTunnel > gh.log
 # connect, open a browser page, then:
-grep -E "relay_selftest|dns_reply|dns_failed|flow_open|flow_closed|tun v" gh.log
+grep -E "relay_selftest|dns_reply|dns_failed|flow_open|flow_closed|flow_failed|tun v|stats t=|no_app_packets" gh.log
 ```
 
 Required evidence for "it works":
@@ -166,6 +205,13 @@ Required evidence for "it works":
 2. `dns_reply … path=doh:cloudflare-dns.com ...` (or `doh:google` / `tcp:…`) for the app's own
    queries — i.e. DNS working for real apps, and no repeating `context deadline exceeded`.
 3. `flow_open` / `flow_closed … up=<n> down=<m>` pairs whose sum equals the Up/Down counters.
+4. the 5-second heartbeat `stats t=15s packets=<n> tcp=<n> dns53=<n> activeTcp=<n>
+   flowsOpened=<n> appUp=<n> appDown=<n> probeUp=<n> dnsOk=<n> dnsFail=<n> state=<…>`:
+   `packets` must grow once an app sends through the tunnel, and `appUp/appDown` must equal the
+   sum of the `flow_closed` lines (self-test bytes appear only in `probeUp/probeDown`).
+5. if it never works, `no_app_packets after 10s` is the measured answer for `ActiveTCP=0`:
+   nothing entered `tun0` (app bypassing the tunnel / VPN not routed for that UID), which is a
+   different failure from "packets entered and the relay failed" — the heartbeat separates them.
 
 If `relay_selftest` fails, the log now names the stage (`syn_ack`, `payload`, `content`,
 `checksum`) and the target; if DNS fails it lists every attempted path with its error.

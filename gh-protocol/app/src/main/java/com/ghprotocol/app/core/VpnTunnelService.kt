@@ -110,6 +110,13 @@ class VpnTunnelService : VpnService() {
 
     private val diagBudget = AtomicInteger(30)
 
+    // Datapath counters for the adb heartbeat below: they separate "apps sent nothing into tun0"
+    // from "apps sent packets but the relay failed", which is exactly what ActiveTCP=0 hides.
+    private val tunPackets = java.util.concurrent.atomic.AtomicLong(0)
+    private val tunTcpPackets = java.util.concurrent.atomic.AtomicLong(0)
+    private val tunDnsPackets = java.util.concurrent.atomic.AtomicLong(0)
+    private val tunOtherUdp = java.util.concurrent.atomic.AtomicLong(0)
+
     /** Bounded DNS executor: a DNS storm must never create unbounded threads. */
     private val dnsPool = ThreadPoolExecutor(
         1, 2, 30L, TimeUnit.SECONDS, ArrayBlockingQueue(96),
@@ -249,6 +256,7 @@ class VpnTunnelService : VpnService() {
         )
         buildDatapath(output)
         TunnelLogBuffer.setTunnelState(TunnelState.CORE_READY, "tun_up ipv6=$ipv6")
+        startStatsHeartbeat()
         Thread({ readLoop(input, output) }, "gh-tun-read").apply { isDaemon = true; start() }
         runSelfTestAsync()
         return true
@@ -319,6 +327,61 @@ class VpnTunnelService : VpnService() {
         }
     }
 
+    /**
+     * Requirement-1 evidence, one line every 5 s on `adb logcat -s GhDiag:D`:
+     *
+     *   stats t=15s packets=.. tcp=.. dns53=.. otherUdp=.. activeTcp=.. flowsOpened=..
+     *         flowsEstablished=.. connectFailures=.. up=.. down=.. dnsOk=.. dnsFail=.. state=..
+     *
+     * Every byte/flow number is the relay's **absolute** counter, never a UI-side accumulator, so
+     * a reported Up/Down/ActiveTCP can be compared with the wire. If packets stays 0 while the
+     * tunnel is up, no application traffic ever entered tun0 — that is the measured cause of
+     * ActiveTCP=0, and it is logged as such instead of being guessed.
+     */
+    private fun startStatsHeartbeat() {
+        Thread({
+            var ticks = 0
+            while (running.get()) {
+                try {
+                    Thread.sleep(5_000L)
+                } catch (_: InterruptedException) {
+                    break
+                }
+                if (!running.get()) break
+                ticks++
+                val stats = relay?.stats()
+                val telemetry = TunnelLogBuffer.telemetry.value
+                Log.d(
+                    "GhDiag",
+                    "stats t=${ticks * 5}s packets=${tunPackets.get()} tcp=${tunTcpPackets.get()} " +
+                        "dns53=${tunDnsPackets.get()} otherUdp=${tunOtherUdp.get()} " +
+                        "activeTcp=${stats?.activeFlows ?: -1} flowsOpened=${stats?.flowsOpened ?: 0} " +
+                        "flowsEstablished=${stats?.flowsEstablished ?: 0} " +
+                        "connectFailures=${stats?.connectFailures ?: 0} retransmits=${stats?.retransmits ?: 0} " +
+                        "appUp=${stats?.applicationOnly()?.bytesUp ?: 0} appDown=${stats?.applicationOnly()?.bytesDown ?: 0} " +
+                        "probeUp=${stats?.probeBytesUp ?: 0} probeDown=${stats?.probeBytesDown ?: 0} " +
+                        "probeFlows=${stats?.probeActiveFlows ?: 0} " +
+                        "dnsOk=${telemetry.dnsQueriesHandled} dnsFail=${telemetry.dnsQueriesFailed} " +
+                        "state=${telemetry.tunnelState} ipv6=${telemetry.ipv6Mode}"
+                )
+                if (ticks == 2 && tunPackets.get() == 0L) {
+                    Log.w(
+                        "GhDiag",
+                        "no_app_packets after 10s: nothing entered tun0 — ActiveTCP stays 0 because " +
+                            "no application sends through the tunnel (verifier/self-test traffic is " +
+                            "excluded from these counters)"
+                    )
+                    TunnelLogBuffer.log(
+                        LogLevel.WARN, LogCategory.TUN,
+                        "هیچ بستهٔ برنامه‌ای وارد تونل نشد — دلیل ActiveTCP=0 نبودِ ترافیک برنامه است",
+                        "heartbeat tun0_up_10s packets=0 tcp=0 dns53=0"
+                    )
+                }
+            }
+            Log.d("GhDiag", "stats heartbeat exited")
+        }, "gh-stats").apply { isDaemon = true; start() }
+    }
+
     private fun readLoop(input: FileInputStream, output: FileOutputStream) {
         val buffer = ByteArray(MTU + 512)
         while (running.get()) {
@@ -333,6 +396,15 @@ class VpnTunnelService : VpnService() {
             if (packet == null) {
                 Log.d("GhDiag", "tun_parse_fail len=$read")
                 continue
+            }
+            tunPackets.incrementAndGet()
+            when (packet.protocol) {
+                PacketCodec.PROTO_TCP -> tunTcpPackets.incrementAndGet()
+                PacketCodec.PROTO_UDP -> if (packet.dstPort == 53) {
+                    tunDnsPackets.incrementAndGet()
+                } else {
+                    tunOtherUdp.incrementAndGet()
+                }
             }
             if (diagBudget.getAndDecrement() > 0) {
                 Log.d(
@@ -449,9 +521,11 @@ class VpnTunnelService : VpnService() {
         }
 
         override fun onTraffic(upBytes: Long, downBytes: Long, activeFlows: Int) {
-            // Absolute values from the relay — the UI never accumulates on its own.
+            // Absolute values from the relay — the UI never accumulates on its own. Self-test
+            // bytes are excluded so "Up/Down/ActiveTCP" describe application traffic only
+            // (requirement 5); the probe share is logged by the heartbeat below.
             val stats = relay?.stats()
-            if (stats != null) TunnelLogBuffer.setRelayStats(stats)
+            if (stats != null) TunnelLogBuffer.setRelayStats(stats.applicationOnly())
         }
 
         override fun onWarning(stage: String, detail: String) {

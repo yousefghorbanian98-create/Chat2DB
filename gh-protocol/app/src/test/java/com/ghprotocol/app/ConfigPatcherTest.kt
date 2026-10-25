@@ -337,7 +337,20 @@ class ConfigPatcherTest {
             // The transaction that really becomes DoH must be identifiable from the plan alone.
             assertEquals("https://" + ConfigPatcher.DOH_HOST + "/dns-query", plan.dohEndpoints.firstOrNull())
             assertEquals(listOf(ConfigPatcher.DOH_BOOTSTRAP_IPV4), plan.dohBootstrapIps)
-            assertNotNull("profile[$index] must route DoH through a named outbound", plan.dohOutbound)
+            // These profiles expose their DoH server in the string form, which carries no tag, so
+            // no routing rule matches it and Xray uses the first outbound. The plan must still
+            // name that outbound instead of claiming "unknown".
+            assertEquals(
+                "profile[$index] DoH must be carried by an identifiable outbound",
+                "tcp-fragment",
+                plan.dohOutbound ?: plan.defaultOutbound
+            )
+            // The app path: our own resolver enters Xray on mixed-in, which is routed explicitly.
+            assertEquals(
+                "profile[$index] app DNS/DoH must ride the fragmenting outbound",
+                "tcp-fragment",
+                ConfigPatcher.findOutboundForInbound(cfg, "mixed-in")
+            )
             assertNotNull("profile[$index] must expose a local dns inbound for the tunnel", dnsInbound)
             assertFalse("profile[$index] must not use fakedns", plan.servers.any { it == "fakedns" })
             assertEquals(
@@ -346,6 +359,17 @@ class ConfigPatcherTest {
                 dnsInbound?.optString("protocol")
             )
             assertEquals("127.0.0.1", dnsInbound?.optString("listen"))
+            assertEquals(
+                "profile[$index] dns-in must listen on the port the app relays to",
+                ConfigPatcher.DNS_IN_PORT,
+                dnsInbound?.optInt("port")
+            )
+            // The DoH query must never be answered by a name that needs the very DNS it is asking.
+            assertEquals(
+                "profile[$index] DoH bootstrap must be a literal IP",
+                true,
+                plan.dohBootstrapIps.all { it.first().isDigit() }
+            )
         }
     }
 

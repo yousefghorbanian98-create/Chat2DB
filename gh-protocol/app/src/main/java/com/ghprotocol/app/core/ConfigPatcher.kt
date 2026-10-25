@@ -347,7 +347,9 @@ object ConfigPatcher {
         val dohEndpoints: List<String>,
         val dohBootstrapIps: List<String>,
         val dohOutbound: String?,
-        val notes: List<String>
+        /** First outbound tag: Xray's implicit target when no routing rule matches. */
+        val defaultOutbound: String? = null,
+        val notes: List<String> = emptyList()
     ) {
         fun describe(): String = buildString {
             append("servers=").append(servers.joinToString(","))
@@ -356,13 +358,17 @@ object ConfigPatcher {
             append(" doh=").append(dohEndpoints.joinToString(",").ifEmpty { "none" })
             append(" dohIps=").append(dohBootstrapIps.joinToString(",").ifEmpty { "none" })
             append(" dohOutbound=").append(dohOutbound ?: "default")
+            append(" defaultOutbound=").append(defaultOutbound ?: "none")
             if (notes.isNotEmpty()) append(" notes=").append(notes.joinToString("; "))
         }
     }
 
     const val DOH_HOST = "cloudflare-dns.com"
 
-    /** Real A records of cloudflare-dns.com (verified 2026-10-25: 104.16.248.249/249). */
+    /**
+     * Real A records of cloudflare-dns.com, re-verified from an independent resolver on
+     * 2026-10-26: 104.16.248.249 / 104.16.249.249 (AAAA 2606:4700::6810:f8f9 / ::f9f9).
+     */
     const val DOH_BOOTSTRAP_IPV4 = "104.16.248.249"
     val DOH_ZONE_IPV4 = listOf(DOH_BOOTSTRAP_IPV4, "104.16.249.249")
 
@@ -438,6 +444,9 @@ object ConfigPatcher {
             dohEndpoints = dohEndpoints,
             dohBootstrapIps = dohBootstrapIps,
             dohOutbound = dohOutbound,
+            defaultOutbound = json.optJSONArray("outbounds")
+                ?.optJSONObject(0)?.optString("tag", "")
+                ?.takeIf { it.isNotEmpty() },
             notes = notes
         )
     }
