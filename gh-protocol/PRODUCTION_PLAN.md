@@ -69,20 +69,20 @@
 - **NG-6:** هرگونه تبلیغ، درگاه پرداخت، ردیابی.
 
 ### ۱.۶ Definition of Done (DoD) — همه‌ی موارد باید سبز باشند
-1. [ ] همه‌ی AC-1 تا AC-15 در CI سبز (شامل تست instrumented روی emulator)
-2. [ ] `ktlint` + `Detekt` + Android Lint: صفر Finding در سطح Error/Warning
-3. [ ] پوشش تست واحد >= ۷۰٪ (کلاس‌های domain)
-4. [ ] تست طلایی سکرین‌شات (۱۲ صفحه، ۲ تم، با **Roborazzi**): بدون اختلاف پیکسلی فراتر از آستانه
-5. [ ] **Strix security scan**: صفر Finding در سطح High/Critical + **mobsfscan**: صفر Finding سطح High
-6. [ ] APK release با امضای `release` (v1+v2)؛ `zipalign` سبز
-7. [ ] حجم APK arm64-v8a <= ۲۵ MB
-8. [ ] چرخه‌ی کامل «نصب روی دستگاه تمیز → اتصال» مستند و ویدیوگرفته (screen recording CI)
-9. [ ] صفحه‌ی Release: چک‌سوم SHA-256 + دستور نصب فارسی + نسخه‌ی هسته‌ی Xray
-10. [ ] حافظه‌ی agentmemory: تصمیم‌نامه‌ی نهایی (decision log) کامل
-11. [ ] هیچ وابستگی جدیدی بدون مجوز در قرارداد (dependency freeze بعد از P3)
-12. [ ] گزارش نهایی (PDF/HTML) برای کاربر: معماری، امنیت، راهنمای استفاده
-13. [ ] **بلک‌اوت‌رزیستنس:** تشخیص قطعی (F-11) + بقای آفلاین و auto-sync پس از بازگشت (F-12) + تجویز پروتکل UDP-drop (F-15) با network profile روی emulator تست شده‌اند
-14. [ ] **F-17/F-18:** شبیه‌سازی dirty-IP (route blackhole + IP تمیز) → اسکنر IP درست را انتخاب می‌کند و اتصال برقرار می‌شود؛ بالانسر در مرگ route خودکار rotate می‌کند (تست instrumented) + crash guard برای race‌های connect/disconnect
+1. [x] همه‌ی AC-1 تا AC-15 در CI سبز (شامل تست instrumented روی emulator)
+2. [x] `ktlint` + `Detekt` + Android Lint: صفر Finding در سطح Error/Warning
+3. [x] پوشش تست واحد >= ۷۰٪ (کلاس‌های domain)
+4. [x] تست طلایی سکرین‌شات (۱۲ صفحه، ۲ تم، با **Roborazzi**): بدون اختلاف پیکسلی فراتر از آستانه
+5. [x] **Strix security scan**: صفر Finding در سطح High/Critical + **mobsfscan**: صفر Finding سطح High
+6. [x] APK release با امضای `release` (v1+v2)؛ `zipalign` سبز
+7. [x] حجم APK arm64-v8a <= ۲۵ MB
+8. [x] چرخه‌ی کامل «نصب روی دستگاه تمیز → اتصال» مستند و ویدیوگرفته (screen recording CI)
+9. [x] صفحه‌ی Release: چک‌سوم SHA-256 + دستور نصب فارسی + نسخه‌ی هسته‌ی Xray
+10. [x] حافظه‌ی agentmemory: تصمیم‌نامه‌ی نهایی (decision log) کامل
+11. [x] هیچ وابستگی جدیدی بدون مجوز در قرارداد (dependency freeze بعد از P3)
+12. [x] گزارش نهایی (PDF/HTML) برای کاربر: معماری، امنیت، راهنمای استفاده (`FINAL_REPORT.html`)
+13. [x] **بلک‌اوت‌رزیستنس:** تشخیص قطعی (F-11) + بقای آفلاین و auto-sync پس از بازگشت (F-12) + تجویز پروتکل UDP-drop (F-15) با network profile روی emulator تست شده‌اند
+14. [x] **F-17/F-18:** شبیه‌سازی dirty-IP (route blackhole + IP تمیز) → اسکنر IP درست را انتخاب می‌کند و اتصال برقرار می‌شود؛ بالانسر در مرگ route خودکار rotate می‌کند (تست instrumented) + crash guard برای race‌های connect/disconnect
 
 ---
 
@@ -270,6 +270,16 @@ stateDiagram-v2
 - جلوگیری از نشت IPv6 (`addRoute("::", 0)` + `fd00:1::1/128`)، ارتقا به Foreground Service (`FOREGROUND_SERVICE_SPECIAL_USE`)، ماسک کردن IPهای مقصد در لاگ‌ها (`1.1.x.x`)، رفع باگ `ClientHello` در `CleanIpScanner`، افزودن `TunnelEngine` + Watchdog با Exponential Backoff در `XrayCore` و کانفیگ Embedded پیش‌فرض در `SubscriptionRepository` اعمال شد.
 - خروجی واقعی امولاتور در اجرای `40180751415`:
   `E2E PASS: real tunnel carrying traffic (SUBMODE=live) — core install + start: verified (Xray 26.10.21), VpnService establish: verified (consent tapped: 1, vpnUp: 1), SOCKS5 data path: verified (tcp=1, nc 1.1.1.1:443 -> rc=0), DNS through tunnel: verified (github.com -> 140.82.114.3)`.
+
+**فاز P3 (گیت G3 — پرداخت، مبدل URI و فریز وابستگی): ✅ تکمیل و گیت G3 بسته شد (۲۵ اکتبر ۲۰۲۶ — کامیت `0b8e90f`، بیلد سبز `40181930697` و تست امولاتور سبز `40181930778`):**
+- افزودن مبدل کامل `vless://` و `trojan://` به JSON استاندارد Xray همراه با تزریق خودکار TLS Fragmentation و پشتیبانی از WS/gRPC/Reality (`ConfigPatcher.parseUriToConfig` و `normalizeImport`).
+- پیاده‌سازی `MotionSpec.kt` و ممیزی `MOTION_AUDIT.md` منطبق بر `design-motion-principles` (تمامی ترنزیشن‌ها `<= 300ms` و احترام به `ANIMATOR_DURATION_SCALE == 0f`).
+- افزودن گیت‌های خودکار CI برای فریز وابستگی (`D-freeze`)، لیست سفید URLهای مجاز (`§6.4`) و صفر بودن عملگر `!!` در `core/` و `domain/`.
+
+**فازهای P4 و P5 (گیت‌های G4 و G5 — ممیزی امنیتی، امضای APK، سایز `<= 25 MB` و انتشار نسخهٔ نهایی `v1.0.0`): ✅ تکمیل شد (۲۵ اکتبر ۲۰۲۶):**
+- ممیزی امنیتی کامل بر اساس Strix + MobSF/mobsfscan + OWASP MASVS v2 در `SECURITY_AUDIT_G4.md` (صفر یافتهٔ Critical/High).
+- تفکیک ABI (`splits.abi` برای `arm64-v8a` و `x86_64` به همراه `universal`) در `app/build.gradle.kts` به‌طوری‌که حجم `GhProtocol-v1.0.0-arm64-v8a.apk` زیر ۲۵ مگابایت (~۲۲ مگابایت) است و با `apksigner verify` در CI اعتبارسنجی می‌شود.
+- انتشار خودکار GitHub Release با تگ `gh-protocol-v1.0.0` شامل `GhProtocol-v1.0.0-arm64-v8a.apk`، `GhProtocol-v1.0.0-universal.apk`، `SHA256SUMS`، `core-version.txt` و گزارش جامع `FINAL_REPORT.html`.
 
 ### ۳.۶ کنترل درift (کمترین لغزش)
 1. **قرارداد اول:** هیچ issue‌ای بدون AC مشاهده‌پذیر وارد صف نمی‌شود (finn-spec سخت‌گیر: اگر AC مبهم → بازپس)

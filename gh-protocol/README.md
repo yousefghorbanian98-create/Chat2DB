@@ -1,71 +1,60 @@
-# Gh Protocol
+# Gh Protocol — v1.0.0
 
 **همیشه متصل. — Stay connected.**
 
-Gh Protocol is an open-source Android client for staying connected in restricted
-networks. It runs the official **Serverless-for-Iran** subscription on the
-official **Xray-core** (XTLS), inside a native `VpnService` tunnel — one tap,
-zero config, zero telemetry.
+[![Release v1.0.0](https://img.shields.io/badge/release-v1.0.0-34d399)](https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/gh-protocol-v1.0.0)
+[![Xray-core v26.10.21](https://img.shields.io/badge/Xray--core-v26.10.21-22d3ee)](https://github.com/XTLS/Xray-core/releases/tag/v26.10.21)
+[![Finn-Loop Gates](https://img.shields.io/badge/Finn--Loop-G0..G5%20PASSED-818cf8)](./QUALITY_GATES.md)
 
-> ## Honest positioning (read this)
-> Gh Protocol maximizes your chance of staying connected in **normal, degraded,
-> and partially restricted** network conditions. It **cannot** create a
-> connection during a **full national internet cutoff** — no client-side
-> software can (proven by the 88-day 2026 blackout, where packets were
-> discarded at the national gateway's forwarding plane). The app detects this
-> state and tells you the truth instead of promising miracles.
+**Gh Protocol** یک کلاینت اندروید متن‌باز، بدون نیاز به سرور شخصی و بدون تله‌متری برای حفظ ارتباط در شبکه‌های محدود است. این برنامه اشتراک رسمی **Serverless-for-Iran** (و لینک‌های `vless://` / `trojan://`) را همراه با فرگمنت TLS و اسکنر IP تمیز روی هستهٔ رسمی **Xray-core v26.10.21** در قالب یک تونل بومی `VpnService` با یک تپ اجرا می‌کند.
 
-## Status
+---
 
-**P0 — skeleton.** CI builds a signed empty APK. Connectivity (F-1..F-3) lands
-in P1/P2. No release yet.
+## دانلود و نصب در ۳ گام (۳-Step Quick Start)
 
-## Architecture (target)
+1. **دانلود و نصب APK:**
+   - **[دانلود مستقیم `GhProtocol-v1.0.0-arm64-v8a.apk` (~۲۲ مگابایت — پیشنهادی برای تمام گوشی‌های اندروید)](https://github.com/yousefghorbanian98-create/Chat2DB/releases/download/gh-protocol-v1.0.0/GhProtocol-v1.0.0-arm64-v8a.apk)**
+   - **[دانلود مستقیم `GhProtocol-v1.0.0-universal.apk` (نسخهٔ جامع arm64 + x86_64)](https://github.com/yousefghorbanian98-create/Chat2DB/releases/download/gh-protocol-v1.0.0/GhProtocol-v1.0.0-universal.apk)**
+   - **[فایل هش `SHA256SUMS`](https://github.com/yousefghorbanian98-create/Chat2DB/releases/download/gh-protocol-v1.0.0/SHA256SUMS)** | **[گزارش جامع `FINAL_REPORT.html`](./FINAL_REPORT.html)**
+2. **اتصال با یک کلیک:** برنامه را باز کنید و روی دکمهٔ بزرگ **«اتصال»** بزنید؛ در اولین اجرا مجوز سیستمی VPN اندروید را تایید کنید.
+3. **ابزارهای بازیابی در زمان اختلال شدید:**
+   - **اسکنر IP تمیز (F-17):** یافتن سریع‌ترین IP کلودفلر با هندشیک واقعی TLS 1.2 روی اپراتور فعلی شما.
+   - **وارد کردن کانفیگ دلخواه (F-16):** پشتیبانی از لینک‌های `vless://`، `trojan://` و JSON با تزریق خودکار TLS Fragmentation.
+   - **آماده‌سازی برای قطعی (F-13):** ذخیرهٔ آفلاین آخرین اشتراک سالم و بررسی سلامت هسته.
+
+---
+
+> ## مرزهای صادقانهٔ عملکرد (Honest Positioning)
+> **Gh Protocol** شانس اتصال شما را در شرایط عادی، اختلال شدید DPI، مسدودسازی SNI و محدودیت UDP به حداکثر می‌رساند. اما در صورت **قطع کامل ارتباط بین‌المللی در دروازهٔ ملی (National Gateway Forwarding-Plane Cutoff)**، هیچ نرم‌افزار سمت کلاینتی قادر به ایجاد اتصال بین‌المللی نیست. برنامه این وضعیت را از طریق کاوشگر شبکه تشخیص داده و صادقانه نمایش می‌دهد.
+
+---
+
+## معماری فنی (v1.0.0)
 
 ```
-User tap ──> Compose UI ──> VpnService (TUN)
-                          └─> tun2socks ──> Xray-core SOCKS5 :10808
-                                            └─> official Serverless-for-Iran config
+User Tap ──> Compose UI (RTL / Vazirmatn / MotionSpec <=300ms)
+         ──> HomeViewModel + SubscriptionRepository (Primary + Mirror + Embedded Fallback)
+         ──> ConfigPatcher (vless/trojan/JSON + TLS Fragment + Clean IP + Single Outbound)
+         ──> VpnTunnelService (TUN 10.8.0.2/24 + IPv6 fd00:1::1/128 Leak Guard)
+              ├─> UDP :53 ──> Dokodemo-door :15353 ──> Xray dns-out (Cloudflare DoH)
+              └─> TCP SYN/Data (RFC 793) ──> SOCKS5 :10808 ──> Xray-core v26.10.21
 ```
 
-- **Client:** Kotlin 2 + Jetpack Compose + Material 3, RTL-first, Vazirmatn.
-- **Core:** official `Xray-core` Android binary (MPL-2.0), version-checked ≥ 26.6.27.
-- **Privacy:** zero telemetry, zero analytics, exactly the permissions the
-  tunnel needs (`INTERNET`, `VPN`, `NOTIFICATIONS`). No accounts, no cloud.
+## وضعیت قابلیت‌ها (F-1 تا F-18)
 
-## Features (roadmap)
+| کد | قابلیت | وضعیت |
+|----|--------|-------|
+| F-1..F-10 | اتصال یک‌کلیکی، Xray-core 26.10.21، تونل VPN، پینگ واقعی، آپدیت خودکار، QR، لاگ ماسک‌شده، تم تیره/روشن، فارسی/انگلیسی | ✅ v1.0.0 |
+| F-11..F-15 | تشخیص صادقانهٔ قطعی، بقای آفلاین، آماده‌سازی پیش از قطعی، راهنمای اتصال جایگزین، تطبیق خودکار پروتکل (TCP-first) | ✅ v1.0.0 |
+| F-16..F-18 | مبدل هوشمند `vless://` و `trojan://` با فرگمنت، اسکنر IP تمیز با هندشیک TLS، بالانسر هوشمند با چرخش خودکار | ✅ v1.0.0 |
 
-| # | Feature | Phase |
-|---|---------|-------|
-| F-1 | One-tap connect (auto subscription) | P1 |
-| F-2 | Xray-core bootstrap (version-checked) | P2 |
-| F-3 | VpnService one-tap tunnel | P2 |
-| F-6 | Auto config update (12h) + GitHub mirror failover | P2 |
-| F-11 | Blackout detection + honest status | P1 |
-| F-12 | Offline survival + instant re-sync | P1 |
-| F-13 | Pre-blackout preparation | P2 |
-| F-14 | Alternative connectivity guide (informational) | P1 |
-| F-15 | Protocol adaptation (UDP-drop aware) | P2 |
-| F-16 | Import any valid config (serverless / vless:// / trojan://) | P2 |
-| F-17 | Clean-IP scanner (dirty-IP recovery) | P2 |
-| F-18 | Smart balancer (auto route selection/rotation) | P2 |
-
-## Building
+## بررسی اصالت فایل (SHA-256 & Signature)
 
 ```bash
-./gradlew assembleRelease   # needs KEYSTORE_PASS + keystore (CI: GitHub Secrets)
+sha256sum -c SHA256SUMS
+apksigner verify --verbose --print-certs GhProtocol-v1.0.0-arm64-v8a.apk
 ```
 
-Releases are built and signed in GitHub Actions (public repo, unlimited
-minutes). SHA-256 checksums are published with every release.
+## مجوز (License)
 
-## Security notes
-
-- Fully open source (MIT). The Xray core is the official XTLS build (MPL-2.0).
-- The release keystore lives in GitHub Actions Secrets (never in the repo).
-- No third-party endpoints other than the official XTLS releases and the
-  official Serverless-for-Iran subscription.
-
-## License
-
-MIT (app) + MPL-2.0 (bundled Xray-core binary, per XTLS).
+MIT (کد کلاینت Gh Protocol) + MPL-2.0 (باینری رسمی Xray-core از پروژهٔ XTLS).

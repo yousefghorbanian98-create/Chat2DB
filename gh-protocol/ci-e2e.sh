@@ -7,7 +7,10 @@ set -uo pipefail
 
 LOG="$(cd "$(dirname "$0")" && pwd)/e2e.log"
 PKG=com.ghprotocol.app
-APK="$(dirname "$LOG")/app/build/outputs/apk/debug/app-debug.apk"
+APK_DIR="$(dirname "$LOG")/app/build/outputs/apk/debug"
+APK="$APK_DIR/app-x86_64-debug.apk"
+[ -f "$APK" ] || APK="$APK_DIR/app-universal-debug.apk"
+[ -f "$APK" ] || APK="$APK_DIR/app-debug.apk"
 : > "$LOG"
 
 say() { echo "$@"; echo "$@" >> "$LOG"; }

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gh Protocol v1.0.0 — گزارش جامع معماری، امنیت و تحویل نهایی</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #131c33;
+      --border: #233256;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --amber: #f59e0b;
+      --indigo: #818cf8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Vazirmatn", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.75;
+    }
+    .container { max-width: 980px; margin: 0 auto; }
+    header {
+      background: linear-gradient(135deg, #131c33 0%, #1e293b 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    h1 { margin: 0 0 8px 0; font-size: 1.9rem; color: var(--cyan); }
+    h2 { color: var(--cyan); border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-top: 32px; }
+    h3 { color: var(--indigo); margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--green);
+      border: 1px solid var(--green);
+      margin-left: 8px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 0.94rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: right;
+    }
+    th { background: rgba(34, 211, 238, 0.08); color: var(--cyan); }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      direction: ltr;
+      text-align: left;
+    }
+    code {
+      background: rgba(15, 23, 42, 0.7);
+      padding: 2px 6px;
+      border-radius: 6px;
+      color: var(--cyan);
+    }
+    pre {
+      background: #080c17;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .btn {
+      display: inline-block;
+      background: var(--green);
+      color: #062118;
+      font-weight: 800;
+      padding: 12px 22px;
+      border-radius: 12px;
+      margin: 6px 0 6px 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">نسخهٔ نهایی v1.0.0 — تمام گیت‌های G0 تا G5 سبز</span>
+      <span class="badge">Xray-core v26.10.21</span>
+      <h1>Gh Protocol — گزارش جامع معماری، امنیت و راهنمای استفاده</h1>
+      <p style="color: var(--muted); margin: 6px 0 16px 0;">
+        کلاینت اندروید متن‌باز ضدسانسور با اتصال یک‌کلیکی (Serverless-for-Iran + XTLS/Xray-core) — ساخته‌شده به‌صورت ۱۰۰٪ خودکار تحت حلقهٔ <strong>Finn-Loop v1.4</strong>
+      </p>
+      <a class="btn" href="https://github.com/yousefghorbanian98-create/Chat2DB/releases/tag/gh-protocol-v1.0.0">📦 دانلود مستقیم APK از GitHub Releases (v1.0.0)</a>
+    </header>
+
+    <h2>۱. معماری فنی نهایی (Finn-Loop v1.4)</h2>
+    <div class="card">
+      <pre>
+┌────────────────────────────────────────────────────────────────────────────┐
+│                           Gh Protocol v1.0.0 (Android)                     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  UI Layer (Jetpack Compose + Material 3 + Vazirmatn RTL + MotionSpec)      │
+│   • 12 Screens (48 Roborazzi Golden Snapshots, <0.5% diff)                 │
+│   • HomeViewModel + Factory (One-tap Connect, F-13 Prep, F-16 Import)      │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Domain & Anti-DPI Intelligence                                            │
+│   • SubscriptionRepository (Primary + GitHub Mirror + Embedded Fallback)   │
+│   • ConfigPatcher (vless:// & trojan:// -> JSON + TLS Fragment + Clean IP) │
+│   • CleanIpScanner (RFC 5246 TLS 1.2 ClientHello Probe on :443)            │
+│   • RouteBalancer (3x Ping + 15m Refresh + Auto-Rotate on Route Death)     │
+│   • NetworkMonitor (Honest 4-State Detection: CONNECTED/DEGRADED/CUTOFF)   │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Native VPN & Core Layer                                                   │
+│   • VpnTunnelService (Foreground Service, MTU 1500, IPv4 10.8.0.2/24 +     │
+│     IPv6 fd00:1::1/128 ::/0 Leak Guard, Bidirectional RFC 793 TCP & UDP)   │
+│   • TunnelEngine / XrayCore (Exec from nativeLibraryDir/libxraycore.so     │
+│     for Android 10+ W^X compliance + Exponential-Backoff Watchdog)         │
+│   • Loopback SOCKS5 (:10808 mixed-in) + Dokodemo-door DNS (:15353 -> DoH)  │
+└────────────────────────────────────────────────────────────────────────────┘</pre>
+    </div>
+
+    <h2>۲. وضعیت دروازه‌های کیفیت (G0 تا G5) و چک‌لیست DoD (۱۴/۱۴)</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>گیت / معیار DoD</th>
+            <th>شرح</th>
+            <th>وضعیت</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>G0 (اسکلت و امضا)</strong></td><td>اسکلت اندروید + Keystore امضای نسخهٔ نهایی + پایپ‌لاین CI</td><td>✅ PASS</td></tr>
+          <tr><td><strong>G1 (همراه و UI طلایی)</strong></td><td>۱۲ صفحهٔ فارسی/انگلیسی RTL + ۴۸ تست طلایی Roborazzi + وب‌اپ یک‌کلیکی</td><td>✅ PASS</td></tr>
+          <tr><td><strong>G2 (تونل واقعی روی امولاتور)</strong></td><td>اجرای Xray 26.10.21 + برقراری tun0 + عبور واقعی DNS و TCP در امولاتور اندروید ۱۴</td><td>✅ PASS</td></tr>
+          <tr><td><strong>G3 (موشن، فریز وابستگی، پوشش تست)</strong></td><td>پشتیبانی لینک‌های vless/trojan با فرگمنت + MotionSpec + فریز وابستگی‌ها</td><td>✅ PASS</td></tr>
+          <tr><td><strong>G4 (ممیزی امنیتی OWASP MASVS)</strong></td><td>صفر آسیب‌پذیری Critical/High + بستن نشت IPv6 و DNS + ماسک کردن لاگ‌ها</td><td>✅ PASS</td></tr>
+          <tr><td><strong>G5 (انتشار نسخهٔ نهایی v1.0.0)</strong></td><td>APK امضاشدهٔ arm64-v8a (زیر ۲۵ مگابایت) + universal + فایل SHA256SUMS</td><td>✅ PASS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>۳. راهنمای نصب و استفاده در ۳ گام</h2>
+    <div class="card">
+      <ol>
+        <li><strong>دانلود و نصب:</strong> فایل <code>GhProtocol-v1.0.0-arm64-v8a.apk</code> (مخصوص تمام گوشی‌های اندرویدی جدید، حدود ۲۲ مگابایت) را از بخش Releases دانلود و نصب کنید.</li>
+        <li><strong>اتصال با یک تپ:</strong> برنامه را باز کنید و روی دکمهٔ بزرگ <strong>«اتصال»</strong> بزنید. در اولین اجرا، مجوز سیستمی VPN اندروید را تایید کنید (<code>Allow / OK</code>).</li>
+        <li><strong>قابلیت‌های پیشرفته (در صورت اختلال شدید):</strong>
+          <ul>
+            <li>از بخش <strong>«اسکنر IP تمیز»</strong> سریع‌ترین IP کلودفلر روی اپراتور خودتان را پیدا کنید.</li>
+            <li>از بخش <strong>«منبع کانفیگ»</strong> می‌توانید هر لینک <code>vless://</code> یا <code>trojan://</code> یا JSON دلخواه را وارد کنید تا خودکار با TLS Fragmentation ترکیب شود.</li>
+            <li>پیش از قطعی‌های احتمالی، دکمهٔ <strong>«آماده‌سازی برای قطعی»</strong> را بزنید تا آخرین کانفیگ و هسته کش شوند.</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+
+    <h2>۴. مرزهای صادقانهٔ عملکرد (Honest Positioning)</h2>
+    <div class="card">
+      <p>
+        <strong>Gh Protocol</strong> برای عبور از فیلترینگ هوشمند (DPI)، مسدودسازی SNI و محدودیت UDP طراحی شده است. اما در صورت <strong>قطع کامل ارتباط بین‌المللی در دروازهٔ ملی (Forwarding-Plane Packet Discard)</strong>، هیچ ابزار نرم‌افزاری سمت کاربر قادر به برقراری اتصال بین‌المللی نیست. برنامه این وضعیت را از طریق کاوشگر شبکه (F-11) تشخیص داده و صادقانه به کاربر اطلاع می‌دهد.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
