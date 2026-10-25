@@ -1,4 +1,4 @@
-## gh-protocol build failure — 2026-10-25T15:53:02Z
+## gh-protocol build failure — 2026-10-25T15:53:22Z
 
 ### Xray fetch diag:
 == tools ==
@@ -14,11 +14,11 @@ UnZip 6.00 of 20 April 2009, by Debian. Original by Info-ZIP.
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 13.5M  100 13.5M    0     0  65.1M      0 --:--:-- --:--:-- --:--:-- 65.1M
+100 13.5M  100 13.5M    0     0  38.2M      0 --:--:-- --:--:-- --:--:-- 38.2M
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   299  100   299    0     0   2809      0 --:--:-- --:--:-- --:--:--  2809
+100   299  100   299    0     0   1053      0 --:--:-- --:--:-- --:--:--  1053
 dgst file: MD5= 687f7c35e92247c9fbf0e692b2911df8|SHA1= d3baecf3f45ec8b5f6625bc6e97ca67e97145c36|SHA2-256= d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9|SHA2-512= e5a0758728b6509645feb2d41c41effe760825eb64492c1df14617528cca5473fd32576cfaa80f50ac71b4bc3e224e6c6db74ae8436056fa1b9059a8921b2268|
 expected=d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9 actual=d81604f35a56c98ea6091142c1c744f4895c7384bc2e1c85cd910612c70794e9
 sha256 verified Xray-android-arm64-v8a.zip
@@ -34,11 +34,11 @@ installed Xray-android-arm64-v8a.zip -> app/src/main/jniLibs/arm64-v8a/libxrayco
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 14.7M  100 14.7M    0     0  79.5M      0 --:--:-- --:--:-- --:--:-- 79.5M
+100 14.7M  100 14.7M    0     0  35.2M      0 --:--:-- --:--:-- --:--:-- 35.2M
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100   299  100   299    0     0   2050      0 --:--:-- --:--:-- --:--:--  2050
+100   299  100   299    0     0   1016      0 --:--:-- --:--:-- --:--:--  1016
 dgst file: MD5= 8df0efc5b53db5f9f2a39b500210dfed|SHA1= 13feb022200c8ba1aff11f0c2827ae7ee4da3b68|SHA2-256= 58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934|SHA2-512= bd66ad67d8f7c99a57b45788dbcac494919d5b78830a7a694884a1656b72fc004151480a3e8d3d981d998490b204eafbf0c039d1c5e3563fb9ab1d15259a30c9|
 expected=58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934 actual=58546b1a2711164dc0db9b847fca3d3d6829b2631ab8d6105dc6790a26c80934
 sha256 verified Xray-android-amd64.zip
@@ -67,41 +67,39 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug assembleRelease test
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preBuild UP-TO-DATE
-> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:generateDebugResValues
-> Task :app:generateDebugBuildConfig
 > Task :app:buildKotlinToolingMetadata
+> Task :app:generateDebugBuildConfig
 > Task :app:generateDebugResources
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:packageDebugResources
-> Task :app:mapDebugSourceSetPaths
-> Task :app:extractDeepLinksDebug
 > Task :app:parseDebugLocalResources
+> Task :app:extractDeepLinksDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
+> Task :app:desugarDebugFileDependencies
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies
-> Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugAssets
 > Task :app:processDebugMainManifest
-> Task :app:mergeDebugResources
 > Task :app:processDebugManifest
-> Task :app:mergeExtDexDebug
-> Task :app:compressDebugAssets
-> Task :app:mergeLibDexDebug
 > Task :app:processDebugManifestForPackage
+> Task :app:mergeDebugAssets
+> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugResources
+> Task :app:compressDebugAssets
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:processDebugResources
 > Task :app:mergeDebugNativeLibs
-
-> Task :app:stripDebugDebugSymbols
-Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
-
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
 > Task :app:generateReleaseBuildConfig
@@ -109,7 +107,10 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:generateReleaseResValues FROM-CACHE
 > Task :app:mapReleaseSourceSetPaths
 > Task :app:generateReleaseResources
-> Task :app:validateSigningDebug
+
+> Task :app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
+
 > Task :app:packageReleaseResources
 > Task :app:parseReleaseLocalResources FROM-CACHE
 > Task :app:createReleaseCompatibleScreenManifests
@@ -132,14 +133,14 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:desugarReleaseFileDependencies
 > Task :app:mergeReleaseStartupProfile
 > Task :app:processReleaseResources
-> Task :app:processDebugResources
+> Task :app:compileDebugKotlin
 > Task :app:mergeExtDexRelease
+> Task :app:compileReleaseKotlin
 > Task :app:mergeReleaseArtProfile
 > Task :app:mergeReleaseShaders
 > Task :app:compileReleaseShaders NO-SOURCE
 > Task :app:generateReleaseAssets UP-TO-DATE
 > Task :app:mergeReleaseAssets
-> Task :app:compileReleaseKotlin
 > Task :app:compressReleaseAssets
 > Task :app:extractReleaseVersionControlInfo
 > Task :app:optimizeReleaseResources
@@ -156,36 +157,38 @@ Unable to strip the following libraries, packaging them as they are: libandroidx
 > Task :app:javaPreCompileReleaseUnitTest FROM-CACHE
 > Task :app:packageReleaseUnitTestForUnitTest
 > Task :app:generateReleaseUnitTestConfig
-> Task :app:compileDebugKotlin
-w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
 > Task :app:compileReleaseKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
-> Task :app:processDebugJavaRes
 > Task :app:processReleaseJavaRes
-> Task :app:mergeDebugJavaResource
 > Task :app:mergeReleaseJavaResource
+
+> Task :app:compileDebugKotlin
+w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+
+> Task :app:processDebugJavaRes
 > Task :app:compileReleaseJavaWithJavac
 > Task :app:compileDebugJavaWithJavac
-> Task :app:generateReleaseLintVitalReportModel
-> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:mergeDebugJavaResource
 > Task :app:dexBuilderDebug
-> Task :app:bundleDebugClassesToCompileJar
+> Task :app:generateReleaseLintVitalReportModel
 > Task :app:mergeDebugGlobalSynthetics
-> Task :app:dexBuilderRelease
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
 > Task :app:mergeProjectDexDebug
+> Task :app:dexBuilderRelease
 > Task :app:packageDebug
 > Task :app:createDebugApkListingFileRedirect
 > Task :app:assembleDebug
-> Task :app:mergeReleaseGlobalSynthetics
-> Task :app:bundleReleaseClassesToRuntimeJar
-> Task :app:bundleReleaseClassesToCompileJar
 
 > Task :app:compileDebugUnitTestKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/test/java/com/ghprotocol/app/NetworkMonitorTest.kt:33:13 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/test/java/com/ghprotocol/app/NetworkMonitorTest.kt:41:13 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
 
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:bundleReleaseClassesToRuntimeJar
+> Task :app:bundleReleaseClassesToCompileJar
 > Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processDebugUnitTestJavaRes
 > Task :app:mergeDexRelease
@@ -194,9 +197,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/test/java/com/gh
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/test/java/com/ghprotocol/app/NetworkMonitorTest.kt:33:13 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/test/java/com/ghprotocol/app/NetworkMonitorTest.kt:41:13 This declaration needs opt-in. Its usage should be marked with '@kotlinx.coroutines.ExperimentalCoroutinesApi' or '@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)'
 
+> Task :app:compileReleaseArtProfile
 > Task :app:compileReleaseUnitTestJavaWithJavac NO-SOURCE
 > Task :app:processReleaseUnitTestJavaRes
-> Task :app:compileReleaseArtProfile
 > Task :app:packageRelease
 > Task :app:createReleaseApkListingFileRedirect
 > Task :app:lintVitalAnalyzeRelease
@@ -209,7 +212,7 @@ SubscriptionParserTest > embeddedFallbackConfigIsValid FAILED
 65 tests completed, 1 failed
 
 > Task :app:finalizeTestRoborazziDebug SKIPPED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792943352077.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792943355132.json
 
 FAILURE: Build failed with an exception.
 
@@ -386,6 +389,6 @@ Caused by: org.gradle.api.internal.exceptions.MarkedVerificationException: There
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 
 
-BUILD FAILED in 3m 59s
+BUILD FAILED in 4m 13s
 100 actionable tasks: 94 executed, 6 from cache
 Configuration cache entry stored.
