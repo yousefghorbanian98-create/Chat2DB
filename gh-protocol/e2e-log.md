@@ -1,4 +1,4 @@
-## gh-protocol E2E log — 2026-10-25T05:58:00Z
+## gh-protocol E2E log — 2026-10-25T06:00:30Z
 
 
 
@@ -23,33 +23,34 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugResValues
-> Task :app:generateDebugBuildConfig
-> Task :app:extractDeepLinksDebug
 > Task :app:generateDebugResources
-> Task :app:mapDebugSourceSetPaths
-> Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:extractDeepLinksDebug
+> Task :app:checkDebugAarMetadata
+> Task :app:packageDebugResources
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:packageDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:mergeDebugAssets
 > Task :app:processDebugManifestForPackage
 > Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugResources
 > Task :app:parseDebugLocalResources
-> Task :app:mergeDebugAssets
+> Task :app:compressDebugAssets
 > Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugJniLibFolders
-> Task :app:compressDebugAssets
-> Task :app:mergeDebugResources
+> Task :app:validateSigningDebug
 > Task :app:mergeDebugNativeLibs FAILED
+> Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
 > Task :app:mergeLibDexDebug
-> Task :app:processDebugResources
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792907756117.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792907910099.json
 
 FAILURE: Build failed with an exception.
 
@@ -264,8 +265,8 @@ Caused by: java.lang.IllegalStateException: out extracted from path /home/runner
 	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:48)
 
 
-BUILD FAILED in 2m 14s
-24 actionable tasks: 24 executed
+BUILD FAILED in 2m 8s
+25 actionable tasks: 25 executed
 Configuration cache entry stored.
 
 
