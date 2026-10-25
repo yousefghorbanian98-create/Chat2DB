@@ -38,7 +38,7 @@ unzip -v 2>/dev/null | head -1 >> "$DIAG" 2>&1 || log "unzip -v failed"
 
 for ABI in arm64-v8a amd64; do
   ZIP="Xray-android-${ABI}.zip"
-  DEST="app/src/main/assets/xray/Xray-${ABI}"
+  DEST="app/src/main/jniLibs/${ABI}/libxraycore.so"
   log "== ${ZIP} =="
   if ! curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}" \
        "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}" 2>>"$DIAG"; then
@@ -76,7 +76,9 @@ for ABI in arm64-v8a amd64; do
   log "binary: ${BIN} ($(du -h "$BIN" | cut -f1))"
   mkdir -p "$(dirname "$DEST")"
   cp "$BIN" "$DEST"
-  for DAT in /tmp/xray-${ABI}/*.dat; do [ -f "$DAT" ] && cp "$DAT" "$(dirname "$DEST")"; done
+  # geo data are NOT code — they stay in assets and are extracted to filesDir at runtime
+  mkdir -p app/src/main/assets/xray
+  for DAT in /tmp/xray-${ABI}/*.dat; do [ -f "$DAT" ] && cp "$DAT" app/src/main/assets/xray/; done
   chmod 755 "$DEST"
   log "installed ${ZIP} -> ${DEST}"
 done

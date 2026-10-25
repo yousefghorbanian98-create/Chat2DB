@@ -155,8 +155,10 @@ done
   adb shell "ps -A" | grep -E "$PKG|xray|NAME" >> "$LOG" 2>&1
   adb shell "netstat -ltn" >> "$LOG" 2>&1
   adb shell "dumpsys activity activities" 2>/dev/null | grep -B2 -A8 -i "ghprotocol" >> "$LOG" 2>&1 || true
-  say "app filesDir/xray:"
+  say "app filesDir/xray (geo data):"
   adb shell "run-as $PKG ls -la files/xray 2>/dev/null" >> "$LOG" 2>&1
+  say "nativeLibraryDir (bundled core must be here, exec_allowed):"
+  adb shell "ls -la /data/app/*/$PKG*/lib/*/ 2>/dev/null" >> "$LOG" 2>&1
   say "xray-err.log:"
   adb shell "run-as $PKG cat files/xray/xray-err.log 2>/dev/null" >> "$LOG" 2>&1
   say "GhDiag (connect-flow trace):"

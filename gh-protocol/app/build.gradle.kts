@@ -58,6 +58,18 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Android 10+ W^X (b/112357170): files in the app data dir (app_data_file)
+    // cannot be exec'd for targetSdk > 28. Files in the read-only native lib
+    // dir (apk_data_file) CAN. Xray ships as jniLibs/<abi>/libxraycore.so
+    // (a real ELF executable with a .so name) => useLegacyPackaging=true makes
+    // the installer extract it to nativeLibraryDir where execve() is allowed.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+            keepDebugSymbols += "**/libxraycore.so"
+        }
+    }
 }
 
 dependencies {

@@ -10,6 +10,7 @@ captures/
 .cxx/
 # CI-generated / transient (never commit)
 app/src/main/assets/xray/
+app/src/main/jniLibs/
 sub.json
 e2e.log
 e2e-*.log

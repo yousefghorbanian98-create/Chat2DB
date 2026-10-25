@@ -2,41 +2,56 @@ package com.ghprotocol.app.core
 
 import android.content.Context
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * F-2: Xray-core lifecycle.
- * The official android binary (MPL-2.0, XTLS/Xray-core) ships as an APK asset
- * (downloaded + SHA-256 verified in CI). At runtime it is extracted to
- * filesDir/xray and executed as a child process.
+ *
+ * Android 10+ enforces W^X (b/112357170): files in the app's own data dir are
+ * labelled `app_data_file`, and `execute_no_trans` on them is denied for
+ * targetSdk > 28 — so the classic "extract the Xray binary to filesDir and
+ * Runtime.exec it" approach FAILS on modern Android
+ * (`avc: denied { execute_no_trans } ... app_data_file`, seen on API 34 AOSP
+ * and GMS images alike).
+ *
+ * The read-only native library dir (/data/app/.../lib/<abi>/,
+ * `applicationInfo.nativeLibraryDir`) is explicitly executable. The official
+ * XTLS/Xray-core Android build is therefore shipped as
+ * `jniLibs/<abi>/libxraycore.so` — a real ELF executable with a `.so` name —
+ * and the installer extracts it there (requires
+ * `packaging.jniLibs.useLegacyPackaging = true`, see app/build.gradle.kts).
+ * We exec that path directly.
+ *
+ * Geo data (geoip.dat / geosite.dat) is NOT code: it stays in assets and is
+ * extracted to filesDir/xray, pointed at by XRAY_LOCATION_ASSET.
  */
 class XrayCore(private val context: Context) {
 
+    /** Runtime dir for geo data + logs (app_data_file — data only, never exec'd). */
     private val dir = File(context.filesDir, "xray")
 
-    private val assetAbi: String = run {
-        val arch = android.os.Build.SUPPORTED_ABIS.firstOrNull().orEmpty()
-        when (arch) {
-            "arm64-v8a" -> "arm64-v8a"
-            "armeabi-v7a", "armeabi" -> "arm64-v8a" // 32-bit devices: no 32-bit release; fail at version check
-            else -> "amd64" // x86_64 emulators
-        }
+    /**
+     * The bundled core. Normally inside the read-only native library dir;
+     * falls back to filesDir for environments without one (Robolectric).
+     */
+    private val binary: File = run {
+        val nativeDir = context.applicationInfo?.nativeLibraryDir
+        if (nativeDir.isNullOrEmpty()) File(context.filesDir, "libxraycore.so")
+        else File(nativeDir, "libxraycore.so")
     }
-
-    private val binary = File(dir, "Xray")
 
     private var process: Process? = null
 
     data class Info(val path: File, val version: String)
 
-    /** Extract asset -> verify executable -> report version. */
+    /** Verify the bundled core + geo assets -> report version. */
     fun ensureInstalled(): Result<Info> {
         return try {
+            dir.mkdirs()
+            extractGeoAssets()
             if (!binary.exists()) {
-                dir.mkdirs()
-                extractAssets()
+                return Result.failure(IllegalStateException("bundled core missing at ${binary.path}"))
             }
-            if (!binary.exists()) return Result.failure(IllegalStateException("Xray binary missing after extraction"))
-            binary.setExecutable(true, false)
             val v = version()
             if (v == "unknown") return Result.failure(IllegalStateException("Xray version unreadable"))
             Result.success(Info(binary, v))
@@ -45,12 +60,16 @@ class XrayCore(private val context: Context) {
         }
     }
 
-    /** `Xray version` -> "Xray 26.10.21 (android...) ..." */
+    /** `Xray version` -> "26.10.21" (parsed from stdout or stderr). */
     fun version(): String = try {
         val p = Runtime.getRuntime().exec(arrayOf(binary.absolutePath, "version"), null, dir)
-        val out = p.inputStream.bufferedReader().readText().trim().lineSequence().firstOrNull().orEmpty()
-        p.waitFor()
-        out.substringAfter("Xray ").substringBefore(' ').ifBlank { "unknown" }
+        val out = p.inputStream.bufferedReader().readText()
+        val err = p.errorStream.bufferedReader().readText()
+        if (!p.waitFor(10, TimeUnit.SECONDS)) p.destroyForcibly()
+        val text = if (out.isNotBlank()) out else err
+        val candidate = text.lineSequence().firstOrNull { it.contains("Xray", ignoreCase = true) }
+            ?: text.trim().lineSequence().firstOrNull().orEmpty()
+        Regex("""(\d+\.\d+\.\d+)""").find(candidate)?.groupValues?.get(1) ?: "unknown"
     } catch (e: Exception) {
         "unknown"
     }
@@ -59,8 +78,7 @@ class XrayCore(private val context: Context) {
 
     /**
      * F-2/F-3: start the core with the given config (stderr -> filesDir/xray/xray-err.log).
-     * Android's ProcessBuilder has no directory(); Xray resolves geo assets from the
-     * XRAY_LOCATION_ASSET env (falls back to the executable dir — same place here).
+     * Geo assets resolve from XRAY_LOCATION_ASSET (also the executable dir default).
      */
     fun start(configPath: File): Result<Process> {
         return try {
@@ -83,7 +101,7 @@ class XrayCore(private val context: Context) {
     fun stop() {
         process?.let {
             it.destroy()
-            try { it.waitFor(2, java.util.concurrent.TimeUnit.SECONDS) } catch (_: InterruptedException) {}
+            try { it.waitFor(2, TimeUnit.SECONDS) } catch (_: InterruptedException) {}
             if (it.isAlive) it.destroyForcibly()
         }
         process = null
@@ -91,15 +109,14 @@ class XrayCore(private val context: Context) {
 
     fun close() = stop()
 
-    private fun extractAssets() {
+    /** Copy geoip.dat / geosite.dat (data only) from assets on first use. */
+    private fun extractGeoAssets() {
         val names = context.assets.list("xray") ?: emptyArray()
         for (name in names) {
+            if (!name.endsWith(".dat")) continue
             val out = File(dir, name)
+            if (out.length() > 0) continue
             context.assets.open("xray/$name").use { input -> out.outputStream().use { input.copyTo(it) } }
-        }
-        val abiBinary = File(dir, "Xray-$assetAbi")
-        if (abiBinary.exists() && !binary.exists()) {
-            abiBinary.renameTo(binary)
         }
     }
 }
