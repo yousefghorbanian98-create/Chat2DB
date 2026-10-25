@@ -238,15 +238,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create gh-protocol-v1.0.0 \
+          gh release upload gh-protocol-v1.0.0 \
             release-dist/GhProtocol-v1.0.0-arm64-v8a.apk \
             release-dist/GhProtocol-v1.0.0-universal.apk \
             release-dist/SHA256SUMS \
             release-dist/core-version.txt \
             release-dist/FINAL_REPORT.html \
-            --title "Gh Protocol v1.0.0 (Xray-core v26.10.21)" \
-            --notes "Gh Protocol v1.0.0 — Production Signed Android Release (Finn-Loop G0–G5 Verified). Download GhProtocol-v1.0.0-arm64-v8a.apk for modern Android phones (~22 MB) or GhProtocol-v1.0.0-universal.apk for universal arm64+x86_64 devices." \
-            --clobber || true
+            --clobber
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
+          mkdir -p gh-protocol
+          cp gh-protocol/release-dist/SHA256SUMS gh-protocol/SHA256SUMS.v1.0.0
+          git add gh-protocol/SHA256SUMS.v1.0.0
+          git commit -m "ci-diag: v1.0.0 SHA256SUMS $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag --force
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
