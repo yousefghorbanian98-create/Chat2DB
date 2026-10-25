@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-25T06:40:49Z
+## gh-protocol E2E log — 2026-10-25T06:52:31Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-25T06:32:13Z ==
+== pre-flight 2026-10-25T06:44:04Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 06:28 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 06:40 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 25 06:32 .
-drwxr-xr-x 3 runner runner 4096 Oct 25 06:32 ..
-drwxr-xr-x 3 runner runner 4096 Oct 25 06:32 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 25 06:32 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 25 06:44 .
+drwxr-xr-x 3 runner runner 4096 Oct 25 06:44 ..
+drwxr-xr-x 3 runner runner 4096 Oct 25 06:44 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 25 06:44 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -50,8 +50,7 @@ USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (a
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-ERROR        | Unable to connect to adb daemon on port: 5037
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3048
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3047
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -121,21 +120,19 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7f6d04401000 as it is in the protected range from 0x7f6c04400000 to 0x7f6d04600000
+WARNING: cannnot unmap ptr 0x7f25a4e01000 as it is in the protected range from 0x7f24a4e00000 to 0x7f25a5000000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
-INFO         | Activated packet streamer for bluetooth emulation
 INFO         | Successfully initialized netsim WiFi
+INFO         | Activated packet streamer for bluetooth emulation
 INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
 INFO         | setDisplayActiveConfig: id:0, 1080x2400
 INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 38411 ms
+INFO         | Boot completed in 37564 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
-ERROR        | Failed to find ColorBuffer: 180
-ERROR        | Failed to bind to texture: invalid color buffer.
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -153,8 +150,8 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug
-> Task :app:preBuild UP-TO-DATE
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:generateDebugResValues
@@ -165,31 +162,31 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:mapDebugSourceSetPaths
 > Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
-> Task :app:mergeDebugShaders
 > Task :app:packageDebugResources
+> Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
 > Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugResources
 > Task :app:parseDebugLocalResources
 > Task :app:mergeDebugAssets
 > Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugResources
-> Task :app:compressDebugAssets
 > Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs
+> Task :app:compressDebugAssets
 > Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
+> Task :app:mergeDebugNativeLibs
+> Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
-> Task :app:mergeLibDexDebug
-> Task :app:mergeExtDexDebug
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
@@ -202,9 +199,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792909770171.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792910483743.json
 
-BUILD SUCCESSFUL in 2m 40s
+BUILD SUCCESSFUL in 2m 31s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -220,39 +217,39 @@ Performing Streamed Install
 Success
 == probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 60s) ==
 WARN: emulator CANNOT reach raw.githubusercontent.com (runner NAT) — pre-seeding app cache
-seeded cache: 37417 bytes, meta=1792910070160
+seeded cache: 37417 bytes, meta=1792910771990
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 5338)
+app up (try 1, pid 5361)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
 tapped VPN consent at: 894 1519 (iter 3)
 USER           PID  PPID        VSZ    RSS WCHAN            ADDR S NAME                       
-u0_a192       5338   336   13772628 176416 0                   0 S com.ghprotocol.app
+u0_a192       5361   338   13735740 177292 0                   0 S com.ghprotocol.app
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State      
 tcp        0      0 127.0.0.1:8872          0.0.0.0:*               LISTEN     
-tcp6       0      0 ::ffff:127.0.0.1:40765  [::]:*                  LISTEN     
-tcp6       0      0 ::ffff:127.0.0.1:43217  [::]:*                  LISTEN     
+tcp6       0      0 ::ffff:127.0.0.1:43619  [::]:*                  LISTEN     
+tcp6       0      0 ::ffff:127.0.0.1:40473  [::]:*                  LISTEN     
 tcp6       0      0 [::]:5555               [::]:*                  LISTEN     
-tcp6       1     25 ::ffff:10.0.2.16:35178  ::ffff:142.251.157.:443 LAST_ACK   
+tcp6       1     25 ::ffff:10.0.2.16:41118  ::ffff:142.251.155.:443 LAST_ACK   
 ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)
 Display #0 (activities from top to bottom):
-  * Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
-    mLastPausedActivity: ActivityRecord{b9d8dc1 u0 com.android.vpndialogs/.ConfirmDialog t-1 f}}
+  * Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+    mLastPausedActivity: ActivityRecord{ff277ab u0 com.android.vpndialogs/.ConfirmDialog t-1 f}}
     mLastNonFullscreenBounds=Rect(291, 691 - 790, 1771)
     isSleeping=false
-    topResumedActivity=ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
-    * Hist  #1: ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
+    topResumedActivity=ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
+    * Hist  #1: ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
       packageName=com.ghprotocol.app processName=com.ghprotocol.app
       launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
-      app=ProcessRecord{6c6456 5338:com.ghprotocol.app/u0a192}
+      app=ProcessRecord{e74b363 5361:com.ghprotocol.app/u0a192}
       Intent { act=android.intent.action.VIEW dat=ghprotocol://connect flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
-      rootOfTask=false task=Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
+      rootOfTask=false task=Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
       taskAffinity=10192:com.ghprotocol.app
       mActivityComponent=com.ghprotocol.app/.MainActivity
-      baseDir=/data/app/~~hbQR4B7JBz2Wd7t4mLGpWw==/com.ghprotocol.app-9SQulb3oQ_jkBX_qooWdgw==/base.apk
+      baseDir=/data/app/~~1c_xSkwX01Nw0uVLbymeMw==/com.ghprotocol.app-spmVFIAu1li7u01r_nF3aQ==/base.apk
       dataDir=/data/user/0/com.ghprotocol.app
       stateNotNeeded=false componentSpecified=false mActivityType=standard
       compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
@@ -265,7 +262,7 @@ Display #0 (activities from top to bottom):
 --
       mActivityType=standard
       mImeInsetsFrozenUntilStartInput=false
-      windows=[Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windows=[Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
       windowType=2 waitingToShow=true
       mOccludesParent=true
       overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
@@ -273,19 +270,19 @@ Display #0 (activities from top to bottom):
       mVisibleRequested=true mVisible=true mClientVisible=true reportedDrawn=true reportedVisible=true
       mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
       startingData=null firstWindowDrawn=true mIsExiting=false
-      nowVisible=true lastVisibleTime=-6m7s87ms
+      nowVisible=true lastVisibleTime=-6m7s21ms
 --
       mCameraCompatControlState=hidden
       mCameraCompatControlEnabled=true
-    * Hist  #0: ActivityRecord{c7c398a u0 com.ghprotocol.app/.MainActivity t8}
+    * Hist  #0: ActivityRecord{5c7c1c7 u0 com.ghprotocol.app/.MainActivity t8}
       packageName=com.ghprotocol.app processName=com.ghprotocol.app
       launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
-      app=ProcessRecord{6c6456 5338:com.ghprotocol.app/u0a192}
+      app=ProcessRecord{e74b363 5361:com.ghprotocol.app/u0a192}
       Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
-      rootOfTask=true task=Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
+      rootOfTask=true task=Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
       taskAffinity=10192:com.ghprotocol.app
       mActivityComponent=com.ghprotocol.app/.MainActivity
-      baseDir=/data/app/~~hbQR4B7JBz2Wd7t4mLGpWw==/com.ghprotocol.app-9SQulb3oQ_jkBX_qooWdgw==/base.apk
+      baseDir=/data/app/~~1c_xSkwX01Nw0uVLbymeMw==/com.ghprotocol.app-spmVFIAu1li7u01r_nF3aQ==/base.apk
       dataDir=/data/user/0/com.ghprotocol.app
       stateNotNeeded=false componentSpecified=false mActivityType=standard
       compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
@@ -298,7 +295,7 @@ Display #0 (activities from top to bottom):
 --
       mActivityType=standard
       mImeInsetsFrozenUntilStartInput=true
-      windows=[Window{82fc6ba u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windows=[Window{7780d87 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
       windowType=2
       mOccludesParent=true
       overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
@@ -306,29 +303,29 @@ Display #0 (activities from top to bottom):
       mVisibleRequested=false mVisible=false mClientVisible=false reportedDrawn=false reportedVisible=false
       mAppStopped=true
       mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
-      nowVisible=false lastVisibleTime=-6m13s868ms
+      nowVisible=false lastVisibleTime=-6m13s934ms
 --
 
   Resumed activities in task display areas (from top to bottom):
-    Resumed: ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
+    Resumed: ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
 
-  ResumedActivity: ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
+  ResumedActivity: ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
 
 ActivityTaskSupervisor state:
-  topDisplayFocusedRootTask=Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
+  topDisplayFocusedRootTask=Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
   Display: mDisplayId=0 (organized)
     init=1080x2400 420dpi mMinSizeOfResizeableTaskDp=220 cur=1080x2400 app=1080x2400 rng=1080x1017-2400x2337
     deferred=false mLayoutNeeded=false mTouchExcludeRegion=SkRegion((0,0,1080,2400))
 
-  mLastOrientationSource=WindowedMagnification:0:31@158479076
-  deepestLastOrientationSource=ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
+  mLastOrientationSource=WindowedMagnification:0:31@180064688
+  deepestLastOrientationSource=ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
   overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.36 fontWeightAdjustment=0}
-  mLayoutSeq=95
-  mCurrentFocus=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
-  mFocusedApp=ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
+  mLayoutSeq=93
+  mCurrentFocus=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+  mFocusedApp=ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
 
   mHoldScreenWindow=null
-  mObscuringWindow=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+  mObscuringWindow=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
   mLastWakeLockHoldingWindow=null
   mLastWakeLockObscuringWindow=null
 
@@ -340,32 +337,32 @@ ActivityTaskSupervisor state:
 --
     TaskDisplayArea DefaultTaskDisplayArea
       overrideConfig={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
-      mPreferredTopFocusableRootTask=Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
-      mLastFocusedRootTask=Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
+      mPreferredTopFocusableRootTask=Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
+      mLastFocusedRootTask=Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
       Application tokens in top down Z order:
-      * Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+      * Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
         bounds=[0,0][1080,2400]
-        * ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}
-        * ActivityRecord{c7c398a u0 com.ghprotocol.app/.MainActivity t8}
-      * Task{2981e02 #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        * ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}
+        * ActivityRecord{5c7c1c7 u0 com.ghprotocol.app/.MainActivity t8}
+      * Task{1ceb7ae #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
         bounds=[0,0][1080,2400]
-        * Task{feb3a1e #7 type=home I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        * Task{8b64da5 #7 type=home I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
           bounds=[0,0][1080,2400]
-          * ActivityRecord{64d1e59 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
-      * Task{c472c4 #2 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+          * ActivityRecord{7e7bf9c u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+      * Task{ce36f30 #2 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
         bounds=[0,0][1080,2400]
-        * Task{6050fa9 #4 type=undefined U=0 rootTaskId=2 visible=false visibleRequested=false mode=multi-window translucent=true sz=0}
+        * Task{a67912e #4 type=undefined U=0 rootTaskId=2 visible=false visibleRequested=false mode=multi-window translucent=true sz=0}
 --
     isKeyguardShowing=false
-    mTopGestureHost=Window{ef71889 u0 StatusBar}
-    mFocusedWindow=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
-    mTopFullscreenOpaqueWindowState=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
-    mSystemBarColorApps={ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity t8}}
+    mTopGestureHost=Window{84cfd4a u0 StatusBar}
+    mFocusedWindow=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mTopFullscreenOpaqueWindowState=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mSystemBarColorApps={ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity t8}}
     mLastStatusBarAppearanceRegions=
       AppearanceRegion{LIGHT_STATUS_BARS bounds=[0,0][1080,2400]}
     mLastLetterboxDetails=
     mStatusBarBackgroundWindows=
-      Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+      Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
     mTopIsFullscreen=false
     mForceShowNavigationBarEnabled=false mAllowLockscreenWhenOn=false
     mRemoteInsetsControllerControlsSystemBars=false
@@ -375,29 +372,29 @@ ActivityTaskSupervisor state:
       ROTATION_180={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][1080,2400], configFrame=[0,63][1080,2400]}
       ROTATION_270={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][2400,1080], configFrame=[0,63][2400,1080]}
 --
-        InsetsSource id=54950006 type=tappableElement frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
+        InsetsSource id=b750006 type=tappableElement frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
     Control map:
-      Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}:
-        InsetsSourceControl: {54950000 mType=statusBars initiallyVisible mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=63, right=0, bottom=0}}
+      Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}:
+        InsetsSourceControl: {b750000 mType=statusBars initiallyVisible mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=63, right=0, bottom=0}}
         InsetsSourceControl: {3 mType=ime mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0}}
     InsetsSourceProviders:
       InsetsSourceProvider
-        mSource=InsetsSource id=54950006 type=tappableElement frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
+        mSource=InsetsSource id=b750006 type=tappableElement frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
         mSourceFrame=Rect(0, 0 - 1080, 63)
         mIsLeashReadyForDispatching=true
-        mWindowContainer=Window{ef71889 u0 StatusBar}
+        mWindowContainer=Window{84cfd4a u0 StatusBar}
 --
-        mWindowContainer=Window{ef71889 u0 StatusBar}
-        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=ef71889 StatusBar)/@0xb2fb445 - animation-leash of insets_animation)/@0x61fca72
-        mControlTarget=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+        mWindowContainer=Window{84cfd4a u0 StatusBar}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=84cfd4a StatusBar)/@0xe5a416 - animation-leash of insets_animation)/@0xd89c125
+        mControlTarget=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
       ImeInsetsSourceProvider
         mSource=InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= insetsRoundedCornerFrame=false
         mSourceFrame=Rect(0, 2400 - 1080, 2400)
-        mControl=InsetsSourceControl mId=3 mType=ime mLeash=Surface(name=Surface(name=9f55958 InputMethod)/@0xaecab96 - animation-leash of insets_animation)/@0x1641ec3 mInitiallyVisible=false mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0} mSkipAnimationOnce=false
+        mControl=InsetsSourceControl mId=3 mType=ime mLeash=Surface(name=Surface(name=dd20cdd InputMethod)/@0x89a4f23 - animation-leash of insets_animation)/@0x41eb2fa mInitiallyVisible=false mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0} mSkipAnimationOnce=false
         mIsLeashReadyForDispatching=true
-        mWindowContainer=Window{9f55958 u0 InputMethod}
-        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=9f55958 InputMethod)/@0xaecab96 - animation-leash of insets_animation)/@0x1641ec3
-        mControlTarget=Window{a08a3a5 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+        mWindowContainer=Window{dd20cdd u0 InputMethod}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=dd20cdd InputMethod)/@0x89a4f23 - animation-leash of insets_animation)/@0x41eb2fa
+        mControlTarget=Window{a56fb0e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
         mImeShowing=false
 
   KeyguardController:
@@ -407,272 +404,273 @@ ActivityTaskSupervisor state:
    KeyguardShowing=false AodShowing=false KeyguardGoingAway=false DismissalRequested=false  Occluded=false DismissingKeyguardActivity=null TurnScreenOnActivity=null at display=0
     mDismissalRequested=false
 --
-        (multi-window) Task{634c5ad #3 type=undefined}
-        (multi-window) Task{6050fa9 #4 type=undefined}
-        (fullscreen) Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}
+        (multi-window) Task{7d727a9 #3 type=undefined}
+        (multi-window) Task{a67912e #4 type=undefined}
+        (fullscreen) Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}
 
-  VisibleActivityProcess:[ ProcessRecord{6c6456 5338:com.ghprotocol.app/u0a192}]
+  VisibleActivityProcess:[ ProcessRecord{e74b363 5361:com.ghprotocol.app/u0a192}]
   NumNonAppVisibleWindowUidMap:[ 10168:1]
 app filesDir/xray (geo data):
 total 6224
-drwx------ 2 u0_a192 u0_a192    4096 2026-10-25 06:34 .
-drwxrwxrwx 3 u0_a192 u0_a192    4096 2026-10-25 06:34 ..
--rw------- 1 u0_a192 u0_a192 3977011 2026-10-25 06:34 geoip.dat
--rw------- 1 u0_a192 u0_a192 2358471 2026-10-25 06:34 geosite.dat
--rw------- 1 u0_a192 u0_a192       0 2026-10-25 06:34 xray-err.log
--rw------- 1 u0_a192 u0_a192     537 2026-10-25 06:34 xray-out.log
+drwx------ 2 u0_a192 u0_a192    4096 2026-10-25 06:46 .
+drwxrwxrwx 3 u0_a192 u0_a192    4096 2026-10-25 06:46 ..
+-rw------- 1 u0_a192 u0_a192 3977011 2026-10-25 06:46 geoip.dat
+-rw------- 1 u0_a192 u0_a192 2358471 2026-10-25 06:46 geosite.dat
+-rw------- 1 u0_a192 u0_a192       0 2026-10-25 06:46 xray-err.log
+-rw------- 1 u0_a192 u0_a192     537 2026-10-25 06:46 xray-out.log
 nativeLibraryDir (bundled core must be here, exec_allowed):
 xray-err.log:
 xray-out.log (Xray writes its logs to stdout):
 Xray 26.10.21 (Xray, Penetrates Everything.) 1b1647c (go1.27.3 android/amd64)
 A unified platform for anti-censorship.
-2026/10/25 06:34:38.929823 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
+2026/10/25 06:46:20.615372 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
 Failed to start: main: failed to load config files: [/data/user/0/com.ghprotocol.app/files/xray-config.json] > infra/conf: failed to build inbound config with tag dns-in > infra/conf: failed to load inbound detour config for protocol dns > infra/conf: unknown config id: dns
 runtime config (first 1400 bytes):
 {"__Credits__":{"creator":"@patterniha","donate1":"USDT (BEP20): 0x76a768B53Ca77B43086946315f0BDF21156bF424","donate2":"USDT (TRC20): TU5gKvKqcXPn8itp1DouBCwcqGHMemBm8o","donate3":"TON (TON): UQAc-mZB3y7uxWHKiMmq0ORZEYgycWDWZ4V1k73HsXvTJx-i"},"remarks":"Serverless-v52-fragA","version":{"min":"26.6.27"},"log":{"loglevel":"warning","dnsLog":false,"access":"none"},"policy":{"levels":{"0":{"uplinkOnly":0,"downlinkOnly":0},"12":{"uplinkOnly":0,"downlinkOnly":0,"connIdle":12}}},"dns":{"hosts":{"geosite:category-ads-all":"#3","cloudflare-dns.com":"challenges.cloudflare.com"},"servers":[{"tag":"no-filter-dns","address":"https:\/\/cloudflare-dns.com\/dns-query","timeoutMs":12000,"finalQuery":true},{"tag":"domestic-dns","address":"localhost","domains":["domain:ir","geosite:private","geosite:category-ir","geosite:xai","geosite:openai","geosite:google-deepmind","geosite:anthropic","geosite:github","geosite:microsoft","geosite:golang","geosite:python","geosite:rust","full:challenges.cloudflare.com"],"timeoutMs":12000,"finalQuery":true}],"queryStrategy":"UseSystem","useSystemHosts":true,"serveStale":true},"inbounds":[{"tag":"mixed-in","port":10808,"protocol":"mixed","sniffing":{"enabled":true,"destOverride":["tls","http","quic"],"routeOnly":false},"settings":{"udp":true,"ip":"127.0.0.1"},"streamSettings":{"sockopt":{"tcpKeepAliveInterval":1,"tcpKeepAliveIdle":11}}},{"tag":"dns-in","protocol"core exit line:
-10-25 06:34:38.965  5338  5591 W GhDiag  : xray exited rc=23
+10-25 06:46:20.665  5361  5594 W GhDiag  : xray exited rc=23
 GhDiag (connect-flow trace):
 --------- beginning of main
-10-25 06:34:38.402  5338  5338 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 06:34:38.402  5338  5338 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 06:34:38.665  5338  5338 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 06:34:38.685  5338  5338 D GhDiag  : connect: config written bytes=5272 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 06:34:38.834  5338  5338 D GhDiag  : connect: core.start=true 
-10-25 06:34:38.965  5338  5591 W GhDiag  : xray exited rc=23
-10-25 06:34:49.665  5338  5338 D GhDiag  : tunnel: startTunnel called (running=false)
-10-25 06:34:49.763  5338  5338 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@3d92a6e} — relay loop started
+10-25 06:46:20.234  5361  5361 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-25 06:46:20.234  5361  5361 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-25 06:46:20.402  5361  5361 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-25 06:46:20.423  5361  5361 D GhDiag  : connect: config written bytes=5272 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-25 06:46:20.580  5361  5361 D GhDiag  : connect: core.start=true 
+10-25 06:46:20.665  5361  5594 W GhDiag  : xray exited rc=23
+10-25 06:46:31.370  5361  5361 D GhDiag  : tunnel: startTunnel called (running=false)
+10-25 06:46:31.440  5361  5361 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@5cad7fc} — relay loop started
 === E2E FAILED: tunnel not up (xray/:10808) — xray process not running and :10808 not listening (core exited — see xray-out/err logs) ===
 
 
 ### e2e-logcat.log (crashes + app + vpn, tail)
- ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +980ms
-10-25 06:34:39.161   523   540 V WindowManager: Sent Transition #7 createdAt=10-25 06:34:38.178 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=109805 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ca8e9c7 Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{f38a25d com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 06:34:39.161   523   540 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{8ad8e6e u0 com.ghprotocol.app/.MainActivity)/@0x4ef5b07 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{c7c398a u0 com.ghprotocol.app/.MainActivity)/@0x184fd46 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 06:34:39.415   838   874 V WindowManagerShell: Transition requested: android.os.BinderProxy@7e514da TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=110797 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@3807d0b} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{550c7e8 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 06:34:39.449   523   592 I ImeTracker: com.ghprotocol.app:629ff389: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-25 06:34:39.449   523   592 I ImeTracker: com.ghprotocol.app:629ff389: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 06:34:39.481  1534  1534 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 06:34:39.504   523  2146 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
-10-25 06:34:39.506   523  2146 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
-10-25 06:34:39.506   523  2146 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
-10-25 06:34:40.028   523   540 V WindowManager: Sent Transition #8 createdAt=10-25 06:34:39.170 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=110797 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ca8e9c7 Task{528bbfb #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{2bb13e4 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 06:34:40.515  5338  5348 I .ghprotocol.app: Background concurrent copying GC freed 106519(5441KB) AllocSpace objects, 30(896KB) LOS objects, 49% free, 6467KB/12MB, paused 41us,9us total 120.368ms
-10-25 06:34:44.752   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{400b63f com.google.android.as/10125} BLOCKED
-10-25 06:34:44.752   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{f8efb0c com.google.android.contacts/10156} BLOCKED
-10-25 06:34:45.870   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{b35e74a com.google.android.googlequicksearchbox/10132} BLOCKED
-10-25 06:34:46.774  5781  5781 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-25 06:34:46.783  5781  5781 I AndroidRuntime: Using default boot image
-10-25 06:34:46.783  5781  5781 I AndroidRuntime: Leaving lock profiling enabled
-10-25 06:34:46.993  5781  5781 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-25 06:34:48.151  5781  5781 D AndroidRuntime: Shutting down VM
-10-25 06:34:49.435   523  1734 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
-10-25 06:34:49.665  5338  5338 D GhDiag  : tunnel: startTunnel called (running=false)
-10-25 06:34:49.756   523  1894 I Vpn     : Established by com.ghprotocol.app on tun0
-10-25 06:34:49.763  5338  5338 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@3d92a6e} — relay loop started
-10-25 06:34:49.880   523  1744 I ImeTracker: com.ghprotocol.app:d92b00ec: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
-10-25 06:34:49.880   523  1744 I ImeTracker: com.ghprotocol.app:d92b00ec: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 06:34:49.881  1534  1534 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 06:34:49.983  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45368) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:50.194  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45380) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:50.615  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45396) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:51.480  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45406) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:53.176  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45422) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:55.604   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{6aaf50a com.google.android.contacts/10156} BLOCKED
-10-25 06:34:56.344  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45424) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:56.632  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45430) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:57.368  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45442) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:34:59.383  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 33692) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:35:03.544  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 33698) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:35:03.545  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 33700) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:35:11.739  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 55896) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:35:17.112  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 55912) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:35:29.788   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{60f8110 com.google.android.contacts/10156} BLOCKED
-10-25 06:35:39.798   523   574 I AppsFilter: interaction: PackageSetting{13ed106 com.ghprotocol.app/10192} -> PackageSetting{27bfc0e com.google.android.contacts/10156} BLOCKED
-10-25 06:35:45.528  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 58464) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:36:36.333  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:36:36.337  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.481  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.481  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.619  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.620  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.753  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.753  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.878  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.878  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.996  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:36.996  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.111  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.111  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.219  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.219  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.321  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.321  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.417  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.417  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.507  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.507  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.590  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.590  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.669  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.669  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.740  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.740  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.805  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.805  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.862  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.862  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.913  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.913  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.959  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.959  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.999  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:37.999  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.032  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.032  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.060  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.060  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.084  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.084  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.100  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.100  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.108  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.108  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.111  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.111  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:36:38.118  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:36:38.124  5338  5350 I .ghprotocol.app: Alloc concurrent copying GC freed 8488(482KB) AllocSpace objects, 16(320KB) LOS objects, 49% free, 6365KB/12MB, paused 20us,4us total 12.109ms
-10-25 06:36:38.124  5338  5815 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Alloc for 5.175ms
-10-25 06:36:38.124  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.425  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:38:26.431  5338  5815 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Background for 5.143ms
-10-25 06:38:26.431  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.569  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.569  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.703  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.703  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.831  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.831  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.953  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:26.953  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.070  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.071  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.181  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.181  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.285  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.285  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.383  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.383  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.477  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.477  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.565  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.565  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.648  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.648  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.723  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.723  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.793  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.793  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.858  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.858  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.916  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.916  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.976  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:27.976  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.022  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.022  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.062  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.062  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.096  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.096  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.123  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.123  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.145  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.145  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.160  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.160  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.168  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.168  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.171  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.171  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:28.178  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:38:28.183  5338  5350 I .ghprotocol.app: Alloc concurrent copying GC freed 6315(402KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 6364KB/12MB, paused 19us,3us total 11.495ms
-10-25 06:38:28.183  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:38:38.452  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 47114) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:38:39.910  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 36278) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:38:42.908  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 36294) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:38:49.289  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43448) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:01.279  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 36680) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:13.269  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 55796) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:25.257  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 44470) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:37.248  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43418) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:38.411  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43428) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:38.412  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43432) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:38.620  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43434) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:39.063  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 43446) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:39.928  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45226) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:41.624  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45238) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:45.143  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45246) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:49.238  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 59910) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:39:52.056  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 59918) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:01.227  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 51952) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:05.623  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 51964) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:13.216  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 55944) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:15.780  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:40:15.784  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:15.922  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:15.922  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.059  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.059  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.191  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.191  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.317  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.317  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.434  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.434  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.547  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.547  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.654  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.654  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.754  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.754  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.848  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.848  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.934  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:16.934  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.016  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.016  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.093  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.093  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.164  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.164  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.228  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.228  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.288  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.288  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.340  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.340  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.385  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.385  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.425  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.425  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.458  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.458  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.486  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.486  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.507  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.507  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.522  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.522  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.532  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.532  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.535  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.535  5338  5350 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:17.545  5338  5815 I .ghprotocol.app: Waiting for a blocking GC Alloc
-10-25 06:40:17.550  5338  5350 I .ghprotocol.app: Alloc concurrent copying GC freed 6617(427KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 6355KB/12MB, paused 30us,3us total 15.476ms
-10-25 06:40:17.550  5338  5815 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Alloc for 5.252ms
-10-25 06:40:17.550  5338  5815 I .ghprotocol.app: Starting a blocking GC Alloc
-10-25 06:40:25.206  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 39376) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:34.296  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 38250) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
-10-25 06:40:37.196  5338  5815 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 38254) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+.911   522   540 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +864ms
+10-25 06:46:20.911   522   540 V WindowManager: Sent Transition #7 createdAt=10-25 06:46:20.040 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=109228 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{666749a Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{d0eebda com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 06:46:20.911   522   540 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{712ffe2 u0 com.ghprotocol.app/.MainActivity)/@0x51566fc sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{5c7c1c7 u0 com.ghprotocol.app/.MainActivity)/@0x78e9bef sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 06:46:21.166   833   874 V WindowManagerShell: Transition requested: android.os.BinderProxy@b6ac73 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=110145 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@a44a730} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{94bffa9 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 06:46:21.183   522   913 I ImeTracker: com.ghprotocol.app:9c346c25: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-25 06:46:21.183   522   913 I ImeTracker: com.ghprotocol.app:9c346c25: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-25 06:46:21.197  1513  1513 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-25 06:46:21.261   522   537 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
+10-25 06:46:21.267   522   537 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
+10-25 06:46:21.267   522   537 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
+10-25 06:46:21.957   522   540 V WindowManager: Sent Transition #8 createdAt=10-25 06:46:20.950 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=110145 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{666749a Task{a0253f4 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{1787b09 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 06:46:22.467  5361  5370 I .ghprotocol.app: Background concurrent copying GC freed 100390(5251KB) AllocSpace objects, 30(896KB) LOS objects, 49% free, 6578KB/12MB, paused 41us,2.817ms total 133.419ms
+10-25 06:46:26.361   522   576 I AppsFilter: interaction: PackageSetting{6b4e65e com.ghprotocol.app/10192} -> PackageSetting{1e4c37f com.google.android.googlequicksearchbox/10132} BLOCKED
+10-25 06:46:26.361   522   576 I AppsFilter: interaction: PackageSetting{6b4e65e com.ghprotocol.app/10192} -> PackageSetting{5321f4c com.google.android.as/10125} BLOCKED
+10-25 06:46:28.606  5779  5779 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-25 06:46:28.611  5779  5779 I AndroidRuntime: Using default boot image
+10-25 06:46:28.611  5779  5779 I AndroidRuntime: Leaving lock profiling enabled
+10-25 06:46:28.877  5779  5779 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-25 06:46:30.007  5779  5779 D AndroidRuntime: Shutting down VM
+10-25 06:46:30.309   522   576 I AppsFilter: interaction: PackageSetting{6b4e65e com.ghprotocol.app/10192} -> PackageSetting{c1ca432 com.google.android.contacts/10154} BLOCKED
+10-25 06:46:31.272   522  1161 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
+10-25 06:46:31.370  5361  5361 D GhDiag  : tunnel: startTunnel called (running=false)
+10-25 06:46:31.440   522  2331 I Vpn     : Established by com.ghprotocol.app on tun0
+10-25 06:46:31.440  5361  5361 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@5cad7fc} — relay loop started
+10-25 06:46:31.453   522  1255 I ImeTracker: com.ghprotocol.app:1fc3c3ab: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
+10-25 06:46:31.453   522  1255 I ImeTracker: com.ghprotocol.app:1fc3c3ab: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-25 06:46:31.519  1513  1513 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-25 06:46:31.785  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45404) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:31.975  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45412) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:32.410  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45424) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:33.242  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45432) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:34.907  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45444) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:37.307  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45448) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:38.298  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45454) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:38.330  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45464) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:40.347  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 45466) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:44.442  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 35894) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:44.954  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 35906) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:52.634  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 48540) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:46:58.266  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 48552) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:47:10.719   522   576 I AppsFilter: interaction: PackageSetting{6b4e65e com.ghprotocol.app/10192} -> PackageSetting{f140c71 com.google.android.contacts/10154} BLOCKED
+10-25 06:47:20.729   522   576 I AppsFilter: interaction: PackageSetting{6b4e65e com.ghprotocol.app/10192} -> PackageSetting{5217f60 com.google.android.contacts/10154} BLOCKED
+10-25 06:47:25.914  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 52036) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:48:17.690  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:48:17.694  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:17.827  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:17.827  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:17.959  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:17.959  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.086  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.086  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.207  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.207  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.321  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.321  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.430  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.430  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.531  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.532  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.627  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.627  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.717  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.717  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.802  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.802  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.880  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.880  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.952  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:18.952  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.019  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.019  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.085  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.085  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.141  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.141  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.191  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.191  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.236  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.236  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.274  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.274  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.308  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.308  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.334  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.334  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.355  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.355  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.369  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.369  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.379  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.379  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.382  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.382  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:48:19.392  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:48:19.397  5361  5372 I .ghprotocol.app: Alloc concurrent copying GC freed 8196(475KB) AllocSpace objects, 8(160KB) LOS objects, 49% free, 6557KB/12MB, paused 46us,4us total 14.944ms
+10-25 06:48:19.397  5361  5824 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Alloc for 5.359ms
+10-25 06:48:19.397  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.399  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:50:06.403  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.544  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.544  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.683  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.683  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.815  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.815  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.942  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:06.942  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.061  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.061  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.176  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.176  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.285  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.285  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.387  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.387  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.484  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.484  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.575  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.575  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.660  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.660  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.739  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.739  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.812  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.812  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.878  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.878  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.939  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.939  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.994  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:07.994  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.043  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.043  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.086  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.086  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.123  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.123  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.155  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.155  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.181  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.181  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.201  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.202  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.216  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.216  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.224  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.224  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.227  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.227  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:08.234  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:50:08.239  5361  5372 I .ghprotocol.app: Alloc concurrent copying GC freed 6576(418KB) AllocSpace objects, 8(160KB) LOS objects, 49% free, 6394KB/12MB, paused 14us,3us total 12.134ms
+10-25 06:50:08.239  5361  5824 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Alloc for 5.423ms
+10-25 06:50:08.240  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:50:20.282  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37532) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:50:21.740  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 49242) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:50:24.738  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 49256) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:50:30.872  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 49260) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:50:42.863  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 34424) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:50:55.242  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 38948) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:07.231  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 49984) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:19.221  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60860) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:20.242  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60868) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:20.243  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60876) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:20.447  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60880) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:20.858  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60896) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:21.691  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37896) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:23.354  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37910) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:26.810  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37912) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:31.211  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37922) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:33.467  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 32854) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:43.201  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60350) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:46.778  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 60358) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:51:52.496  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:51:52.499  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.633  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.633  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.766  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.766  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.891  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:52.891  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.010  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.010  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.123  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.123  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.231  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.231  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.332  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.332  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.428  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.428  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.520  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.520  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.605  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.605  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.684  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.684  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.756  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.756  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.823  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.823  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.884  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.884  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.940  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.940  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.989  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:53.989  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.033  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.033  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.071  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.071  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.102  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.102  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.128  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.128  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.149  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.149  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.163  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.163  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.171  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.171  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.174  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.174  5361  5372 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:54.181  5361  5824 I .ghprotocol.app: Waiting for a blocking GC Alloc
+10-25 06:51:54.186  5361  5372 I .ghprotocol.app: Alloc concurrent copying GC freed 6752(444KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 6375KB/12MB, paused 18us,3us total 11.935ms
+10-25 06:51:54.186  5361  5824 I .ghprotocol.app: WaitForGcToComplete blocked Alloc on Alloc for 5.113ms
+10-25 06:51:54.186  5361  5824 I .ghprotocol.app: Starting a blocking GC Alloc
+10-25 06:51:55.190  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 37480) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:52:07.180  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 59810) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:52:14.682  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 46600) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
+10-25 06:52:19.170  5361  5824 W GhVpnTunnel: socks5 connect failed: failed to connect to /127.0.0.1 (port 10808) from /127.0.0.1 (port 46616) after 2000ms: isConnected failed: ECONNREFUSED (Connection refused)
 
 
