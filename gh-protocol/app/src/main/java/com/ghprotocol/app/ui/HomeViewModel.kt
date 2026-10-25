@@ -472,10 +472,10 @@ class HomeViewModel(
     private fun waitForSocksListener(maxWaitMs: Long = 4500L): Boolean {
         val deadline = System.currentTimeMillis() + maxWaitMs
         while (System.currentTimeMillis() < deadline) {
-            if (core.isHealthy(VpnTunnelService.PROXY_PORT)) return true
+            if (core.isHealthy(com.ghprotocol.app.core.VpnTunnelService.PROXY_PORT)) return true
             try { Thread.sleep(150) } catch (_: InterruptedException) { break }
         }
-        return core.isHealthy(VpnTunnelService.PROXY_PORT)
+        return core.isHealthy(com.ghprotocol.app.core.VpnTunnelService.PROXY_PORT)
     }
 
     private fun verifyAndAutoHealIfNeeded() {
