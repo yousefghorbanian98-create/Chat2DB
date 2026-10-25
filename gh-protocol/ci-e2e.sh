@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# P2b: instrumented E2E — real VPN on an x86_64 emulator.
+# P2b: instrumented E2E — real VPN on an x86_64 emulator (GMS image).
+# NOTE: AOSP "default" image's sepolicy denies app exec of the bundled core;
 # Runs inside reactivecircus/android-emulator-runner (adb available, emulator up).
 # Sequence: install -> launch -> deep-link connect -> VPN consent -> tunnel up
 #           -> DNS through tunnel -> (HTTPS if curl) -> logcat sanity.
