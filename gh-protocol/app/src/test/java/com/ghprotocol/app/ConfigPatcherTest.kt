@@ -63,9 +63,14 @@ class ConfigPatcherTest {
         val ibs = c.getJSONArray("inbounds")
         assertEquals(2, ibs.length())
         val dnsIn = ibs.getJSONObject(1)
-        assertEquals("dns", dnsIn.getString("protocol"))
+        assertEquals("dokodemo-door", dnsIn.getString("protocol"))
         assertEquals(53, dnsIn.getInt("port"))
         assertEquals("127.0.0.1", dnsIn.getString("listen"))
+        // routed into a dns-protocol outbound, ahead of everything else
+        val rules = c.getJSONObject("routing").getJSONArray("rules")
+        assertEquals("dns-in", rules.getJSONObject(0).getJSONArray("inboundTag").getString(0))
+        assertEquals("dns-out", rules.getJSONObject(0).getString("outboundTag"))
+        assertEquals("dns", c.getJSONArray("outbounds").getJSONObject(0).getString("protocol"))
         // idempotent
         assertFalse(ConfigPatcher.addLocalDnsInbound(c))
         assertEquals(2, c.getJSONArray("inbounds").length())

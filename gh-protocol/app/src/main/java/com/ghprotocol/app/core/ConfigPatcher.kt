@@ -77,17 +77,63 @@ object ConfigPatcher {
 
     /**
      * Inject a loopback DNS inbound (127.0.0.1:53, tag `dns-in`) so the VpnService
-     * can relay client DNS queries into Xray's own resolver (fakedns + DoH).
-     * Idempotent: returns false if a DNS inbound already exists.
+     * can relay client DNS queries into Xray's own resolver (config dns.servers).
+     *
+     * Xray 26.x has NO `dns` inbound protocol — using one aborts startup with
+     * "failed to build inbound config with tag dns-in > unknown config id: dns"
+     * (verified on Xray 26.10.21). The canonical form is dokodemo-door plus a
+     * routing rule that hands its traffic to the config's `dns` outbound.
+     * Idempotent: returns false if such an inbound already exists.
      */
     fun addLocalDnsInbound(json: JSONObject): Boolean {
         val inbounds = json.optJSONArray("inbounds") ?: return false
         for (i in 0 until inbounds.length()) {
             val ib = inbounds.getJSONObject(i)
+            val proto = ib.optString("protocol")
             if (ib.optString("tag") == "dns-in") return false
-            if (ib.optString("protocol") == "dns" && ib.optInt("port", -1) == 53) return false
+            if (ib.optInt("port", -1) == 53 && (proto == "dns" || proto == "dokodemo-door")) return false
         }
-        inbounds.put(JSONObject().put("tag", "dns-in").put("protocol", "dns").put("listen", "127.0.0.1").put("port", 53))
+        inbounds.put(
+            JSONObject()
+                .put("tag", "dns-in")
+                .put("protocol", "dokodemo-door")
+                .put("listen", "127.0.0.1")
+                .put("port", 53)
+                .put("settings", JSONObject()
+                    .put("address", "127.0.0.1")
+                    .put("port", 53)
+                    .put("network", "tcp,udp")
+                    .put("userLevel", 12))
+        )
+
+        // Which outbound speaks the internal DNS protocol? Use the config's own
+        // dns outbound (tag `dns-out` in the official subscription) or add one.
+        var dnsTag: String? = null
+        val outbounds = json.optJSONArray("outbounds")
+        if (outbounds != null) {
+            for (i in 0 until outbounds.length()) {
+                val ob = outbounds.getJSONObject(i)
+                if (ob.optString("protocol") == "dns") dnsTag = ob.optString("tag", "dns-out")
+            }
+        }
+        if (dnsTag == null) {
+            dnsTag = "dns-out"
+            val ob = json.optJSONArray("outbounds") ?: JSONArray().also { json.put("outbounds", it) }
+            ob.put(JSONObject().put("tag", dnsTag).put("protocol", "dns"))
+        }
+
+        // Prepend the route so the config's catch-all `block` rule can't swallow
+        // the tunnel's DNS queries.
+        val routing = json.optJSONObject("routing") ?: JSONObject().also { json.put("routing", it) }
+        val rules = routing.optJSONArray("rules") ?: JSONArray().also { routing.put("rules", it) }
+        val newRules = JSONArray()
+        newRules.put(
+            JSONObject().put("type", "field")
+                .put("inboundTag", JSONArray().put("dns-in"))
+                .put("outboundTag", dnsTag)
+        )
+        for (i in 0 until rules.length()) newRules.put(rules.getJSONObject(i))
+        routing.put("rules", newRules)
         return true
     }
 
