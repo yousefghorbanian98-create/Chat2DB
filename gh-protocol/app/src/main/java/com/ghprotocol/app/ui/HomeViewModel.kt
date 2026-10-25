@@ -102,7 +102,7 @@ class HomeViewModel(
                 diag("connect: fetching subscription (primary+mirror, timeouts 20s/30s)")
                 val r = repository.update()
                 diag("connect: fetch result=${r.isSuccess} ${r.exceptionOrNull()?.message ?: ""}")
-                r.getOrNull() ?: _ui.value.subscription
+                r.getOrNull() ?: _ui.value.subscription ?: repository.cachedAnyAge() ?: repository.embeddedFallback()
             } else {
                 _ui.value.subscription
             }

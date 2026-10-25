@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # P2b: instrumented E2E — real VPN on an x86_64 emulator (GMS image).
-# NOTE: AOSP "default" image's sepolicy denies app exec of the bundled core;
-# Runs inside reactivecircus/android-emulator-runner (adb available, emulator up).
 # Sequence: install -> launch -> deep-link connect -> VPN consent -> tunnel up
-#           -> DNS through tunnel -> (HTTPS if curl) -> logcat sanity.
+#           -> VpnService establish -> DNS through tunnel -> TCP through tunnel -> logcat sanity.
 # On failure: publishes full diag to the ci-diag branch.
 set -uo pipefail
 
@@ -15,9 +13,34 @@ APK="$(dirname "$LOG")/app/build/outputs/apk/debug/app-debug.apk"
 say() { echo "$@"; echo "$@" >> "$LOG"; }
 
 report() {
-  # Log publication happens in the workflow's "always()" step (keeps this script simple).
   say "=== E2E FAILED: $1 ==="
   exit 1
+}
+
+CONSENT=0
+tap_consent() {
+  [ "$CONSENT" = "1" ] && return 0
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || true
+  adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1 || true
+  if [ -s /tmp/ui.xml ] && grep -qi "vpn" /tmp/ui.xml; then
+    COORDS=$(python3 - <<'PY'
+import re
+x = open('/tmp/ui.xml', encoding='utf-8', errors='ignore').read()
+for m in re.finditer(r'text="([^"]*)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', x):
+    t = m.group(1).strip().lower()
+    if t in ("allow", "allow anyway", "ok", "قبول"):
+        print((int(m.group(2)) + int(m.group(4))) // 2, (int(m.group(3)) + int(m.group(5))) // 2)
+        break
+PY
+)
+    if [ -n "${COORDS:-}" ]; then
+      adb shell input tap $COORDS >>"$LOG" 2>&1
+      say "tapped VPN consent at: $COORDS (iter ${1:-?})"
+      CONSENT=1
+      return 0
+    fi
+  fi
+  return 1
 }
 
 say "== adb devices =="
@@ -43,12 +66,6 @@ adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"
 
 D="$(dirname "$LOG")"
 
-# --- subscription availability: live fetch vs pre-seeded cache -----------------
-# The emulator's QEMU NAT may not reach GitHub (observed on GH runners), while the
-# runner itself has full internet. Probe the REAL sub host from the emulator:
-#  - reachable  -> SUBMODE=live   : app fetches on its own (full F-5/F-6 path)
-#  - not        -> SUBMODE=seeded : seed the app cache (host-downloaded sub.json);
-#                                  tunnel/core/VPN/DNS are still fully real.
 SUBHOST="raw.githubusercontent.com"
 say "== probe emulator reachability to sub host ($SUBHOST:443, up to 60s) =="
 REACH=0
@@ -70,9 +87,6 @@ else
   SUB="$D/sub.json"
   [ -s "$SUB" ] || report "no sub.json for seeding (host-side fetch step must have produced it)"
   TS=$(python3 -c 'import time; print(int(time.time() * 1000))' 2>/dev/null || echo "$(date +%s)000")
-  # Stream into the app's filesDir via run-as stdin — SELinux blocks app reads
-  # of /sdcard files pushed by adb (shell_data_file) on API 30+.
-  # NB: app files/ dir only exists after first launch — create it first.
   adb shell "run-as $PKG sh -c 'mkdir -p files && cat > files/subscription.json'" < "$SUB" >> "$LOG" 2>&1 \
     || report "seed: writing subscription.json failed (see log above)"
   adb shell "run-as $PKG sh -c 'echo $TS > files/subscription.meta'" >> "$LOG" 2>&1 \
@@ -110,9 +124,9 @@ adb shell am start -a android.intent.action.VIEW -d "ghprotocol://connect" >>"$L
 
 say "== wait for tunnel; tap VPN consent when it appears (up to 6 min) =="
 TUNNEL=0
-CONSENT=0
 WHY="neither xray process nor :10808 listener seen"
 for i in $(seq 1 90); do
+  tap_consent "$i" || true
   STATE=$(adb shell "ps -A 2>/dev/null | grep -ci xray || true; netstat -ltn 2>/dev/null | grep -c ':10808' || true" | tr -d '\r')
   PSOK=$(echo "$STATE" | sed -n 1p)
   NETOK=$(echo "$STATE" | sed -n 2p)
@@ -124,7 +138,6 @@ for i in $(seq 1 90); do
   else
     WHY="xray process not running and :10808 not listening (core exited — see xray-out/err logs)"
   fi
-  # app must stay alive
   if [ $((i % 5)) -eq 0 ]; then
     ALIVE=$(adb shell "pidof $PKG" 2>/dev/null | tr -d '\r')
     if [ -z "$ALIVE" ]; then
@@ -133,31 +146,8 @@ for i in $(seq 1 90); do
       report "app process died during connect flow (logcat attached)"
     fi
   fi
-  # consent dialog?
-  if [ "$CONSENT" != "1" ] && [ $((i % 3)) -eq 0 ]; then
-    adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
-    adb pull /sdcard/ui.xml /tmp/ui.xml >/dev/null 2>&1
-    if [ -s /tmp/ui.xml ] && grep -qi "vpn" /tmp/ui.xml; then
-      COORDS=$(python3 - <<'PY'
-import re
-x = open('/tmp/ui.xml', encoding='utf-8', errors='ignore').read()
-for m in re.finditer(r'text="([^"]*)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', x):
-    t = m.group(1).strip().lower()
-    if t in ("allow", "allow anyway", "ok", "قبول"):
-        print((int(m.group(2)) + int(m.group(4))) // 2, (int(m.group(3)) + int(m.group(5))) // 2)
-        break
-PY
-)
-      if [ -n "${COORDS:-}" ]; then
-        adb shell input tap $COORDS >>"$LOG" 2>&1
-        say "tapped VPN consent at: $COORDS (iter $i)"
-        CONSENT=1
-      fi
-    fi
-  fi
   sleep 4
 done
-[ "$CONSENT" = "1" ] || say "WARN: consent dialog never seen"
 [ "$TUNNEL" = "1" ] || {
   adb shell "ps -A" | grep -E "$PKG|xray|NAME" >> "$LOG" 2>&1
   adb shell "netstat -ltn" >> "$LOG" 2>&1
@@ -181,22 +171,22 @@ done
   report "tunnel not up (xray/:10808) — $WHY"
 }
 
-# NB: traffic must be generated AS THE APP UID — the adb shell UID bypasses the
-# VPN, so plain `adb shell nc` never enters the tunnel (verified: zero TUN packets).
-# And the VpnService must be ESTABLISHED first (consent tap happens later than the
-# :10808 listener coming up).
+# Wait for VpnService establish AND keep polling for the VPN consent dialog
+# because Xray (:10808) starts BEFORE HomeScreen launches VpnService.prepare()!
 say "== wait for VpnService establish (consent result) =="
 VPNUP=0
-for i in $(seq 1 20); do
+for i in $(seq 1 25); do
   if adb logcat -d -s GhDiag 2>/dev/null | grep -q "tunnel: established"; then
     VPNUP=1
     say "vpn established after ~$((i * 3))s"
     break
   fi
+  tap_consent "vpn-$i" || true
   sleep 3
 done
+[ "$CONSENT" = "1" ] || say "WARN: consent dialog never seen"
 [ "$VPNUP" = "1" ] || say "WARN: VpnService not established (GhDiag has no 'tunnel: established')"
-adb shell "ip addr show tun0 2>/dev/null | head -6" >> "$LOG" 2>&1
+adb shell "ip addr show tun0 2>/dev/null | head -8" >> "$LOG" 2>&1
 adb shell "ip route show table all 2>/dev/null | grep -m5 -i 'tun0\|10\.8\.0' " >> "$LOG" 2>&1
 
 say "== DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) =="
@@ -204,8 +194,8 @@ DNS_OK=0
 DNSOUT=""
 for i in $(seq 1 6); do
   DNSOUT=$(adb shell "run-as $PKG toybox ping -c 1 -W 2 github.com" 2>&1)
-  echo "$DNSOUT" | grep -qE "PING github\.com \([0-9]" && { DNS_OK=1; break; }
-  sleep 4
+  echo "$DNSOUT" | grep -qiE "ping github\.com \([0-9]" && { DNS_OK=1; break; }
+  sleep 3
 done
 say "dns through tunnel: $( [ "$DNS_OK" = "1" ] && echo OK || echo FAILED )"
 echo "$DNSOUT" >> "$LOG" 2>&1
@@ -220,7 +210,7 @@ for dst in 1.1.1.1:443 8.8.8.8:53 9.9.9.9:443; do
 done
 
 say "== relay diagnostics (GhVpnTunnel + GhDiag) =="
-adb logcat -d -s GhVpnTunnel GhDiag 2>/dev/null | tail -45 >> "$LOG"
+adb logcat -d -s GhVpnTunnel GhDiag 2>/dev/null | tail -50 >> "$LOG"
 if [ "$TCP_OK" != "1" ] && [ "$DNS_OK" != "1" ]; then
   adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
   report "tunnel up but no traffic passes (TCP connect + DNS query both failed)"
@@ -258,7 +248,7 @@ fi
 say "==============================="
 say "E2E PASS: real tunnel carrying traffic (SUBMODE=$SUBMODE)"
 say "  - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)"
-say "  - VpnService establish: verified (consent tapped: $CONSENT)"
+say "  - VpnService establish: verified (consent tapped: $CONSENT, vpnUp: $VPNUP)"
 say "  - SOCKS5 data path: verified (tcp=$TCP_OK)"
 say "  - DNS through tunnel: $([ "$DNS_OK" = "1" ] && echo verified || echo 'not resolving — runner egress/DNS limitation')"
 if [ "$SUBMODE" = "seeded" ]; then

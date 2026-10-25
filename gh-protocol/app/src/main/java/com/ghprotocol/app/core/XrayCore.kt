@@ -2,30 +2,27 @@ package com.ghprotocol.app.core
 
 import android.content.Context
 import java.io.File
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * F-2: Xray-core lifecycle.
+ * F-2: Xray-core lifecycle implementing [TunnelEngine].
  *
  * Android 10+ enforces W^X (b/112357170): files in the app's own data dir are
  * labelled `app_data_file`, and `execute_no_trans` on them is denied for
- * targetSdk > 28 — so the classic "extract the Xray binary to filesDir and
- * Runtime.exec it" approach FAILS on modern Android
- * (`avc: denied { execute_no_trans } ... app_data_file`, seen on API 34 AOSP
- * and GMS images alike).
+ * targetSdk > 28. The read-only native library dir (`applicationInfo.nativeLibraryDir`)
+ * is explicitly executable (`apk_data_file`). We ship Xray as
+ * `jniLibs/<abi>/libxraycore.so` (`useLegacyPackaging = true`) and exec it directly.
  *
- * The read-only native library dir (/data/app/.../lib/<abi>/,
- * `applicationInfo.nativeLibraryDir`) is explicitly executable. The official
- * XTLS/Xray-core Android build is therefore shipped as
- * `jniLibs/<abi>/libxraycore.so` — a real ELF executable with a `.so` name —
- * and the installer extracts it there (requires
- * `packaging.jniLibs.useLegacyPackaging = true`, see app/build.gradle.kts).
- * We exec that path directly.
- *
- * Geo data (geoip.dat / geosite.dat) is NOT code: it stays in assets and is
- * extracted to filesDir/xray, pointed at by XRAY_LOCATION_ASSET.
+ * Geo data (geoip.dat / geosite.dat) stays in assets and is extracted to
+ * `filesDir/xray` (`XRAY_LOCATION_ASSET`).
  */
-class XrayCore(private val context: Context) {
+class XrayCore(private val context: Context) : TunnelEngine {
+
+    override val name: String = "xray-core"
 
     /** Runtime dir for geo data + logs (app_data_file — data only, never exec'd). */
     private val dir = File(context.filesDir, "xray")
@@ -40,12 +37,15 @@ class XrayCore(private val context: Context) {
         else File(nativeDir, "libxraycore.so")
     }
 
+    @Volatile
     private var process: Process? = null
+    private val shouldRun = AtomicBoolean(false)
+    private val restartAttempts = AtomicInteger(0)
 
     data class Info(val path: File, val version: String)
 
     /** Verify the bundled core + geo assets -> report version. */
-    fun ensureInstalled(): Result<Info> {
+    override fun ensureInstalled(): Result<Info> {
         return try {
             dir.mkdirs()
             extractGeoAssets()
@@ -61,10 +61,10 @@ class XrayCore(private val context: Context) {
     }
 
     /** `Xray version` -> "26.10.21" (parsed from stdout or stderr). */
-    fun version(): String = try {
+    override fun version(): String = try {
         val p = Runtime.getRuntime().exec(arrayOf(binary.absolutePath, "version"), null, dir)
-        val out = p.inputStream.bufferedReader().readText()
-        val err = p.errorStream.bufferedReader().readText()
+        val out = p.inputStream.bufferedReader().use { it.readText() }
+        val err = p.errorStream.bufferedReader().use { it.readText() }
         if (!p.waitFor(10, TimeUnit.SECONDS)) p.destroyForcibly()
         val text = if (out.isNotBlank()) out else err
         val candidate = text.lineSequence().firstOrNull { it.contains("Xray", ignoreCase = true) }
@@ -74,38 +74,82 @@ class XrayCore(private val context: Context) {
         "unknown"
     }
 
-    fun isRunning(): Boolean = process?.let { it.isAlive } ?: false
+    override fun isRunning(): Boolean = process?.isAlive == true
+
+    /** Rule #8: Real socket health check on loopback mixed-in port (default 10808). */
+    override fun isHealthy(port: Int, timeoutMs: Int): Boolean {
+        if (!isRunning()) return false
+        return try {
+            Socket().use { s ->
+                s.connect(InetSocketAddress("127.0.0.1", port), timeoutMs)
+                true
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
 
     /**
-     * F-2/F-3: start the core with the given config (stderr -> filesDir/xray/xray-err.log).
-     * Geo assets resolve from XRAY_LOCATION_ASSET (also the executable dir default).
+     * F-2/F-3: start the core with the given config and attach a watchdog thread
+     * with bounded exponential-backoff restart on unexpected exit.
      */
-    fun start(configPath: File): Result<Process> {
+    override fun start(configPath: File): Result<Process> {
         return try {
             if (isRunning()) return Result.failure(IllegalStateException("Xray already running"))
             if (!ensureInstalled().isSuccess) return Result.failure(IllegalStateException("Xray not installed"))
-            val pb = ProcessBuilder(listOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
-            val env = pb.environment()
-            env["XRAY_LOCATION_ASSET"] = dir.absolutePath
-            env["xray.location.asset"] = dir.absolutePath
-            // Android discards a child's stdout/stderr by default — Xray logs to
-            // stdout, so capture BOTH (a silent core exit is otherwise invisible).
-            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(File(dir, "xray-out.log")))
-            pb.redirectError(ProcessBuilder.Redirect.appendTo(File(dir, "xray-err.log")))
-            val p = pb.start()
+            shouldRun.set(true)
+            restartAttempts.set(0)
+            val p = spawnProcess(configPath)
             process = p
-            Thread {
-                val rc = try { p.waitFor() } catch (e: InterruptedException) { -1 }
-                android.util.Log.w("GhDiag", "xray exited rc=$rc")
-            }.apply { isDaemon = true; name = "xray-watchdog" }.start()
+            startWatchdog(p, configPath)
             Result.success(p)
         } catch (e: Exception) {
+            shouldRun.set(false)
             Result.failure(e)
         }
     }
 
+    private fun spawnProcess(configPath: File): Process {
+        val pb = ProcessBuilder(listOf(binary.absolutePath, "run", "-c", configPath.absolutePath))
+        val env = pb.environment()
+        env["XRAY_LOCATION_ASSET"] = dir.absolutePath
+        env["xray.location.asset"] = dir.absolutePath
+        pb.redirectOutput(ProcessBuilder.Redirect.appendTo(File(dir, "xray-out.log")))
+        pb.redirectError(ProcessBuilder.Redirect.appendTo(File(dir, "xray-err.log")))
+        return pb.start()
+    }
+
+    private fun startWatchdog(initial: Process, configPath: File) {
+        Thread({
+            var current = initial
+            while (shouldRun.get()) {
+                val rc = try { current.waitFor() } catch (_: InterruptedException) { -1 }
+                android.util.Log.w("GhDiag", "xray exited rc=$rc shouldRun=${shouldRun.get()}")
+                if (!shouldRun.get() || rc == 0) break
+                val attempt = restartAttempts.incrementAndGet()
+                if (attempt > 4) {
+                    android.util.Log.e("GhDiag", "xray exceeded max restart attempts ($attempt)")
+                    shouldRun.set(false)
+                    break
+                }
+                val backoffMs = (1000L shl (attempt - 1)).coerceAtMost(16_000L)
+                try { Thread.sleep(backoffMs) } catch (_: InterruptedException) { break }
+                if (!shouldRun.get()) break
+                try {
+                    current = spawnProcess(configPath)
+                    process = current
+                    android.util.Log.i("GhDiag", "xray restarted (attempt=$attempt)")
+                } catch (e: Exception) {
+                    android.util.Log.e("GhDiag", "xray restart failed: ${e.message}")
+                    break
+                }
+            }
+        }, "xray-watchdog").apply { isDaemon = true; start() }
+    }
+
     /** F-4: stop < 3s (kill + wait with timeout). */
-    fun stop() {
+    override fun stop() {
+        shouldRun.set(false)
         process?.let {
             it.destroy()
             try { it.waitFor(2, TimeUnit.SECONDS) } catch (_: InterruptedException) {}

@@ -8,11 +8,14 @@ import java.net.Socket
 /**
  * F-17: clean-IP recovery (Nova Radar / Simorgh 2026 pattern).
  * When the default route is dirty (blackholed), scan a pool of well-known
- * Cloudflare egress IPs with a real TCP/TLS probe on :443. The cleanest (lowest
- * latency) IP is cached; only the egress address is swapped in the config —
- * SNI/Host/Path stay untouched.
+ * Cloudflare egress IPs with a real TCP/TLS ClientHello probe on :443. The
+ * cleanest (lowest latency) IP is cached; only the egress address is swapped
+ * in the config — SNI/Host/Path stay untouched.
  */
-class CleanIpScanner(private val pool: List<String> = DEFAULT_POOL) {
+class CleanIpScanner(
+    private val pool: List<String> = DEFAULT_POOL,
+    private val probeFn: (String, Int) -> Boolean = ::defaultTlsProbe
+) {
 
     companion object {
         /** Well-known Cloudflare anycast egress IPs (stable, globally reachable). */
@@ -24,6 +27,41 @@ class CleanIpScanner(private val pool: List<String> = DEFAULT_POOL) {
             "190.93.240.229", "190.93.241.229",
             "198.41.200.229", "198.41.201.229"
         )
+
+        /**
+         * Minimal RFC 5246 TLS 1.2 ClientHello record (45 bytes) so the server
+         * responds with a TLS Handshake (0x16) or TLS Alert (0x15) record.
+         * Without sending ClientHello first, a TLS server never speaks first.
+         */
+        internal val MINIMAL_CLIENT_HELLO = byteArrayOf(
+            0x16, 0x03, 0x01, 0x00, 0x28, // TLS Handshake record, version 3.1, len 40
+            0x01, 0x00, 0x00, 0x24,       // ClientHello, len 36
+            0x03, 0x03,                   // TLS 1.2
+            // 32-byte client random
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
+            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+            0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
+            0x00,                         // session ID len 0
+            0x00, 0x02, 0x13, 0x01,       // cipher suite: TLS_AES_128_GCM_SHA256
+            0x01, 0x00                    // compression methods: null
+        )
+
+        fun defaultTlsProbe(ip: String, timeoutMs: Int): Boolean = try {
+            Socket().use { s ->
+                s.connect(InetSocketAddress(ip, 443), timeoutMs)
+                s.soTimeout = timeoutMs
+                s.tcpNoDelay = true
+                val out = s.getOutputStream()
+                out.write(MINIMAL_CLIENT_HELLO)
+                out.flush()
+                // TLS record type: 0x16 (Handshake / ServerHello) or 0x15 (Alert from live TLS stack)
+                val b = s.getInputStream().read()
+                b == 0x16 || b == 0x15
+            }
+        } catch (_: Exception) {
+            false
+        }
     }
 
     data class ScanResult(val ip: String, val latencyMs: Long)
@@ -33,18 +71,8 @@ class CleanIpScanner(private val pool: List<String> = DEFAULT_POOL) {
         val results = mutableListOf<ScanResult>()
         for (ip in pool) {
             val t0 = System.currentTimeMillis()
-            val ok = try {
-                Socket().use { s ->
-                    s.connect(InetSocketAddress(ip, 443), timeoutMs)
-                    s.soTimeout = timeoutMs
-                    // read the TLS ServerHello first bytes (proves a live TLS egress)
-                    val b = s.getInputStream().read()
-                    b in 0x16..0xFE
-                }
-            } catch (e: Exception) {
-                false
-            }
-            if (ok) results.add(ScanResult(ip, System.currentTimeMillis() - t0))
+            val ok = probeFn(ip, timeoutMs)
+            if (ok) results.add(ScanResult(ip, (System.currentTimeMillis() - t0).coerceAtLeast(1L)))
         }
         val best = results.minByOrNull { it.latencyMs }
         Report(best, results.sortedBy { it.latencyMs })

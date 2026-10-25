@@ -3,6 +3,7 @@ package com.ghprotocol.app
 import com.ghprotocol.app.core.Socks5
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -65,16 +66,45 @@ class Socks5Test {
         val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB.toByte(), 0xCD.toByte())
         val pkt = Socks5.buildUdpSegment("10.8.0.1", 53, "10.8.0.5", 41000, payload)
         assertEquals(20 + 8 + payload.size, pkt.size)
-        // IPv4 header sanity
+        // IPv4 header sanity + checksum populated
         assertEquals(0x45, pkt[0].toInt())
         assertEquals(17, pkt[9].toInt() and 0xFF)
+        assertNotEquals(0, ((pkt[10].toInt() and 0xFF) shl 8) or (pkt[11].toInt() and 0xFF))
         assertEquals("10.8.0.1", Socks5.ipSrcIp(pkt))
         assertEquals("10.8.0.5", Socks5.parseIp4(pkt)!!.second)
-        // UDP header (full-packet offsets)
+        // UDP header (full-packet offsets + UDP length)
         assertEquals(53, Socks5.transportSrcPort(pkt, 17))
         assertEquals(41000, Socks5.transportDstPort(pkt, 17))
+        assertEquals(8 + payload.size, ((pkt[24].toInt() and 0xFF) shl 8) or (pkt[25].toInt() and 0xFF))
         // payload intact
         assertEquals(payload.toList(), pkt.copyOfRange(28, 28 + payload.size).toList())
+    }
+
+    @Test fun buildTcpSegmentRoundTrip() {
+        val payload = "HEAD / HTTP/1.1\r\n\r\n".toByteArray(Charsets.US_ASCII)
+        val pkt = Socks5.buildTcpSegment(
+            srcIp = "1.1.1.1", srcPort = 443,
+            dstIp = "10.8.0.1", dstPort = 52345,
+            seq = 1000L, ack = 2500000001L,
+            flags = 0x18, // PSH-ACK
+            payload = payload
+        )
+        assertEquals(40 + payload.size, pkt.size)
+        val (proto, dst, len) = Socks5.parseIp4(pkt)!!
+        assertEquals(6, proto)
+        assertEquals("10.8.0.1", dst)
+        assertEquals("1.1.1.1", Socks5.ipSrcIp(pkt))
+        assertEquals(40 + payload.size, len)
+        assertEquals(443, Socks5.transportSrcPort(pkt, 6))
+        assertEquals(52345, Socks5.transportDstPort(pkt, 6))
+        assertEquals(0x18, Socks5.tcpFlags(pkt))
+        assertEquals(1000L, Socks5.tcpSeq(pkt))
+        assertEquals(2500000001L, Socks5.tcpAck(pkt))
+        assertEquals(payload.toList(), Socks5.tcpPayload(pkt).toList())
+        // Both IPv4 and TCP checksums are populated
+        assertNotEquals(0, ((pkt[10].toInt() and 0xFF) shl 8) or (pkt[11].toInt() and 0xFF))
+        assertNotEquals(0, ((pkt[36].toInt() and 0xFF) shl 8) or (pkt[37].toInt() and 0xFF))
+        assertEquals("1.1.x.x", Socks5.maskIp("1.1.1.1"))
     }
 
     @Test fun fullPacketUdpSrcDst() {

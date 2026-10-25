@@ -10,8 +10,8 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * F-5/F-6/F-12: subscription with on-device cache.
- * - First launch offline: falls back to cache, honest "couldn't update" message
+ * F-5/F-6/F-12: subscription with on-device cache + embedded fallback.
+ * - First launch offline: falls back to cache (or embedded fallback on connect)
  * - Auto re-sync on link recovery (NetworkMonitor hook) and every 12h (in-app)
  * - Mirror failover when the primary edge is filtered
  */
@@ -39,11 +39,15 @@ class SubscriptionRepository(private val context: Context) {
         null
     }
 
+    /** Rule #13: Embedded fallback config when both network edges and disk cache are unavailable. */
+    fun embeddedFallback(): SubscriptionInfo =
+        SubscriptionParser.parse(Subscription.EMBEDDED_FALLBACK_JSON).copy(source = "embedded")
+
     suspend fun update(): Result<SubscriptionInfo> = withContext(Dispatchers.IO) {
         for (url in listOf(Subscription.SUBSCRIPTION_URL, Subscription.MIRROR_URL)) {
             try {
                 val raw = fetch(url)
-                val parsed = SubscriptionParser.parse(raw)
+                val parsed = SubscriptionParser.parse(raw).copy(source = url)
                 cacheFile().writeText(raw)
                 metaFile().writeText(parsed.fetchedAt.toString())
                 return@withContext Result.success(parsed)
@@ -56,17 +60,17 @@ class SubscriptionRepository(private val context: Context) {
 
     private fun fetch(url: String): String {
         val conn = URL(url).openConnection() as HttpURLConnection
-        conn.connectTimeout = 20_000
-        conn.readTimeout = 30_000
-        conn.instanceFollowRedirects = true
-        conn.setRequestProperty("User-Agent", "GhProtocol/0.1")
-        val code = try {
-            conn.responseCode
+        return try {
+            conn.connectTimeout = 20_000
+            conn.readTimeout = 30_000
+            conn.instanceFollowRedirects = true
+            conn.setRequestProperty("User-Agent", "GhProtocol/0.1")
+            val code = conn.responseCode
+            require(code in 200..299) { "HTTP $code from $url" }
+            conn.inputStream.bufferedReader().use { it.readText() }
         } finally {
             conn.disconnect()
         }
-        require(code in 200..299) { "HTTP $code from $url" }
-        return conn.inputStream.bufferedReader().use { it.readText() }
     }
 
     fun lastUpdateText(): String? = try {

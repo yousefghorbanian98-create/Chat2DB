@@ -56,4 +56,48 @@ object Subscription {
     const val MIRROR_URL =
         "https://github.com/patterniha/Serverless-for-Iran/raw/main/Subscription/Serverless-for-Iran.json"
     const val STALE_AFTER_MS = 12L * 60 * 60 * 1000 // 12h (F-6)
+
+    /**
+     * Rule #13: Embedded fallback Serverless-for-Iran config so first-launch
+     * users can still establish a TLS-fragmented tunnel when GitHub edges are
+     * blocked before any on-disk cache exists.
+     */
+    val EMBEDDED_FALLBACK_JSON: String = """
+    [
+      {
+        "remarks": "Serverless-v52-fragA (embedded)",
+        "version": {"min": "26.6.27"},
+        "log": {"loglevel": "warning"},
+        "dns": {"servers": ["https://cloudflare-dns.com/dns-query", "8.8.8.8"]},
+        "inbounds": [
+          {
+            "tag": "mixed-in",
+            "listen": "127.0.0.1",
+            "port": 10808,
+            "protocol": "mixed",
+            "settings": {"udp": true},
+            "sniffing": {"enabled": true, "destOverride": ["tls", "http"]}
+          }
+        ],
+        "outbounds": [
+          {
+            "tag": "tcp-fragment",
+            "protocol": "freedom",
+            "settings": {"domainStrategy": "UseIP"},
+            "streamSettings": {
+              "sockopt": {"tcpNoDelay": true}
+            }
+          },
+          {"tag": "dns-out", "protocol": "dns"},
+          {"tag": "block", "protocol": "blackhole"}
+        ],
+        "routing": {
+          "domainStrategy": "IPIfNonMatch",
+          "rules": [
+            {"type": "field", "inboundTag": ["mixed-in"], "outboundTag": "tcp-fragment"}
+          ]
+        }
+      }
+    ]
+    """.trimIndent()
 }
