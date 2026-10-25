@@ -9,6 +9,10 @@ on:
   # Integration-token pushes don't trigger workflows (GitHub anti-recursion);
   # repository_dispatch is the supported escape hatch (POST /repos/.../dispatches).
   repository_dispatch:
+  # PR from this branch also runs the E2E (pull_request workflows are read from
+  # the PR head, so the branch's own file is used).
+  pull_request:
+    branches: [main]
   # Self-iterating: runs only when the E2E assets themselves change (emulator jobs are expensive)
   push:
     branches: [arena/7324330b-chat2db]
