@@ -75,7 +75,7 @@ class ConfigPatcherTest {
         assertFalse(ConfigPatcher.addLocalDnsInbound(c))
         assertEquals(2, c.getJSONArray("inbounds").length())
         // existing dns:53 inbound not duplicated
-        val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 5353, "protocol": "dokodemo-door"}]}""")
+        val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 15353, "protocol": "dokodemo-door"}]}""")
         assertFalse(ConfigPatcher.addLocalDnsInbound(c2))
     }
 

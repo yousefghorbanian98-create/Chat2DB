@@ -12,7 +12,7 @@ import java.net.Socket
  * F-3/F-4: VpnService tunnel.
  * Loop: read packets from the protected fd -> SOCKS5 CONNECT to Xray mixed-in
  * (127.0.0.1:10808) -> relay. TCP per 4-tuple with idle reuse; client DNS
- * (UDP to 10.8.0.1:53) is relayed to Xray's local DNS inbound on 127.0.0.1:5353.
+ * (UDP to 10.8.0.1:53) is relayed to Xray's local DNS inbound on 127.0.0.1:15353.
  */
 class VpnTunnelService : VpnService() {
 
@@ -167,7 +167,7 @@ class VpnTunnelService : VpnService() {
     }
 
     /**
-     * DNS relay: client query (dst 10.8.0.1:53) -> Xray dns inbound (127.0.0.1:5353)
+     * DNS relay: client query (dst 10.8.0.1:53) -> Xray dns inbound (127.0.0.1:15353)
      * -> response routed back to the client address via the tunnel.
      */
     private fun sendUdp(udpPacket: ByteArray, clientIp: String, clientPort: Int) {

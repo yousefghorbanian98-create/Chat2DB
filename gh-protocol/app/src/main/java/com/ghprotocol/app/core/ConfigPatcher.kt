@@ -16,8 +16,10 @@ object ConfigPatcher {
      * Loopback port the VpnService relays client DNS to. MUST be > 1024:
      * Android denies binding privileged ports to apps
      * ("listen tcp 127.0.0.1:53: bind: permission denied", verified on API 34).
+     * Also avoids 5353 (the system mDNS daemon already owns it:
+     * "listen udp 127.0.0.1:5353: bind: address already in use").
      */
-    const val DNS_IN_PORT = 5353
+    const val DNS_IN_PORT = 15353
 
     data class InboundInfo(val tag: String, val port: Int, val protocol: String)
 
@@ -83,7 +85,7 @@ object ConfigPatcher {
     }
 
     /**
-     * Inject a loopback DNS inbound (127.0.0.1:5353, tag `dns-in`) so the VpnService
+     * Inject a loopback DNS inbound (127.0.0.1:15353, tag `dns-in`) so the VpnService
      * can relay client DNS queries into Xray's own resolver (config dns.servers).
      *
      * Xray 26.x has NO `dns` inbound protocol — using one aborts startup with
