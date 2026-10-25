@@ -64,7 +64,7 @@ class ConfigPatcherTest {
         assertEquals(2, ibs.length())
         val dnsIn = ibs.getJSONObject(1)
         assertEquals("dokodemo-door", dnsIn.getString("protocol"))
-        assertEquals(53, dnsIn.getInt("port"))
+        assertEquals(ConfigPatcher.DNS_IN_PORT, dnsIn.getInt("port"))
         assertEquals("127.0.0.1", dnsIn.getString("listen"))
         // routed into a dns-protocol outbound, ahead of everything else
         val rules = c.getJSONObject("routing").getJSONArray("rules")
@@ -75,7 +75,7 @@ class ConfigPatcherTest {
         assertFalse(ConfigPatcher.addLocalDnsInbound(c))
         assertEquals(2, c.getJSONArray("inbounds").length())
         // existing dns:53 inbound not duplicated
-        val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 53, "protocol": "dns"}]}""")
+        val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 5353, "protocol": "dokodemo-door"}]}""")
         assertFalse(ConfigPatcher.addLocalDnsInbound(c2))
     }
 

@@ -12,6 +12,13 @@ import org.json.JSONObject
  */
 object ConfigPatcher {
 
+    /**
+     * Loopback port the VpnService relays client DNS to. MUST be > 1024:
+     * Android denies binding privileged ports to apps
+     * ("listen tcp 127.0.0.1:53: bind: permission denied", verified on API 34).
+     */
+    const val DNS_IN_PORT = 5353
+
     data class InboundInfo(val tag: String, val port: Int, val protocol: String)
 
     fun findInbound(json: JSONObject): InboundInfo? {
@@ -76,7 +83,7 @@ object ConfigPatcher {
     }
 
     /**
-     * Inject a loopback DNS inbound (127.0.0.1:53, tag `dns-in`) so the VpnService
+     * Inject a loopback DNS inbound (127.0.0.1:5353, tag `dns-in`) so the VpnService
      * can relay client DNS queries into Xray's own resolver (config dns.servers).
      *
      * Xray 26.x has NO `dns` inbound protocol — using one aborts startup with
@@ -91,14 +98,14 @@ object ConfigPatcher {
             val ib = inbounds.getJSONObject(i)
             val proto = ib.optString("protocol")
             if (ib.optString("tag") == "dns-in") return false
-            if (ib.optInt("port", -1) == 53 && (proto == "dns" || proto == "dokodemo-door")) return false
+            if (ib.optInt("port", -1) == DNS_IN_PORT && proto == "dokodemo-door") return false
         }
         inbounds.put(
             JSONObject()
                 .put("tag", "dns-in")
                 .put("protocol", "dokodemo-door")
                 .put("listen", "127.0.0.1")
-                .put("port", 53)
+                .put("port", DNS_IN_PORT)
                 .put("settings", JSONObject()
                     .put("address", "127.0.0.1")
                     .put("port", 53)
