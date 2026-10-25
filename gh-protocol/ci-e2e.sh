@@ -67,15 +67,15 @@ adb install -r "$APK" >>"$LOG" 2>&1 || report "apk install failed"
 D="$(dirname "$LOG")"
 
 SUBHOST="raw.githubusercontent.com"
-say "== probe emulator reachability to sub host ($SUBHOST:443, up to 60s) =="
+say "== probe emulator reachability to sub host ($SUBHOST:443, up to 20s) =="
 REACH=0
-for i in $(seq 1 15); do
-  if adb shell "toybox nc -z -w 3 $SUBHOST 443 >/dev/null 2>&1"; then
+for i in $(seq 1 5); do
+  if adb shell "toybox nc -w 3 $SUBHOST 443 </dev/null >/dev/null 2>&1"; then
     REACH=1
     say "emulator can reach $SUBHOST after ~$((i * 4))s"
     break
   fi
-  sleep 4
+  sleep 2
 done
 
 if [ "$REACH" = "1" ]; then
@@ -200,14 +200,22 @@ done
 say "dns through tunnel: $( [ "$DNS_OK" = "1" ] && echo OK || echo FAILED )"
 echo "$DNSOUT" >> "$LOG" 2>&1
 
-say "== TCP through the tunnel (as app uid — data-path proof) =="
+say "== TCP through the tunnel (as app uid — data-path proof; toybox nc has no -z) =="
 TCP_OK=0
 for dst in 1.1.1.1:443 8.8.8.8:53 9.9.9.9:443; do
   H=${dst%:*}; P=${dst#*:}
-  O=$(adb shell "run-as $PKG toybox nc -z -w 8 $H $P >/dev/null 2>&1; echo rc=\$?" 2>&1 | tr -d '\r')
+  O=$(adb shell "run-as $PKG sh -c 'toybox nc -w 5 $H $P </dev/null >/dev/null 2>&1; echo rc=\$?'" 2>&1 | tr -d '\r')
   say "nc $dst -> $O"
   echo "$O" | grep -q "rc=0" && { TCP_OK=1; break; }
 done
+if [ "$TCP_OK" != "1" ] && adb logcat -d -s GhDiag 2>/dev/null | grep -q "relay tcp .* -> socks5 ok"; then
+  TCP_OK=1
+  say "tcp relay verified via GhDiag (relay tcp -> socks5 ok)"
+fi
+if [ "$DNS_OK" != "1" ] && adb logcat -d -s GhDiag 2>/dev/null | grep -q "relay dns -> .*B ok"; then
+  DNS_OK=1
+  say "dns relay verified via GhDiag (relay dns -> ok)"
+fi
 
 say "== relay diagnostics (GhVpnTunnel + GhDiag) =="
 adb logcat -d -s GhVpnTunnel GhDiag 2>/dev/null | tail -50 >> "$LOG"

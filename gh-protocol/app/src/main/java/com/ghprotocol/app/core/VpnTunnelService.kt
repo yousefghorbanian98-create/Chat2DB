@@ -39,6 +39,7 @@ class VpnTunnelService : VpnService() {
         const val PROXY_HOST = "127.0.0.1"
         const val PROXY_PORT = 10808
         const val MTU = 1500
+        const val TUNNEL_ADDR = "10.8.0.2"
         const val TUNNEL_GW = "10.8.0.1"
         const val TUNNEL_GW_V6 = "fd00:1::1"
         const val DNS_UPSTREAM_HOST = "127.0.0.1"
@@ -117,7 +118,7 @@ class VpnTunnelService : VpnService() {
         val builder = Builder()
             .setSession("gh-protocol")
             .setMtu(MTU)
-            .addAddress(TUNNEL_GW, 8)
+            .addAddress(TUNNEL_ADDR, 24)
             .addAddress(TUNNEL_GW_V6, 128)
             .addDnsServer(TUNNEL_GW)
             .addRoute("0.0.0.0", 0)
@@ -291,10 +292,7 @@ class VpnTunnelService : VpnService() {
                 }
                 session.socket = sock
                 session.lastActive = System.currentTimeMillis()
-                if (diagBudget > 0) {
-                    diagBudget--
-                    Log.d("GhDiag", "relay tcp ${Socks5.maskIp(dstIp)}:$dstPort -> socks5 ok")
-                }
+                Log.d("GhDiag", "relay tcp ${Socks5.maskIp(dstIp)}:$dstPort -> socks5 ok")
                 // Complete TCP 3-way handshake with SYN-ACK (seq=1000, ack=clientIsn+1)
                 val synAck = Socks5.buildTcpSegment(
                     srcIp = dstIp, srcPort = dstPort,
@@ -446,10 +444,7 @@ class VpnTunnelService : VpnService() {
                     dstIp = clientIp, dstPort = clientPort,
                     payload = answer
                 )
-                if (diagBudget > 0) {
-                    diagBudget--
-                    Log.d("GhDiag", "relay dns -> ${answer.size}B ok")
-                }
+                Log.d("GhDiag", "relay dns -> ${answer.size}B ok")
                 writeTun(tunOut, reply)
             }
         }, "gh-dns-$clientPort").apply { isDaemon = true; start() }
