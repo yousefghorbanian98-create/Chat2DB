@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-25T08:27:45Z
+## gh-protocol E2E log — 2026-10-25T08:40:44Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-25T08:24:58Z ==
+== pre-flight 2026-10-25T08:36:51Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 08:19 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 08:27 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:25 .
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:25 ..
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:25 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 25 08:25 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:37 .
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:37 ..
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:37 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 25 08:37 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -50,7 +50,7 @@ USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (a
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3074
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 2913
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -120,7 +120,7 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7fdde5801000 as it is in the protected range from 0x7fdce5800000 to 0x7fdde5a00000
+WARNING: cannnot unmap ptr 0x7f97f8e01000 as it is in the protected range from 0x7f96f8e00000 to 0x7f97f9000000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
 INFO         | Activated packet streamer for bluetooth emulation
@@ -131,8 +131,11 @@ INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 37736 ms
+INFO         | Boot completed in 28968 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
+ERROR        | DisplaySurfaceGlContextHelper context was preempted by others, current=0x3, needed=0x3, thread=0x55a2292808c8
+ERROR        | DisplaySurfaceGlContextHelper context was preempted by others, current=0x3, needed=0x3, thread=0x55a228264c88
+ERROR        | Failed to restore previous context: 12297
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -150,42 +153,43 @@ For more details see https://docs.gradle.org/8.10.2/release-notes.html
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug
-> Task :app:preBuild UP-TO-DATE
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugResValues
 > Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResources
 > Task :app:extractDeepLinksDebug
-> Task :app:packageDebugResources
-> Task :app:parseDebugLocalResources
+> Task :app:generateDebugResources
 > Task :app:mapDebugSourceSetPaths
+> Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
+> Task :app:packageDebugResources
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
-> Task :app:mergeDebugAssets
 > Task :app:processDebugManifestForPackage
+> Task :app:desugarDebugFileDependencies
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugAssets
 > Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugJniLibFolders
 > Task :app:compressDebugAssets
 > Task :app:mergeDebugResources
-> Task :app:mergeDebugJniLibFolders
-> Task :app:mergeExtDexDebug
-> Task :app:mergeLibDexDebug
-> Task :app:processDebugResources
 > Task :app:mergeDebugNativeLibs
+> Task :app:mergeLibDexDebug
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
+
+> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
 
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
@@ -199,9 +203,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792916543199.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792916938000.json
 
-BUILD SUCCESSFUL in 2m 30s
+BUILD SUCCESSFUL in 7m 34s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -217,33 +221,38 @@ Performing Streamed Install
 Success
 == probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 60s) ==
 WARN: emulator CANNOT reach raw.githubusercontent.com (runner NAT) — pre-seeding app cache
-seeded cache: 37417 bytes, meta=1792916827412
+seeded cache: 37417 bytes, meta=1792917532400
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 5501)
+app up (try 1, pid 5703)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
 tunnel up after ~8s (xray pid + :10808 listener)
 WARN: consent dialog never seen
-== DNS resolution THROUGH the tunnel (as app uid) ==
+== wait for VpnService establish (consent result) ==
+WARN: VpnService not established (GhDiag has no 'tunnel: established')
+== DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) ==
 dns through tunnel: FAILED
-toybox: Unknown command nslookup (see "toybox --help")
+Ping github.com (140.82.114.3): 56(84) bytes.
+
+--- 140.82.114.3 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss
 == TCP through the tunnel (as app uid — data-path proof) ==
 nc 1.1.1.1:443 -> rc=1
 nc 8.8.8.8:53 -> rc=1
 nc 9.9.9.9:443 -> rc=1
 == relay diagnostics (GhVpnTunnel + GhDiag) ==
 --------- beginning of main
-10-25 08:27:15.643  5501  5501 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 08:27:15.643  5501  5501 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 08:27:15.921  5501  5501 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 08:27:15.948  5501  5501 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 08:27:16.078  5501  5501 D GhDiag  : connect: core.start=true 
+10-25 08:39:00.572  5703  5703 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-25 08:39:00.572  5703  5703 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-25 08:39:00.664  5703  5703 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-25 08:39:00.685  5703  5703 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-25 08:39:00.833  5703  5703 D GhDiag  : connect: core.start=true 
 Xray 26.10.21 (Xray, Penetrates Everything.) 1b1647c (go1.27.3 android/amd64)
 A unified platform for anti-censorship.
-2026/10/25 08:27:16.180689 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
-2026/10/25 08:27:17.493470 [Warning] core: Xray 26.10.21 started
+2026/10/25 08:39:00.912414 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
+2026/10/25 08:39:01.787477 [Warning] core: Xray 26.10.21 started
 === E2E FAILED: tunnel up but no traffic passes (TCP connect + DNS query both failed) ===
 
 
