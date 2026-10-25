@@ -52,7 +52,10 @@ class CleanIpProbeTest {
     fun acceptsOnlyTlsHttpWithCloudflareMarker() {
         TestNet.TlsHttpServer().use { server ->
             val result = probeFor(server.port).probe("127.0.0.1")
-            assertTrue(result.stage + ":" + result.detail, result.ok)
+            assertTrue(
+                "probe=${result.stage}:${result.detail} serverStage=${server.stage} serverError=${server.lastError} accepts=${server.accepts} bytesOut=${server.bytesWritten} elapsed=${result.latencyMs}ms",
+                result.ok
+            )
             assertEquals(IpProbeResult.STAGE_OK, result.stage)
             assertTrue("must prove the peer is a Cloudflare edge", result.cloudflareEdge)
             assertEquals(403, result.httpStatus)
@@ -65,7 +68,11 @@ class CleanIpProbeTest {
         TestNet.TlsHttpServer(extraHeaders = listOf("server: nginx")).use { server ->
             val result = probeFor(server.port).probe("127.0.0.1")
             assertFalse("a generic TLS server is not a clean Cloudflare edge", result.ok)
-            assertEquals(IpProbeResult.STAGE_CF_RAY, result.stage)
+            assertEquals(
+                "serverStage=${server.stage} serverError=${server.lastError} bytesOut=${server.bytesWritten} probe=${result.detail}",
+                IpProbeResult.STAGE_CF_RAY,
+                result.stage
+            )
         }
     }
 

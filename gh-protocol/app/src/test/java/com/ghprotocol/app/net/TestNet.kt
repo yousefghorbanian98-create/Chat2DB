@@ -14,7 +14,7 @@ import java.net.Socket
 import java.security.KeyStore
 import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
-import javax.net.ssl.SSLServerSocket
+import javax.net.ssl.SSLSocket
 
 /**
  * Test-only network doubles. Everything runs on 127.0.0.1 with ephemeral ports so the
@@ -338,22 +338,74 @@ object TestNet {
         return combined
     }
 
-    /** Minimal RFC 8484 DoH server over TLS with a controllable answer builder. */
+    /**
+     * Close a connection without turning a completed exchange into a TCP reset.
+     *
+     * Closing a socket that still has unread bytes queued makes the kernel emit RST, and a RST
+     * discards the peer's already-delivered data — on a loaded runner that turned a perfectly
+     * good response into "client received nothing". So: half-close the TLS stream, drain whatever
+     * the peer still sends (bounded), then close.
+     */
+    private fun gracefulClose(socket: Socket) {
+        try {
+            val tls = socket as? SSLSocket
+            if (tls != null) {
+                try { tls.shutdownOutput() } catch (_: Exception) { }
+            }
+            socket.soTimeout = 500
+            val sink = ByteArray(1024)
+            val deadline = System.currentTimeMillis() + 500
+            while (System.currentTimeMillis() < deadline) {
+                val n = try { socket.getInputStream().read(sink) } catch (_: Exception) { break }
+                if (n < 0) break
+            }
+        } catch (_: Exception) {
+            // best effort
+        } finally {
+            try { socket.close() } catch (_: Exception) { }
+        }
+    }
+
+    /**
+     * Minimal RFC 8484 DoH server over TLS with a controllable answer builder.
+     *
+     * The TLS layer is built explicitly instead of relying on `SSLServerSocket.accept()` and its
+     * lazy handshake: a plain loopback [ServerSocket] accepts, the accepted socket is wrapped with
+     * the server-side SSL factory, and the handshake is driven *in the worker thread* before any
+     * application byte is read. On CI runners the lazy variant left the client with a finished
+     * handshake but no server-side exchange at all; spelling the sequence out removes that
+     * dependency and every processed step is recorded in [stage] / [lastError].
+     */
     class DohServer(
         private val answer: (ByteArray) -> ByteArray,
         val requirePath: String = "/dns-query",
         val responseCode: Int = 200
     ) : AutoCloseable {
         private val context = testSslContext()
-        private val server = context.serverSocketFactory.createServerSocket(
-            0, 16, InetAddress.getByName("127.0.0.1")
-        ) as SSLServerSocket
+        private val server = ServerSocket(0, 16, InetAddress.getByName("127.0.0.1"))
         val port: Int get() = server.localPort
+
         @Volatile
         var requests = 0
             private set
+
         @Volatile
         var lastPath: String? = null
+            private set
+
+        /** Last successfully processed step: `idle`/`handshake`/`request`/`response`. */
+        @Volatile
+        var stage: String = "idle"
+            private set
+
+        /** Response body bytes handed to the TLS stream by the last connection. */
+        @Volatile
+        var bytesWritten = 0
+            private set
+
+        /** Server-side failure of the last connection (empty when the exchange was clean). */
+        @Volatile
+        var lastError: String = ""
             private set
 
         init {
@@ -365,50 +417,70 @@ object TestNet {
             }, "test-doh-accept").apply { isDaemon = true; start() }
         }
 
-        private fun handle(client: Socket) {
-            client.use { socket ->
-                socket.soTimeout = 10_000
-                try {
-                    val input = socket.getInputStream()
-                    val headers = readHeaders(input) ?: return
-                    val path = headers.lineSequence().firstOrNull()?.split(' ')?.getOrNull(1) ?: "/"
-                    lastPath = path
-                    val contentLength = Regex("content-length:\\s*(\\d+)", RegexOption.IGNORE_CASE)
-                        .find(headers)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
-                    val body = ByteArray(contentLength)
-                    var read = 0
-                    while (read < contentLength) {
-                        val n = input.read(body, read, contentLength - read)
-                        if (n < 0) break
-                        read += n
-                    }
-                    requests++
-                    val out = socket.getOutputStream()
-                    if (responseCode != 200 || path != requirePath) {
-                        val status = if (responseCode != 200) responseCode else 404
-                        out.write("HTTP/1.1 $status Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".toByteArray())
-                        out.flush()
-                        return
-                    }
-                    val answerBytes = answer(body)
-                    out.write(
-                        (
-                            "HTTP/1.1 200 OK\r\nContent-Type: application/dns-message\r\n" +
-                                "Content-Length: ${answerBytes.size}\r\nConnection: close\r\n\r\n"
-                            ).toByteArray(Charsets.US_ASCII)
-                    )
-                    out.write(answerBytes)
-                    out.flush()
-                } catch (_: Exception) {
-                    // client disconnected
+        private fun handle(raw: Socket) {
+            var socket: Socket = raw
+            try {
+                raw.soTimeout = 10_000
+                val tls = context.socketFactory
+                    .createSocket(raw, raw.inetAddress.hostAddress, raw.port, true) as SSLSocket
+                socket = tls
+                tls.useClientMode = false
+                tls.enabledProtocols = arrayOf("TLSv1.2")
+                tls.soTimeout = 10_000
+                tls.startHandshake()
+                stage = "handshake"
+                val input = tls.getInputStream()
+                val headers = readHeaders(input)
+                if (headers == null) {
+                    stage = "no_headers"
+                    return
                 }
+                val path = headers.lineSequence().firstOrNull()?.split(' ')?.getOrNull(1) ?: "/"
+                lastPath = path
+                stage = "request"
+                val contentLength = Regex("content-length:\\s*(\\d+)", RegexOption.IGNORE_CASE)
+                    .find(headers)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
+                val body = ByteArray(contentLength)
+                var read = 0
+                while (read < contentLength) {
+                    val n = input.read(body, read, contentLength - read)
+                    if (n < 0) break
+                    read += n
+                }
+                requests++
+                val out = tls.getOutputStream()
+                if (responseCode != 200 || path != requirePath) {
+                    val status = if (responseCode != 200) responseCode else 404
+                    out.write("HTTP/1.1 $status Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n".toByteArray())
+                    out.flush()
+                    stage = "response"
+                    return
+                }
+                val answerBytes = answer(body)
+                out.write(
+                    (
+                        "HTTP/1.1 200 OK\r\nContent-Type: application/dns-message\r\n" +
+                            "Content-Length: ${answerBytes.size}\r\nConnection: close\r\n\r\n"
+                        ).toByteArray(Charsets.US_ASCII)
+                )
+                out.write(answerBytes)
+                out.flush()
+                bytesWritten = answerBytes.size
+                stage = "response"
+            } catch (e: Exception) {
+                lastError = e.javaClass.simpleName + ":" + (e.message ?: "")
+            } finally {
+                gracefulClose(socket)
             }
         }
 
         private fun readHeaders(input: InputStream): String? {
             val buffer = java.io.ByteArrayOutputStream()
             while (buffer.size() < 16 * 1024) {
-                val b = input.read()
+                val b = try { input.read() } catch (e: Exception) {
+                    lastError = "read_headers:" + e.javaClass.simpleName
+                    return null
+                }
                 if (b < 0) return null
                 buffer.write(b)
                 val data = buffer.toByteArray()
@@ -427,46 +499,89 @@ object TestNet {
         }
     }
 
-    /** TLS HTTP server that emits a Cloudflare-like response (or anything else). */
+    /**
+     * TLS HTTP server that emits a Cloudflare-like response (or anything else).
+     *
+     * Same explicit wrap-and-handshake sequence as [DohServer]; the request is read until the
+     * header terminator (or EOF) instead of a single `read`, and [stage] records how far the
+     * exchange got so a CI-only failure is diagnosable from the assertion message.
+     */
     class TlsHttpServer(
         private val statusLine: String = "HTTP/1.1 403 Forbidden",
         private val extraHeaders: List<String> = listOf("cf-ray: 8a1b2c3d4e5f-TEST")
     ) : AutoCloseable {
         private val context = testSslContext()
-        private val server = context.serverSocketFactory.createServerSocket(
-            0, 16, InetAddress.getByName("127.0.0.1")
-        ) as SSLServerSocket
+        private val server = ServerSocket(0, 16, InetAddress.getByName("127.0.0.1"))
         val port: Int get() = server.localPort
+
         @Volatile
         var accepts = 0
+            private set
+
+        /** Last successfully processed step: `idle`/`handshake`/`request`/`response`. */
+        @Volatile
+        var stage: String = "idle"
+            private set
+
+        /** Response header bytes handed to the TLS stream by the last connection. */
+        @Volatile
+        var bytesWritten = 0
+            private set
+
+        /** Server-side failure of the last connection (empty when the exchange was clean). */
+        @Volatile
+        var lastError: String = ""
             private set
 
         init {
             Thread({
                 while (!server.isClosed) {
                     val client = try { server.accept() } catch (_: Exception) { break }
-                    Thread({
-                        try {
-                            client.soTimeout = 5000
-                            accepts++
-                            val input = client.getInputStream()
-                            val buffer = ByteArray(4096)
-                            try { input.read(buffer) } catch (_: Exception) { }
-                            val headers = buildString {
-                                append(statusLine).append("\r\n")
-                                for (header in extraHeaders) append(header).append("\r\n")
-                                append("Content-Length: 0\r\nConnection: close\r\n\r\n")
-                            }
-                            client.getOutputStream().write(headers.toByteArray(Charsets.US_ASCII))
-                            client.getOutputStream().flush()
-                        } catch (_: Exception) {
-                            // closed
-                        } finally {
-                            try { client.close() } catch (_: Exception) { }
-                        }
-                    }, "test-tls-http").apply { isDaemon = true; start() }
+                    Thread({ handle(client) }, "test-tls-http").apply { isDaemon = true; start() }
                 }
             }, "test-tls-http-accept").apply { isDaemon = true; start() }
+        }
+
+        private fun handle(raw: Socket) {
+            var socket: Socket = raw
+            try {
+                raw.soTimeout = 8000
+                accepts++
+                val tls = context.socketFactory
+                    .createSocket(raw, raw.inetAddress.hostAddress, raw.port, true) as SSLSocket
+                socket = tls
+                tls.useClientMode = false
+                tls.enabledProtocols = arrayOf("TLSv1.2")
+                tls.soTimeout = 8000
+                tls.startHandshake()
+                stage = "handshake"
+                val input = tls.getInputStream()
+                val request = StringBuilder()
+                while (!request.contains("\r\n\r\n") && request.length < 8192) {
+                    val b = try { input.read() } catch (e: Exception) {
+                        lastError = "read_request:" + e.javaClass.simpleName
+                        break
+                    }
+                    if (b < 0) break
+                    request.append(b.toChar())
+                }
+                stage = "request"
+                val headers = buildString {
+                    append(statusLine).append("\r\n")
+                    for (header in extraHeaders) append(header).append("\r\n")
+                    append("Content-Length: 0\r\nConnection: close\r\n\r\n")
+                }
+                val out = tls.getOutputStream()
+                val encoded = headers.toByteArray(Charsets.US_ASCII)
+                out.write(encoded)
+                out.flush()
+                bytesWritten = encoded.size
+                stage = "response"
+            } catch (e: Exception) {
+                lastError = e.javaClass.simpleName + ":" + (e.message ?: "")
+            } finally {
+                gracefulClose(socket)
+            }
         }
 
         override fun close() {

@@ -182,7 +182,10 @@ class DnsResolverTest {
                     verifyHostname = false
                 )
                 val result = transport.exchange(query, 8000)
-                assertNotNull("DoH transport returned no bytes: ${result.detail}", result.response)
+                assertNotNull(
+                    "DoH transport returned no bytes: ${result.detail} serverStage=${server.stage} serverError=${server.lastError} bytesOut=${server.bytesWritten}",
+                    result.response
+                )
                 val response = result.response ?: ByteArray(0)
                 assertTrue(DnsMessage.isResponseTo(response, query))
                 assertEquals(1, server.requests)
@@ -204,7 +207,10 @@ class DnsResolverTest {
                     verifyHostname = false
                 )
                 val result = transport.exchange(query, 6000)
-                assertTrue("non-200 must not be accepted (detail=${result.detail})", result.response == null)
+                assertTrue(
+                    "non-200 must not be accepted (detail=${result.detail} serverStage=${server.stage} serverError=${server.lastError} bytesOut=${server.bytesWritten})",
+                    result.response == null
+                )
                 assertTrue(
                     "detail should name the HTTP status, got: ${result.detail}",
                     result.detail.contains("404") || result.detail.contains("http_status")
