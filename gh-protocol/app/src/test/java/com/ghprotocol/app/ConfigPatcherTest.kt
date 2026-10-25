@@ -87,6 +87,34 @@ class ConfigPatcherTest {
         assertEquals("tcp-fragment-tls", rules.getJSONObject(0).getString("outboundTag"))
     }
 
+    @Test fun dropsDanglingFakeDnsReferences() {
+        val c = JSONObject(
+            """{"inbounds": [{"tag": "mixed-in", "protocol": "mixed", "port": 10808,
+                 "sniffing": {"enabled": true, "destOverride": ["fakedns", "tls", "http"]}}],
+                "dns": {"servers": ["fakedns", "https://cloudflare-dns.com/dns-query", "localhost"]}}"""
+        )
+        assertEquals(2, ConfigPatcher.ensureConsistentDns(c)) // fakedns server + 1 destOverride
+        val servers = c.getJSONObject("dns").getJSONArray("servers")
+        assertEquals(2, servers.length())
+        assertEquals("https://cloudflare-dns.com/dns-query", servers.getString(0))
+        val ov = c.getJSONArray("inbounds").getJSONObject(0)
+            .getJSONObject("sniffing").getJSONArray("destOverride")
+        assertEquals(2, ov.length())
+        assertEquals("tls", ov.getString(0))
+        // idempotent
+        assertEquals(0, ConfigPatcher.ensureConsistentDns(c))
+    }
+
+    @Test fun keepsFakeDnsWhenEnginePresent() {
+        val c = JSONObject(
+            """{"inbounds": [{"tag": "fakedns", "protocol": "fakedns", "port": 0,
+                 "sniffing": {"destOverride": ["fakedns"]}}],
+                "dns": {"servers": ["fakedns"]}}"""
+        )
+        assertEquals(0, ConfigPatcher.ensureConsistentDns(c))
+        assertEquals(1, c.getJSONObject("dns").getJSONArray("servers").length())
+    }
+
     @Test fun importValidation() {
         val raw = JSONArray().put(sample).toString()
         val r = ConfigPatcher.validateImport(raw).getOrThrow()

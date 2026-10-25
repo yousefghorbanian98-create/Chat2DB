@@ -88,9 +88,16 @@ class XrayCore(private val context: Context) {
             val env = pb.environment()
             env["XRAY_LOCATION_ASSET"] = dir.absolutePath
             env["xray.location.asset"] = dir.absolutePath
+            // Android discards a child's stdout/stderr by default — Xray logs to
+            // stdout, so capture BOTH (a silent core exit is otherwise invisible).
+            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(File(dir, "xray-out.log")))
             pb.redirectError(ProcessBuilder.Redirect.appendTo(File(dir, "xray-err.log")))
             val p = pb.start()
             process = p
+            Thread {
+                val rc = try { p.waitFor() } catch (e: InterruptedException) { -1 }
+                android.util.Log.w("GhDiag", "xray exited rc=$rc")
+            }.apply { isDaemon = true; name = "xray-watchdog" }.start()
             Result.success(p)
         } catch (e: Exception) {
             Result.failure(e)

@@ -207,6 +207,7 @@ private fun String.activeEntryConfigJson(index: Int, cleanIp: String?): String {
         if (cleanIp != null) ConfigPatcher.patchCleanEgress(c, cleanIp)
         ConfigPatcher.tcpFirstProfile(c)
         ConfigPatcher.addLocalDnsInbound(c)
+        ConfigPatcher.ensureConsistentDns(c)
         c.toString()
     } catch (e: Exception) {
         this

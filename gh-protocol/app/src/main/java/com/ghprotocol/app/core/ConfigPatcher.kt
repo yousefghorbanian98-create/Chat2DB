@@ -91,6 +91,51 @@ object ConfigPatcher {
         return true
     }
 
+    /**
+     * Xray refuses to start when `dns.servers` references a FakeDNS engine that
+     * no inbound provides. The official subscription lists "fakedns" in
+     * `dns.servers` (and in `sniffing.destOverride`) while defining only a
+     * `mixed` inbound — a fatal config error ("fakedns not found"), observed as
+     * an immediate silent core exit on the emulator. Drop the dangling
+     * references; DoH/localhost servers keep DNS working and TLS/HTTP sniffing
+     * still drives domain routing.
+     * Returns the number of references removed (0 = config was already fine).
+     */
+    fun ensureConsistentDns(json: JSONObject): Int {
+        var removed = 0
+        val ibs = json.optJSONArray("inbounds") ?: return 0
+        var hasFakeDnsEngine = false
+        for (i in 0 until ibs.length()) {
+            if (ibs.getJSONObject(i).optString("protocol") == "fakedns") hasFakeDnsEngine = true
+        }
+        if (hasFakeDnsEngine) return 0
+
+        val dns = json.optJSONObject("dns")
+        val servers = dns?.optJSONArray("servers")
+        if (servers != null) {
+            val kept = JSONArray()
+            for (i in 0 until servers.length()) {
+                val s = servers.opt(i)
+                val addr = if (s is JSONObject) s.optString("address", "") else s?.toString().orEmpty()
+                if (addr.equals("fakedns", ignoreCase = true)) { removed++; continue }
+                kept.put(s)
+            }
+            dns.put("servers", kept)
+        }
+        for (i in 0 until ibs.length()) {
+            val sniff = ibs.getJSONObject(i).optJSONObject("sniffing") ?: continue
+            val ov = sniff.optJSONArray("destOverride") ?: continue
+            val kept = JSONArray()
+            for (j in 0 until ov.length()) {
+                val v = ov.optString(j, "")
+                if (v.equals("fakedns", ignoreCase = true)) { removed++; continue }
+                kept.put(v)
+            }
+            sniff.put("destOverride", kept)
+        }
+        return removed
+    }
+
     data class ImportInfo(val inbound: InboundInfo, val minCoreVersion: String, val entries: Int)
 
     /** F-16: validate a pasted/imported Xray config (array of one or more configs). */

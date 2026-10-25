@@ -111,11 +111,18 @@ adb shell am start -a android.intent.action.VIEW -d "ghprotocol://connect" >>"$L
 say "== wait for tunnel; tap VPN consent when it appears (up to 6 min) =="
 TUNNEL=0
 CONSENT=0
+WHY="neither xray process nor :10808 listener seen"
 for i in $(seq 1 90); do
-  if adb shell "ps -A" 2>/dev/null | grep -qi "xray" && adb shell "netstat -ltn" 2>/dev/null | grep -q ":10808"; then
-    TUNNEL=1
-    say "tunnel up after ~$((i * 4))s"
-    break
+  STATE=$(adb shell "ps -A 2>/dev/null | grep -ci xray || true; netstat -ltn 2>/dev/null | grep -c ':10808' || true" | tr -d '\r')
+  PSOK=$(echo "$STATE" | sed -n 1p)
+  NETOK=$(echo "$STATE" | sed -n 2p)
+  [ -n "$PSOK" ] && [ "$PSOK" -ge 1 ] 2>/dev/null && [ -n "$NETOK" ] && [ "$NETOK" -ge 1 ] 2>/dev/null && { TUNNEL=1; say "tunnel up after ~$((i * 4))s (xray pid + :10808 listener)"; break; }
+  if [ "${PSOK:-0}" -ge 1 ] 2>/dev/null; then
+    WHY="xray process running but nothing listening on :10808"
+  elif [ "${NETOK:-0}" -ge 1 ] 2>/dev/null; then
+    WHY=":10808 listening but no xray process match"
+  else
+    WHY="xray process not running and :10808 not listening (core exited — see xray-out/err logs)"
   fi
   # app must stay alive
   if [ $((i % 5)) -eq 0 ]; then
@@ -161,11 +168,17 @@ done
   adb shell "ls -la /data/app/*/$PKG*/lib/*/ 2>/dev/null" >> "$LOG" 2>&1
   say "xray-err.log:"
   adb shell "run-as $PKG cat files/xray/xray-err.log 2>/dev/null" >> "$LOG" 2>&1
+  say "xray-out.log (Xray writes its logs to stdout):"
+  adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
+  say "runtime config (first 1400 bytes):"
+  adb shell "run-as $PKG sh -c 'head -c 1400 files/xray-config.json' 2>/dev/null" >> "$LOG" 2>&1
+  say "core exit line:"
+  adb logcat -d -s GhDiag 2>/dev/null | grep -i "xray exited" >> "$LOG" 2>&1 || true
   say "GhDiag (connect-flow trace):"
   adb logcat -d -s GhDiag >> "$LOG" 2>&1
   adb logcat -d > "$D/e2e-logcat.log" 2>/dev/null || true
   adb logcat -d -b crash >> "$D/e2e-logcat.log" 2>/dev/null || true
-  report "tunnel not up (xray/:10808)"
+  report "tunnel not up (xray/:10808) — $WHY"
 }
 
 say "== DNS resolution THROUGH the tunnel =="
