@@ -2,17 +2,10 @@ package com.ghprotocol.app.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,26 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,26 +27,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ghprotocol.app.R
 import com.ghprotocol.app.core.TunnelLogBuffer
-import com.ghprotocol.app.domain.NetworkState
-import com.ghprotocol.app.ui.theme.GhBlue
-import com.ghprotocol.app.ui.theme.GhGreen
-import com.ghprotocol.app.ui.theme.MotionSpec
 
-private val Amber = Color(0xFFF5A524)
-private val Red = Color(0xFFE5484D)
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+/**
+ * Gh Protocol Main Connect Screen:
+ * Built directly from UnboundTechCo/defyxVPN (main_screen.dart, connection_button.dart,
+ * header_section.dart, main_screen_background.dart) + Ashutoshx7/VengenceUI
+ * (glow-border-card.tsx, radial-glow-button.tsx, border-beam.tsx).
+ * All legacy v1.0.0 UI (StatusCard, TopAppBar, ConnectArea, PhaseSpinner) has been removed.
+ */
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
@@ -81,11 +56,13 @@ fun HomeScreen(
     onOpenBalancer: () -> Unit = {},
     onOpenPrep: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
-    onOpenLogs: () -> Unit = {},
-    showEnhancedDashboard: Boolean = false
+    onOpenLogs: () -> Unit = {}
 ) {
     val ui by viewModel.ui.collectAsState()
+    val telemetry by TunnelLogBuffer.telemetry.collectAsState()
+    val logs by TunnelLogBuffer.logs.collectAsState()
     val context = LocalContext.current
+
     val vpnLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -96,11 +73,12 @@ fun HomeScreen(
             viewModel.onVpnFailed("vpn_denied")
         }
     }
+
     LaunchedEffect(ui.vpnPending) {
         if (ui.vpnPending) {
             val prep = try {
                 android.net.VpnService.prepare(context)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 null
             }
             if (prep == null) {
@@ -111,349 +89,129 @@ fun HomeScreen(
             }
         }
     }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    IconButton(onClick = onOpenSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings))
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        if (!showEnhancedDashboard) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                StatusCard(state = ui.network)
-
-                Spacer(Modifier.height(20.dp))
-
-                ConnectArea(
-                    phase = ui.connectPhase,
-                    isUpdating = ui.isUpdating,
-                    hasConfig = ui.subscription != null,
-                    onTap = { viewModel.onConnectTap() },
-                    onDisconnect = {
-                        context.stopService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
-                        viewModel.disconnect()
-                    }
-                )
-
-                if (ui.configError != null) {
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        text = stringResource(R.string.config_update_failed),
-                        color = Amber,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    OutlinedButton(onClick = { viewModel.refreshConfig() }) {
-                        Text(stringResource(R.string.retry))
-                    }
-                }
-
-                ui.subscription?.let { sub ->
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(R.string.config_line, sub.entries.joinToString(" · ") { it.remarks }),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(Modifier.height(24.dp))
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedButton(onClick = onOpenConfig) { Text(stringResource(R.string.config_source)) }
-                    OutlinedButton(onClick = onOpenGuide) { Text(stringResource(R.string.guide)) }
-                    OutlinedButton(onClick = onOpenQr) { Text(stringResource(R.string.qr_share)) }
-                    OutlinedButton(onClick = onOpenScanner) { Text(stringResource(R.string.clean_ip_short)) }
-                    OutlinedButton(onClick = onOpenBalancer) { Text(stringResource(R.string.routes_short)) }
-                    OutlinedButton(onClick = onOpenPrep) { Text(stringResource(R.string.blackout_prep_short)) }
-                }
-            }
-        } else {
-            WorldClassConnectHub(
-                ui = ui,
-                viewModel = viewModel,
-                onDisconnect = {
-                    context.stopService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
-                    viewModel.disconnect()
-                },
-                onOpenRadar = onOpenScanner,
-                onOpenLogs = onOpenLogs,
-                onOpenConfig = onOpenConfig,
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            )
-        }
-    }
-}
-
-@Composable
-private fun WorldClassConnectHub(
-    ui: HomeUiState,
-    viewModel: HomeViewModel,
-    onDisconnect: () -> Unit,
-    onOpenRadar: () -> Unit,
-    onOpenLogs: () -> Unit,
-    onOpenConfig: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val telemetry by TunnelLogBuffer.telemetry.collectAsState()
-    val logs by TunnelLogBuffer.logs.collectAsState()
-    val context = LocalContext.current
 
     val isConnected = ui.connectPhase == ConnectPhase.CONNECTED
-    val isBusy = ui.connectPhase == ConnectPhase.CHECKING ||
-        ui.connectPhase == ConnectPhase.PREPARING ||
-        ui.connectPhase == ConnectPhase.TUNNELING ||
-        ui.isAutoHealing
+    val activeRemark = ui.subscription?.entries?.getOrNull(ui.activeEntryIndex)?.remarks
+        ?: ui.subscription?.entries?.firstOrNull()?.remarks
+        ?: "Serverless-v52"
 
-    val ringColor by animateColorAsState(
-        targetValue = when {
-            isConnected && ui.verifiedPingMs != null -> GhGreen
-            isConnected -> GhBlue
-            isBusy -> Amber
-            ui.connectPhase == ConnectPhase.FAILED -> Red
-            else -> GhBlue.copy(alpha = 0.65f)
-        },
-        animationSpec = MotionSpec.tweenMs(context, 250),
-        label = "hero-ring-color"
-    )
-
-    val heroScale by animateFloatAsState(
-        targetValue = if (isConnected) 1.03f else 1.0f,
-        animationSpec = spring(dampingRatio = 0.78f, stiffness = 380f),
-        label = "hero-scale"
-    )
-
-    Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    DefyxMainScreenBackground(
+        phase = ui.connectPhase,
+        isAutoHealing = ui.isAutoHealing,
+        modifier = modifier.fillMaxSize()
     ) {
-        // 1. Honest Network Status Card
-        StatusCard(state = ui.network)
-
-        // 2. Hero Orb Button with Particle Field & Rotating SweepGradient Ring (Particles Casberry + Vengeance UI + Framer Spring)
-        OrbParticleHeroButton(
-            phase = ui.connectPhase,
-            verifiedPingMs = ui.verifiedPingMs,
-            isAutoHealing = ui.isAutoHealing,
-            stepIndex = telemetry.stepIndex,
-            onTapConnect = { viewModel.onConnectTap() },
-            onTapDisconnect = onDisconnect,
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
-
-        // 3. n8n-Inspired 5-Node Live Data-Flow Pipeline (tappable -> jumps to Live Log tab)
-        N8nPipelineFlowCard(
-            telemetry = telemetry,
-            isConnected = isConnected,
-            onClick = onOpenLogs
-        )
-
-        // 4. Live Dual-Wave Traffic Oscilloscope (Upload Cyan + Download Emerald)
-        LiveTrafficWaveformCard(telemetry = telemetry)
-
-        // 5. Psiphon-style Mini Live-Log Strip (tappable -> jumps to Live Log tab)
-        val latestLog = logs.lastOrNull()
-        Card(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .springPressClickable(onClick = onOpenLogs),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
-            shape = RoundedCornerShape(14.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // 1. DefyxVPN Header Section (G + h Protocol brand, status headline, step/ping bar)
+            DefyxHeaderSection(
+                phase = ui.connectPhase,
+                verifiedPingMs = ui.verifiedPingMs,
+                isAutoHealing = ui.isAutoHealing,
+                cleanIp = ui.cleanIp,
+                activeRemark = activeRemark,
+                telemetry = telemetry,
+                onTapPing = { viewModel.runUrlPingTest() },
+                onTapLogs = onOpenLogs
+            )
+
+            // 2. DefyxVPN Shield Connection Button (4 concentric shield pulse rings + ShieldLoadingPainter + Scan Matrix + official defyx_*.svg icons)
+            DefyxShieldConnectionButton(
+                phase = ui.connectPhase,
+                verifiedPingMs = ui.verifiedPingMs,
+                isAutoHealing = ui.isAutoHealing,
+                stepIndex = telemetry.stepIndex,
+                onTapConnect = { viewModel.onConnectTap() },
+                onTapDisconnect = {
+                    context.stopService(android.content.Intent(context, com.ghprotocol.app.core.VpnTunnelService::class.java))
+                    viewModel.disconnect()
+                }
+            )
+
+            // 3. VengeanceUI RadialGlowButtons for instant Radar Scan & Real Tunnel Ping Test
             Row(
-                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(10.dp)
-                        .clip(CircleShape)
-                        .background(ringColor)
+                VengeanceRadialGlowButton(
+                    text = "رادار IP تمیز",
+                    iconRes = R.drawable.ic_defyx_vpn_cloud,
+                    accentColor = DefyxColors.BrandGold,
+                    onClick = onOpenScanner,
+                    modifier = Modifier.weight(1f)
                 )
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = latestLog?.messageFa ?: telemetry.stepTitleFa,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = latestLog?.let { "[${it.timeText}] ${it.rawTech}" }
-                            ?: "برای مشاهدهٔ لاگ زندهٔ اتصال (به سبک سایفون) اینجا بزنید",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                Text("لاگ زنده ←", style = MaterialTheme.typography.labelMedium, color = GhBlue, fontWeight = FontWeight.Bold)
-            }
-        }
-
-        // 6. Bento Grid: Active Route/Clean IP + Live Traffic & URL Ping Test (with 21st.dev Spring Press)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .springPressClickable(onClick = onOpenRadar),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Column(Modifier.padding(14.dp)) {
-                    Text("مسیر و IP تمیز DoH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(4.dp))
-                    val activeRemark = ui.subscription?.entries?.getOrNull(ui.activeEntryIndex)?.remarks
-                        ?: ui.subscription?.entries?.firstOrNull()?.remarks
-                        ?: "Serverless-v52"
-                    Text(activeRemark, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, maxLines = 1)
-                    Text(
-                        text = "IP: ${ui.cleanIp ?: "خودکار (1.1.1.1)"}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = GhBlue
-                    )
-                }
+                VengeanceRadialGlowButton(
+                    text = when {
+                        ui.isTestingUrl -> "در حال تست..."
+                        ui.verifiedPingMs != null -> "پینگ: ${ui.verifiedPingMs} ms"
+                        else -> "تست پینگ واقعی"
+                    },
+                    iconRes = R.drawable.ic_defyx_speed,
+                    accentColor = DefyxColors.DownloadGreen,
+                    onClick = { viewModel.runUrlPingTest() },
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .springPressClickable { viewModel.runUrlPingTest() },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Column(Modifier.padding(14.dp)) {
-                    Text("تست پینگ واقعی تونل", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = when {
-                            ui.isTestingUrl -> "در حال تست..."
-                            ui.verifiedPingMs != null -> "${ui.verifiedPingMs} ms ✓"
-                            else -> "تست پینگ (تپ کنید)"
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (ui.verifiedPingMs != null) GhGreen else GhBlue
-                    )
-                    Text(
-                        text = "↓ ${TunnelLogBuffer.formatBytes(telemetry.bytesDown)} · ↑ ${TunnelLogBuffer.formatBytes(telemetry.bytesUp)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatusCard(state: NetworkState, modifier: Modifier = Modifier) {
-    val spec = when (state) {
-        NetworkState.CONNECTED -> StatusSpec(Icons.Filled.CheckCircle, GhBlue, R.string.st_connected, R.string.st_connected_body)
-        NetworkState.DEGRADED -> StatusSpec(Icons.Filled.Warning, Amber, R.string.st_degraded, R.string.st_degraded_body)
-        NetworkState.CUTOFF -> StatusSpec(Icons.Filled.Close, Red, R.string.st_cutoff, R.string.st_cutoff_body)
-        NetworkState.OFFLINE -> StatusSpec(Icons.Filled.Close, Red, R.string.st_offline, R.string.st_offline_body)
-        NetworkState.UNKNOWN -> StatusSpec(Icons.Filled.Refresh, Color(0xFF9AA7C0), R.string.st_unknown, R.string.st_unknown_body)
-    }
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = spec.color.copy(alpha = 0.12f))
-    ) {
-        Row(
-            modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(spec.icon, contentDescription = null, tint = spec.color, modifier = Modifier.size(32.dp))
-            Spacer(Modifier.size(16.dp))
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(spec.titleRes), style = MaterialTheme.typography.titleMedium, color = spec.color)
-                Text(stringResource(spec.bodyRes), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-    }
-}
-
-private data class StatusSpec(
-    val icon: androidx.compose.ui.graphics.vector.ImageVector,
-    val color: Color,
-    val titleRes: Int,
-    val bodyRes: Int
-)
-
-@Composable
-private fun PhaseSpinner(text: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        CircularProgressIndicator()
-        Spacer(Modifier.height(12.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
-private fun ConnectArea(
-    phase: ConnectPhase,
-    isUpdating: Boolean,
-    hasConfig: Boolean,
-    onTap: () -> Unit,
-    onDisconnect: () -> Unit
-) {
-    when (phase) {
-        ConnectPhase.CHECKING -> PhaseSpinner(stringResource(R.string.connect_checking))
-        ConnectPhase.PREPARING -> PhaseSpinner(stringResource(R.string.connect_preparing))
-        ConnectPhase.TUNNELING -> PhaseSpinner(stringResource(R.string.connect_tunneling))
-        ConnectPhase.CONNECTED -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Button(onClick = onDisconnect, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.disconnect), style = MaterialTheme.typography.titleMedium)
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.connect_connected),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
+            // 4. n8n-Inspired 5-Node Live Data-Flow Pipeline inside VengeanceGlowBorderCard
+            N8nPipelineFlowCard(
+                telemetry = telemetry,
+                isConnected = isConnected,
+                onClick = onOpenLogs
             )
-        }
-        ConnectPhase.FAILED -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                stringResource(R.string.connect_failed),
-                color = Red,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(Modifier.height(12.dp))
-            Button(onClick = onTap, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.retry), style = MaterialTheme.typography.titleMedium)
+
+            // 5. DefyxVPN + VengeanceUI Live Traffic Waveform Card (#76F959 download, #72D9FF upload)
+            LiveTrafficWaveformCard(telemetry = telemetry)
+
+            // 6. Psiphon-style Live Log Strip inside VengeanceGlowBorderCard
+            val latestLog = logs.lastOrNull()
+            VengeanceGlowBorderCard(
+                modifier = Modifier.fillMaxWidth(),
+                presetColors = DefyxColors.VengeanceAurora,
+                onClick = onOpenLogs
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(if (isConnected) DefyxColors.DownloadGreen else DefyxColors.BrandGold)
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = latestLog?.messageFa ?: telemetry.stepTitleFa,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1
+                        )
+                        Text(
+                            text = latestLog?.let { "[${it.timeText}] ${it.rawTech}" }
+                                ?: "مشاهدهٔ ترمینال زندهٔ هستهٔ Xray و تونل ضد فیلتر",
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            color = Color.White.copy(alpha = 0.68f),
+                            maxLines = 1
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        painter = painterResource(R.drawable.ic_vengeance_terminal),
+                        contentDescription = null,
+                        tint = DefyxColors.BrandGold,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
-        }
-        ConnectPhase.IDLE -> Button(
-            onClick = onTap,
-            enabled = !isUpdating,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(R.string.connect), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

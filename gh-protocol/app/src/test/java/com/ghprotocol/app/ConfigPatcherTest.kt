@@ -225,11 +225,15 @@ class ConfigPatcherTest {
                   "protocol": "direct",
                   "streamSettings": {
                     "finalmask": {"tcp": [{"type": "fragment"}]},
-                    "sockopt": {"happyEyeballs": {"prioritizeIPv6": true}}
+                    "sockopt": {
+                      "domainStrategy": "ForceIP",
+                      "happyEyeballs": {"prioritizeIPv6": true}
+                    }
                   }
                 }
               ],
               "routing": {
+                "domainStrategy": "IPOnDemand",
                 "rules": [
                   {"outboundTag": "dns-out", "port": 53},
                   {"outboundTag": "tcp-fragment-tls", "network": "tcp", "port": "443", "ip": ["0.0.0.0/0"]}
@@ -251,14 +255,18 @@ class ConfigPatcherTest {
         val fragOb = serverless.getJSONArray("outbounds").getJSONObject(0)
         assertFalse(fragOb.optJSONObject("settings")?.has("address") == true)
 
-        // 3. sniffing.routeOnly=true and happyEyeballs.prioritizeIPv6=false
+        // 3. sniffing.routeOnly=true, sockopt.domainStrategy=AsIs, routing.domainStrategy=AsIs, happyEyeballs.prioritizeIPv6=false
         val sniff = serverless.getJSONArray("inbounds").getJSONObject(0).getJSONObject("sniffing")
         assertTrue(sniff.getBoolean("routeOnly"))
-        val he = fragOb.getJSONObject("streamSettings").getJSONObject("sockopt").getJSONObject("happyEyeballs")
+        val sockopt = fragOb.getJSONObject("streamSettings").getJSONObject("sockopt")
+        assertEquals("AsIs", sockopt.getString("domainStrategy"))
+        assertEquals("AsIs", serverless.getJSONObject("routing").getString("domainStrategy"))
+        val he = sockopt.getJSONObject("happyEyeballs")
         assertFalse(he.getBoolean("prioritizeIPv6"))
 
-        // 4. Routing order preserved (dns-out stays ahead of 0.0.0.0/0 catch-all)
+        // 4. Routing order preserved and port:53 dns-out rule restricted to dns-in
         val rules = serverless.getJSONObject("routing").getJSONArray("rules")
         assertEquals("dns-out", rules.getJSONObject(0).getString("outboundTag"))
+        assertEquals("dns-in", rules.getJSONObject(0).getJSONArray("inboundTag").getString(0))
     }
 }

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Directly imported from UnboundTechCo/defyxVPN/assets/icons/no_wifi.svg -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="35dp"
+    android:height="35dp"
+    android:viewportWidth="35"
+    android:viewportHeight="35">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M17.5 26.25H17.5146" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M13.3757 22.1258C14.4696 21.0322 15.9531 20.4179 17.4999 20.4179C19.0467 20.4179 20.5302 21.0322 21.6241 22.1258" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M9.25024 18.0002C10.7967 16.4494 12.7502 15.3675 14.8852 14.8794M20.9563 15.1054C22.7685 15.6713 24.4143 16.6727 25.7498 18.0221" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M5.12598 13.876C6.61849 12.3804 8.36952 11.1674 10.2943 10.2958M14.8166 8.95417C17.5365 8.53243 20.3176 8.7582 22.9339 9.61314C25.5501 10.4681 27.9279 11.9281 29.8739 13.8746" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4.375 4.375L30.625 30.625" />
+</vector>

@@ -457,19 +457,38 @@ class HomeViewModel(
 
     /** Called by the Activity after VpnService.establish() succeeded. */
     fun onVpnEstablished() {
-        _ui.update { it.copy(connectPhase = ConnectPhase.CONNECTED, vpnPending = false, tunnelError = null) }
+        _ui.update {
+            it.copy(
+                connectPhase = ConnectPhase.CONNECTED,
+                vpnPending = false,
+                tunnelError = null,
+                network = if (it.network == NetworkState.OFFLINE) NetworkState.CONNECTED else it.network
+            )
+        }
         TunnelLogBuffer.updateStep(5, "متصل — در حال راستی‌آزمایی پینگ واقعی تونل...")
         verifyAndAutoHealIfNeeded()
+    }
+
+    private fun waitForSocksListener(maxWaitMs: Long = 4500L): Boolean {
+        val deadline = System.currentTimeMillis() + maxWaitMs
+        while (System.currentTimeMillis() < deadline) {
+            if (core.isHealthy(VpnTunnelService.PROXY_PORT)) return true
+            try { Thread.sleep(150) } catch (_: InterruptedException) { break }
+        }
+        return core.isHealthy(VpnTunnelService.PROXY_PORT)
     }
 
     private fun verifyAndAutoHealIfNeeded() {
         viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
             val xrayOut = File(app.filesDir, "xray/xray-out.log")
-            try { Thread.sleep(350) } catch (_: InterruptedException) {}
+            // Wait up to 4.5s for Xray-core to finish loading 19MB geoip.dat/geosite.dat
+            // and open 127.0.0.1:10808 so we never get a false ECONNREFUSED disconnect!
+            waitForSocksListener(4500L)
+            try { Thread.sleep(200) } catch (_: InterruptedException) {}
             TunnelLogBuffer.ingestXrayLogTail(xrayOut)
 
-            val firstCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4000)
+            val firstCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4500)
             TunnelLogBuffer.ingestXrayLogTail(xrayOut)
             if (firstCheck.ok) {
                 TunnelLogBuffer.updatePingAndProfile(firstCheck.latencyMs)
@@ -480,7 +499,7 @@ class HomeViewModel(
                     "✓ عبور واقعی ترافیک از تونل تایید شد! پینگ: ${firstCheck.latencyMs} ms",
                     "TunnelVerifier PASS: ${firstCheck.target} -> ${firstCheck.detail} (${firstCheck.latencyMs}ms)"
                 )
-                _ui.update { it.copy(verifiedPingMs = firstCheck.latencyMs, isAutoHealing = false) }
+                _ui.update { it.copy(verifiedPingMs = firstCheck.latencyMs, isAutoHealing = false, network = NetworkState.CONNECTED) }
                 return@launch
             }
 
@@ -521,7 +540,8 @@ class HomeViewModel(
                 val cfgFile = writeRuntimeConfig(sub)
                 core.stop()
                 core.start(cfgFile)
-                try { Thread.sleep(450) } catch (_: InterruptedException) {}
+                waitForSocksListener(4500L)
+                try { Thread.sleep(200) } catch (_: InterruptedException) {}
                 val secondCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4500)
                 TunnelLogBuffer.ingestXrayLogTail(xrayOut)
                 if (secondCheck.ok) {
@@ -534,7 +554,7 @@ class HomeViewModel(
                         "✓ خودترمیمی (Auto-Heal) موفق بود! عبور دوطرفهٔ ترافیک تایید شد (${secondCheck.latencyMs} ms)",
                         "Auto-Heal PASS via cleanIp=${activeIp ?: "default"} latency=${secondCheck.latencyMs}ms"
                     )
-                    _ui.update { it.copy(verifiedPingMs = secondCheck.latencyMs, isAutoHealing = false) }
+                    _ui.update { it.copy(verifiedPingMs = secondCheck.latencyMs, isAutoHealing = false, network = NetworkState.CONNECTED) }
                     return@launch
                 }
             }

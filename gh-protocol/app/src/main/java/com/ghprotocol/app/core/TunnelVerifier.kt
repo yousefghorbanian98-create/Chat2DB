@@ -22,13 +22,23 @@ object TunnelVerifier {
         val host: String,
         val port: Int,
         val httpPath: String?,
-        val hostHeader: String
+        val hostHeader: String,
+        val tcpDnsQuery: Boolean = false
     )
 
     private val TARGETS = listOf(
         ProbeTarget("1.1.1.1", 80, "/cdn-cgi/trace", "1.1.1.1"),
-        ProbeTarget("www.google.com", 80, "/generate_204", "www.google.com"),
-        ProbeTarget("1.1.1.1", 443, null, "1.1.1.1")
+        ProbeTarget("104.18.12.149", 80, "/cdn-cgi/trace", "cp.cloudflare.com"),
+        ProbeTarget("8.8.8.8", 53, null, "dns.google", tcpDnsQuery = true)
+    )
+
+    // Minimal RFC 1035 DNS query for example.com A record (29 bytes)
+    private val DNS_PROBE_QUERY = byteArrayOf(
+        0x12, 0x34, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x07, 'e'.code.toByte(), 'x'.code.toByte(), 'a'.code.toByte(), 'm'.code.toByte(),
+        'p'.code.toByte(), 'l'.code.toByte(), 'e'.code.toByte(),
+        0x03, 'c'.code.toByte(), 'o'.code.toByte(), 'm'.code.toByte(), 0x00,
+        0x00, 0x01, 0x00, 0x01
     )
 
     fun verifyThroughSocks5(
@@ -103,14 +113,16 @@ object TunnelVerifier {
                 din.readShort()
 
                 if (target.httpPath != null) {
-                    val req = "GET ${target.httpPath} HTTP/1.1\r\nHost: ${target.hostHeader}\r\nUser-Agent: GhProtocol/1.1\r\nConnection: close\r\n\r\n"
-                    out.write(req.toByteArray(Charsets.US_ASCII))
+                    val req = "GET ${target.httpPath} HTTP/1.1\r\nHost: ${target.hostHeader}\r\nUser-Agent: GhProtocol/1.3\r\nConnection: close\r\n\r\n"
+                    val reqBytes = req.toByteArray(Charsets.US_ASCII)
+                    out.write(reqBytes)
                     out.flush()
                     val buf = ByteArray(256)
                     val n = s.getInputStream().read(buf)
                     if (n <= 0) {
                         return Pair(false, "http_empty_reply")
                     }
+                    TunnelLogBuffer.recordTraffic(reqBytes.size, n, 1)
                     val statusLine = String(buf, 0, n, Charsets.US_ASCII).lineSequence().firstOrNull().orEmpty()
                     if (statusLine.startsWith("HTTP/1.")) {
                         return Pair(true, statusLine.trim())
@@ -118,7 +130,25 @@ object TunnelVerifier {
                     return Pair(false, "invalid_http_status")
                 }
 
-                Pair(true, "tcp_handshake_ok")
+                if (target.tcpDnsQuery) {
+                    val q = DNS_PROBE_QUERY
+                    out.write(byteArrayOf(((q.size shr 8) and 0xFF).toByte(), (q.size and 0xFF).toByte()))
+                    out.write(q)
+                    out.flush()
+                    val respLen = din.readUnsignedShort()
+                    if (respLen in 12..4096) {
+                        val ans = ByteArray(respLen)
+                        din.readFully(ans)
+                        val rcode = ans[3].toInt() and 0x0F
+                        if (rcode == 0 || rcode == 3) {
+                            TunnelLogBuffer.recordTraffic(q.size + 2, respLen + 2, 1)
+                            return Pair(true, "dns_tcp_ok_${respLen}B")
+                        }
+                    }
+                    return Pair(false, "dns_tcp_invalid")
+                }
+
+                Pair(false, "no_probe_payload")
             }
         } catch (e: Exception) {
             Pair(false, e.javaClass.simpleName + ": " + (e.message ?: "error"))

@@ -57,70 +57,70 @@ fun RadarScreen(
     val ui by viewModel.ui.collectAsState()
     val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("رادار IP تمیز و بالانسر مسیرها", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "اسکن هندشیک واقعی TLS 1.2 کلودفلر + انتخاب هوشمند مسیر",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
-        },
+    DefyxMainScreenBackground(
+        phase = ui.connectPhase,
+        isAutoHealing = ui.isAutoHealing,
         modifier = modifier
-    ) { padding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Section 1: Clean IP Scanner (F-17)
-            Card(
+            Column {
+                Text(
+                    text = "رادار IP تمیز و بالانسر مسیرها",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Text(
+                    text = "اسکن هندشیک واقعی TLS 1.2 کلودفلر + انتخاب هوشمند مسیر",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.72f)
+                )
+            }
+
+            // Section 1: Clean IP Scanner (F-17) inside VengeanceGlowBorderCard
+            VengeanceGlowBorderCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = GhBlue.copy(alpha = 0.10f)),
-                shape = RoundedCornerShape(16.dp)
+                presetColors = DefyxColors.VengeanceAurora
             ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text("رادار IP تمیز کلودفلر (F-17)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = GhBlue)
+                            Text("رادار IP تمیز کلودفلر (F-17)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = DefyxColors.BrandGold)
                             Text(
                                 text = "IP فعال فعلی: ${ui.cleanIp ?: "خودکار (پیش‌فرض کانفیگ)"}",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = Color.White
                             )
                         }
                     }
 
                     if (ui.isScanningIps) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = GhBlue)
-                        Text("در حال ارسال ClientHello استاندارد TLS 1.2 به لبه‌های کلودفلر...", style = MaterialTheme.typography.labelSmall, color = GhBlue)
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = DefyxColors.BrandGold)
+                        Text("در حال ارسال ClientHello استاندارد TLS 1.2 به لبه‌های کلودفلر...", style = MaterialTheme.typography.labelSmall, color = DefyxColors.BrandGold)
                     }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(
-                            onClick = { viewModel.runCleanIpScan() },
+                        VengeanceRadialGlowButton(
+                            text = if (ui.isScanningIps) "در حال اسکن رادار..." else "شروع اسکن IP تمیز",
+                            iconRes = com.ghprotocol.app.R.drawable.ic_defyx_vpn_cloud,
+                            accentColor = DefyxColors.BrandGold,
                             enabled = !ui.isScanningIps,
-                            colors = ButtonDefaults.buttonColors(containerColor = GhBlue),
+                            onClick = { viewModel.runCleanIpScan() },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text(if (ui.isScanningIps) "در حال اسکن رادار..." else "شروع اسکن IP تمیز")
-                        }
+                        )
                         if (ui.cleanIp != null) {
                             OutlinedButton(onClick = { viewModel.applyCleanIp(null) }) {
-                                Text("حالت خودکار")
+                                Text("حالت خودکار", color = Color.White)
                             }
                         }
                     }

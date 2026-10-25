@@ -522,12 +522,12 @@ class VpnTunnelService : VpnService() {
         if (udpPacket.size <= ihl + 8 || clientIp.isEmpty() || clientPort == 0) return
         val payload = udpPacket.copyOfRange(ihl + 8, udpPacket.size)
         Thread({
-            val answer = queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 3000)
-                ?.takeIf { isUsableDnsResponse(it) }
-                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 3000)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 3000)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { isUsableDnsResponse(it) }
+            val answer = queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 1800)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 1800)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 1800)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 1500)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 1500)?.takeIf { isUsableDnsResponse(it) }
             if (answer != null && answer.isNotEmpty()) {
                 val reply = Socks5.buildUdpSegment(
                     srcIp = dnsServerIp, srcPort = 53,

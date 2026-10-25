@@ -55,48 +55,48 @@ fun ConfigHubScreen(
     var rawConfigInput by remember { mutableStateOf("") }
     var importFeedback by remember { mutableStateOf<Pair<Boolean, String>?>(null) }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("مرکز کانفیگ، بقای آفلاین و راهنما", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "پشتیبانی از اشتراک رسمی + vless:// و trojan:// با فرگمنت خودکار",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
-        },
+    DefyxMainScreenBackground(
+        phase = ui.connectPhase,
+        isAutoHealing = ui.isAutoHealing,
         modifier = modifier
-    ) { padding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // 1. Custom Config Importer (F-16: vless://, trojan://, JSON)
-            Card(
+            Column {
+                Text(
+                    text = "مرکز کانفیگ، بقای آفلاین و راهنما",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.White
+                )
+                Text(
+                    text = "پشتیبانی از اشتراک رسمی + vless:// و trojan:// با فرگمنت خودکار",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.72f)
+                )
+            }
+
+            // 1. Custom Config Importer (F-16: vless://, trojan://, JSON) inside VengeanceGlowBorderCard
+            VengeanceGlowBorderCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = GhBlue.copy(alpha = 0.10f)),
-                shape = RoundedCornerShape(16.dp)
+                presetColors = DefyxColors.VengeanceAurora
             ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         text = "وارد کردن کانفیگ سفارشی (F-16 — الگوی سیمرغ)",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = GhBlue
+                        color = DefyxColors.BrandGold
                     )
                     Text(
                         text = "لینک vless:// یا trojan:// یا JSON کامل Xray را وارد کنید؛ فرگمنت TLS و IP تمیز به‌طور خودکار تزریق می‌شوند:",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = Color.White.copy(alpha = 0.78f)
                     )
                     OutlinedTextField(
                         value = rawConfigInput,
@@ -106,7 +106,10 @@ fun ConfigHubScreen(
                         maxLines = 4
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(
+                        VengeanceRadialGlowButton(
+                            text = "جای‌گذاری کلیپ‌بورد",
+                            iconRes = R.drawable.ic_defyx_copy,
+                            accentColor = DefyxColors.UploadCyan,
                             onClick = {
                                 val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                                 val pasted = cm?.primaryClip?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty()
@@ -121,10 +124,11 @@ fun ConfigHubScreen(
                                 }
                             },
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("جای‌گذاری از کلیپ‌بورد")
-                        }
-                        Button(
+                        )
+                        VengeanceRadialGlowButton(
+                            text = "ثبت و فعال‌سازی",
+                            iconRes = R.drawable.ic_vengeance_sparkles,
+                            accentColor = DefyxColors.BrandGold,
                             onClick = {
                                 val ok = viewModel.importCustomConfig(rawConfigInput, ui.cleanIp)
                                 importFeedback = if (ok) {
@@ -133,17 +137,14 @@ fun ConfigHubScreen(
                                     false to "فرمت واردشده معتبر نیست"
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = GhBlue),
                             modifier = Modifier.weight(1f)
-                        ) {
-                            Text("ثبت و فعال‌سازی")
-                        }
+                        )
                     }
                     importFeedback?.let { (ok, msg) ->
                         Text(
                             text = msg,
                             style = MaterialTheme.typography.labelMedium,
-                            color = if (ok) GhGreen else Color(0xFFE5484D),
+                            color = if (ok) DefyxColors.DownloadGreen else DefyxColors.ErrorRose,
                             fontWeight = FontWeight.Bold
                         )
                     }

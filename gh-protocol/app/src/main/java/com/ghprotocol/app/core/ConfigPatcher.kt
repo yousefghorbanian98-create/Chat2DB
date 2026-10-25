@@ -260,14 +260,39 @@ object ConfigPatcher {
             }
             sniff.put("destOverride", kept)
         }
+        // Prevent Xray router from invoking app/dns (IPOnDemand/IPIfNonMatch) on TCP flows
+        // that already have a numeric destination IP from VpnTunnelService.
+        val routing = json.optJSONObject("routing")
+        if (routing != null) {
+            val ds = routing.optString("domainStrategy", "")
+            if (ds.isNotEmpty() && !ds.equals("AsIs", ignoreCase = true)) {
+                routing.put("domainStrategy", "AsIs")
+            }
+            val rules = routing.optJSONArray("rules")
+            if (rules != null) {
+                for (i in 0 until rules.length()) {
+                    val r = rules.getJSONObject(i)
+                    if (r.optString("outboundTag") == "dns-out" && r.has("port") && !r.has("inboundTag")) {
+                        r.put("inboundTag", JSONArray().put("dns-in"))
+                    }
+                }
+            }
+        }
         val obs = json.optJSONArray("outbounds")
         if (obs != null) {
             for (i in 0 until obs.length()) {
                 val ob = obs.getJSONObject(i)
-                val he = ob.optJSONObject("streamSettings")
-                    ?.optJSONObject("sockopt")
-                    ?.optJSONObject("happyEyeballs")
-                he?.put("prioritizeIPv6", false)
+                val proto = ob.optString("protocol", "").lowercase()
+                val sockopt = ob.optJSONObject("streamSettings")?.optJSONObject("sockopt")
+                sockopt?.optJSONObject("happyEyeballs")?.put("prioritizeIPv6", false)
+                // Critical fix for Serverless-for-Iran.json: freedom/direct outbounds with
+                // sockopt.domainStrategy="ForceIP" force Xray to call app/dns (DoH) on every
+                // sniffed TLS SNI even when sniffing.routeOnly=true, causing 12s DoH timeouts
+                // and Down=0 B. Setting AsIs connects directly to the already-resolved dstIp
+                // while keeping TLS ClientHello fragmentation intact.
+                if ((proto == "direct" || proto == "freedom") && sockopt != null && sockopt.has("domainStrategy")) {
+                    sockopt.put("domainStrategy", "AsIs")
+                }
             }
         }
         return removed

@@ -92,30 +92,39 @@ fun LiveLogScreen(
 
     val animMs = MotionSpec.durationMs(context, 220)
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("لاگ زنده و رادار ترافیک", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = "پروفایل: ${telemetry.activeProfile} · IP: ${telemetry.activeCleanIp ?: "خودکار"}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
-        },
+    DefyxMainScreenBackground(
+        phase = ui.connectPhase,
+        isAutoHealing = ui.isAutoHealing,
         modifier = modifier
-    ) { padding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "لاگ زنده و مانیتور ترافیک",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
+                    Text(
+                        text = "پروفایل: ${telemetry.activeProfile} · IP: ${telemetry.activeCleanIp ?: "خودکار"}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.72f)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
             // 1. n8n-Inspired 5-Node Live Pipeline + Waveform Oscilloscope
             N8nPipelineFlowCard(
                 telemetry = telemetry,
@@ -128,7 +137,7 @@ fun LiveLogScreen(
 
             Spacer(Modifier.height(10.dp))
 
-            // 2. Real-time Traffic & Ping Telemetry Cards (Psiphon / Hiddify style)
+            // 2. Real-time Traffic & Ping Telemetry Cards
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -136,27 +145,27 @@ fun LiveLogScreen(
                 TelemetryMiniCard(
                     title = "پینگ واقعی تونل",
                     value = telemetry.verifiedPingMs?.let { "$it ms" } ?: "—",
-                    sub = if (telemetry.verifiedPingMs != null) "HTTP 204 تاییدشده" else "تست نشده",
-                    accent = if (telemetry.verifiedPingMs != null) LogEmerald else LogCyan,
+                    sub = if (telemetry.verifiedPingMs != null) "تاییدشده از داخل تونل" else "تست نشده",
+                    accent = if (telemetry.verifiedPingMs != null) DefyxColors.DownloadGreen else DefyxColors.UploadCyan,
                     modifier = Modifier.weight(1f)
                 )
                 TelemetryMiniCard(
                     title = "ترافیک جلسه",
                     value = "↓ ${TunnelLogBuffer.formatBytes(telemetry.bytesDown)}",
                     sub = "↑ ${TunnelLogBuffer.formatBytes(telemetry.bytesUp)} · DNS: ${telemetry.dnsQueriesHandled}",
-                    accent = LogCyan,
+                    accent = DefyxColors.UploadCyan,
                     modifier = Modifier.weight(1f)
                 )
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // 2. Dual-Mode Segmented Switch (Persian Step-by-Step vs Technical Terminal)
+            // 3. Dual-Mode Segmented Switch (Persian Step-by-Step vs Technical Terminal)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+                    .background(Color.Black.copy(alpha = 0.35f))
                     .padding(4.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -176,29 +185,31 @@ fun LiveLogScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // 3. Action bar: URL Ping Test + Auto-Heal + Copy Log + Clear
+            // 4. VengeanceUI RadialGlowButtons for Real Ping Test + Copy Log (with ic_defyx_copy) + Clear
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
+                VengeanceRadialGlowButton(
+                    text = if (ui.isTestingUrl) "در حال تست..." else "تست پینگ واقعی",
+                    iconRes = com.ghprotocol.app.R.drawable.ic_defyx_speed,
+                    accentColor = DefyxColors.DownloadGreen,
                     onClick = { viewModel.runUrlPingTest() },
-                    colors = ButtonDefaults.buttonColors(containerColor = GhBlue),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(if (ui.isTestingUrl) "در حال تست..." else "تست پینگ واقعی (HTTP 204)")
-                }
-                OutlinedButton(
+                    modifier = Modifier.weight(1.2f)
+                )
+                VengeanceRadialGlowButton(
+                    text = if (copiedToast) "کپی شد ✓" else "کپی لاگ",
+                    iconRes = com.ghprotocol.app.R.drawable.ic_defyx_copy,
+                    accentColor = DefyxColors.BrandGold,
                     onClick = {
                         val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
                         cm?.setPrimaryClip(ClipData.newPlainText("gh-protocol-log", TunnelLogBuffer.exportAllText()))
                         copiedToast = true
-                    }
-                ) {
-                    Text(if (copiedToast) "کپی شد ✓" else "کپی لاگ")
-                }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
                 OutlinedButton(onClick = { TunnelLogBuffer.clear(); copiedToast = false }) {
-                    Text("پاک کردن")
+                    Text("پاک", color = Color.White)
                 }
             }
 

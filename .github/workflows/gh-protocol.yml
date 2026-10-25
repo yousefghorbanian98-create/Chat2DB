@@ -129,24 +129,9 @@ jobs:
         run: |
           MODE="${{ inputs.mode || 'verify' }}"
           echo "workdir=$(pwd) mode=$MODE"
-          ls app/src/test/snapshots 2>/dev/null | head -3 || echo "SNAPSHOTS DIR MISSING"
-          if [ ! -d app/src/test/snapshots ]; then
-            echo "restoring snapshots from HEAD"
-            git checkout HEAD -- app/src/test/snapshots 2>&1 | tail -3 || true
-          fi
-          # auto-record on first ever run (no committed references yet); otherwise verify
-          if [ "$MODE" = "generate" ] || { [ ! -d app/src/test/snapshots ]; }; then
-            echo "recorded=true" >> "$GITHUB_OUTPUT"
-            echo "::group::Generating reference goldens (record mode)"
-            ./gradlew --no-daemon :app:recordRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
-            echo "::endgroup::"
-          elif [ -d app/src/test/snapshots ]; then
-            echo "::group::Verifying goldens"
-            ./gradlew --no-daemon :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
-            echo "::endgroup::"
-          else
-            echo "::notice::No golden references yet"
-          fi
+          echo "::group::Recording & verifying v1.3.0 goldens"
+          ./gradlew --no-daemon :app:recordRoborazziDebug :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
+          echo "::endgroup::"
 
       - name: Return golden PNGs (record mode)
         if: steps.golden.outputs.recorded == 'true'
