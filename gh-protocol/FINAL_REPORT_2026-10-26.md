@@ -107,7 +107,7 @@ self-test reports `ok=true` with real payload.
 
 ## 5. Remaining limitations (stated, not hidden)
 
-1. **No physical phone was available in this environment.** CI proves compilation, 124 unit /
+1. **No physical phone was available in this environment.** CI proves compilation, 125 unit /
    integration tests and a signed APK — it cannot prove that *a specific carrier* passes the
    fragmented TLS outbound. That still needs the log in §6.
 2. QUIC/HTTP-3 is not relayed: UDP ≠ 53 is counted, answered with ICMP port-unreachable and
