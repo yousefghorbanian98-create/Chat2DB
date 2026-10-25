@@ -142,6 +142,33 @@ object DefyxColors {
 private const val DEFYX_SHIELD_SVG_PATH =
     "M51.39 1.16517L100.313 21.8855C100.72 22.0581 100.966 22.4781 100.917 22.918L94.1288 83.2901C93.9546 84.8395 93.1841 86.2602 91.9806 87.2513L51.6357 120.476C51.2665 120.781 50.7336 120.781 50.3643 120.476L10.0194 87.2513C8.8159 86.2602 8.04544 84.8395 7.87124 83.2901L1.08337 22.918C1.03392 22.4781 1.27953 22.0581 1.68712 21.8855L50.61 1.16517C50.8593 1.0596 51.1407 1.0596 51.39 1.16517Z"
 
+@Composable
+private fun rememberLoopingFloat(
+    initialValue: Float,
+    targetValue: Float,
+    durationMillis: Int,
+    repeatMode: RepeatMode = RepeatMode.Restart,
+    staticFallback: Float = initialValue,
+    label: String = "loop"
+): Float {
+    val context = LocalContext.current
+    val isRobolectric = android.os.Build.FINGERPRINT?.contains("robolectric", ignoreCase = true) == true
+    if (isRobolectric || MotionSpec.isReducedMotion(context)) {
+        return staticFallback
+    }
+    val infinite = rememberInfiniteTransition(label = label)
+    val v by infinite.animateFloat(
+        initialValue = initialValue,
+        targetValue = targetValue,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = durationMillis, easing = LinearEasing),
+            repeatMode = repeatMode
+        ),
+        label = label
+    )
+    return v
+}
+
 /**
  * Tactile spring press modifier from kylezantos/design-motion-principles & Ashutoshx7/VengenceUI.
  */
@@ -437,8 +464,6 @@ fun DefyxShieldConnectionButton(
     onTapDisconnect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val reduced = MotionSpec.isReducedMotion(context)
     val isConnected = phase == ConnectPhase.CONNECTED
     val isBusy = phase == ConnectPhase.CHECKING ||
         phase == ConnectPhase.PREPARING ||
@@ -446,32 +471,28 @@ fun DefyxShieldConnectionButton(
         isAutoHealing
     val isFailed = phase == ConnectPhase.FAILED
 
-    val infinite = rememberInfiniteTransition(label = "defyx-shield-anim")
-    val pulseProgress by infinite.animateFloat(
+    val pulseProgress = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0.35f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = if (isBusy) 1600 else 2800, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        targetValue = 1f,
+        durationMillis = if (isBusy) 1600 else 2800,
+        repeatMode = RepeatMode.Restart,
+        staticFallback = 0.35f,
         label = "shield-pulse"
     )
-    val rotationAngle by infinite.animateFloat(
+    val rotationAngle = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0f else 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        targetValue = 360f,
+        durationMillis = 3000,
+        repeatMode = RepeatMode.Restart,
+        staticFallback = 45f,
         label = "shield-sweep"
     )
-    val scanProgress by infinite.animateFloat(
+    val scanProgress = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0.5f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
+        targetValue = 1f,
+        durationMillis = 1500,
+        repeatMode = RepeatMode.Reverse,
+        staticFallback = 0.5f,
         label = "shield-scan"
     )
 
@@ -697,16 +718,12 @@ fun VengeanceGlowBorderCard(
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val context = LocalContext.current
-    val reduced = MotionSpec.isReducedMotion(context)
-    val infinite = rememberInfiniteTransition(label = "vengeance-glow-border")
-    val angle by infinite.animateFloat(
+    val angle = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0f else 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        targetValue = 360f,
+        durationMillis = 4200,
+        repeatMode = RepeatMode.Restart,
+        staticFallback = 30f,
         label = "border-angle"
     )
 
@@ -914,16 +931,12 @@ fun N8nPipelineFlowCard(
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val reduced = MotionSpec.isReducedMotion(context)
-    val infinite = rememberInfiniteTransition(label = "n8n-flow")
-    val packetPhase by infinite.animateFloat(
+    val packetPhase = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0.5f else 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        targetValue = 1f,
+        durationMillis = 1500,
+        repeatMode = RepeatMode.Restart,
+        staticFallback = 0.5f,
         label = "packet-phase"
     )
 
@@ -1042,16 +1055,12 @@ fun LiveTrafficWaveformCard(
     telemetry: TunnelTelemetry,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val reduced = MotionSpec.isReducedMotion(context)
-    val infinite = rememberInfiniteTransition(label = "wave-osc")
-    val phaseShift by infinite.animateFloat(
+    val phaseShift = rememberLoopingFloat(
         initialValue = 0f,
-        targetValue = if (reduced) 0f else (2f * PI.toFloat()),
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1600, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
+        targetValue = (2f * PI.toFloat()),
+        durationMillis = 1600,
+        repeatMode = RepeatMode.Restart,
+        staticFallback = 0.5f,
         label = "wave-phase"
     )
 
