@@ -51,13 +51,28 @@ class SubscriptionParserTest {
     }
 
     @Test fun cleanIpScannerPicksFastestHealthy() = runTest {
+        val probe = object : com.ghprotocol.app.core.net.IpProbe {
+            override fun probe(ip: String): com.ghprotocol.app.core.net.IpProbeResult =
+                if (ip == "104.16.132.229") {
+                    // Bare TCP works but TLS does not: must never be reported as healthy.
+                    com.ghprotocol.app.core.net.IpProbeResult(
+                        ip, false, com.ghprotocol.app.core.net.IpProbeResult.STAGE_TLS, "tls_failed", 12
+                    )
+                } else {
+                    com.ghprotocol.app.core.net.IpProbeResult(
+                        ip, true, com.ghprotocol.app.core.net.IpProbeResult.STAGE_OK, "headers_ok",
+                        30, httpStatus = 200, cloudflareEdge = true
+                    )
+                }
+        }
         val scanner = CleanIpScanner(
-            pool = listOf("104.16.132.229", "1.1.1.1", "198.41.200.229"),
-            probeFn = { ip, _ -> ip != "104.16.132.229" }
+            pool = listOf("104.16.132.229", "1.1.1.1", "198.41.200.229", "10.0.0.1"),
+            probe = probe
         )
-        val report = scanner.scan(timeoutMs = 100)
+        val report = scanner.scan()
         assertEquals(2, report.healthy.size)
         assertNotNull(report.best)
-        assertEquals(0x16, CleanIpScanner.MINIMAL_CLIENT_HELLO[0].toInt() and 0xFF)
+        // 10.0.0.1 is private and is rejected before any probe runs.
+        assertEquals(3, report.examined)
     }
 }

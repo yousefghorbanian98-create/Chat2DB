@@ -30,6 +30,13 @@ on:
         default: verify
         type: choice
         options: [verify, generate]
+      publish:
+        # Requirement: never publish a release from an ordinary push. A human has to ask for
+        # it, after the build + tests + goldens in this very run are green.
+        description: "Publish the GitHub Release for the current versionName (only after green)"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: gh-protocol-${{ github.ref }}
@@ -210,22 +217,29 @@ jobs:
         working-directory: gh-protocol
         run: |
           mkdir -p release-dist
-          cp app/build/outputs/apk/release/app-arm64-v8a-release.apk release-dist/GhProtocol-v1.0.0-arm64-v8a.apk
-          cp app/build/outputs/apk/release/app-universal-release.apk release-dist/GhProtocol-v1.0.0-universal.apk
+          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts | head -1)
+          echo "versionName=$VERSION" >> "$GITHUB_ENV"
+          echo "ARTIFACT_TAG=gh-protocol-v$VERSION" >> "$GITHUB_ENV"
+          cp app/build/outputs/apk/release/app-arm64-v8a-release.apk "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk"
+          cp app/build/outputs/apk/release/app-universal-release.apk "release-dist/GhProtocol-v$VERSION-universal.apk"
           echo "XTLS/Xray-core v26.10.21" > release-dist/core-version.txt
           cp FINAL_REPORT.html release-dist/FINAL_REPORT.html
-          (cd release-dist && sha256sum GhProtocol-v1.0.0-arm64-v8a.apk GhProtocol-v1.0.0-universal.apk core-version.txt FINAL_REPORT.html > SHA256SUMS)
+          (cd release-dist && sha256sum "GhProtocol-v$VERSION-arm64-v8a.apk" "GhProtocol-v$VERSION-universal.apk" core-version.txt FINAL_REPORT.html > SHA256SUMS)
           cp release-dist/SHA256SUMS SHA256SUMS
           cat SHA256SUMS
 
-      - name: P5/G5 Publish GitHub Release (gh-protocol-v1.0.0)
+      - name: P5/G5 Publish GitHub Release (manual, green build only)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish == true
         working-directory: gh-protocol
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload gh-protocol-v1.0.0 \
-            release-dist/GhProtocol-v1.0.0-arm64-v8a.apk \
-            release-dist/GhProtocol-v1.0.0-universal.apk \
+          gh release view "$ARTIFACT_TAG" >/dev/null 2>&1 || \
+            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" \
+              --notes "Built from $GITHUB_SHA by the gh-protocol-build workflow after green tests."
+          gh release upload "$ARTIFACT_TAG" \
+            "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk" \
+            "release-dist/GhProtocol-v$VERSION-universal.apk" \
             release-dist/SHA256SUMS \
             release-dist/core-version.txt \
             release-dist/FINAL_REPORT.html \
@@ -236,15 +250,15 @@ jobs:
           git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
           git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
           mkdir -p gh-protocol
-          cp gh-protocol/release-dist/SHA256SUMS gh-protocol/SHA256SUMS.v1.0.0
-          git add gh-protocol/SHA256SUMS.v1.0.0
-          git commit -m "ci-diag: v1.0.0 SHA256SUMS $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          cp gh-protocol/release-dist/SHA256SUMS "gh-protocol/SHA256SUMS.v$VERSION"
+          git add "gh-protocol/SHA256SUMS.v$VERSION"
+          git commit -m "ci-diag: v$VERSION SHA256SUMS $(date -u +%Y%m%d-%H%M%S)" --allow-empty
           git push origin HEAD:ci-diag --force
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gh-protocol-v1.0.0-release
+          name: gh-protocol-release-${{ github.run_number }}
           path: |
             gh-protocol/release-dist/*
             gh-protocol/app/build/outputs/apk/**/*.apk

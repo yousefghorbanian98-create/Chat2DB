@@ -1,112 +1,111 @@
 package com.ghprotocol.app.core
 
+import com.ghprotocol.app.core.net.CleanIpPool
+import com.ghprotocol.app.core.net.IpProbe
+import com.ghprotocol.app.core.net.IpProbeResult
+import com.ghprotocol.app.core.net.TlsHttpProbe
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import java.net.InetSocketAddress
-import java.net.Socket
 
 /**
- * F-17: clean-IP recovery (Nova Radar / Simorgh 2026 pattern).
- * When the default route is dirty (blackholed), scan a pool of well-known
- * Cloudflare egress IPs with a real TCP/TLS ClientHello probe on :443. The
- * cleanest (lowest latency) IP is cached; only the egress address is swapped
- * in the config — SNI/Host/Path stay untouched.
+ * F-17: clean-IP recovery, judged only on real evidence.
+ *
+ * A candidate survives only when, in this order:
+ *  1. it is a *valid* public unicast IPv4 literal ([CleanIpPool]),
+ *  2. a full TLS handshake completes against a trusted certificate,
+ *  3. a complete HTTP/1.x response arrives,
+ *  4. the peer proves it is a Cloudflare edge (`cf-ray` / `Server: Cloudflare`).
+ *
+ * A bare TCP connect — or the 51-byte partial ClientHello this class used before v1.6 —
+ * is never reported as healthy (see DIAGNOSIS 2026-10-25, D4).
  */
 class CleanIpScanner(
-    private val pool: List<String> = DEFAULT_POOL,
-    private val probeFn: (String, Int) -> Boolean = ::defaultTlsProbe
+    private val pool: List<String> = CleanIpPool.CLOUDFLARE_EDGES,
+    private val probe: IpProbe = TlsHttpProbe(),
+    private val concurrency: Int = 6,
+    /** Hard cap for the whole scan; results collected so far are still returned. */
+    private val scanBudgetMs: Long = 8000
 ) {
 
     companion object {
-        /**
-         * Well-known Cloudflare Anycast egress IPs (prioritizing `challenges.cloudflare.com`
-         * edges `104.18.94.41` / `104.18.95.41` which remain open on Iranian ISPs).
-         * Excludes `1.1.1.1` / `1.0.0.1` because port 443 is IP-blocked on Iranian ISPs.
-         */
-        val DEFAULT_POOL = listOf(
-            "104.18.94.41", "104.18.95.41",
-            "104.16.132.229", "104.16.133.229",
-            "172.64.32.229", "172.64.33.229",
-            "104.18.12.149", "104.18.13.149",
-            "188.114.96.229", "188.114.97.229",
-            "190.93.240.229", "198.41.200.229"
-        )
+        val DEFAULT_POOL: List<String> = CleanIpPool.CLOUDFLARE_EDGES
 
-        /**
-         * Minimal RFC 5246 TLS 1.2 ClientHello record (51 bytes) advertising standard
-         * ECDHE/RSA + TLS 1.3 cipher suites (0xC02F, 0xC02B, 0x009C, 0x1301) so the server
-         * responds with a TLS Handshake (0x16) or TLS Alert (0x15) record.
-         */
+        /** v1.5's truncated ClientHello is kept only so tests can assert it is *not* proof. */
         internal val MINIMAL_CLIENT_HELLO = byteArrayOf(
-            0x16, 0x03, 0x01, 0x00, 0x2E, // TLS Handshake record, version 3.1, len 46
-            0x01, 0x00, 0x00, 0x2A,       // ClientHello, len 42
-            0x03, 0x03,                   // TLS 1.2
-            // 32-byte client random
+            0x16, 0x03, 0x01, 0x00, 0x2E,
+            0x01, 0x00, 0x00, 0x2A,
+            0x03, 0x03,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
             0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
             0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-            0x00,                         // session ID len 0
-            0x00, 0x08,                   // cipher suites len 8
-            0xC0.toByte(), 0x2F.toByte(), // TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-            0xC0.toByte(), 0x2B.toByte(), // TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
-            0x00, 0x9C.toByte(),          // TLS_RSA_WITH_AES_128_GCM_SHA256
-            0x13, 0x01,                   // TLS_AES_128_GCM_SHA256
-            0x01, 0x00                    // compression methods: null
+            0x00,
+            0x00, 0x08,
+            0xC0.toByte(), 0x2F.toByte(),
+            0xC0.toByte(), 0x2B.toByte(),
+            0x00, 0x9C.toByte(),
+            0x13, 0x01,
+            0x01, 0x00
         )
-
-        fun defaultTlsProbe(ip: String, timeoutMs: Int): Boolean {
-            try {
-                Socket().use { s ->
-                    s.connect(InetSocketAddress(ip, 443), timeoutMs)
-                    s.soTimeout = timeoutMs
-                    s.tcpNoDelay = true
-                    val out = s.getOutputStream()
-                    out.write(MINIMAL_CLIENT_HELLO)
-                    out.flush()
-                    // TLS record type: 0x16 (Handshake / ServerHello) or 0x15 (Alert from live TLS stack)
-                    val b = s.getInputStream().read()
-                    if (b == 0x16 || b == 0x15) return true
-                }
-            } catch (_: Exception) {}
-            return try {
-                Socket().use { s ->
-                    s.connect(InetSocketAddress(ip, 80), timeoutMs)
-                    s.soTimeout = timeoutMs
-                    s.tcpNoDelay = true
-                    val out = s.getOutputStream()
-                    out.write("HEAD / HTTP/1.1\r\nHost: challenges.cloudflare.com\r\nConnection: close\r\n\r\n".toByteArray())
-                    out.flush()
-                    val b = s.getInputStream().read()
-                    b == 'H'.code
-                }
-            } catch (_: Exception) {
-                false
-            }
-        }
     }
 
     data class ScanResult(val ip: String, val latencyMs: Long)
-    data class Report(val best: ScanResult?, val healthy: List<ScanResult>)
 
-    suspend fun scan(timeoutMs: Int = 1500): Report = withContext(Dispatchers.IO) {
-        val results = mutableListOf<ScanResult>()
-        for (ip in pool) {
-            val t0 = System.currentTimeMillis()
-            val ok = probeFn(ip, timeoutMs)
-            if (ok) results.add(ScanResult(ip, (System.currentTimeMillis() - t0).coerceAtLeast(1L)))
+    data class Report(
+        val best: ScanResult?,
+        val healthy: List<ScanResult>,
+        val rejected: List<String> = emptyList(),
+        val examined: Int = 0
+    )
+
+    /** Full per-IP outcome, for logs and the diagnostics screen. */
+    data class DetailedReport(val results: List<IpProbeResult>) {
+        val healthy: List<IpProbeResult> get() = results.filter { it.ok }
+        val best: IpProbeResult? get() = healthy.minByOrNull { it.latencyMs }
+
+        fun summary(): String = results.joinToString(", ") {
+            "${it.ip}:" + if (it.ok) "ok(${it.latencyMs}ms)" else "${it.stage}(${it.detail.take(40)})"
         }
-        val best = results.minByOrNull { it.latencyMs }
-        Report(best, results.sortedBy { it.latencyMs })
     }
 
-    /** Cache the best clean IP across launches. */
-    fun saveBest(ip: String?, context: android.content.Context) {
-        context.getSharedPreferences("gh-settings", android.content.Context.MODE_PRIVATE)
-            .edit().putString("clean_ip", ip).apply()
+    suspend fun scanDetailed(): DetailedReport = coroutineScope {
+        val started = System.currentTimeMillis()
+        val candidates = pool.distinct()
+        val rejected = candidates.filterNot { CleanIpPool.isValid(it) }
+        val valid = candidates.filter { CleanIpPool.isValid(it) }
+        if (rejected.isNotEmpty()) {
+            TunnelLogBuffer.log(
+                LogLevel.WARN, LogCategory.PROBE,
+                "چند ورودی غیرمعتبر در فهرست IP تمیز رد شد",
+                "cleanIp pool rejected=${rejected.joinToString(",")}"
+            )
+        }
+        val results = ArrayList<IpProbeResult>(valid.size)
+        for (chunk in valid.chunked(concurrency.coerceAtLeast(1))) {
+            if (System.currentTimeMillis() - started > scanBudgetMs) break
+            val running = chunk.map { ip -> async(Dispatchers.IO) { probe.probe(ip) } }
+            running.forEach { results.add(it.await()) }
+            if (results.any { it.ok }) break // one verified edge is enough
+        }
+        DetailedReport(results)
     }
 
-    fun loadBest(context: android.content.Context): String? =
-        context.getSharedPreferences("gh-settings", android.content.Context.MODE_PRIVATE)
-            .getString("clean_ip", null)
+    suspend fun scan(): Report = withContext(Dispatchers.IO) {
+        val detailed = scanDetailed()
+        val healthy = detailed.healthy.sortedBy { it.latencyMs }.map { ScanResult(it.ip, it.latencyMs) }
+        Report(
+            best = healthy.firstOrNull(),
+            healthy = healthy,
+            rejected = detailed.results.filterNot { it.ok }.map { "${it.ip}:${it.stage}" },
+            examined = detailed.results.size
+        )
+    }
+
+    /**
+     * Legacy synchronous probe hook: kept for the UI preview path, same acceptance rules.
+     * `probeFn` returns true only when the candidate passed the full TLS/HTTP/CF checks.
+     */
+    fun probeOne(ip: String): IpProbeResult = probe.probe(ip)
 }

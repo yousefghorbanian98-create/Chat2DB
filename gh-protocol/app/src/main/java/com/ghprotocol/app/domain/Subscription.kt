@@ -61,6 +61,11 @@ object Subscription {
      * Rule #13: Embedded fallback Serverless-for-Iran config with full TLS ClientHello
      * fragmentation and DoH bootstrap hosts so first-launch users can establish a
      * working fragmented tunnel even when GitHub edges are blocked.
+     *
+     * v1.6: `cloudflare-dns.com` is bootstrapped to its own anycast address
+     * (104.16.248.249) in BOTH profiles. v1.5 used 1.1.1.1 / 1.0.0.1, whose :443 is
+     * IP-blocked on several Iranian ISPs — that is what produced
+     * `Post "https://cloudflare-dns.com/dns-query": context deadline exceeded`.
      */
     val EMBEDDED_FALLBACK_JSON: String = """
     [
@@ -69,7 +74,8 @@ object Subscription {
         "version": {"min": "26.6.27"},
         "log": {"loglevel": "warning"},
         "dns": {
-          "hosts": {"cloudflare-dns.com": "1.1.1.1", "dns.google": "8.8.8.8"},
+          "hosts": {"cloudflare-dns.com": "104.16.248.249", "dns.google": "8.8.8.8"},
+          "queryStrategy": "UseIPv4",
           "servers": ["https://cloudflare-dns.com/dns-query", "1.1.1.1", "8.8.8.8"]
         },
         "inbounds": [
@@ -109,8 +115,9 @@ object Subscription {
         "version": {"min": "26.6.27"},
         "log": {"loglevel": "warning"},
         "dns": {
-          "hosts": {"cloudflare-dns.com": "1.0.0.1", "dns.google": "8.8.4.4"},
-          "servers": ["https://cloudflare-dns.com/dns-query", "1.0.0.1", "8.8.4.4"]
+          "hosts": {"cloudflare-dns.com": "104.16.248.249", "dns.google": "8.8.8.8"},
+          "queryStrategy": "UseIPv4",
+          "servers": ["https://cloudflare-dns.com/dns-query", "1.1.1.1", "8.8.8.8"]
         },
         "inbounds": [
           {

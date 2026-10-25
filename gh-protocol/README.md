@@ -29,15 +29,25 @@
 
 ---
 
+## وضعیت اتصال، صادقانه (v1.6)
+
+«متصل» فقط وقتی نمایش داده می‌شود که یک تست واقعی **از داخل همان مسیر تونل** دادهٔ واقعی از
+راه دور دریافت کرده باشد (`relay_selftest=PASS`, بایت‌های Down > 0). باز بودن پورت SOCKS،
+هندشیک محلی یا یک درخواست تکی، «متصل» محسوب نمی‌شود. شمارنده‌های Up/Down/ActiveTCP مستقیماً از
+هستهٔ رله کپی می‌شوند تا با بایت‌های واقعی برابر بمانند. جزئیات علت‌های اثبات‌شدهٔ مشکل قبلی در
+`DIAGNOSIS_2026-10-25.md` آمده است.
+
 ## معماری فنی (v1.0.0)
 
 ```
 User Tap ──> Compose UI (RTL / Vazirmatn / MotionSpec <=300ms)
          ──> HomeViewModel + SubscriptionRepository (Primary + Mirror + Embedded Fallback)
          ──> ConfigPatcher (vless/trojan/JSON + TLS Fragment + Clean IP + Single Outbound)
-         ──> VpnTunnelService (TUN 10.8.0.2/24 + IPv6 fd00:1::1/128 Leak Guard)
-              ├─> UDP :53 ──> Dokodemo-door :15353 ──> Xray dns-out (Cloudflare DoH)
-              └─> TCP SYN/Data (RFC 793) ──> SOCKS5 :10808 ──> Xray-core v26.10.21
+         ──> VpnTunnelService (TUN 10.8.0.2/24 + fd00:1::2/64, both really tunneled)
+              ├─> UDP/UDP6 :53 ──> DnsResolver (DoH via SOCKS5 → DoH Google → TCP DNS → dns-in)
+              │                    hard 5s budget · validated replies · real SERVFAIL
+              └─> TCP (IPv4+IPv6) ──> TcpRelay (seq/ack/retransmit) ──> SOCKS5 :10808
+                                       └─> Xray-core v26.10.21 → tcp-fragment (TLS hello)
 ```
 
 ## وضعیت قابلیت‌ها (F-1 تا F-18)

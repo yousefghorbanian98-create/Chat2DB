@@ -1,23 +1,33 @@
 package com.ghprotocol.app
 
 import com.ghprotocol.app.core.Socks5
+import com.ghprotocol.app.core.net.PacketCodec
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * SOCKS5 framing (RFC 1928) + the packet codec that replaced the old hand-rolled helpers.
+ *
+ * Packet construction/parsing now lives in [PacketCodec] so the same code the relay uses is
+ * what the tests check — the duplicated codec that used to live in `Socks5` was deleted
+ * (v1.6) after auditing every reference.
+ */
 class Socks5Test {
 
-    @Test fun greetingReply() {
+    @Test
+    fun greetingReply() {
         assertTrue(Socks5.greetingReplyOk(byteArrayOf(0x05, 0x00)))
         assertFalse(Socks5.greetingReplyOk(byteArrayOf(0x05, 0x01)))
+        assertFalse(Socks5.greetingReplyOk(byteArrayOf(0x05)))
     }
 
-    @Test fun connectRequestIpv4() {
+    @Test
+    fun connectRequestIpv4() {
         val req = Socks5.connectRequest("93.184.216.34", 443)
-        // 05 01 00 01 + 4 addr bytes + 2 port bytes
+        // 05 01 00 01 + 4 address bytes + 2 port bytes
         assertEquals(0x05, req[0].toInt())
         assertEquals(0x01, req[1].toInt())
         assertEquals(0x00, req[2].toInt())
@@ -27,98 +37,100 @@ class Socks5Test {
         assertEquals(10, req.size)
     }
 
-    @Test fun connectRequestDomain() {
+    @Test
+    fun connectRequestIpv6UsesAtyp4() {
+        val req = Socks5.connectRequest("2001:db8::1", 443)
+        assertEquals(0x04, req[3].toInt())
+        assertEquals(22, req.size) // 4 head + 16 address + 2 port
+    }
+
+    @Test
+    fun connectRequestDomain() {
         val req = Socks5.connectRequest("github.com", 443)
-        assertEquals(0x03, req[3].toInt()) // ATYP domain
-        assertEquals(10, req[4].toInt())   // len("github.com")
+        assertEquals(0x03, req[3].toInt())
+        assertEquals(10, req[4].toInt())
         assertEquals("github.com", req.slice(5..14).joinToString("") { (it.toInt() and 0xFF).toChar().toString() })
     }
 
-    @Test fun connectReply() {
+    @Test
+    fun connectReply() {
         assertTrue(Socks5.connectReplyOk(byteArrayOf(0x05, 0x00, 0x00, 0x01)))
         assertFalse(Socks5.connectReplyOk(byteArrayOf(0x05, 0x05, 0x00, 0x01)))
+        assertEquals("connection_refused", Socks5.replyCodeName(0x05))
+        assertEquals(4, Socks5.bindAddressLength(1))
+        assertEquals(16, Socks5.bindAddressLength(4))
+        assertEquals(-2, Socks5.bindAddressLength(3))
+        assertEquals(-1, Socks5.bindAddressLength(9))
     }
 
-    @Test fun parseIp4TcpPacket() {
-        // IPv4, IHL=5, proto=6 (TCP), total=42, dst 1.2.3.4 + TCP dst port 443
-        val packet = ByteArray(42)
-        packet[0] = 0x45.toByte()   // v4, IHL=5
-        packet[9] = 6.toByte()      // TCP
-        packet[3] = 42.toByte()     // total length = 42
-        packet[16] = 1.toByte(); packet[17] = 2.toByte(); packet[18] = 3.toByte(); packet[19] = 4.toByte()  // dst 1.2.3.4
-        packet[22] = (443 shr 8).toByte()   // TCP dst port high
-        packet[23] = (443 and 0xFF).toByte() // TCP dst port low
-        val (proto, dst, len) = Socks5.parseIp4(packet)!!
-        assertEquals(6, proto)
-        assertEquals("1.2.3.4", dst)
-        assertEquals(42, len)
-        assertEquals(443, Socks5.segmentDstPort(packet.copyOfRange(20, 42)))
-        assertEquals(443, Socks5.transportDstPort(packet, 6))
+    @Test
+    fun literalDetectionNeverResolvesNames() {
+        assertTrue(Socks5.isLiteralAddress("1.2.3.4"))
+        assertTrue(Socks5.isLiteralAddress("2001:db8::1"))
+        assertFalse(Socks5.isLiteralAddress("example.com"))
+        assertNull(PacketCodec.ipBytes("example.com"))
     }
 
-    @Test fun parseIp4RejectsV6OrShort() {
-        val v6 = ByteArray(40); v6[0] = 0x60.toByte()
-        assertNull(Socks5.parseIp4(v6))
-        assertNull(Socks5.parseIp4(ByteArray(5)))
-    }
-
-    @Test fun buildUdpSegmentRoundTrip() {
-        val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB.toByte(), 0xCD.toByte())
-        val pkt = Socks5.buildUdpSegment("10.8.0.1", 53, "10.8.0.5", 41000, payload)
-        assertEquals(20 + 8 + payload.size, pkt.size)
-        // IPv4 header sanity + checksum populated
-        assertEquals(0x45, pkt[0].toInt())
-        assertEquals(17, pkt[9].toInt() and 0xFF)
-        assertNotEquals(0, ((pkt[10].toInt() and 0xFF) shl 8) or (pkt[11].toInt() and 0xFF))
-        assertEquals("10.8.0.1", Socks5.ipSrcIp(pkt))
-        assertEquals("10.8.0.5", Socks5.parseIp4(pkt)!!.second)
-        // UDP header (full-packet offsets + UDP length)
-        assertEquals(53, Socks5.transportSrcPort(pkt, 17))
-        assertEquals(41000, Socks5.transportDstPort(pkt, 17))
-        assertEquals(8 + payload.size, ((pkt[24].toInt() and 0xFF) shl 8) or (pkt[25].toInt() and 0xFF))
-        // payload intact
-        assertEquals(payload.toList(), pkt.copyOfRange(28, 28 + payload.size).toList())
-    }
-
-    @Test fun buildTcpSegmentRoundTrip() {
-        val payload = "HEAD / HTTP/1.1\r\n\r\n".toByteArray(Charsets.US_ASCII)
-        val pkt = Socks5.buildTcpSegment(
-            srcIp = "1.1.1.1", srcPort = 443,
-            dstIp = "10.8.0.1", dstPort = 52345,
+    @Test
+    fun packetCodecParsesTcpWithoutTheOldSocks5Helpers() {
+        val packet = PacketCodec.buildTcp(
+            family = 4,
+            srcIp = "10.8.0.1", srcPort = 443,
+            dstIp = "10.8.0.2", dstPort = 52345,
             seq = 1000L, ack = 2500000001L,
-            flags = 0x18, // PSH-ACK
-            payload = payload
+            flags = 0x18,
+            payload = "HEAD / HTTP/1.1\r\n\r\n".toByteArray(Charsets.US_ASCII)
         )
-        assertEquals(40 + payload.size, pkt.size)
-        val (proto, dst, len) = Socks5.parseIp4(pkt)!!
-        assertEquals(6, proto)
-        assertEquals("10.8.0.1", dst)
-        assertEquals("1.1.1.1", Socks5.ipSrcIp(pkt))
-        assertEquals(40 + payload.size, len)
-        assertEquals(443, Socks5.transportSrcPort(pkt, 6))
-        assertEquals(52345, Socks5.transportDstPort(pkt, 6))
-        assertEquals(0x18, Socks5.tcpFlags(pkt))
-        assertEquals(1000L, Socks5.tcpSeq(pkt))
-        assertEquals(2500000001L, Socks5.tcpAck(pkt))
-        assertEquals(payload.toList(), Socks5.tcpPayload(pkt).toList())
-        // Both IPv4 and TCP checksums are populated
-        assertNotEquals(0, ((pkt[10].toInt() and 0xFF) shl 8) or (pkt[11].toInt() and 0xFF))
-        assertNotEquals(0, ((pkt[36].toInt() and 0xFF) shl 8) or (pkt[37].toInt() and 0xFF))
-        assertEquals("1.1.x.x", Socks5.maskIp("1.1.1.1"))
+        val flow = PacketCodec.parse(packet ?: ByteArray(0))
+        assertEquals(4, flow?.family)
+        assertEquals(PacketCodec.PROTO_TCP, flow?.protocol)
+        assertEquals("10.8.0.1", flow?.srcIp)
+        assertEquals("10.8.0.2", flow?.dstIp)
+        assertEquals(443, flow?.srcPort)
+        assertEquals(52345, flow?.dstPort)
+        assertEquals(0x18, flow?.tcpFlags)
+        assertEquals(1000L, flow?.seq)
+        assertEquals(2500000001L, flow?.ack)
+        assertTrue(flow?.isPsh == true)
+        assertTrue(PacketCodec.hasValidTcpChecksum(packet ?: ByteArray(0)))
     }
 
-    @Test fun fullPacketUdpSrcDst() {
-        // full 28B packet: src 10.8.0.7:5353 -> dst 10.8.0.1:53
-        val pkt = ByteArray(28)
-        pkt[0] = 0x45.toByte()
-        pkt[3] = 28.toByte()
-        pkt[9] = 17.toByte()
-        pkt[12] = 10.toByte(); pkt[13] = 8.toByte(); pkt[14] = 0.toByte(); pkt[15] = 7.toByte()  // src
-        pkt[16] = 10.toByte(); pkt[17] = 8.toByte(); pkt[18] = 0.toByte(); pkt[19] = 1.toByte()  // dst
-        pkt[20] = (5353 shr 8).toByte(); pkt[21] = (5353 and 0xFF).toByte()  // udp src port
-        pkt[22] = (53 shr 8).toByte(); pkt[23] = (53 and 0xFF).toByte()      // udp dst port
-        assertEquals("10.8.0.7", Socks5.ipSrcIp(pkt))
-        assertEquals(5353, Socks5.transportSrcPort(pkt, 17))
-        assertEquals(53, Socks5.transportDstPort(pkt, 17))
+    @Test
+    fun udpRoundTripKeepsPortsAndChecksum() {
+        val payload = byteArrayOf(0x12, 0x34, 0x01, 0x00, 0xAB.toByte(), 0xCD.toByte())
+        val pkt = PacketCodec.buildUdp(
+            family = 4,
+            srcIp = "10.8.0.1", srcPort = 53,
+            dstIp = "10.8.0.5", dstPort = 41000,
+            payload = payload
+        ) ?: ByteArray(0)
+        val flow = PacketCodec.parse(pkt)
+        assertEquals(53, flow?.srcPort)
+        assertEquals(41000, flow?.dstPort)
+        assertEquals(payload.toList(), flow?.payload?.toList())
+        // UDP checksum must be computed (mandatory for IPv6, always set here).
+        val checksum = ((pkt[26].toInt() and 0xFF) shl 8) or (pkt[27].toInt() and 0xFF)
+        assertTrue(checksum != 0)
+    }
+
+    @Test
+    fun ipv6UdpAndTcpCarryMandatoryChecksums() {
+        val udp = PacketCodec.buildUdp(
+            family = 6,
+            srcIp = "fd00:1::1", srcPort = 53,
+            dstIp = "fd00:1::2", dstPort = 50000,
+            payload = ByteArray(12) { it.toByte() }
+        ) ?: ByteArray(0)
+        val checksumOffset = 40 + 6
+        val checksum = ((udp[checksumOffset].toInt() and 0xFF) shl 8) or (udp[checksumOffset + 1].toInt() and 0xFF)
+        assertTrue("IPv6 UDP checksum must be non-zero", checksum != 0)
+
+        val tcp = PacketCodec.buildTcp(
+            family = 6,
+            srcIp = "fd00:1::1", srcPort = 443,
+            dstIp = "fd00:1::2", dstPort = 50000,
+            seq = 1L, ack = 1L, flags = PacketCodec.FLAG_ACK
+        ) ?: ByteArray(0)
+        assertTrue(PacketCodec.hasValidTcpChecksum(tcp))
     }
 }

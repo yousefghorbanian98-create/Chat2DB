@@ -174,8 +174,17 @@ class ConfigPatcherTest {
         val frag = first.getJSONArray("outbounds").getJSONObject(0)
             .getJSONObject("settings").getJSONObject("fragment")
         assertEquals("tlshello", frag.getString("packets"))
-        val hosts = first.getJSONObject("dns").getJSONObject("hosts")
-        assertEquals("1.1.1.1", hosts.getString("cloudflare-dns.com"))
+        val dns = first.getJSONObject("dns")
+        val hosts = dns.getJSONObject("hosts")
+        // cloudflare-dns.com is bootstrapped to its own anycast address, never to the
+        // IP-blocked 1.1.1.1/1.0.0.1 and never to another zone's edge (DIAGNOSIS §D1).
+        assertEquals(ConfigPatcher.DOH_BOOTSTRAP_IPV4, hosts.getString("cloudflare-dns.com"))
+        assertEquals("UseIPv4", dns.getString("queryStrategy"))
+        val servers = dns.getJSONArray("servers")
+        val addresses = (0 until servers.length()).map { servers.optString(it, "") }
+        assertFalse(addresses.any { it.equals("fakedns", ignoreCase = true) })
+        assertFalse(hosts.keys().asSequence().any { hosts.optString(it) == "1.1.1.1" })
+        assertFalse(hosts.keys().asSequence().any { hosts.optString(it) == "1.0.0.1" })
     }
 
     @Test fun tunnelLogBufferMasksPrivateDestinationIpsAndTracksTelemetry() {
@@ -236,6 +245,7 @@ class ConfigPatcherTest {
                 "domainStrategy": "IPOnDemand",
                 "rules": [
                   {"outboundTag": "dns-out", "port": 53},
+                  {"inboundTag": ["no-filter-dns"], "outboundTag": "tcp-fragment-tls"},
                   {"outboundTag": "tcp-fragment-tls", "network": "tcp", "port": "443", "ip": ["0.0.0.0/0"]}
                 ]
               }
@@ -245,28 +255,66 @@ class ConfigPatcherTest {
         ConfigPatcher.tcpFirstProfile(serverless)
         ConfigPatcher.ensureConsistentDns(serverless)
         ConfigPatcher.applySmartCleanIp(serverless, "172.64.33.229")
+        ConfigPatcher.enforceReachableDns(serverless)
 
-        // 1. DoH hosts must resolve to numeric clean IP, breaking the challenges.cloudflare.com loop
+        // 1. The DoH bootstrap is pinned to the DoH zone itself, so the TLS handshake cannot
+        //    land on an edge with a different zone (the v1.5 `context deadline exceeded` loop).
         val hosts = serverless.getJSONObject("dns").getJSONObject("hosts")
-        assertEquals("172.64.33.229", hosts.getString("cloudflare-dns.com"))
-        assertEquals("172.64.33.229", hosts.getString("challenges.cloudflare.com"))
+        assertEquals(ConfigPatcher.DOH_BOOTSTRAP_IPV4, hosts.getString("cloudflare-dns.com"))
+        // A hostname mapped onto another hostname is a resolution loop: it must be gone.
+        assertFalse(hosts.has("challenges.cloudflare.com"))
+        // A clean IP is an *egress* choice and must never rewrite the DoH hostname.
+        assertFalse(hosts.keys().asSequence().any { hosts.optString(it) == "172.64.33.229" })
 
-        // 2. Direct/fragment outbound must NOT have settings.address hijacked to Cloudflare IP
+        // 2. Direct/fragment outbound must NOT have settings.address hijacked to a Cloudflare IP
         val fragOb = serverless.getJSONArray("outbounds").getJSONObject(0)
         assertFalse(fragOb.optJSONObject("settings")?.has("address") == true)
 
-        // 3. sniffing.routeOnly=true, sockopt.domainStrategy=UseIPv4, routing.domainStrategy=AsIs, happyEyeballs.prioritizeIPv6=false
+        // 3. sniffing.routeOnly=true, sockopt.domainStrategy=UseIPv4, routing.domainStrategy=AsIs
         val sniff = serverless.getJSONArray("inbounds").getJSONObject(0).getJSONObject("sniffing")
         assertTrue(sniff.getBoolean("routeOnly"))
         val sockopt = fragOb.getJSONObject("streamSettings").getJSONObject("sockopt")
         assertEquals("UseIPv4", sockopt.getString("domainStrategy"))
         assertEquals("AsIs", serverless.getJSONObject("routing").getString("domainStrategy"))
-        val he = sockopt.getJSONObject("happyEyeballs")
-        assertFalse(he.getBoolean("prioritizeIPv6"))
+        assertFalse(sockopt.getJSONObject("happyEyeballs").getBoolean("prioritizeIPv6"))
 
-        // 4. Routing order preserved and port:53 dns-out rule restricted to dns-in
+        // 4. Routing order preserved and the port:53 rule restricted to the dns-in inbound
         val rules = serverless.getJSONObject("routing").getJSONArray("rules")
         assertEquals("dns-out", rules.getJSONObject(0).getString("outboundTag"))
         assertEquals("dns-in", rules.getJSONObject(0).getJSONArray("inboundTag").getString(0))
+
+        // 5. The effective plan is machine-checkable and free of dead ends
+        val plan = ConfigPatcher.effectiveDnsPlan(serverless)
+        assertEquals("UseIPv4", plan.queryStrategy)
+        assertEquals(listOf("https://cloudflare-dns.com/dns-query"), plan.dohEndpoints)
+        assertEquals(listOf(ConfigPatcher.DOH_BOOTSTRAP_IPV4), plan.dohBootstrapIps)
+        assertTrue(plan.notes.any { it.startsWith("doh_bootstrap_zone_ok") })
+        assertTrue(plan.notes.none { it.startsWith("doh_bootstrap_is_domain") })
+        // Xray treats a DNS server's tag as an inbound tag for routing: that is the rule
+        // which decides the outbound that actually carries the DoH request.
+        assertEquals("tcp-fragment-tls", plan.dohOutbound)
+        assertFalse(plan.servers.any { it.equals("fakedns", ignoreCase = true) })
+        assertFalse(plan.servers.any { it.equals("localhost", ignoreCase = true) })
     }
-}
+
+    @Test fun bothEmbeddedProfilesGetAReachableDohPlan() {
+        val raw = com.ghprotocol.app.domain.Subscription.EMBEDDED_FALLBACK_JSON
+        for (index in 0..1) {
+            val audit = ConfigPatcher.runtimeDnsAudit(raw, index, cleanIp = null)
+            assertTrue("audit[$index] must describe the DoH endpoint: $audit", audit.contains("doh=https://cloudflare-dns.com/dns-query"))
+            assertTrue("audit[$index] must not keep a domain bootstrap: $audit", !audit.contains("doh_bootstrap_is_domain"))
+            assertTrue(
+                "audit[$index] must not bootstrap to a blocked IP: $audit",
+                !audit.contains("doh_bootstrap_ip_blocked_in_ir")
+            )
+            assertTrue("audit[$index] must not keep fakedns: $audit", !audit.contains("fakedns"))
+        }
+    }
+
+    @Test fun cleanIpIsNeverWrittenIntoTheDohHostsMap() {
+        val raw = com.ghprotocol.app.domain.Subscription.EMBEDDED_FALLBACK_JSON
+        val cfg = ConfigPatcher.runtimeConfigForEntry(raw, 0, cleanIp = "172.64.33.229").getOrThrow()
+        val hosts = cfg.getJSONObject("dns").getJSONObject("hosts")
+        assertFalse(hosts.keys().asSequence().any { hosts.optString(it) == "172.64.33.229" })
+        assertEquals(ConfigPatcher.DOH_BOOTSTRAP_IPV4, hosts.getString("cloudflare-dns.com"))
+    }

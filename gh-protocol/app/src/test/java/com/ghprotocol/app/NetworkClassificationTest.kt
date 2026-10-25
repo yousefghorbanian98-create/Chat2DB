@@ -24,4 +24,20 @@ class NetworkClassificationTest {
 
     @Test fun allDownOffline() =
         assertEquals(NetworkState.OFFLINE, classify(fail(3), fail(2)))
+
+    /** A bare TCP connect proves the link, never the payload: degraded at best. */
+    @Test fun tcpOnlySuccessIsNeverConnected() =
+        assertEquals(
+            NetworkState.DEGRADED,
+            classify(
+                listOf(ProbeResult("u0", true, 40, weak = true), ProbeResult("u1", true, 40, weak = true), fail(1).first()),
+                ok(1)
+            )
+        )
+
+    @Test fun strongPlusWeakStillNeedsTwoStrongForConnected() =
+        assertEquals(
+            NetworkState.DEGRADED,
+            classify(listOf(ProbeResult("u0", true, 40), ProbeResult("u1", true, 40, weak = true), fail(1).first()), fail(2))
+        )
 }

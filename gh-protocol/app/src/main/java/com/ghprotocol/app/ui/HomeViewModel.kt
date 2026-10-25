@@ -10,6 +10,7 @@ import com.ghprotocol.app.core.LogCategory
 import com.ghprotocol.app.core.LogLevel
 import com.ghprotocol.app.core.TunnelLogBuffer
 import com.ghprotocol.app.core.TunnelVerifier
+import com.ghprotocol.app.core.net.TunnelSelfTestResult
 import com.ghprotocol.app.core.XrayCore
 import com.ghprotocol.app.core.xrayVersionOk
 import com.ghprotocol.app.domain.NetworkMonitor
@@ -182,7 +183,7 @@ class HomeViewModel(
             val report = withContext(Dispatchers.IO) { scanner.scan() }
             val bestIp = report.best?.ip
             if (bestIp != null) {
-                scanner.saveBest(bestIp, getApplication())
+                prefs.edit().putString("clean_ip", bestIp).apply()
                 TunnelLogBuffer.log(
                     LogLevel.SUCCESS,
                     LogCategory.PROBE,
@@ -263,14 +264,26 @@ class HomeViewModel(
                 TunnelVerifier.verifyThroughSocks5()
             }
             if (res.ok) {
-                TunnelLogBuffer.updatePingAndProfile(res.latencyMs)
-                TunnelLogBuffer.log(
-                    LogLevel.SUCCESS,
-                    LogCategory.PROBE,
-                    "تست تونل موفق! پینگ واقعی: ${res.latencyMs} ms (${res.detail})",
-                    "TunnelVerifier OK: target=${res.target} latency=${res.latencyMs}ms status=${res.detail}"
-                )
-                _ui.update { it.copy(isTestingUrl = false, verifiedPingMs = res.latencyMs) }
+                val payloadProof = com.ghprotocol.app.core.VpnTunnelService.lastSelfTest
+                if (payloadProof?.ok == true) {
+                    TunnelLogBuffer.updatePingAndProfile(res.latencyMs)
+                    TunnelLogBuffer.log(
+                        LogLevel.SUCCESS, LogCategory.PROBE,
+                        "تست تونل موفق! پینگ واقعی: ${res.latencyMs} ms (${res.detail})",
+                        "verify OK egress=${res.target} ${res.latencyMs}ms payload=verified " +
+                            "down=${payloadProof.responseBytes}B"
+                    )
+                    _ui.update { it.copy(isTestingUrl = false, verifiedPingMs = res.latencyMs) }
+                } else {
+                    // Core egress works, but no remote payload has crossed the relay yet.
+                    TunnelLogBuffer.log(
+                        LogLevel.WARN, LogCategory.PROBE,
+                        "خروج هستهٔ Xray سالم است اما عبور داده از تونل هنوز تایید نشده (${res.detail})",
+                        "verify PARTIAL egress_ok only: target=${res.target} ${res.latencyMs}ms " +
+                            "payload=${payloadProof?.stage ?: "not_run"}"
+                    )
+                    _ui.update { it.copy(isTestingUrl = false, verifiedPingMs = null) }
+                }
             } else {
                 TunnelLogBuffer.log(
                     LogLevel.WARN,
@@ -449,24 +462,62 @@ class HomeViewModel(
             val tcpFirst = prefs.getBoolean("tcp_first", true)
             val patched = sub.rawJson.activeEntryConfigJson(active, cleanIp, tcpFirst)
             cfg.writeText(patched)
+            // Requirement 3: the *effective* DNS plan of every profile is logged, so the log
+            // shows which query really becomes DoH, to which IP/SNI and through which outbound.
+            val audit = ConfigPatcher.runtimeDnsAudit(sub.rawJson, active, cleanIp)
+            TunnelLogBuffer.log(
+                LogLevel.INFO, LogCategory.DNS,
+                "پلن مؤثر DNS برای مسیر فعال ثبت شد",
+                "effective_dns $audit"
+            )
+            TunnelLogBuffer.log(
+                LogLevel.INFO, LogCategory.DNS,
+                "پلن مؤثر DNS برای مسیر جایگزین ثبت شد",
+                "effective_dns " + ConfigPatcher.runtimeDnsAudit(sub.rawJson, if (active == 0) 1 else 0, cleanIp)
+            )
             cfg
         } catch (e: Exception) {
             File(app.filesDir, "missing.json")
         }
     }
 
-    /** Called by the Activity after VpnService.establish() succeeded. */
+    /**
+     * Called after [com.ghprotocol.app.core.VpnTunnelService] established tun0.
+     *
+     * The tunnel is **not** reported as connected here: a TUN device plus a listening SOCKS
+     * port says nothing about app traffic. The phase only becomes [ConnectPhase.CONNECTED]
+     * once [com.ghprotocol.app.core.net.TunnelSelfTest] received real remote payload through
+     * the relay the apps use (see DIAGNOSIS 2026-10-25 §D2/§D5).
+     */
     fun onVpnEstablished() {
         _ui.update {
             it.copy(
-                connectPhase = ConnectPhase.CONNECTED,
+                connectPhase = ConnectPhase.TUNNELING,
                 vpnPending = false,
                 tunnelError = null,
                 network = if (it.network == NetworkState.OFFLINE) NetworkState.CONNECTED else it.network
             )
         }
-        TunnelLogBuffer.updateStep(5, "متصل — در حال راستی‌آزمایی پینگ واقعی تونل...")
+        TunnelLogBuffer.updateStep(5, "تونل برپا شد — در انتظار تایید عبور واقعی داده...")
         verifyAndAutoHealIfNeeded()
+    }
+
+    /** Waits for the service's own in-tunnel payload test (the only source of "verified"). */
+    private fun awaitPayloadVerification(maxWaitMs: Long = 16_000L): TunnelSelfTestResult? {
+        com.ghprotocol.app.core.VpnTunnelService.requestSelfTest(getApplication())
+        val deadline = System.currentTimeMillis() + maxWaitMs
+        while (System.currentTimeMillis() < deadline) {
+            val last = com.ghprotocol.app.core.VpnTunnelService.lastSelfTest
+            if (last != null) return last
+            val state = TunnelLogBuffer.telemetry.value
+            if (state.tunnelState == com.ghprotocol.app.core.TunnelState.DEGRADED ||
+                state.tunnelState == com.ghprotocol.app.core.TunnelState.VERIFIED
+            ) {
+                return last
+            }
+            try { Thread.sleep(200) } catch (_: InterruptedException) { return null }
+        }
+        return com.ghprotocol.app.core.VpnTunnelService.lastSelfTest
     }
 
     private fun waitForSocksListener(maxWaitMs: Long = 4500L): Boolean {
@@ -482,85 +533,114 @@ class HomeViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             val app = getApplication<Application>()
             val xrayOut = File(app.filesDir, "xray/xray-out.log")
-            // Wait up to 4.5s for Xray-core to finish loading 19MB geoip.dat/geosite.dat
-            // and open 127.0.0.1:10808 so we never get a false ECONNREFUSED disconnect!
-            waitForSocksListener(4500L)
-            try { Thread.sleep(200) } catch (_: InterruptedException) {}
+            // Xray must be listening before the relay can connect anything.
+            waitForSocksListener(4_500L)
+            try { Thread.sleep(200) } catch (_: InterruptedException) { }
             TunnelLogBuffer.ingestXrayLogTail(xrayOut)
 
-            val firstCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4500)
+            // 1) Egress through Xray's SOCKS inbound (real remote bytes).
+            val egress = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4_500)
             TunnelLogBuffer.ingestXrayLogTail(xrayOut)
-            if (firstCheck.ok) {
-                TunnelLogBuffer.updatePingAndProfile(firstCheck.latencyMs)
-                TunnelLogBuffer.updateStep(5, "متصل و تاییدشده (پینگ واقعی: ${firstCheck.latencyMs} ms)", isAutoHealing = false)
+
+            // 2) The datapath apps actually use: synthetic flow through the live relay.
+            val selfTest = awaitPayloadVerification()
+            val verify = TunnelVerifier.combine(egress, selfTest)
+            if (verify.ok) {
+                TunnelLogBuffer.updatePingAndProfile(verify.latencyMs)
+                TunnelLogBuffer.updateStep(5, "متصل و تاییدشده (عبور واقعی داده · ${verify.latencyMs} ms)")
                 TunnelLogBuffer.log(
-                    LogLevel.SUCCESS,
-                    LogCategory.PROBE,
-                    "✓ عبور واقعی ترافیک از تونل تایید شد! پینگ: ${firstCheck.latencyMs} ms",
-                    "TunnelVerifier PASS: ${firstCheck.target} -> ${firstCheck.detail} (${firstCheck.latencyMs}ms)"
+                    LogLevel.SUCCESS, LogCategory.PROBE,
+                    "✓ تونل تایید شد: دادهٔ واقعی از راه دور دریافت شد (${verify.target})",
+                    "verify PASS egress=${egress.detail} payload=${selfTest?.detail ?: "-"} " +
+                        "down=${selfTest?.responseBytes ?: 0}B latency=${verify.latencyMs}ms"
                 )
-                _ui.update { it.copy(verifiedPingMs = firstCheck.latencyMs, isAutoHealing = false, network = NetworkState.CONNECTED) }
+                _ui.update {
+                    it.copy(
+                        connectPhase = ConnectPhase.CONNECTED,
+                        verifiedPingMs = verify.latencyMs,
+                        isAutoHealing = false,
+                        network = NetworkState.CONNECTED
+                    )
+                }
                 return@launch
             }
 
-            // Auto-Heal: scan for a clean Cloudflare IP, patch config, restart Xray, and re-verify
-            _ui.update { it.copy(isAutoHealing = true) }
-            TunnelLogBuffer.updateStep(4, "در حال خودترمیمی (Auto-Heal): اسکن IP تمیز کلودفلر...", isAutoHealing = true)
             TunnelLogBuffer.log(
-                LogLevel.WARN,
-                LogCategory.PROBE,
-                "مسیر پیش‌فرض پاسخ نداد (${firstCheck.detail}) — شروع خودکار اسکن IP تمیز (Auto-Heal)...",
-                "Auto-Heal triggered after initial probe failure: ${firstCheck.detail}"
+                LogLevel.WARN, LogCategory.PROBE,
+                "تونل برپاست اما عبور دادهٔ واقعی تایید نشد — شروع خودترمیمی",
+                "verify FAIL egress=${egress.detail} stages=${verify.summary()} " +
+                    "selftest=${selfTest?.stage ?: "none"}:${selfTest?.detail ?: "-"}"
             )
+            _ui.update { it.copy(isAutoHealing = true, verifiedPingMs = null) }
+            TunnelLogBuffer.updateStep(4, "خودترمیمی: اسکن IP تمیز کلودفلر با تأیید TLS/HTTP...", isAutoHealing = true)
+
             val scanner = CleanIpScanner()
             val report = scanner.scan()
             val best = report.best
             val sub = _ui.value.subscription ?: repository.cachedAnyAge() ?: repository.embeddedFallback()
             if (best != null) {
-                scanner.saveBest(best.ip, app)
+                prefs.edit().putString("clean_ip", best.ip).apply()
                 _ui.update { it.copy(cleanIp = best.ip, scanResults = report.healthy) }
                 TunnelLogBuffer.log(
-                    LogLevel.SUCCESS,
-                    LogCategory.PROBE,
-                    "IP تمیز کلودفلر برای DoH/پروکسی تنظیم شد: ${best.ip} (${best.latencyMs} ms) — بازنشانی هستهٔ Xray...",
-                    "Auto-Heal applying smart cleanIp=${best.ip} (${best.latencyMs}ms)"
+                    LogLevel.SUCCESS, LogCategory.PROBE,
+                    "IP تمیز تأییدشده انتخاب شد: ${best.ip} (${best.latencyMs} ms) — بازنشانی هستهٔ Xray...",
+                    "autoheal cleanIp=${best.ip} latency=${best.latencyMs}ms examined=${report.examined} " +
+                        "rejected=${report.rejected.joinToString(",").take(300)}"
                 )
             } else if ((sub?.entries?.size ?: 0) > 1) {
-                val nextIdx = (_ui.value.activeEntryIndex + 1) % sub!!.entries.size
-                prefs.edit().putInt("active_entry", nextIdx).apply()
-                _ui.update { it.copy(activeEntryIndex = nextIdx) }
-                TunnelLogBuffer.log(
-                    LogLevel.INFO,
-                    LogCategory.STEP,
-                    "سوییچ خودکار به مسیر جایگزین (${sub.entries[nextIdx].remarks})...",
-                    "Auto-Heal switching route to index=$nextIdx (${sub.entries[nextIdx].remarks})"
-                )
+                val entries = sub?.entries ?: emptyList()
+                if (entries.isNotEmpty()) {
+                    val nextIdx = (_ui.value.activeEntryIndex + 1) % entries.size
+                    prefs.edit().putInt("active_entry", nextIdx).apply()
+                    _ui.update { it.copy(activeEntryIndex = nextIdx) }
+                    TunnelLogBuffer.log(
+                        LogLevel.INFO, LogCategory.STEP,
+                        "سوییچ خودکار به مسیر جایگزین (${entries[nextIdx].remarks})...",
+                        "autoheal switching route index=$nextIdx (${entries[nextIdx].remarks})"
+                    )
+                }
             }
             if (sub != null) {
                 val cfgFile = writeRuntimeConfig(sub)
                 core.stop()
                 core.start(cfgFile)
-                waitForSocksListener(4500L)
-                try { Thread.sleep(200) } catch (_: InterruptedException) {}
-                val secondCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4500)
+                waitForSocksListener(4_500L)
+                try { Thread.sleep(200) } catch (_: InterruptedException) { }
+                val secondEgress = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4_500)
+                val secondSelfTest = awaitPayloadVerification(12_000L)
+                val second = TunnelVerifier.combine(secondEgress, secondSelfTest)
                 TunnelLogBuffer.ingestXrayLogTail(xrayOut)
-                if (secondCheck.ok) {
+                if (second.ok) {
                     val activeIp = best?.ip ?: _ui.value.cleanIp
-                    TunnelLogBuffer.updatePingAndProfile(secondCheck.latencyMs, cleanIp = activeIp)
-                    TunnelLogBuffer.updateStep(5, "متصل و خودترمیمی‌شده (پینگ: ${secondCheck.latencyMs} ms)", isAutoHealing = false)
+                    TunnelLogBuffer.updatePingAndProfile(second.latencyMs, cleanIp = activeIp)
+                    TunnelLogBuffer.updateStep(5, "متصل و خودترمیمی‌شده (ایجاد واقعی داده · ${second.latencyMs} ms)", isAutoHealing = false)
                     TunnelLogBuffer.log(
-                        LogLevel.SUCCESS,
-                        LogCategory.PROBE,
-                        "✓ خودترمیمی (Auto-Heal) موفق بود! عبور دوطرفهٔ ترافیک تایید شد (${secondCheck.latencyMs} ms)",
-                        "Auto-Heal PASS via cleanIp=${activeIp ?: "default"} latency=${secondCheck.latencyMs}ms"
+                        LogLevel.SUCCESS, LogCategory.PROBE,
+                        "✓ خودترمیمی موفق بود: عبور دادهٔ واقعی تایید شد (${second.latencyMs} ms)",
+                        "autoheal PASS cleanIp=${activeIp ?: "default"} latency=${second.latencyMs}ms " +
+                            "down=${secondSelfTest?.responseBytes ?: 0}B"
                     )
-                    _ui.update { it.copy(verifiedPingMs = secondCheck.latencyMs, isAutoHealing = false, network = NetworkState.CONNECTED) }
+                    _ui.update {
+                        it.copy(
+                            connectPhase = ConnectPhase.CONNECTED,
+                            verifiedPingMs = second.latencyMs,
+                            isAutoHealing = false,
+                            network = NetworkState.CONNECTED
+                        )
+                    }
                     return@launch
                 }
             }
 
-            TunnelLogBuffer.updateStep(5, "تونل فعال است (تست پینگ اولیه زمان‌بر شد — لاگ زنده را ببینید)", isAutoHealing = false)
-            _ui.update { it.copy(isAutoHealing = false) }
+            // Honest end state: the tunnel exists, but nothing proved that app traffic flows.
+            TunnelLogBuffer.updateStep(5, "تونل برپاست اما عبور دادهٔ واقعی تایید نشد (لاگ زنده را ببینید)", isAutoHealing = false)
+            _ui.update {
+                it.copy(
+                    isAutoHealing = false,
+                    verifiedPingMs = null,
+                    tunnelError = "payload_not_verified"
+                )
+            }
         }
     }
 
@@ -613,15 +693,7 @@ class HomeViewModel(
  * F-15 (TCP-first) and the loopback DNS inbound. Best-effort, pure.
  */
 private fun String.activeEntryConfigJson(index: Int, cleanIp: String?, tcpFirst: Boolean = true): String {
-    return try {
-        val arr = org.json.JSONArray(this)
-        val c = arr.getJSONObject(index.coerceIn(0, (arr.length() - 1).coerceAtLeast(0)))
-        if (tcpFirst) ConfigPatcher.tcpFirstProfile(c)
-        ConfigPatcher.addLocalDnsInbound(c)
-        ConfigPatcher.ensureConsistentDns(c)
-        if (!cleanIp.isNullOrBlank()) ConfigPatcher.applySmartCleanIp(c, cleanIp)
-        c.toString()
-    } catch (e: Exception) {
-        this
-    }
+    return ConfigPatcher.runtimeConfigForEntry(this, index, cleanIp, tcpFirst)
+        .map { it.toString() }
+        .getOrElse { this }
 }

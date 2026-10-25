@@ -179,7 +179,7 @@ done
 say "== wait for VpnService establish (consent result) =="
 VPNUP=0
 for i in $(seq 1 25); do
-  if adb logcat -d -s GhDiag 2>/dev/null | grep -q "tunnel: established"; then
+  if adb logcat -d -s GhDiag 2>/dev/null | grep -q "tun0 established"; then
     VPNUP=1
     say "vpn established after ~$((i * 3))s"
     break
@@ -188,7 +188,7 @@ for i in $(seq 1 25); do
   sleep 3
 done
 [ "$CONSENT" = "1" ] || say "WARN: consent dialog never seen"
-[ "$VPNUP" = "1" ] || say "WARN: VpnService not established (GhDiag has no 'tunnel: established')"
+[ "$VPNUP" = "1" ] || say "WARN: VpnService not established (GhDiag has no 'tun0 established')"
 adb shell "ip addr show tun0 2>/dev/null | head -8" >> "$LOG" 2>&1
 adb shell "ip route show table all 2>/dev/null | grep -m5 -i 'tun0\|10\.8\.0' " >> "$LOG" 2>&1
 
@@ -220,11 +220,34 @@ if [ "$DNS_OK" != "1" ] && adb logcat -d -s GhDiag 2>/dev/null | grep -q "relay 
   say "dns relay verified via GhDiag (relay dns -> ok)"
 fi
 
+say "== in-tunnel payload self-test (the only accepted proof, requirement 5) =="
+SELFTEST=0
+for i in $(seq 1 30); do
+  if adb logcat -d -s GhDiag 2>/dev/null | grep -q "relay_selftest ok=true"; then
+    SELFTEST=1
+    say "relay self-test PASS (real remote payload through the relay)"
+    adb logcat -d -s GhDiag 2>/dev/null | grep "relay_selftest" | tail -5 >> "$LOG"
+    break
+  fi
+  # Nudge the app for a fresh self-test (the service also runs one on establish).
+  adb shell am startservice -n "$PKG/.core.VpnTunnelService" -a "$PKG.action.SELF_TEST" >>"$LOG" 2>&1 || true
+  sleep 4
+done
+if [ "$SELFTEST" != "1" ]; then
+  adb logcat -d -s GhDiag 2>/dev/null | grep -E "relay_selftest|dns_reply|dns_failed|flow_open|flow_closed" | tail -60 >> "$LOG"
+fi
+
 say "== relay diagnostics (GhVpnTunnel + GhDiag) =="
 adb logcat -d -s GhVpnTunnel GhDiag 2>/dev/null | tail -50 >> "$LOG"
 if [ "$TCP_OK" != "1" ] && [ "$DNS_OK" != "1" ]; then
   adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
   report "tunnel up but no traffic passes (TCP connect + DNS query both failed)"
+fi
+# A TCP connect or a DNS reply alone is not tunnel proof (requirement 5).
+if [ "$SELFTEST" != "1" ]; then
+  adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
+  adb logcat -d -s GhDiag >> "$LOG" 2>&1 || true
+  report "no in-tunnel payload self-test passed (relay_selftest ok=true never logged)"
 fi
 
 say "== HTTPS probe through tunnel (best-effort) ==="
@@ -261,6 +284,7 @@ say "E2E PASS: real tunnel carrying traffic (SUBMODE=$SUBMODE)"
 say "  - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)"
 say "  - VpnService establish: verified (consent tapped: $CONSENT, vpnUp: $VPNUP)"
 say "  - SOCKS5 data path: verified (tcp=$TCP_OK)"
+say "  - in-tunnel payload self-test: PASS (real remote bytes through the relay)"
 say "  - DNS through tunnel: $([ "$DNS_OK" = "1" ] && echo verified || echo 'not resolving — runner egress/DNS limitation')"
 if [ "$SUBMODE" = "seeded" ]; then
   say "  - subscription fetch: SKIPPED this run (runner NAT blocked sub host; cache was pre-seeded)"

@@ -45,7 +45,13 @@ class HttpProber : Prober {
                 Socket().use { s ->
                     s.connect(InetSocketAddress(tcpTarget.first, tcpTarget.second), timeoutMs.coerceAtMost(2000))
                 }
-                ProbeResult(url, ok = true, latencyMs = (System.currentTimeMillis() - t0).coerceAtLeast(1L))
+                // TCP only: the link exists, but no application payload was received.
+                ProbeResult(
+                    url,
+                    ok = true,
+                    latencyMs = (System.currentTimeMillis() - t0).coerceAtLeast(1L),
+                    weak = true
+                )
             } catch (_: Exception) {
                 ProbeResult(url, ok = false, latencyMs = -1)
             }

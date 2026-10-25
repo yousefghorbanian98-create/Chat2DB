@@ -109,12 +109,10 @@ object ConfigPatcher {
                 }
             }
         }
-        val dns = json.optJSONObject("dns") ?: JSONObject().also { json.put("dns", it) }
-        val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
-        hosts.put("cloudflare-dns.com", cleanIp)
-        hosts.put("challenges.cloudflare.com", cleanIp)
-        hosts.put("one.one.one.one", cleanIp)
-        patched++
+        // The clean IP is an *egress* address for Cloudflare-fronted destinations. Pointing the
+        // DoH hostname (cloudflare-dns.com) at it would send the DoH TLS handshake to an edge
+        // whose certificate/zone does not match the SNI — the exact failure fixed in v1.6.
+        // DoH bootstrap is handled by [enforceReachableDns] with the zone's real IPs instead.
         return patched
     }
 
@@ -242,18 +240,8 @@ object ConfigPatcher {
             }
             dns.put("servers", kept)
             dns.put("queryStrategy", "UseIPv4")
-            val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
-            val cfHost = hosts.optString("cloudflare-dns.com", "")
-            // Map cloudflare-dns.com / challenges.cloudflare.com to the real unblocked
-            // challenges.cloudflare.com Anycast IPv4 (104.18.94.41) rather than 1.1.1.1
-            // (since 1.1.1.1:443 is IP-blocked for HTTPS/DoH on Iranian ISPs).
-            val cfIp = if (cfHost.isNotBlank() && cfHost.first().isDigit()) cfHost else "104.18.94.41"
-            hosts.put("cloudflare-dns.com", cfIp)
-            val chHost = hosts.optString("challenges.cloudflare.com", "")
-            if (chHost.isBlank() || !chHost.first().isDigit()) {
-                hosts.put("challenges.cloudflare.com", cfIp)
-            }
-            if (!hosts.has("dns.google")) hosts.put("dns.google", "8.8.8.8")
+            // Bootstrap hosts are canonicalised by [enforceReachableDns]; nothing here may map
+            // a DoH hostname onto an unrelated edge (see DIAGNOSIS 2026-10-25, D1).
         }
         if (json.has("fakedns")) {
             json.remove("fakedns")
@@ -308,6 +296,166 @@ object ConfigPatcher {
             }
         }
         return removed
+    }
+
+    /**
+     * v1.6: make the *effective* DNS plan reachable and auditable.
+     *
+     * Fixes the fragB failure mode from DIAGNOSIS 2026-10-25 §D1:
+     *  - `dns.hosts["cloudflare-dns.com"]` must be the **zone's own** anycast IPs
+     *    (`104.16.248.249` / `104.16.249.249`, the A records of the name), never
+     *    `1.1.1.1`/`1.0.0.1` (their :443 is IP-blocked on several Iranian ISPs and they
+     *    answer DoH only under `one.one.one.one`) and never an arbitrary clean IP
+     *    (certificate/zone mismatch → the `context deadline exceeded` loop);
+     *  - `dns.queryStrategy` is pinned to `UseIPv4` so Xray never emits AAAA lookups that
+     *    time out on an IPv4-only tunnel;
+     *  - every HTTPS (RFC 8484 DoH) DNS server is reported with its resolved bootstrap IP and
+     *    the outbound that will carry it, so the plan can be logged and asserted in tests.
+     *
+     * Idempotent. Returns the number of mutated fields.
+     */
+    fun enforceReachableDns(json: JSONObject): Int {
+        var mutated = 0
+        val dns = json.optJSONObject("dns") ?: return 0
+        val hosts = dns.optJSONObject("hosts") ?: JSONObject().also {
+            dns.put("hosts", it)
+            mutated++
+        }
+        val existing = hosts.optString(DOH_HOST, "")
+        if (existing != DOH_BOOTSTRAP_IPV4) {
+            hosts.put(DOH_HOST, DOH_BOOTSTRAP_IPV4)
+            mutated++
+        }
+        // A hostname mapped onto a hostname is a resolution loop; remove it.
+        val challenge = hosts.opt("challenges.cloudflare.com")
+        if (challenge is String && !challenge.first().isDigit()) {
+            hosts.remove("challenges.cloudflare.com")
+            mutated++
+        }
+        if (dns.optString("queryStrategy", "") != "UseIPv4") {
+            dns.put("queryStrategy", "UseIPv4")
+            mutated++
+        }
+        return mutated
+    }
+
+    /** Machine-checkable view of the DNS configuration that will actually run. */
+    data class DnsPlan(
+        val servers: List<String>,
+        val hosts: Map<String, String>,
+        val queryStrategy: String,
+        val dohEndpoints: List<String>,
+        val dohBootstrapIps: List<String>,
+        val dohOutbound: String?,
+        val notes: List<String>
+    ) {
+        fun describe(): String = buildString {
+            append("servers=").append(servers.joinToString(","))
+            append(" hosts=").append(hosts.entries.joinToString(",") { "${it.key}->${it.value}" })
+            append(" strategy=").append(queryStrategy)
+            append(" doh=").append(dohEndpoints.joinToString(",").ifEmpty { "none" })
+            append(" dohIps=").append(dohBootstrapIps.joinToString(",").ifEmpty { "none" })
+            append(" dohOutbound=").append(dohOutbound ?: "default")
+            if (notes.isNotEmpty()) append(" notes=").append(notes.joinToString("; "))
+        }
+    }
+
+    const val DOH_HOST = "cloudflare-dns.com"
+
+    /** Real A records of cloudflare-dns.com (verified 2026-10-25: 104.16.248.249/249). */
+    const val DOH_BOOTSTRAP_IPV4 = "104.16.248.249"
+    val DOH_ZONE_IPV4 = listOf(DOH_BOOTSTRAP_IPV4, "104.16.249.249")
+
+    /**
+     * Compute the effective DNS plan (after patching) so both fragA and fragB can be
+     * printed, logged and asserted. Pure.
+     */
+    fun effectiveDnsPlan(json: JSONObject): DnsPlan {
+        val dns = json.optJSONObject("dns")
+        val notes = mutableListOf<String>()
+        val servers = mutableListOf<String>()
+        val serverTags = mutableMapOf<String, String>()
+        dns?.optJSONArray("servers")?.let { arr ->
+            for (i in 0 until arr.length()) {
+                val item = arr.opt(i)
+                when (item) {
+                    is JSONObject -> {
+                        val address = item.optString("address", "")
+                        if (address.isNotEmpty()) {
+                            servers.add(address)
+                            val tag = item.optString("tag", "")
+                            if (tag.isNotEmpty()) serverTags[address] = tag
+                        }
+                    }
+                    is String -> servers.add(item)
+                }
+            }
+        }
+        val hosts = mutableMapOf<String, String>()
+        dns?.optJSONObject("hosts")?.let { h ->
+            val keys = h.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                hosts[key] = h.optString(key, "")
+            }
+        }
+        val strategies = mutableListOf<String>()
+        servers.forEach { address ->
+            if (address.startsWith("https://")) {
+                val host = address.removePrefix("https://").substringBefore('/')
+                val mapped = hosts[host] ?: ""
+                if (mapped.isEmpty()) {
+                    notes.add("doh_host_without_bootstrap:$host")
+                } else if (!mapped.first().isDigit()) {
+                    notes.add("doh_bootstrap_is_domain:$host->$mapped")
+                } else if (mapped == "1.1.1.1" || mapped == "1.0.0.1") {
+                    notes.add("doh_bootstrap_ip_blocked_in_ir:$mapped")
+                } else if (DOH_ZONE_IPV4.contains(mapped)) {
+                    notes.add("doh_bootstrap_zone_ok:$host->$mapped")
+                } else {
+                    notes.add("doh_bootstrap_foreign_edge:$host->$mapped")
+                }
+            } else if (address == "fakedns" || address == "localhost") {
+                notes.add("dns_server_unresolvable:$address")
+            } else {
+                strategies.add(address)
+            }
+        }
+        val dohEndpoints = servers.filter { it.startsWith("https://") }
+        val dohBootstrapIps = dohEndpoints.mapNotNull { endpoint ->
+            val host = endpoint.removePrefix("https://").substringBefore('/')
+            hosts[host]?.takeIf { it.isNotEmpty() && it.first().isDigit() }
+        }.distinct()
+        val dohOutbound = dohEndpoints.firstOrNull()?.let { endpoint ->
+            val host = endpoint.removePrefix("https://").substringBefore('/')
+            val tag = serverTags[endpoint] ?: host
+            findOutboundForInbound(json, tag)
+        }
+        return DnsPlan(
+            servers = servers,
+            hosts = hosts,
+            queryStrategy = dns?.optString("queryStrategy", "UseSystem") ?: "UseSystem",
+            dohEndpoints = dohEndpoints,
+            dohBootstrapIps = dohBootstrapIps,
+            dohOutbound = dohOutbound,
+            notes = notes
+        )
+    }
+
+    /** The outbound that carries traffic tagged with [inboundTag] (first matching rule). */
+    fun findOutboundForInbound(json: JSONObject, inboundTag: String): String? {
+        val rules = json.optJSONObject("routing")?.optJSONArray("rules") ?: return null
+        for (i in 0 until rules.length()) {
+            val rule = rules.optJSONObject(i) ?: continue
+            val inbound = rule.optJSONArray("inboundTag") ?: continue
+            for (j in 0 until inbound.length()) {
+                if (inbound.optString(j, "") == inboundTag) {
+                    val tag = rule.optString("outboundTag", "")
+                    return if (tag.isEmpty()) null else tag
+                }
+            }
+        }
+        return null
     }
 
     /**
@@ -473,6 +621,39 @@ object ConfigPatcher {
             }
         }
         return map
+    }
+
+    /**
+     * The **runtime** transform pipeline for one subscription entry — used by the app *and*
+     * by the tests that dump the effective fragA/fragB DNS configuration:
+     * tcp-first ordering → loopback DNS inbound → DNS consistency → reachable DoH bootstrap
+     * → optional clean egress. Pure and idempotent.
+     */
+    fun runtimeConfigForEntry(
+        rawJson: String,
+        index: Int,
+        cleanIp: String? = null,
+        tcpFirst: Boolean = true
+    ): Result<JSONObject> = try {
+        val array = JSONArray(rawJson)
+        require(array.length() > 0) { "empty config list" }
+        val cfg = array.getJSONObject(index.coerceIn(0, array.length() - 1))
+        if (tcpFirst) tcpFirstProfile(cfg)
+        addLocalDnsInbound(cfg)
+        ensureConsistentDns(cfg)
+        enforceReachableDns(cfg)
+        if (!cleanIp.isNullOrBlank()) applySmartCleanIp(cfg, cleanIp)
+        enforceReachableDns(cfg)
+        Result.success(cfg)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    /** Human-readable per-profile DNS audit for logs and bug reports. */
+    fun runtimeDnsAudit(rawJson: String, index: Int, cleanIp: String? = null): String {
+        val cfg = runtimeConfigForEntry(rawJson, index, cleanIp).getOrNull() ?: return "config_parse_failed"
+        val remarks = cfg.optString("remarks", "entry-$index")
+        return "$remarks :: " + effectiveDnsPlan(cfg).describe()
     }
 
     /**
