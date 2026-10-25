@@ -166,4 +166,35 @@ class ConfigPatcherTest {
         assertEquals(200, MotionSpec.resolveDurationMs(1f, 200))
         assertEquals(300, MotionSpec.resolveDurationMs(2f, 250))
     }
+
+    @Test fun embeddedFallbackHasTlsHelloFragmentAndDohHosts() {
+        val arr = JSONArray(com.ghprotocol.app.domain.Subscription.EMBEDDED_FALLBACK_JSON)
+        assertEquals(2, arr.length())
+        val first = arr.getJSONObject(0)
+        val frag = first.getJSONArray("outbounds").getJSONObject(0)
+            .getJSONObject("settings").getJSONObject("fragment")
+        assertEquals("tlshello", frag.getString("packets"))
+        val hosts = first.getJSONObject("dns").getJSONObject("hosts")
+        assertEquals("1.1.1.1", hosts.getString("cloudflare-dns.com"))
+    }
+
+    @Test fun tunnelLogBufferMasksPrivateDestinationIpsAndTracksTelemetry() {
+        com.ghprotocol.app.core.TunnelLogBuffer.clear()
+        com.ghprotocol.app.core.TunnelLogBuffer.resetSessionStats()
+        com.ghprotocol.app.core.TunnelLogBuffer.log(
+            com.ghprotocol.app.core.LogLevel.INFO,
+            com.ghprotocol.app.core.LogCategory.TUN,
+            "بسته ارسال شد",
+            "dial tcp 142.250.185.78:443 via 1.1.1.1"
+        )
+        val entries = com.ghprotocol.app.core.TunnelLogBuffer.logs.value
+        assertEquals(1, entries.size)
+        assertTrue(entries[0].rawTech.contains("142.250.x.x"))
+        assertTrue(entries[0].rawTech.contains("1.1.1.1"))
+        com.ghprotocol.app.core.TunnelLogBuffer.recordTraffic(2048, 4096, 3)
+        val t = com.ghprotocol.app.core.TunnelLogBuffer.telemetry.value
+        assertEquals(2048L, t.bytesUp)
+        assertEquals(4096L, t.bytesDown)
+        assertEquals(3, t.activeTcpSessions)
+    }
 }

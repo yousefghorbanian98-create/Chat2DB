@@ -58,17 +58,20 @@ object Subscription {
     const val STALE_AFTER_MS = 12L * 60 * 60 * 1000 // 12h (F-6)
 
     /**
-     * Rule #13: Embedded fallback Serverless-for-Iran config so first-launch
-     * users can still establish a TLS-fragmented tunnel when GitHub edges are
-     * blocked before any on-disk cache exists.
+     * Rule #13: Embedded fallback Serverless-for-Iran config with full TLS ClientHello
+     * fragmentation and DoH bootstrap hosts so first-launch users can establish a
+     * working fragmented tunnel even when GitHub edges are blocked.
      */
     val EMBEDDED_FALLBACK_JSON: String = """
     [
       {
-        "remarks": "Serverless-v52-fragA (embedded)",
+        "remarks": "Serverless-v52-fragA",
         "version": {"min": "26.6.27"},
         "log": {"loglevel": "warning"},
-        "dns": {"servers": ["https://cloudflare-dns.com/dns-query", "8.8.8.8"]},
+        "dns": {
+          "hosts": {"cloudflare-dns.com": "1.1.1.1", "dns.google": "8.8.8.8"},
+          "servers": ["https://cloudflare-dns.com/dns-query", "1.1.1.1", "8.8.8.8"]
+        },
         "inbounds": [
           {
             "tag": "mixed-in",
@@ -83,7 +86,50 @@ object Subscription {
           {
             "tag": "tcp-fragment",
             "protocol": "freedom",
-            "settings": {"domainStrategy": "UseIP"},
+            "settings": {
+              "domainStrategy": "UseIP",
+              "fragment": {"packets": "tlshello", "length": "10-20", "interval": "10-20"}
+            },
+            "streamSettings": {
+              "sockopt": {"tcpNoDelay": true}
+            }
+          },
+          {"tag": "dns-out", "protocol": "dns"},
+          {"tag": "block", "protocol": "blackhole"}
+        ],
+        "routing": {
+          "domainStrategy": "IPIfNonMatch",
+          "rules": [
+            {"type": "field", "inboundTag": ["mixed-in"], "outboundTag": "tcp-fragment"}
+          ]
+        }
+      },
+      {
+        "remarks": "Serverless-v52-fragB",
+        "version": {"min": "26.6.27"},
+        "log": {"loglevel": "warning"},
+        "dns": {
+          "hosts": {"cloudflare-dns.com": "1.0.0.1", "dns.google": "8.8.4.4"},
+          "servers": ["https://cloudflare-dns.com/dns-query", "1.0.0.1", "8.8.4.4"]
+        },
+        "inbounds": [
+          {
+            "tag": "mixed-in",
+            "listen": "127.0.0.1",
+            "port": 10808,
+            "protocol": "mixed",
+            "settings": {"udp": true},
+            "sniffing": {"enabled": true, "destOverride": ["tls", "http"]}
+          }
+        ],
+        "outbounds": [
+          {
+            "tag": "tcp-fragment",
+            "protocol": "freedom",
+            "settings": {
+              "domainStrategy": "UseIP",
+              "fragment": {"packets": "tlshello", "length": "5-15", "interval": "15-30"}
+            },
             "streamSettings": {
               "sockopt": {"tcpNoDelay": true}
             }

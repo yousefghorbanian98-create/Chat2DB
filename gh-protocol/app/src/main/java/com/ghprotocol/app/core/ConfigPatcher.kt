@@ -182,7 +182,15 @@ object ConfigPatcher {
                 if (addr.equals("localhost", ignoreCase = true)) { removed++; continue }
                 kept.put(s)
             }
+            if (kept.length() == 0) {
+                kept.put("https://cloudflare-dns.com/dns-query")
+                kept.put("1.1.1.1")
+                kept.put("8.8.8.8")
+            }
             dns.put("servers", kept)
+            val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
+            if (!hosts.has("cloudflare-dns.com")) hosts.put("cloudflare-dns.com", "1.1.1.1")
+            if (!hosts.has("dns.google")) hosts.put("dns.google", "8.8.8.8")
         }
         for (i in 0 until ibs.length()) {
             val sniff = ibs.getJSONObject(i).optJSONObject("sniffing") ?: continue

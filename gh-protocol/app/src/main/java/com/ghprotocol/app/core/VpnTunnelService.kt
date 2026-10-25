@@ -21,16 +21,18 @@ import java.net.Socket
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * F-3/F-4: Bidirectional VpnService tunnel (Finn-loop v1.4).
+ * F-3/F-4: Bidirectional VpnService tunnel (Finn-loop v1.5).
  *
- * - Routes both IPv4 (0.0.0.0/0) and IPv6 (::/0) into the TUN to prevent IPv6 leaks.
- * - Performs real IPv4+TCP 3-way handshake (SYN -> SYN-ACK -> PSH-ACK/FIN-ACK)
- *   on the TUN file descriptor while relaying stream payloads over SOCKS5 to
- *   Xray's `mixed-in` (127.0.0.1:10808).
- * - Intercepts UDP port-53 DNS queries on the TUN and relays them to Xray's
- *   `dns-in` dokodemo-door (127.0.0.1:15353), with a VpnService.protect()ed
- *   fallback resolver when hypervisor NAT blocks outbound DoH.
- * - Guards against recursive outbound dials when Xray shares the app UID.
+ * Key real-device fixes:
+ * 1. Calls `builder.addDisallowedApplication(packageName)` so the child `libxraycore.so`
+ *    process (which shares the app UID) never routes its own outbound sockets back
+ *    into `tun0` (preventing self-loop and RST-kill on real phones).
+ * 2. Strict TCP sequence validation (`seq == session.clientNextSeq`), pre-connect payload
+ *    buffering, and remote-EOF `FIN-ACK` injection so multi-segment TLS 1.3 (post-quantum
+ *    ClientHello) and HTTPS streams never corrupt or hang.
+ * 3. DNS relay via Xray `dns-in` (:15353) + RFC 1035 DNS-over-TCP through Xray SOCKS5
+ *    (:10808 -> 1.1.1.1:53) + GFW poisoned-IP filter (`10.10.34.*` rejected).
+ * 4. Real-time telemetry and step logs pushed to [TunnelLogBuffer].
  */
 class VpnTunnelService : VpnService() {
 
@@ -57,19 +59,20 @@ class VpnTunnelService : VpnService() {
         @Volatile var serverSeq: Long,
         @Volatile var clientNextSeq: Long,
         @Volatile var socket: Socket? = null,
+        @Volatile var handshakeSent: Boolean = false,
+        @Volatile var finSent: Boolean = false,
         @Volatile var lastActive: Long = System.currentTimeMillis()
-    )
+    ) {
+        val pendingPayloads = ArrayList<ByteArray>(2)
+    }
 
     private var vpnFd: ParcelFileDescriptor? = null
     @Volatile
     private var running = false
     private val tunWriteLock = Any()
-    /** First N relay decisions are logged under GhDiag (privacy-masked destination IPs). */
     @Volatile
-    private var diagBudget = 20
+    private var diagBudget = 25
     private val sessions = ConcurrentHashMap<String, TcpSession>()
-    /** Recursion guard: "$dstIp:$dstPort" -> (originClientPort to timestampMs). */
-    private val activeTargetDials = ConcurrentHashMap<String, Pair<Int, Long>>()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -81,6 +84,12 @@ class VpnTunnelService : VpnService() {
 
     override fun onRevoke() {
         Log.w(TAG, "VPN revoked — stopping")
+        TunnelLogBuffer.log(
+            LogLevel.WARN,
+            LogCategory.TUN,
+            "دسترسی VPN توسط سیستم لغو شد",
+            "VpnService.onRevoke() called — stopping tun0"
+        )
         stopTunnel()
     }
 
@@ -123,19 +132,52 @@ class VpnTunnelService : VpnService() {
             .addDnsServer(TUNNEL_GW)
             .addRoute("0.0.0.0", 0)
             .addRoute("::", 0) // Rule #2: prevent IPv6 leak
+
+        // CRITICAL FIX: Exclude our own package UID from tun0 so libxraycore.so's
+        // outbound sockets exit directly via Wi-Fi/cellular without looping into tun0!
+        try {
+            builder.addDisallowedApplication(packageName)
+            TunnelLogBuffer.log(
+                LogLevel.INFO,
+                LogCategory.TUN,
+                "هستهٔ Xray از تونل مستثنی شد (جلوگیری از لوپ شبکه)",
+                "VpnService.Builder: addDisallowedApplication($packageName) OK"
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "addDisallowedApplication skipped: ${e.message}")
+        }
+
         val fd = try {
             builder.establish()
         } catch (e: Exception) {
             Log.e(TAG, "establish failed", e)
+            TunnelLogBuffer.log(
+                LogLevel.ERROR,
+                LogCategory.TUN,
+                "خطا در ایجاد رابط مجازی tun0",
+                "VpnService.establish() failed: ${e.message}"
+            )
             return false
         }
         if (fd == null) {
             Log.e(TAG, "establish returned null fd")
+            TunnelLogBuffer.log(
+                LogLevel.ERROR,
+                LogCategory.TUN,
+                "سیستم اجازهٔ ایجاد تونل را نداد (fd=null)",
+                "VpnService.establish() returned null"
+            )
             return false
         }
         vpnFd = fd
         running = true
         Log.d("GhDiag", "tunnel: established fd=$fd — relay loop started")
+        TunnelLogBuffer.log(
+            LogLevel.SUCCESS,
+            LogCategory.TUN,
+            "رابط تونل tun0 برقرار شد (10.8.0.2/24 · MTU 1500)",
+            "tun0 established: ipv4=$TUNNEL_ADDR/24 dns=$TUNNEL_GW ipv6=$TUNNEL_GW_V6/128"
+        )
         Thread({ loop(fd) }, "gh-vpn-loop").apply { isDaemon = true; start() }
         return true
     }
@@ -147,9 +189,9 @@ class VpnTunnelService : VpnService() {
             try { s.socket?.close() } catch (_: Exception) {}
         }
         sessions.clear()
-        activeTargetDials.clear()
         try { vpnFd?.close() } catch (_: Exception) {}
         vpnFd = null
+        TunnelLogBuffer.recordTraffic(0, 0, 0)
     }
 
     override fun onDestroy() {
@@ -182,7 +224,7 @@ class VpnTunnelService : VpnService() {
             if (n < 0) break
             if (n < 20) continue
             val pkt = buf.copyOfRange(0, n)
-            val ip = Socks5.parseIp4(pkt) ?: continue // IPv6 packets captured by ::/0 are safely dropped (no leak)
+            val ip = Socks5.parseIp4(pkt) ?: continue
             val (proto, dstIp, totalLen) = ip
             if (diagBudget > 0) {
                 diagBudget--
@@ -194,7 +236,6 @@ class VpnTunnelService : VpnService() {
             val srcPort = Socks5.transportSrcPort(trimmed, proto)
             val dstPort = Socks5.transportDstPort(trimmed, proto)
             if (proto == 17) {
-                // Intercept all UDP DNS queries (port 53) and relay safely
                 if (dstPort == 53) {
                     sendUdpDns(output, trimmed, dstIp, srcIp, srcPort)
                 }
@@ -233,35 +274,24 @@ class VpnTunnelService : VpnService() {
             sessions.remove(key)?.let { s ->
                 try { s.socket?.close() } catch (_: Exception) {}
             }
+            TunnelLogBuffer.recordTraffic(0, 0, sessions.size)
             return
         }
 
-        // SYN (new connection)
+        // SYN (new connection or SYN retransmit)
         if ((flags and 0x02) != 0 && (flags and 0x10) == 0) {
-            val targetKey = "$dstIp:$dstPort"
-            val existingDial = activeTargetDials[targetKey]
-            if (existingDial != null && existingDial.first != clientPort && now - existingDial.second < 2000L) {
-                // Recursive outbound dial from Xray sharing the app UID: reject with RST-ACK to prevent loop
-                val rst = Socks5.buildTcpSegment(
-                    srcIp = dstIp, srcPort = dstPort,
-                    dstIp = clientIp, dstPort = clientPort,
-                    seq = 0L, ack = (seq + 1L) and 0xFFFFFFFFL,
-                    flags = 0x14
-                )
-                writeTun(tunOut, rst)
-                return
-            }
-            activeTargetDials[targetKey] = Pair(clientPort, now)
-
             val existing = sessions[key]
-            if (existing?.socket != null) {
-                val synAck = Socks5.buildTcpSegment(
-                    srcIp = dstIp, srcPort = dstPort,
-                    dstIp = clientIp, dstPort = clientPort,
-                    seq = 1000L, ack = (seq + 1L) and 0xFFFFFFFFL,
-                    flags = 0x12
-                )
-                writeTun(tunOut, synAck)
+            if (existing != null) {
+                existing.lastActive = now
+                if (existing.handshakeSent) {
+                    val synAck = Socks5.buildTcpSegment(
+                        srcIp = dstIp, srcPort = dstPort,
+                        dstIp = clientIp, dstPort = clientPort,
+                        seq = 1000L, ack = existing.clientNextSeq,
+                        flags = 0x12
+                    )
+                    writeTun(tunOut, synAck)
+                }
                 return
             }
 
@@ -276,11 +306,13 @@ class VpnTunnelService : VpnService() {
                 clientNextSeq = clientNext
             )
             sessions[key] = session
+            TunnelLogBuffer.recordTraffic(0, 0, sessions.size)
 
             Thread({
                 val sock = openSocks5(dstIp, dstPort)
                 if (sock == null) {
                     sessions.remove(key)
+                    TunnelLogBuffer.recordTraffic(0, 0, sessions.size)
                     val rst = Socks5.buildTcpSegment(
                         srcIp = dstIp, srcPort = dstPort,
                         dstIp = clientIp, dstPort = clientPort,
@@ -290,17 +322,30 @@ class VpnTunnelService : VpnService() {
                     writeTun(tunOut, rst)
                     return@Thread
                 }
-                session.socket = sock
-                session.lastActive = System.currentTimeMillis()
+                synchronized(session) {
+                    session.socket = sock
+                    session.handshakeSent = true
+                    session.lastActive = System.currentTimeMillis()
+                    // Complete TCP 3-way handshake with SYN-ACK (seq=1000, ack=clientIsn+1)
+                    val synAck = Socks5.buildTcpSegment(
+                        srcIp = dstIp, srcPort = dstPort,
+                        dstIp = clientIp, dstPort = clientPort,
+                        seq = 1000L, ack = session.clientNextSeq,
+                        flags = 0x12
+                    )
+                    writeTun(tunOut, synAck)
+                    if (session.pendingPayloads.isNotEmpty()) {
+                        try {
+                            val out = sock.getOutputStream()
+                            for (chunk in session.pendingPayloads) {
+                                out.write(chunk)
+                            }
+                            out.flush()
+                        } catch (_: Exception) {}
+                        session.pendingPayloads.clear()
+                    }
+                }
                 Log.d("GhDiag", "relay tcp ${Socks5.maskIp(dstIp)}:$dstPort -> socks5 ok")
-                // Complete TCP 3-way handshake with SYN-ACK (seq=1000, ack=clientIsn+1)
-                val synAck = Socks5.buildTcpSegment(
-                    srcIp = dstIp, srcPort = dstPort,
-                    dstIp = clientIp, dstPort = clientPort,
-                    seq = 1000L, ack = clientNext,
-                    flags = 0x12
-                )
-                writeTun(tunOut, synAck)
                 pumpRemoteToTun(tunOut, session, sock)
             }, "gh-tcp-$clientPort").apply { isDaemon = true; start() }
             return
@@ -310,40 +355,62 @@ class VpnTunnelService : VpnService() {
         session.lastActive = now
 
         if (payload.isNotEmpty()) {
-            session.clientNextSeq = (seq + payload.size.toLong()) and 0xFFFFFFFFL
-            val ackPkt = Socks5.buildTcpSegment(
-                srcIp = dstIp, srcPort = dstPort,
-                dstIp = clientIp, dstPort = clientPort,
-                seq = session.serverSeq, ack = session.clientNextSeq,
-                flags = 0x10
-            )
-            writeTun(tunOut, ackPkt)
-            try {
-                session.socket?.getOutputStream()?.let { out ->
-                    out.write(payload)
-                    out.flush()
+            synchronized(session) {
+                if (seq == session.clientNextSeq) {
+                    session.clientNextSeq = (seq + payload.size.toLong()) and 0xFFFFFFFFL
+                    val ackPkt = Socks5.buildTcpSegment(
+                        srcIp = dstIp, srcPort = dstPort,
+                        dstIp = clientIp, dstPort = clientPort,
+                        seq = session.serverSeq, ack = session.clientNextSeq,
+                        flags = 0x10
+                    )
+                    writeTun(tunOut, ackPkt)
+                    val sock = session.socket
+                    if (sock != null) {
+                        try {
+                            val out = sock.getOutputStream()
+                            out.write(payload)
+                            out.flush()
+                            TunnelLogBuffer.recordTraffic(payload.size, 0, sessions.size)
+                        } catch (_: Exception) {
+                            sessions.remove(key)?.let { s ->
+                                try { s.socket?.close() } catch (_: Exception) {}
+                            }
+                            return
+                        }
+                    } else {
+                        session.pendingPayloads.add(payload)
+                    }
+                } else {
+                    // Retransmitted or out-of-order segment: re-ACK expected sequence without duplicating stream bytes
+                    val dupAck = Socks5.buildTcpSegment(
+                        srcIp = dstIp, srcPort = dstPort,
+                        dstIp = clientIp, dstPort = clientPort,
+                        seq = session.serverSeq, ack = session.clientNextSeq,
+                        flags = 0x10
+                    )
+                    writeTun(tunOut, dupAck)
                 }
-            } catch (_: Exception) {
-                sessions.remove(key)?.let { s ->
-                    try { s.socket?.close() } catch (_: Exception) {}
-                }
-                return
             }
         }
 
         if ((flags and 0x01) != 0) {
-            // FIN from client -> reply FIN-ACK and close
-            session.clientNextSeq = (session.clientNextSeq + 1L) and 0xFFFFFFFFL
-            val finAck = Socks5.buildTcpSegment(
-                srcIp = dstIp, srcPort = dstPort,
-                dstIp = clientIp, dstPort = clientPort,
-                seq = session.serverSeq, ack = session.clientNextSeq,
-                flags = 0x11
-            )
-            writeTun(tunOut, finAck)
+            synchronized(session) {
+                session.clientNextSeq = (session.clientNextSeq + 1L) and 0xFFFFFFFFL
+                session.finSent = true
+                val finAck = Socks5.buildTcpSegment(
+                    srcIp = dstIp, srcPort = dstPort,
+                    dstIp = clientIp, dstPort = clientPort,
+                    seq = session.serverSeq, ack = session.clientNextSeq,
+                    flags = 0x11
+                )
+                session.serverSeq = (session.serverSeq + 1L) and 0xFFFFFFFFL
+                writeTun(tunOut, finAck)
+            }
             sessions.remove(key)?.let { s ->
                 try { s.socket?.close() } catch (_: Exception) {}
             }
+            TunnelLogBuffer.recordTraffic(0, 0, sessions.size)
         }
     }
 
@@ -356,22 +423,40 @@ class VpnTunnelService : VpnService() {
                 if (r < 0) break
                 if (r == 0) continue
                 val chunk = readBuf.copyOfRange(0, r)
-                val seg = Socks5.buildTcpSegment(
-                    srcIp = session.dstIp, srcPort = session.dstPort,
-                    dstIp = session.clientIp, dstPort = session.clientPort,
-                    seq = session.serverSeq, ack = session.clientNextSeq,
-                    flags = 0x18, // PSH-ACK
-                    payload = chunk
-                )
-                session.serverSeq = (session.serverSeq + r.toLong()) and 0xFFFFFFFFL
-                session.lastActive = System.currentTimeMillis()
-                writeTun(tunOut, seg)
+                synchronized(session) {
+                    val seg = Socks5.buildTcpSegment(
+                        srcIp = session.dstIp, srcPort = session.dstPort,
+                        dstIp = session.clientIp, dstPort = session.clientPort,
+                        seq = session.serverSeq, ack = session.clientNextSeq,
+                        flags = 0x18, // PSH-ACK
+                        payload = chunk
+                    )
+                    session.serverSeq = (session.serverSeq + r.toLong()) and 0xFFFFFFFFL
+                    session.lastActive = System.currentTimeMillis()
+                    writeTun(tunOut, seg)
+                }
+                TunnelLogBuffer.recordTraffic(0, r, sessions.size)
+            }
+            // Send FIN-ACK to client when remote server closes stream cleanly
+            synchronized(session) {
+                if (running && !session.finSent) {
+                    session.finSent = true
+                    val finAck = Socks5.buildTcpSegment(
+                        srcIp = session.dstIp, srcPort = session.dstPort,
+                        dstIp = session.clientIp, dstPort = session.clientPort,
+                        seq = session.serverSeq, ack = session.clientNextSeq,
+                        flags = 0x11 // FIN-ACK
+                    )
+                    session.serverSeq = (session.serverSeq + 1L) and 0xFFFFFFFFL
+                    writeTun(tunOut, finAck)
+                }
             }
         } catch (_: Exception) {
             // socket closed or reset
         } finally {
             try { sock.close() } catch (_: Exception) {}
             sessions.remove(session.key)
+            TunnelLogBuffer.recordTraffic(0, 0, sessions.size)
         }
     }
 
@@ -379,8 +464,8 @@ class VpnTunnelService : VpnService() {
     private fun openSocks5(dstIp: String, dstPort: Int): Socket? {
         val s = Socket()
         return try {
-            s.connect(InetSocketAddress(PROXY_HOST, PROXY_PORT), 2500)
-            s.soTimeout = 10_000
+            s.connect(InetSocketAddress(PROXY_HOST, PROXY_PORT), 4000)
+            s.soTimeout = 15_000
             s.tcpNoDelay = true
             val out = s.getOutputStream()
             val din = DataInputStream(s.getInputStream())
@@ -420,9 +505,11 @@ class VpnTunnelService : VpnService() {
     }
 
     /**
-     * DNS relay: client UDP query on port 53 -> Xray dns-in (127.0.0.1:15353),
-     * with a VpnService.protect()ed fallback to 10.0.2.3 / 8.8.8.8 when QEMU NAT
-     * filters outbound DoH -> response injected directly into the TUN fd.
+     * DNS relay:
+     * 1. Xray `dns-in` dokodemo-door (127.0.0.1:15353, 3500ms timeout for cold DoH).
+     * 2. RFC 1035 DNS-over-TCP through Xray SOCKS5 (:10808 -> 1.1.1.1:53 / 8.8.8.8:53)
+     *    so DNS stays inside the anti-DPI tunnel and avoids UDP port-53 poisoning.
+     * 3. Emulator-safe fallback (rejects poisoned 10.10.34.* responses).
      */
     private fun sendUdpDns(
         tunOut: FileOutputStream,
@@ -435,9 +522,10 @@ class VpnTunnelService : VpnService() {
         if (udpPacket.size <= ihl + 8 || clientIp.isEmpty() || clientPort == 0) return
         val payload = udpPacket.copyOfRange(ihl + 8, udpPacket.size)
         Thread({
-            val answer = queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 1500)
-                ?: queryUdpDns("10.0.2.3", 53, payload, protectSocket = true, timeoutMs = 1500)
-                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 1500)
+            val answer = queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 3500)
+                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 3500)
+                ?: queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 3500)
+                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { !isPoisonedDnsAnswer(it) }
             if (answer != null && answer.isNotEmpty()) {
                 val reply = Socks5.buildUdpSegment(
                     srcIp = dnsServerIp, srcPort = 53,
@@ -445,9 +533,54 @@ class VpnTunnelService : VpnService() {
                     payload = answer
                 )
                 Log.d("GhDiag", "relay dns -> ${answer.size}B ok")
+                TunnelLogBuffer.recordDnsHandled()
                 writeTun(tunOut, reply)
             }
         }, "gh-dns-$clientPort").apply { isDaemon = true; start() }
+    }
+
+    /** RFC 1035 §4.2.2 DNS-over-TCP (2-byte big-endian length prefix) via Xray SOCKS5. */
+    private fun queryTcpDnsOverSocks5(
+        dnsHost: String,
+        dnsPort: Int,
+        payload: ByteArray,
+        timeoutMs: Int
+    ): ByteArray? {
+        val sock = openSocks5(dnsHost, dnsPort) ?: return null
+        return try {
+            sock.use { s ->
+                s.soTimeout = timeoutMs
+                val out = s.getOutputStream()
+                val din = DataInputStream(s.getInputStream())
+                val lenHi = ((payload.size shr 8) and 0xFF).toByte()
+                val lenLo = (payload.size and 0xFF).toByte()
+                out.write(byteArrayOf(lenHi, lenLo))
+                out.write(payload)
+                out.flush()
+                val respLen = din.readUnsignedShort()
+                if (respLen in 12..4096) {
+                    val ans = ByteArray(respLen)
+                    din.readFully(ans)
+                    ans
+                } else {
+                    null
+                }
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /** Reject Iranian ISP DNS-poisoning responses containing 10.10.34.34 / 10.10.34.35 / 10.10.34.36. */
+    private fun isPoisonedDnsAnswer(ans: ByteArray): Boolean {
+        if (ans.size < 16) return false
+        for (i in 0..(ans.size - 4)) {
+            val b0 = ans[i].toInt() and 0xFF
+            val b1 = ans[i + 1].toInt() and 0xFF
+            val b2 = ans[i + 2].toInt() and 0xFF
+            if (b0 == 10 && b1 == 10 && b2 == 34) return true
+        }
+        return false
     }
 
     private fun queryUdpDns(
