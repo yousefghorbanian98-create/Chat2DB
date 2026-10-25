@@ -230,6 +230,9 @@ object ConfigPatcher {
                 val addr = if (s is JSONObject) s.optString("address", "") else s?.toString().orEmpty()
                 if (addr.equals("fakedns", ignoreCase = true)) { removed++; continue }
                 if (addr.equals("localhost", ignoreCase = true)) { removed++; continue }
+                if (s is JSONObject && s.optInt("timeoutMs", 0) > 4000) {
+                    s.put("timeoutMs", 4000)
+                }
                 kept.put(s)
             }
             if (kept.length() == 0) {
@@ -238,15 +241,22 @@ object ConfigPatcher {
                 kept.put("8.8.8.8")
             }
             dns.put("servers", kept)
+            dns.put("queryStrategy", "UseIPv4")
             val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
             val cfHost = hosts.optString("cloudflare-dns.com", "")
-            val cfIp = if (cfHost.isNotBlank() && cfHost.first().isDigit()) cfHost else "1.1.1.1"
+            // Map cloudflare-dns.com / challenges.cloudflare.com to the real unblocked
+            // challenges.cloudflare.com Anycast IPv4 (104.18.94.41) rather than 1.1.1.1
+            // (since 1.1.1.1:443 is IP-blocked for HTTPS/DoH on Iranian ISPs).
+            val cfIp = if (cfHost.isNotBlank() && cfHost.first().isDigit()) cfHost else "104.18.94.41"
             hosts.put("cloudflare-dns.com", cfIp)
             val chHost = hosts.optString("challenges.cloudflare.com", "")
             if (chHost.isBlank() || !chHost.first().isDigit()) {
                 hosts.put("challenges.cloudflare.com", cfIp)
             }
             if (!hosts.has("dns.google")) hosts.put("dns.google", "8.8.8.8")
+        }
+        if (json.has("fakedns")) {
+            json.remove("fakedns")
         }
         for (i in 0 until ibs.length()) {
             val sniff = ibs.getJSONObject(i).optJSONObject("sniffing") ?: continue
@@ -285,13 +295,15 @@ object ConfigPatcher {
                 val proto = ob.optString("protocol", "").lowercase()
                 val sockopt = ob.optJSONObject("streamSettings")?.optJSONObject("sockopt")
                 sockopt?.optJSONObject("happyEyeballs")?.put("prioritizeIPv6", false)
-                // Critical fix for Serverless-for-Iran.json: freedom/direct outbounds with
-                // sockopt.domainStrategy="ForceIP" force Xray to call app/dns (DoH) on every
-                // sniffed TLS SNI even when sniffing.routeOnly=true, causing 12s DoH timeouts
-                // and Down=0 B. Setting AsIs connects directly to the already-resolved dstIp
-                // while keeping TLS ClientHello fragmentation intact.
+                // Critical fix for Serverless-for-Iran.json:
+                // In Xray-core transport/internet/dialer.go, DialSystem checks:
+                //   if sockopt.DomainStrategy.HasStrategy() && dest.Address.Family().IsDomain()
+                // With sniffing.routeOnly=true on mixed-in, all app TCP connections keep their
+                // numeric IPv4 target (IsDomain()==false), so "UseIPv4" NEVER calls app/dns on
+                // app traffic, while still resolving "cloudflare-dns.com" via dns.hosts ->
+                // 104.18.94.41 when no-filter-dns dials tcp:cloudflare-dns.com:443!
                 if ((proto == "direct" || proto == "freedom") && sockopt != null && sockopt.has("domainStrategy")) {
-                    sockopt.put("domainStrategy", "AsIs")
+                    sockopt.put("domainStrategy", "UseIPv4")
                 }
             }
         }

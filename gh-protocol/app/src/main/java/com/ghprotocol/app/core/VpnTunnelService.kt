@@ -73,6 +73,7 @@ class VpnTunnelService : VpnService() {
     @Volatile
     private var diagBudget = 25
     private val sessions = ConcurrentHashMap<String, TcpSession>()
+    private val dnsCache = ConcurrentHashMap<String, Pair<Long, ByteArray>>()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -128,10 +129,8 @@ class VpnTunnelService : VpnService() {
             .setSession("gh-protocol")
             .setMtu(MTU)
             .addAddress(TUNNEL_ADDR, 24)
-            .addAddress(TUNNEL_GW_V6, 128)
             .addDnsServer(TUNNEL_GW)
             .addRoute("0.0.0.0", 0)
-            .addRoute("::", 0) // Rule #2: prevent IPv6 leak
 
         // CRITICAL FIX: Exclude our own package UID from tun0 so libxraycore.so's
         // outbound sockets exit directly via Wi-Fi/cellular without looping into tun0!
@@ -506,10 +505,14 @@ class VpnTunnelService : VpnService() {
 
     /**
      * DNS relay:
-     * 1. Xray `dns-in` dokodemo-door (127.0.0.1:15353, 3500ms timeout for cold DoH).
-     * 2. RFC 1035 DNS-over-TCP through Xray SOCKS5 (:10808 -> 1.1.1.1:53 / 8.8.8.8:53)
-     *    so DNS stays inside the anti-DPI tunnel and avoids UDP port-53 poisoning.
-     * 3. Emulator-safe fallback (rejects poisoned 10.10.34.* responses).
+     * 0. Synthesize instant NOERROR empty response for IPv6 AAAA (QTYPE=28) queries so
+     *    Android apps immediately connect over IPv4 without waiting on IPv6 timeouts.
+     * 1. 120-second in-memory DNS response cache.
+     * 2. Encrypted RFC 8484 DoH over Xray SOCKS5 (:10808 -> tcp-fragment-tls -> 104.18.94.41:443 / 8.8.8.8:443)
+     *    so filtered domains (instagram.com, facebook.com, youtube.com, telegram.org)
+     *    are resolved with TLS ClientHello fragmentation and zero ISP port-53 poisoning.
+     * 3. Xray `dns-in` dokodemo-door (127.0.0.1:15353).
+     * 4. Emulator-safe TCP/UDP port-53 fallback (rejects poisoned 10.10.34.*, 0.0.0.0, 127.0.0.1).
      */
     private fun sendUdpDns(
         tunOut: FileOutputStream,
@@ -521,34 +524,182 @@ class VpnTunnelService : VpnService() {
         val ihl = Socks5.ipHeaderLen(udpPacket)
         if (udpPacket.size <= ihl + 8 || clientIp.isEmpty() || clientPort == 0) return
         val payload = udpPacket.copyOfRange(ihl + 8, udpPacket.size)
-        Thread({
-            val answer = queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 1800)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 1800)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 1800)
-                    ?.takeIf { isUsableDnsResponse(it) }
-                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 1500)?.takeIf { isUsableDnsResponse(it) }
-                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 1500)?.takeIf { isUsableDnsResponse(it) }
-            if (answer != null && answer.isNotEmpty()) {
+        if (payload.size < 12) return
+
+        // Fast-return empty NOERROR for IPv6 AAAA queries so apps use IPv4 immediately
+        if (isIpv6AaaaQuery(payload)) {
+            val emptyAaaa = buildEmptyNoErrorDnsReply(payload)
+            val reply = Socks5.buildUdpSegment(
+                srcIp = dnsServerIp, srcPort = 53,
+                dstIp = clientIp, dstPort = clientPort,
+                payload = emptyAaaa
+            )
+            writeTun(tunOut, reply)
+            return
+        }
+
+        val cacheKey = payload.copyOfRange(12, payload.size).contentToString()
+        val now = System.currentTimeMillis()
+        dnsCache[cacheKey]?.let { (ts, cachedAns) ->
+            if (now - ts < 120_000L && cachedAns.size >= 12) {
+                val ans = cachedAns.copyOf()
+                ans[0] = payload[0]
+                ans[1] = payload[1]
                 val reply = Socks5.buildUdpSegment(
                     srcIp = dnsServerIp, srcPort = 53,
                     dstIp = clientIp, dstPort = clientPort,
-                    payload = answer
+                    payload = ans
                 )
-                Log.d("GhDiag", "relay dns -> ${answer.size}B ok")
+                TunnelLogBuffer.recordDnsHandled()
+                writeTun(tunOut, reply)
+                return
+            }
+        }
+
+        Thread({
+            val answer = queryDohOverSocks5("104.18.94.41", "cloudflare-dns.com", payload, timeoutMs = 2500)
+                ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryDohOverSocks5("8.8.8.8", "dns.google", payload, timeoutMs = 2500)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 2200)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 1500)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 1500)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 1500)
+                    ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 1500)
+                    ?.takeIf { isUsableDnsResponse(it) }
+            if (answer != null && answer.isNotEmpty()) {
+                val fixedAnswer = answer.copyOf()
+                fixedAnswer[0] = payload[0]
+                fixedAnswer[1] = payload[1]
+                dnsCache[cacheKey] = System.currentTimeMillis() to fixedAnswer
+                val reply = Socks5.buildUdpSegment(
+                    srcIp = dnsServerIp, srcPort = 53,
+                    dstIp = clientIp, dstPort = clientPort,
+                    payload = fixedAnswer
+                )
+                Log.d("GhDiag", "relay dns -> ${fixedAnswer.size}B ok")
                 TunnelLogBuffer.recordDnsHandled()
                 writeTun(tunOut, reply)
             }
         }, "gh-dns-$clientPort").apply { isDaemon = true; start() }
     }
 
+    /** True if the DNS query question has QTYPE == 28 (AAAA IPv6). */
+    private fun isIpv6AaaaQuery(payload: ByteArray): Boolean {
+        if (payload.size < 17) return false
+        var pos = 12
+        while (pos < payload.size) {
+            val len = payload[pos].toInt() and 0xFF
+            if (len == 0) {
+                pos++
+                break
+            }
+            if ((len and 0xC0) == 0xC0) {
+                pos += 2
+                break
+            }
+            pos += 1 + len
+        }
+        if (pos + 4 > payload.size) return false
+        val qtype = ((payload[pos].toInt() and 0xFF) shl 8) or (payload[pos + 1].toInt() and 0xFF)
+        return qtype == 28
+    }
+
+    /** Synthesize a valid RFC 1035 NOERROR response with 0 answers (NODATA). */
+    private fun buildEmptyNoErrorDnsReply(query: ByteArray): ByteArray {
+        val resp = query.copyOf()
+        resp[2] = (0x81 or (query[2].toInt() and 0x01)).toByte() // QR=1, RD preserved
+        resp[3] = 0x80.toByte() // RA=1, RCODE=0 (NOERROR)
+        resp[6] = 0; resp[7] = 0 // ANCOUNT = 0
+        resp[8] = 0; resp[9] = 0 // NSCOUNT = 0
+        resp[10] = 0; resp[11] = 0 // ARCOUNT = 0
+        return resp
+    }
+
+    /**
+     * Encrypted RFC 8484 DNS-over-HTTPS (DoH) routed through Xray's `mixed-in` (:10808),
+     * which applies `tcp-fragment-tls` (TLS ClientHello fragmentation) on port 443.
+     */
+    private fun queryDohOverSocks5(
+        ip: String,
+        sniHost: String,
+        payload: ByteArray,
+        timeoutMs: Int
+    ): ByteArray? {
+        val rawSock = openSocks5(ip, 443) ?: return null
+        return try {
+            rawSock.soTimeout = timeoutMs
+            val sslFactory = javax.net.ssl.SSLSocketFactory.getDefault() as javax.net.ssl.SSLSocketFactory
+            val sslSock = sslFactory.createSocket(rawSock, sniHost, 443, true) as javax.net.ssl.SSLSocket
+            sslSock.use { tls ->
+                tls.soTimeout = timeoutMs
+                tls.startHandshake()
+                val reqHeader = (
+                    "POST /dns-query HTTP/1.1\r\n" +
+                    "Host: $sniHost\r\n" +
+                    "Content-Type: application/dns-message\r\n" +
+                    "Accept: application/dns-message\r\n" +
+                    "Content-Length: ${payload.size}\r\n" +
+                    "Connection: close\r\n\r\n"
+                ).toByteArray(Charsets.US_ASCII)
+                val out = tls.getOutputStream()
+                out.write(reqHeader)
+                out.write(payload)
+                out.flush()
+                val respBytes = tls.getInputStream().readBytes()
+                extractDohHttpBody(respBytes)
+            }
+        } catch (_: Exception) {
+            try { rawSock.close() } catch (_: Exception) {}
+            null
+        }
+    }
+
+    private fun extractDohHttpBody(resp: ByteArray): ByteArray? {
+        if (resp.size < 28) return null
+        val headPreview = String(resp, 0, minOf(resp.size, 512), Charsets.ISO_8859_1)
+        if (!headPreview.startsWith("HTTP/1.1 200") && !headPreview.startsWith("HTTP/1.0 200")) return null
+        var sep = -1
+        for (i in 0..(resp.size - 4)) {
+            if (resp[i] == '\r'.code.toByte() &&
+                resp[i + 1] == '\n'.code.toByte() &&
+                resp[i + 2] == '\r'.code.toByte() &&
+                resp[i + 3] == '\n'.code.toByte()
+            ) {
+                sep = i + 4
+                break
+            }
+        }
+        if (sep < 0 || sep >= resp.size) return null
+        val headersLower = String(resp, 0, sep, Charsets.ISO_8859_1).lowercase()
+        val body = resp.copyOfRange(sep, resp.size)
+        if (headersLower.contains("transfer-encoding: chunked")) {
+            val nl = body.indexOfFirst { it == '\n'.code.toByte() }
+            if (nl > 0) {
+                val lenHex = String(body, 0, nl, Charsets.US_ASCII).trim()
+                val chunkLen = lenHex.toIntOrNull(16) ?: return null
+                if (nl + 1 + chunkLen <= body.size) {
+                    return body.copyOfRange(nl + 1, nl + 1 + chunkLen)
+                }
+            }
+        }
+        return body
+    }
+
     /**
      * Reject DNS SERVFAIL (rcode=2), REFUSED (rcode=5), truncated headers,
-     * and Iranian ISP DNS-poisoning responses (10.10.34.*).
+     * and Iranian ISP DNS-poisoning responses (10.10.34.*, 0.0.0.0, 127.0.0.1).
      */
     private fun isUsableDnsResponse(ans: ByteArray): Boolean {
         if (ans.size < 12) return false
         val rcode = ans[3].toInt() and 0x0F
-        if (rcode == 2 || rcode == 4 || rcode == 5) return false
+        if (rcode == 2 || rcode == 3 || rcode == 4 || rcode == 5) return false
+        val anCount = ((ans[6].toInt() and 0xFF) shl 8) or (ans[7].toInt() and 0xFF)
+        if (anCount == 0) return false
         return !isPoisonedDnsAnswer(ans)
     }
 
@@ -584,7 +735,7 @@ class VpnTunnelService : VpnService() {
         }
     }
 
-    /** Reject Iranian ISP DNS-poisoning responses containing 10.10.34.34 / 10.10.34.35 / 10.10.34.36. */
+    /** Reject Iranian ISP DNS-poisoning responses containing 10.10.34.* or sinkholed 0.0.0.0 / 127.0.0.1. */
     private fun isPoisonedDnsAnswer(ans: ByteArray): Boolean {
         if (ans.size < 16) return false
         for (i in 0..(ans.size - 4)) {
@@ -593,6 +744,12 @@ class VpnTunnelService : VpnService() {
             val b2 = ans[i + 2].toInt() and 0xFF
             if (b0 == 10 && b1 == 10 && b2 == 34) return true
         }
+        val r0 = ans[ans.size - 4].toInt() and 0xFF
+        val r1 = ans[ans.size - 3].toInt() and 0xFF
+        val r2 = ans[ans.size - 2].toInt() and 0xFF
+        val r3 = ans[ans.size - 1].toInt() and 0xFF
+        if (r0 == 0 && r1 == 0 && r2 == 0 && r3 == 0) return true
+        if (r0 == 127 && r1 == 0 && r2 == 0 && r3 == 1) return true
         return false
     }
 

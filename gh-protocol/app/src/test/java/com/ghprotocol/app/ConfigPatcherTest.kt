@@ -255,11 +255,11 @@ class ConfigPatcherTest {
         val fragOb = serverless.getJSONArray("outbounds").getJSONObject(0)
         assertFalse(fragOb.optJSONObject("settings")?.has("address") == true)
 
-        // 3. sniffing.routeOnly=true, sockopt.domainStrategy=AsIs, routing.domainStrategy=AsIs, happyEyeballs.prioritizeIPv6=false
+        // 3. sniffing.routeOnly=true, sockopt.domainStrategy=UseIPv4, routing.domainStrategy=AsIs, happyEyeballs.prioritizeIPv6=false
         val sniff = serverless.getJSONArray("inbounds").getJSONObject(0).getJSONObject("sniffing")
         assertTrue(sniff.getBoolean("routeOnly"))
         val sockopt = fragOb.getJSONObject("streamSettings").getJSONObject("sockopt")
-        assertEquals("AsIs", sockopt.getString("domainStrategy"))
+        assertEquals("UseIPv4", sockopt.getString("domainStrategy"))
         assertEquals("AsIs", serverless.getJSONObject("routing").getString("domainStrategy"))
         val he = sockopt.getJSONObject("happyEyeballs")
         assertFalse(he.getBoolean("prioritizeIPv6"))

@@ -303,34 +303,44 @@ fun DefyxHeaderSection(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
-        // Brand row: 'G' in #FFC927 (w800) + 'h Protocol' in White (w400), direct port of Defyx 'D' + 'efyx'
+        // Brand row: official Defyx logo.png + 'G' in #FFC927 (w800) + 'h Protocol' in White (w400)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        SpanStyle(
-                            color = DefyxColors.BrandGold,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 30.sp
-                        )
-                    ) {
-                        append("G")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.foundation.Image(
+                    painter = painterResource(R.drawable.defyx_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                )
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            SpanStyle(
+                                color = DefyxColors.BrandGold,
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = 30.sp
+                            )
+                        ) {
+                            append("G")
+                        }
+                        withStyle(
+                            SpanStyle(
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 27.sp
+                            )
+                        ) {
+                            append("h Protocol")
+                        }
                     }
-                    withStyle(
-                        SpanStyle(
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 27.sp
-                        )
-                    ) {
-                        append("h Protocol")
-                    }
-                }
-            )
+                )
+            }
             // Active Route + Clean IP Pill with official vpn_cloud.svg icon
             Row(
                 modifier = Modifier

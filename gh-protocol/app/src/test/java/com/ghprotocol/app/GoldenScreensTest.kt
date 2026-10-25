@@ -20,15 +20,13 @@ import com.ghprotocol.app.domain.ProbeResult
 import com.ghprotocol.app.domain.Probes
 import com.ghprotocol.app.domain.Prober
 import com.ghprotocol.app.ui.AboutScreen
-import com.ghprotocol.app.ui.BalancerScreen
-import com.ghprotocol.app.ui.ConfigScreen
+import com.ghprotocol.app.ui.ConfigHubScreen
 import com.ghprotocol.app.ui.FirstRunScreen
 import com.ghprotocol.app.ui.GuideScreen
 import com.ghprotocol.app.ui.HomeScreen
 import com.ghprotocol.app.ui.HomeViewModel
-import com.ghprotocol.app.ui.PrepScreen
 import com.ghprotocol.app.ui.QrScreen
-import com.ghprotocol.app.ui.ScannerScreen
+import com.ghprotocol.app.ui.RadarScreen
 import com.ghprotocol.app.ui.SettingsScreen
 import com.ghprotocol.app.ui.theme.GhProtocolTheme
 import org.junit.Rule
@@ -163,16 +161,16 @@ class GoldenScreensTest {
     fun settings_360x640() = plain("settings", "360x640") { SettingsScreen() }
 
     @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun config_360x640() = plain("config", "360x640") { ConfigScreen(viewModel = homeVm(3, 1)) }
+    fun config_360x640() = plain("config", "360x640") { ConfigHubScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun scanner_360x640() = plain("scanner", "360x640") { ScannerScreen() }
+    fun scanner_360x640() = plain("scanner", "360x640") { RadarScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun balancer_360x640() = plain("balancer", "360x640") { BalancerScreen() }
+    fun balancer_360x640() = plain("balancer", "360x640") { RadarScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun prep_360x640() = plain("prep", "360x640") { PrepScreen() }
+    fun prep_360x640() = plain("prep", "360x640") { ConfigHubScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w360dp-h640dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun guide_360x640() = plain("guide", "360x640") { GuideScreen() }
@@ -200,16 +198,16 @@ class GoldenScreensTest {
     fun settings_1080x1920() = plain("settings", "1080x1920") { SettingsScreen() }
 
     @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun config_1080x1920() = plain("config", "1080x1920") { ConfigScreen(viewModel = homeVm(3, 1)) }
+    fun config_1080x1920() = plain("config", "1080x1920") { ConfigHubScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun scanner_1080x1920() = plain("scanner", "1080x1920") { ScannerScreen() }
+    fun scanner_1080x1920() = plain("scanner", "1080x1920") { RadarScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun balancer_1080x1920() = plain("balancer", "1080x1920") { BalancerScreen() }
+    fun balancer_1080x1920() = plain("balancer", "1080x1920") { RadarScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun prep_1080x1920() = plain("prep", "1080x1920") { PrepScreen() }
+    fun prep_1080x1920() = plain("prep", "1080x1920") { ConfigHubScreen(viewModel = homeVm(3, 1)) }
 
     @Test @Config(qualifiers = "w1080dp-h1920dp") @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun guide_1080x1920() = plain("guide", "1080x1920") { GuideScreen() }

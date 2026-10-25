@@ -18,24 +18,28 @@ class CleanIpScanner(
 ) {
 
     companion object {
-        /** Well-known Cloudflare anycast egress IPs (stable, globally reachable). */
+        /**
+         * Well-known Cloudflare Anycast egress IPs (prioritizing `challenges.cloudflare.com`
+         * edges `104.18.94.41` / `104.18.95.41` which remain open on Iranian ISPs).
+         * Excludes `1.1.1.1` / `1.0.0.1` because port 443 is IP-blocked on Iranian ISPs.
+         */
         val DEFAULT_POOL = listOf(
-            "1.1.1.1", "1.0.0.1",
+            "104.18.94.41", "104.18.95.41",
             "104.16.132.229", "104.16.133.229",
             "172.64.32.229", "172.64.33.229",
+            "104.18.12.149", "104.18.13.149",
             "188.114.96.229", "188.114.97.229",
-            "190.93.240.229", "190.93.241.229",
-            "198.41.200.229", "198.41.201.229"
+            "190.93.240.229", "198.41.200.229"
         )
 
         /**
-         * Minimal RFC 5246 TLS 1.2 ClientHello record (45 bytes) so the server
+         * Minimal RFC 5246 TLS 1.2 ClientHello record (51 bytes) advertising standard
+         * ECDHE/RSA + TLS 1.3 cipher suites (0xC02F, 0xC02B, 0x009C, 0x1301) so the server
          * responds with a TLS Handshake (0x16) or TLS Alert (0x15) record.
-         * Without sending ClientHello first, a TLS server never speaks first.
          */
         internal val MINIMAL_CLIENT_HELLO = byteArrayOf(
-            0x16, 0x03, 0x01, 0x00, 0x28, // TLS Handshake record, version 3.1, len 40
-            0x01, 0x00, 0x00, 0x24,       // ClientHello, len 36
+            0x16, 0x03, 0x01, 0x00, 0x2E, // TLS Handshake record, version 3.1, len 46
+            0x01, 0x00, 0x00, 0x2A,       // ClientHello, len 42
             0x03, 0x03,                   // TLS 1.2
             // 32-byte client random
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -43,24 +47,42 @@ class CleanIpScanner(
             0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
             0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
             0x00,                         // session ID len 0
-            0x00, 0x02, 0x13, 0x01,       // cipher suite: TLS_AES_128_GCM_SHA256
+            0x00, 0x08,                   // cipher suites len 8
+            0xC0.toByte(), 0x2F.toByte(), // TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+            0xC0.toByte(), 0x2B.toByte(), // TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+            0x00, 0x9C.toByte(),          // TLS_RSA_WITH_AES_128_GCM_SHA256
+            0x13, 0x01,                   // TLS_AES_128_GCM_SHA256
             0x01, 0x00                    // compression methods: null
         )
 
-        fun defaultTlsProbe(ip: String, timeoutMs: Int): Boolean = try {
-            Socket().use { s ->
-                s.connect(InetSocketAddress(ip, 443), timeoutMs)
-                s.soTimeout = timeoutMs
-                s.tcpNoDelay = true
-                val out = s.getOutputStream()
-                out.write(MINIMAL_CLIENT_HELLO)
-                out.flush()
-                // TLS record type: 0x16 (Handshake / ServerHello) or 0x15 (Alert from live TLS stack)
-                val b = s.getInputStream().read()
-                b == 0x16 || b == 0x15
+        fun defaultTlsProbe(ip: String, timeoutMs: Int): Boolean {
+            try {
+                Socket().use { s ->
+                    s.connect(InetSocketAddress(ip, 443), timeoutMs)
+                    s.soTimeout = timeoutMs
+                    s.tcpNoDelay = true
+                    val out = s.getOutputStream()
+                    out.write(MINIMAL_CLIENT_HELLO)
+                    out.flush()
+                    // TLS record type: 0x16 (Handshake / ServerHello) or 0x15 (Alert from live TLS stack)
+                    val b = s.getInputStream().read()
+                    if (b == 0x16 || b == 0x15) return true
+                }
+            } catch (_: Exception) {}
+            return try {
+                Socket().use { s ->
+                    s.connect(InetSocketAddress(ip, 80), timeoutMs)
+                    s.soTimeout = timeoutMs
+                    s.tcpNoDelay = true
+                    val out = s.getOutputStream()
+                    out.write("HEAD / HTTP/1.1\r\nHost: challenges.cloudflare.com\r\nConnection: close\r\n\r\n".toByteArray())
+                    out.flush()
+                    val b = s.getInputStream().read()
+                    b == 'H'.code
+                }
+            } catch (_: Exception) {
+                false
             }
-        } catch (_: Exception) {
-            false
         }
     }
 
