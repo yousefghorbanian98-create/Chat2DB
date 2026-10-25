@@ -11,6 +11,9 @@ name: gh-protocol-build
 # runbook: see gh-protocol/HANDOFF.md §6 (v2: after setup-gradle fix)
 
 on:
+  # Integration-token pushes don't trigger workflows (GitHub anti-recursion);
+  # repository_dispatch is the supported escape hatch (POST /repos/.../dispatches).
+  repository_dispatch:
   push:
     paths:
       - 'gh-protocol/**'
