@@ -38,7 +38,12 @@ unzip -v 2>/dev/null | head -1 >> "$DIAG" 2>&1 || log "unzip -v failed"
 
 for ABI in arm64-v8a amd64; do
   ZIP="Xray-android-${ABI}.zip"
-  DEST="app/src/main/jniLibs/${ABI}/libxraycore.so"
+  # AGP accepts only its own ABI dir names (amd64 is not one; x86_64 is)
+  case "$ABI" in
+    amd64) GRADLE_ABI="x86_64" ;;
+    *)     GRADLE_ABI="$ABI" ;;
+  esac
+  DEST="app/src/main/jniLibs/${GRADLE_ABI}/libxraycore.so"
   log "== ${ZIP} =="
   if ! curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}" \
        "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}" 2>>"$DIAG"; then
