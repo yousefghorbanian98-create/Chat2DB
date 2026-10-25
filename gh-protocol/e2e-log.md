@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-25T08:05:02Z
+## gh-protocol E2E log — 2026-10-25T08:11:17Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-25T08:02:16Z ==
+== pre-flight 2026-10-25T08:08:29Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 07:58 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 08:02 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:02 .
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:02 ..
-drwxr-xr-x 3 runner runner 4096 Oct 25 08:02 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 25 08:02 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:08 .
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:08 ..
+drwxr-xr-x 3 runner runner 4096 Oct 25 08:08 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 25 08:08 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -45,12 +45,12 @@ INFO         |      Ok: Disk space requirements to run avd: `gh_test` are met
 INFO         |   Checking: hasSufficientHwGpu
 INFO         |      Ok: Hardware GPU compatibility checks are not required
 INFO         |   Checking: hasSufficientSystem
-INFO         |      Warning: Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (available: 15988 MiB)
-USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (available: 15988 MiB).
+INFO         |      Warning: Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (available: 15989 MiB)
+USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (available: 15989 MiB).
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 2826
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3114
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -120,7 +120,7 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7f7f7fc01000 as it is in the protected range from 0x7f7e7fc00000 to 0x7f7f7fe00000
+WARNING: cannnot unmap ptr 0x7eff60c01000 as it is in the protected range from 0x7efe60c00000 to 0x7eff60e00000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
 INFO         | Successfully initialized netsim WiFi
@@ -131,7 +131,7 @@ INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 31062 ms
+INFO         | Boot completed in 38218 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
 
 ### gradle-build.log (tail)
@@ -154,39 +154,40 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResValues
-> Task :app:generateDebugResources
-> Task :app:javaPreCompileDebug
-> Task :app:mapDebugSourceSetPaths
 > Task :app:extractDeepLinksDebug
-> Task :app:packageDebugResources
+> Task :app:generateDebugResources
+> Task :app:mapDebugSourceSetPaths
 > Task :app:checkDebugAarMetadata
+> Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAssets
+> Task :app:packageDebugResources
 > Task :app:processDebugMainManifest
-> Task :app:parseDebugLocalResources
-> Task :app:desugarDebugFileDependencies
-> Task :app:compressDebugAssets
 > Task :app:processDebugManifest
-> Task :app:mergeDebugResources
 > Task :app:processDebugManifestForPackage
-> Task :app:mergeDebugJniLibFolders
-> Task :app:validateSigningDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
+> Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugAssets
+> Task :app:parseDebugLocalResources
 > Task :app:checkDebugDuplicateClasses
+> Task :app:compressDebugAssets
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugResources
+> Task :app:mergeExtDexDebug
+> Task :app:mergeLibDexDebug
 > Task :app:mergeDebugNativeLibs
+> Task :app:processDebugResources
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:processDebugResources
-> Task :app:mergeLibDexDebug
-> Task :app:mergeExtDexDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:validateSigningDebug
+
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
 
@@ -199,9 +200,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792915191486.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792915535198.json
 
-BUILD SUCCESSFUL in 2m 7s
+BUILD SUCCESSFUL in 2m 40s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -217,10 +218,10 @@ Performing Streamed Install
 Success
 == probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 60s) ==
 WARN: emulator CANNOT reach raw.githubusercontent.com (runner NAT) — pre-seeding app cache
-seeded cache: 37417 bytes, meta=1792915464408
+seeded cache: 37417 bytes, meta=1792915839234
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 5596)
+app up (try 1, pid 5397)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
@@ -235,8 +236,8 @@ nc 8.8.8.8:53 -> rc=1
 nc 9.9.9.9:443 -> rc=1
 Xray 26.10.21 (Xray, Penetrates Everything.) 1b1647c (go1.27.3 android/amd64)
 A unified platform for anti-censorship.
-2026/10/25 08:04:32.761795 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
-2026/10/25 08:04:33.309033 [Warning] core: Xray 26.10.21 started
+2026/10/25 08:10:47.993409 [Info] infra/conf/serial: Reading config: &{Name:/data/user/0/com.ghprotocol.app/files/xray-config.json Format:json}
+2026/10/25 08:10:48.817472 [Warning] core: Xray 26.10.21 started
 === E2E FAILED: tunnel up but no traffic passes (TCP connect + DNS query both failed) ===
 
 
