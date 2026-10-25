@@ -6,6 +6,9 @@ name: gh-protocol-e2e (P2b)
 
 on:
   workflow_dispatch:
+  # Integration-token pushes don't trigger workflows (GitHub anti-recursion);
+  # repository_dispatch is the supported escape hatch (POST /repos/.../dispatches).
+  repository_dispatch:
   # Self-iterating: runs only when the E2E assets themselves change (emulator jobs are expensive)
   push:
     branches: [arena/7324330b-chat2db]
