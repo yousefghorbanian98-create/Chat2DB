@@ -318,3 +318,4 @@ class ConfigPatcherTest {
         assertFalse(hosts.keys().asSequence().any { hosts.optString(it) == "172.64.33.229" })
         assertEquals(ConfigPatcher.DOH_BOOTSTRAP_IPV4, hosts.getString("cloudflare-dns.com"))
     }
+}
