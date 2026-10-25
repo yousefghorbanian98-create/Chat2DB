@@ -227,7 +227,7 @@ jobs:
           mkdir -p release-dist
           cp app/build/outputs/apk/release/app-arm64-v8a-release.apk release-dist/GhProtocol-v1.0.0-arm64-v8a.apk
           cp app/build/outputs/apk/release/app-universal-release.apk release-dist/GhProtocol-v1.0.0-universal.apk
-          cp app/src/main/assets/xray/core-version.txt release-dist/core-version.txt
+          echo "XTLS/Xray-core v26.10.21" > release-dist/core-version.txt
           cp FINAL_REPORT.html release-dist/FINAL_REPORT.html
           (cd release-dist && sha256sum GhProtocol-v1.0.0-arm64-v8a.apk GhProtocol-v1.0.0-universal.apk core-version.txt FINAL_REPORT.html > SHA256SUMS)
           cp release-dist/SHA256SUMS SHA256SUMS
