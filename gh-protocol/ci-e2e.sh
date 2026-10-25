@@ -183,12 +183,28 @@ done
 
 # NB: traffic must be generated AS THE APP UID — the adb shell UID bypasses the
 # VPN, so plain `adb shell nc` never enters the tunnel (verified: zero TUN packets).
-say "== DNS resolution THROUGH the tunnel (as app uid) =="
+# And the VpnService must be ESTABLISHED first (consent tap happens later than the
+# :10808 listener coming up).
+say "== wait for VpnService establish (consent result) =="
+VPNUP=0
+for i in $(seq 1 20); do
+  if adb logcat -d -s GhDiag 2>/dev/null | grep -q "tunnel: established"; then
+    VPNUP=1
+    say "vpn established after ~$((i * 3))s"
+    break
+  fi
+  sleep 3
+done
+[ "$VPNUP" = "1" ] || say "WARN: VpnService not established (GhDiag has no 'tunnel: established')"
+adb shell "ip addr show tun0 2>/dev/null | head -6" >> "$LOG" 2>&1
+adb shell "ip route show table all 2>/dev/null | grep -m5 -i 'tun0\|10\.8\.0' " >> "$LOG" 2>&1
+
+say "== DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) =="
 DNS_OK=0
 DNSOUT=""
 for i in $(seq 1 6); do
-  DNSOUT=$(adb shell "run-as $PKG toybox nslookup github.com" 2>&1)
-  echo "$DNSOUT" | grep -qi "github.com" && { DNS_OK=1; break; }
+  DNSOUT=$(adb shell "run-as $PKG toybox ping -c 1 -W 2 github.com" 2>&1)
+  echo "$DNSOUT" | grep -qE "PING github\.com \([0-9]" && { DNS_OK=1; break; }
   sleep 4
 done
 say "dns through tunnel: $( [ "$DNS_OK" = "1" ] && echo OK || echo FAILED )"
