@@ -200,6 +200,135 @@ class TcpRelayIntegrationTest {
         }
     }
 
+    /**
+     * Requirement 2: TLS traffic through the relay. The bytes are a **real** TLS 1.2
+     * ClientHello produced by the JDK's own TLS stack (captured from a throwaway handshake),
+     * pushed through the relay in relay-sized pieces against an echo upstream and compared
+     * byte for byte — so fragmentation, sequence bookkeeping and checksums are exercised on
+     * exactly the record layout a browser sends.
+     */
+    @Test
+    fun realTlsClientHelloIsRelayedByteExact() {
+        val hello = captureClientHello()
+        assertTrue("captured ClientHello looks wrong: ${hello.size} bytes", hello.size > 100)
+        assertEquals("first byte must be a TLS handshake record (0x16)", 0x16.toByte(), hello[0])
+        TestNet.EchoServer().use { echo ->
+            TestNet.SocksServer().use { socks ->
+                val sink = RecordingSink()
+                val relay = TcpRelay(sink, TestNet.connectorFor(socks), Events(), config())
+                try {
+                    val isn = 9000L
+                    relay.onPacket(
+                        TestNet.clientPacket(4, clientIp, clientPort, "127.0.0.1", echo.port, isn, 0, PacketCodec.FLAG_SYN)
+                    )
+                    val synAck = sink.await { it.isSyn && it.isAck } ?: error("no handshake")
+                    val serverNext = PacketCodec.seqAdd(synAck.seq, 1)
+                    relay.onPacket(
+                        TestNet.clientPacket(4, clientIp, clientPort, "127.0.0.1", echo.port, isn + 1, serverNext, PacketCodec.FLAG_ACK)
+                    )
+                    // Send the TLS record in 200-byte pieces (a browser segments it the same way).
+                    var seq = isn + 1
+                    var offset = 0
+                    while (offset < hello.size) {
+                        val size = minOf(200, hello.size - offset)
+                        relay.onPacket(
+                            TestNet.clientPacket(
+                                4, clientIp, clientPort, "127.0.0.1", echo.port, seq, serverNext,
+                                PacketCodec.FLAG_PSH or PacketCodec.FLAG_ACK,
+                                hello.copyOfRange(offset, offset + size)
+                            )
+                        )
+                        seq += size
+                        offset += size
+                    }
+                    val received = java.io.ByteArrayOutputStream()
+                    var ackSeq = serverNext
+                    val deadline = System.currentTimeMillis() + 8000
+                    while (received.size() < hello.size && System.currentTimeMillis() < deadline) {
+                        val flow = sink.await(500) {
+                            it.payload.isNotEmpty() && it.dstPort == clientPort &&
+                                PacketCodec.seqDiff(it.seq, ackSeq) == 0L
+                        } ?: continue
+                        received.write(flow.payload)
+                        ackSeq = PacketCodec.seqAdd(ackSeq, flow.payload.size.toLong())
+                        relay.onPacket(
+                            TestNet.clientPacket(
+                                4, clientIp, clientPort, "127.0.0.1", echo.port, seq, ackSeq, PacketCodec.FLAG_ACK
+                            )
+                        )
+                    }
+                    assertTrue(
+                        "TLS record must come back byte-exact (got ${received.size()} of ${hello.size})",
+                        hello.contentEquals(received.toByteArray())
+                    )
+                    val stats = relay.stats()
+                    assertEquals(hello.size.toLong(), stats.bytesUp)
+                    assertEquals(hello.size.toLong(), stats.bytesDown)
+                    assertEquals(0, stats.retransmits)
+                    assertTrue(sink.packets.all { PacketCodec.hasValidTcpChecksum(it) })
+                } finally {
+                    relay.shutdown()
+                }
+            }
+        }
+    }
+
+    /**
+     * Produces a real ClientHello: the JDK TLS client connects to a plain loopback listener,
+     * the listener keeps the first inbound record and closes. No network, no fixtures.
+     */
+    private fun captureClientHello(): ByteArray {
+        java.net.ServerSocket(0, 1, java.net.InetAddress.getByName("127.0.0.1")).use { server ->
+            val captured = java.io.ByteArrayOutputStream()
+            val worker = Thread {
+                try {
+                    server.accept().use { socket ->
+                        socket.soTimeout = 5000
+                        val input = socket.getInputStream()
+                        val buffer = ByteArray(4096)
+                        // First read gives the full ClientHello record on loopback.
+                        val read = input.read(buffer)
+                        if (read > 0) captured.write(buffer, 0, read)
+                    }
+                } catch (_: Exception) {
+                    // the TLS client gives up after we close, that is expected
+                }
+            }
+            worker.isDaemon = true
+            worker.start()
+            try {
+                val context = javax.net.ssl.SSLContext.getInstance("TLSv1.2")
+                context.init(null, arrayOf(object : javax.net.ssl.X509TrustManager {
+                    override fun checkClientTrusted(c: Array<out java.security.cert.X509Certificate>?, a: String?) = Unit
+                    override fun checkServerTrusted(c: Array<out java.security.cert.X509Certificate>?, a: String?) = Unit
+                    override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = emptyArray()
+                }), null)
+                val socket = context.socketFactory.createSocket("127.0.0.1", server.localPort) as javax.net.ssl.SSLSocket
+                socket.use {
+                    try { it.startHandshake() } catch (_: Exception) { /* server closed after the record */ }
+                }
+            } catch (_: Exception) {
+                // capture is what matters; the handshake cannot complete by design
+            }
+            worker.join(5000)
+            return captured.toByteArray()
+        }
+    }
+
+    /**
+     * `closeFlow()` removes the flow from the map *before* it emits `onFlowClosed`, so a test that
+     * waits for `activeFlows == 0` and then reads the event list is racy on a loaded CI runner.
+     * Every event assertion goes through this helper instead.
+     */
+    private fun awaitClose(events: Events, timeoutMs: Long = 4000, predicate: (String) -> Boolean): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (events.closed.any(predicate)) return true
+            Thread.sleep(10)
+        }
+        return events.closed.any(predicate)
+    }
+
     /** Runs one complete app flow (handshake, payload, ACK) and returns the received bytes. */
     private fun runFlow(
         relay: TcpRelay,
@@ -297,8 +426,11 @@ class TcpRelayIntegrationTest {
                 assertNotNull("client must receive RST when the upstream cannot be reached", reset)
                 assertEquals(0, relay.stats().activeFlows)
                 assertEquals(1L, relay.stats().connectFailures)
-                assertTrue(events.failed.isNotEmpty())
-                assertTrue(events.closed.any { it.contains("upstream_reply") })
+                assertTrue("a failed flow must be reported as a failure", events.failed.isNotEmpty())
+                assertTrue(
+                    "teardown reason must name the failing stage, got=${events.closed}",
+                    awaitClose(events) { it.contains("upstream_") }
+                )
             } finally {
                 relay.shutdown()
             }
@@ -323,7 +455,10 @@ class TcpRelayIntegrationTest {
                     val deadline = System.currentTimeMillis() + 3000
                     while (relay.stats().activeFlows > 0 && System.currentTimeMillis() < deadline) Thread.sleep(20)
                     assertEquals(0, relay.stats().activeFlows)
-                    assertTrue(events.closed.any { it == "upstream_eof" || it == "half_close_complete" })
+                    assertTrue(
+                        "upstream EOF must be reported, got=${events.closed}",
+                        awaitClose(events) { it == "upstream_eof" || it == "half_close_complete" }
+                    )
                 } finally {
                     relay.shutdown()
                 }
@@ -357,7 +492,7 @@ class TcpRelayIntegrationTest {
                     val deadline = System.currentTimeMillis() + 3000
                     while (relay.stats().activeFlows > 0 && System.currentTimeMillis() < deadline) Thread.sleep(20)
                     assertEquals(0, relay.stats().activeFlows)
-                    assertTrue(events.closed.isNotEmpty())
+                    assertTrue("closing the flow must be reported, got=${events.closed}", awaitClose(events) { true })
                 } finally {
                     relay.shutdown()
                 }
@@ -378,17 +513,12 @@ class TcpRelayIntegrationTest {
                     relay.onPacket(
                         TestNet.clientPacket(4, clientIp, clientPort, "127.0.0.1", silent.port, 401, PacketCodec.seqAdd(synAck.seq, 1), PacketCodec.FLAG_ACK)
                     )
-                    // closeFlow() removes the flow from the map *before* it reports the event, so
-                    // polling activeFlows alone is a race on a slow runner: wait for the event.
-                    val deadline = System.currentTimeMillis() + 4000
-                    while (!events.closed.contains("idle_timeout") && System.currentTimeMillis() < deadline) {
-                        Thread.sleep(20)
-                    }
-                    assertEquals("idle flow must be torn down", 0, relay.stats().activeFlows)
-                    assertTrue(
+                    assertEquals(
                         "teardown must be reported, got=${events.closed}",
-                        events.closed.contains("idle_timeout")
+                        true,
+                        awaitClose(events) { it == "idle_timeout" }
                     )
+                    assertEquals("idle flow must be torn down", 0, relay.stats().activeFlows)
                 } finally {
                     relay.shutdown()
                 }
@@ -423,7 +553,10 @@ class TcpRelayIntegrationTest {
                     val deadline = System.currentTimeMillis() + 5000
                     while (relay.stats().activeFlows > 0 && System.currentTimeMillis() < deadline) Thread.sleep(20)
                     assertTrue("expected retransmissions, got none", relay.stats().retransmits > 0)
-                    assertTrue(events.closed.contains("client_ack_timeout"))
+                    assertTrue(
+                        "give-up must be reported, got=${events.closed}",
+                        awaitClose(events) { it == "client_ack_timeout" }
+                    )
                     assertEquals(0, relay.stats().activeFlows)
                 } finally {
                     relay.shutdown()
