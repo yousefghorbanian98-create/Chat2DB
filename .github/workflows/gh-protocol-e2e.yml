@@ -1,6 +1,7 @@
 # P2b: instrumented E2E — real VPN connection on an x86_64 emulator.
 # Runs the reusable impl once; on failure (transient emulator-infra issues are
 # common on GH runners) it retries the whole attempt a second time.
+# Manual dispatch is restricted on this repo; trigger = push paths below.
 name: gh-protocol-e2e (P2b)
 
 on:
