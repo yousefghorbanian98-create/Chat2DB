@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-25T09:33:43Z
+## gh-protocol E2E log — 2026-10-25T09:50:25Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-25T09:31:57Z ==
+== pre-flight 2026-10-25T09:48:39Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 09:28 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 09:44 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 25 09:32 .
-drwxr-xr-x 3 runner runner 4096 Oct 25 09:32 ..
-drwxr-xr-x 3 runner runner 4096 Oct 25 09:32 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 25 09:32 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 25 09:49 .
+drwxr-xr-x 3 runner runner 4096 Oct 25 09:49 ..
+drwxr-xr-x 3 runner runner 4096 Oct 25 09:49 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 25 09:49 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -51,7 +51,7 @@ WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, 
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
 ERROR        | Unable to connect to adb daemon on port: 5037
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3077
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 3056
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -121,7 +121,7 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7f81cfc01000 as it is in the protected range from 0x7f80cfc00000 to 0x7f81cfe00000
+WARNING: cannnot unmap ptr 0x7f5d1b201000 as it is in the protected range from 0x7f5c1b200000 to 0x7f5d1b400000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
 INFO         | Activated packet streamer for bluetooth emulation
@@ -132,20 +132,16 @@ INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 37981 ms
+INFO         | Boot completed in 38085 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
-ERROR        | Failed to find ColorBuffer: 86
-ERROR        | Failed to bind to texture: invalid color buffer.
-ERROR        | Failed to find ColorBuffer: 115
-ERROR        | Failed to bind to texture: invalid color buffer.
-INFO         | Wait for emulator (pid 3077) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
+INFO         | Wait for emulator (pid 3056) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
 
 USER_INFO    | Snapshots have been disabled by the user, save request is ignored.
-INFO         | Saving snapshot 'default_boot' took 1 ms
+INFO         | Saving snapshot 'default_boot' took 0 ms
 ERROR        | stop: Not implemented
 WARNING      | Emulator client has not yet been configured.. Call configure me first!
 INFO         | removeAll
-WARNING      | Netsim Wifi dns:///localhost:44809 is gone due to Stream removed (CANCELLED)
+WARNING      | Netsim Wifi dns:///localhost:41419 is gone due to Stream removed (CANCELLED)
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -167,35 +163,35 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugResValues
+> Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
-> Task :app:extractDeepLinksDebug
 > Task :app:generateDebugResources
+> Task :app:extractDeepLinksDebug
+> Task :app:packageDebugResources
 > Task :app:mapDebugSourceSetPaths
 > Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
+> Task :app:parseDebugLocalResources
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:packageDebugResources
+> Task :app:desugarDebugFileDependencies
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
-> Task :app:desugarDebugFileDependencies
-> Task :app:checkDebugDuplicateClasses
 > Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
-> Task :app:parseDebugLocalResources
-> Task :app:mergeExtDexDebug
+> Task :app:checkDebugDuplicateClasses
 > Task :app:compressDebugAssets
+> Task :app:mergeDebugResources
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeExtDexDebug
 > Task :app:mergeLibDexDebug
 > Task :app:processDebugResources
+> Task :app:mergeDebugNativeLibs
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
-> Task :app:mergeDebugJniLibFolders
-> Task :app:mergeDebugNativeLibs
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
@@ -212,9 +208,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792920550540.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792921547008.json
 
-BUILD SUCCESSFUL in 2m 37s
+BUILD SUCCESSFUL in 2m 33s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -233,7 +229,7 @@ emulator can reach raw.githubusercontent.com after ~4s
 SUBMODE=live — app will fetch the subscription itself (full E2E)
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 2758)
+app up (try 1, pid 2997)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
@@ -247,126 +243,118 @@ vpn established after ~6s
        valid_lft forever preferred_lft forever
     inet6 fd00:1::1/128 scope global 
        valid_lft forever preferred_lft forever
-    inet6 fe80::d323:b102:34cf:c508/64 scope link stable-privacy 
+    inet6 fe80::4e7c:5a96:a91e:a0b2/64 scope link stable-privacy 
        valid_lft forever preferred_lft forever
 == DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) ==
 dns through tunnel: OK
-Ping github.com (140.82.114.3): 56(84) bytes.
+Ping github.com (172.182.252.133): 56(84) bytes.
 
---- 140.82.114.3 ping statistics ---
+--- 172.182.252.133 ping statistics ---
 1 packets transmitted, 0 received, 100% packet loss
 == TCP through the tunnel (as app uid — data-path proof; toybox nc has no -z) ==
 nc 1.1.1.1:443 -> rc=0
 == relay diagnostics (GhVpnTunnel + GhDiag) ==
-10-25 09:33:26.394  2758  2758 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 09:33:26.438  2758  2758 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 09:33:26.499  2758  2758 D GhDiag  : connect: core.start=true 
-10-25 09:33:33.165  2758  2758 D GhDiag  : tunnel: startTunnel called (running=false)
-10-25 09:33:33.206  2758  2758 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@b539f8e} — relay loop started
-10-25 09:33:33.533  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.534  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:33.580  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.611  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.683  2758  4023 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
-10-25 09:33:33.766  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.809  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.812  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.815  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:33.844  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:34.160  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:34.412  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.426  2758  4174 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
-10-25 09:33:34.426  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.429  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.531  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.718  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:34.732  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.741  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:35.549  2758  4117 D GhDiag  : relay dns -> 274B ok
-10-25 09:33:35.549  2758  4110 D GhDiag  : relay dns -> 178B ok
-10-25 09:33:35.552  2758  4085 D GhDiag  : relay dns -> 269B ok
-10-25 09:33:35.554  2758  4078 D GhDiag  : relay dns -> 173B ok
-10-25 09:33:35.592  2758  4285 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.146  2758  4120 D GhDiag  : relay dns -> 45B ok
-10-25 09:33:36.236  2758  4215 D GhDiag  : relay dns -> 260B ok
-10-25 09:33:36.253  2758  4216 D GhDiag  : relay dns -> 164B ok
-10-25 09:33:36.257  2758  4323 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.508  2758  4232 D GhDiag  : relay dns -> 273B ok
-10-25 09:33:36.514  2758  4231 D GhDiag  : relay dns -> 177B ok
-10-25 09:33:36.693  2758  4338 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.694  2758  4126 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:36.737  2758  4340 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.984  2758  4348 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:37.208  2758  4293 D GhDiag  : relay dns -> 44B ok
-10-25 09:33:37.225  2758  4292 D GhDiag  : relay dns -> 112B ok
-10-25 09:33:38.912  2758  4392 D GhDiag  : relay dns -> 160B ok
-10-25 09:33:38.921  2758  4393 D GhDiag  : relay dns -> 256B ok
-10-25 09:33:38.926  2758  4562 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
-10-25 09:33:39.245  2758  4565 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:39.318  2758  4570 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
-10-25 09:33:39.370  2758  4339 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:39.392  2758  4576 D GhDiag  : relay tcp 5.61.x.x:443 -> socks5 ok
+--------- beginning of main
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-25 09:50:08.644  2997  2997 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-25 09:50:08.691  2997  2997 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-25 09:50:09.048  2997  2997 D GhDiag  : connect: core.start=true 
+10-25 09:50:16.092  2997  2997 D GhDiag  : tunnel: startTunnel called (running=false)
+10-25 09:50:16.131  2997  2997 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@7ceea89} — relay loop started
+10-25 09:50:17.359  2997  4329 D GhDiag  : tun pkt proto=1 dst=172.217.x.x len=28
+10-25 09:50:17.384  2997  4329 D GhDiag  : tun pkt proto=17 dst=172.217.x.x len=1278
+10-25 09:50:17.391  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.394  2997  4371 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.403  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.409  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.417  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=69
+10-25 09:50:17.438  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=144
+10-25 09:50:17.475  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.499  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=440
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=61
+10-25 09:50:17.624  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.644  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
+10-25 09:50:17.700  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:18.923  2997  4375 D GhDiag  : relay dns -> 164B ok
+10-25 09:50:18.925  2997  4374 D GhDiag  : relay dns -> 260B ok
+10-25 09:50:18.948  2997  4566 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.283  2997  4624 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.347  2997  4423 D GhDiag  : relay dns -> 177B ok
+10-25 09:50:19.362  2997  4425 D GhDiag  : relay dns -> 273B ok
+10-25 09:50:19.378  2997  4642 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.415  2997  4643 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.511  2997  4434 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:19.511  2997  4435 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:19.523  2997  4654 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
+10-25 09:50:20.512  2997  4578 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:20.531  2997  4580 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:20.664  2997  4598 D GhDiag  : relay dns -> 112B ok
+10-25 09:50:20.674  2997  4597 D GhDiag  : relay dns -> 44B ok
+10-25 09:50:22.233  2997  4732 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.505  2997  4746 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.775  2997  4758 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
 == HTTPS probe through tunnel (best-effort) ===
 no curl on emulator — skipping HTTPS probe (TCP + DNS are the core signal)
 == Xray core stderr (from app filesDir) ==
 == logcat sanity (crashes + GhVpnTunnel) ==
 --------- beginning of main
-10-25 09:33:26.085  2758  2758 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 09:33:26.085  2758  2758 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 09:33:26.394  2758  2758 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 09:33:26.438  2758  2758 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 09:33:26.499  2758  2758 D GhDiag  : connect: core.start=true 
-10-25 09:33:33.165  2758  2758 D GhDiag  : tunnel: startTunnel called (running=false)
-10-25 09:33:33.206  2758  2758 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@b539f8e} — relay loop started
-10-25 09:33:33.533  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.534  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:33.580  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.611  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.683  2758  4023 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
-10-25 09:33:33.766  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.809  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.812  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.815  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:33.844  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:34.160  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:34.412  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.426  2758  4174 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
-10-25 09:33:34.426  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.429  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.531  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.718  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:34.732  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.741  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:35.549  2758  4117 D GhDiag  : relay dns -> 274B ok
-10-25 09:33:35.549  2758  4110 D GhDiag  : relay dns -> 178B ok
-10-25 09:33:35.552  2758  4085 D GhDiag  : relay dns -> 269B ok
-10-25 09:33:35.554  2758  4078 D GhDiag  : relay dns -> 173B ok
-10-25 09:33:35.592  2758  4285 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.146  2758  4120 D GhDiag  : relay dns -> 45B ok
-10-25 09:33:36.236  2758  4215 D GhDiag  : relay dns -> 260B ok
-10-25 09:33:36.253  2758  4216 D GhDiag  : relay dns -> 164B ok
-10-25 09:33:36.257  2758  4323 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.508  2758  4232 D GhDiag  : relay dns -> 273B ok
-10-25 09:33:36.514  2758  4231 D GhDiag  : relay dns -> 177B ok
-10-25 09:33:36.693  2758  4338 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.694  2758  4126 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:36.737  2758  4340 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.984  2758  4348 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:37.208  2758  4293 D GhDiag  : relay dns -> 44B ok
-10-25 09:33:37.225  2758  4292 D GhDiag  : relay dns -> 112B ok
-10-25 09:33:38.912  2758  4392 D GhDiag  : relay dns -> 160B ok
-10-25 09:33:38.921  2758  4393 D GhDiag  : relay dns -> 256B ok
-10-25 09:33:38.926  2758  4562 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
-10-25 09:33:39.245  2758  4565 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:39.318  2758  4570 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
-10-25 09:33:39.370  2758  4339 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:39.392  2758  4576 D GhDiag  : relay tcp 5.61.x.x:443 -> socks5 ok
-10-25 09:33:39.925  2758  4538 D GhDiag  : relay dns -> 160B ok
-10-25 09:33:39.944  2758  4539 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-25 09:50:08.644  2997  2997 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-25 09:50:08.691  2997  2997 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-25 09:50:09.048  2997  2997 D GhDiag  : connect: core.start=true 
+10-25 09:50:16.092  2997  2997 D GhDiag  : tunnel: startTunnel called (running=false)
+10-25 09:50:16.131  2997  2997 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@7ceea89} — relay loop started
+10-25 09:50:17.359  2997  4329 D GhDiag  : tun pkt proto=1 dst=172.217.x.x len=28
+10-25 09:50:17.384  2997  4329 D GhDiag  : tun pkt proto=17 dst=172.217.x.x len=1278
+10-25 09:50:17.391  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.394  2997  4371 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.403  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.409  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.417  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=69
+10-25 09:50:17.438  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=144
+10-25 09:50:17.475  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.499  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=440
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=61
+10-25 09:50:17.624  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.644  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
+10-25 09:50:17.700  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:18.923  2997  4375 D GhDiag  : relay dns -> 164B ok
+10-25 09:50:18.925  2997  4374 D GhDiag  : relay dns -> 260B ok
+10-25 09:50:18.948  2997  4566 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.283  2997  4624 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.347  2997  4423 D GhDiag  : relay dns -> 177B ok
+10-25 09:50:19.362  2997  4425 D GhDiag  : relay dns -> 273B ok
+10-25 09:50:19.378  2997  4642 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.415  2997  4643 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.511  2997  4434 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:19.511  2997  4435 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:19.523  2997  4654 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
+10-25 09:50:20.512  2997  4578 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:20.531  2997  4580 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:20.664  2997  4598 D GhDiag  : relay dns -> 112B ok
+10-25 09:50:20.674  2997  4597 D GhDiag  : relay dns -> 44B ok
+10-25 09:50:22.233  2997  4732 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.505  2997  4746 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.775  2997  4758 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
+10-25 09:50:23.044  2997  4703 D GhDiag  : relay dns -> 57B ok
+10-25 09:50:23.044  2997  4704 D GhDiag  : relay dns -> 45B ok
+10-25 09:50:23.074  2997  4775 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
 ===============================
 E2E PASS: real tunnel carrying traffic (SUBMODE=live)
   - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)
@@ -377,161 +365,152 @@ E2E PASS: real tunnel carrying traffic (SUBMODE=live)
 
 
 ### e2e-logcat.log (crashes + app + vpn, tail)
-16.833   519   586 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
-10-25 09:33:17.064   519  2631 D CoreBackPreview: Window{e466f11 u0 Splash Screen com.ghprotocol.app}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@f3ef5d4, mPriority=0, mIsAnimationCallback=false}
-10-25 09:33:17.710  2758  2758 I .ghprotocol.app: Late-enabling -Xcheck:jni
-10-25 09:33:17.725  2758  2758 I .ghprotocol.app: Using CollectorTypeCC GC.
-10-25 09:33:17.725  2758  2758 W .ghprotocol.app: Unexpected CPU variant for x86: x86_64.
-10-25 09:33:17.725  2758  2758 W .ghprotocol.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
-10-25 09:33:17.735   519   547 I ActivityManager: Start proc 2758:com.ghprotocol.app/u0a192 for next-top-activity {com.ghprotocol.app/com.ghprotocol.app.MainActivity}
-10-25 09:33:17.879   519   536 V WindowManager: Sent Transition #6 createdAt=10-25 09:33:16.720 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=1 lastActiveTime=42899 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{1239ea4 Task{b601e3d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{d58b40d com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 09:33:17.880   519   536 V WindowManager:     info={id=6 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{1239ea4 Task{b601e3d #8 type=standard A=10192:com.ghprotocol.app}}} m=OPEN f=NONE leash=Surface(name=Task=8)/@0x130caf8 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{RemoteToken{4aecfc2 Task{cc5a425 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xae7d633 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 09:33:18.651  2758  2758 W ziparchive: Unable to open '/data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/base.dm': No such file or directory
-10-25 09:33:18.652  2758  2758 W ziparchive: Unable to open '/data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/base.dm': No such file or directory
-10-25 09:33:19.344  2758  2758 D nativeloader: Configuring clns-6 for other apk /data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/lib/x86_64:/data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.ghprotocol.app
-10-25 09:33:19.390  2758  2758 V GraphicsEnvironment: ANGLE GameManagerService for com.ghprotocol.app: false
-10-25 09:33:19.390  2758  2758 V GraphicsEnvironment: com.ghprotocol.app is not listed in per-application setting
-10-25 09:33:20.216   519   798 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10192, mPackageName='com.ghprotocol.app, mAppProcessToken='null'}
-10-25 09:33:20.552   835   835 I SafetyLabelChangedBroadcastReceiver: received broadcast packageName: com.ghprotocol.app, current user: UserHandle{0}, packageChangeEvent: NEW_INSTALL, intent user: UserHandle{0}
-10-25 09:33:20.960  2758  2758 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-25 09:33:20.960  2758  2758 W .ghprotocol.app: Common causes for lock verification issues are non-optimized dex code
-10-25 09:33:20.960  2758  2758 W .ghprotocol.app: and incorrect proguard optimizations.
-10-25 09:33:20.974  2758  2758 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
-10-25 09:33:20.974  2758  2758 W .ghprotocol.app: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-25 09:33:20.974  2758  2758 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
-10-25 09:33:20.974  2758  2758 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
-10-25 09:33:21.200   519   991 D CoreBackPreview: Window{6768413 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@9e4b5ca, mPriority=0, mIsAnimationCallback=false}
-10-25 09:33:21.591  1043  1043 D CarrierSvcBindHelper: onPackageAdded: com.ghprotocol.app
-10-25 09:33:21.605  1043  1334 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
-10-25 09:33:22.610   519  1641 I WindowManager: finishDrawing of relaunch: Window{6768413 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity} 2204ms
-10-25 09:33:22.626   519   536 W ziparchive: Unable to open '/data/app/~~aI46ralyaMKfdz94qRssOg==/com.ghprotocol.app-YXPCRW3UUjrxel7I59tMpA==/base.dm': No such file or directory
-10-25 09:33:22.631   519   536 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +5s978ms
-10-25 09:33:22.673   519  2637 D CoreBackPreview: Window{6768413 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback null
-10-25 09:33:22.673   519  1880 D CoreBackPreview: Window{e466f11 u0 Splash Screen com.ghprotocol.app}: Setting back callback null
-10-25 09:33:22.673   519  2404 W InputManager-JNI: Input channel object '6768413 com.ghprotocol.app/com.ghprotocol.app.MainActivity (client)' was disposed without first being removed with the input manager!
-10-25 09:33:22.684   519   532 W InputManager-JNI: Input channel object 'e466f11 Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
-10-25 09:33:23.136   519  1915 D CoreBackPreview: Window{9f4821f u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@b1ec0e7, mPriority=0, mIsAnimationCallback=false}
-10-25 09:33:23.543   519  2401 I ImeTracker: com.ghprotocol.app:e3235d2e: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-25 09:33:23.543   519  2401 I ImeTracker: com.ghprotocol.app:e3235d2e: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 09:33:23.563  1555  1555 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 09:33:23.592  1043  1043 D CarrierSvcBindHelper: onPackageModified: com.ghprotocol.app
-10-25 09:33:23.706  1043  1334 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
-10-25 09:33:25.275   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{e050e56 com.google.android.youtube/10139} BLOCKED
-10-25 09:33:25.276   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{f097ed7 com.google.android.googlequicksearchbox/10132} BLOCKED
-10-25 09:33:25.276   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{cfab3c4 com.google.android.gm/10147} BLOCKED
-10-25 09:33:25.276   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{71c72ad com.google.android.dialer/10128} BLOCKED
-10-25 09:33:25.276   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{dbb9e2 com.google.android.contacts/10154} BLOCKED
-10-25 09:33:25.276   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{6fd3173 com.google.android.apps.youtube.music/10156} BLOCKED
-10-25 09:33:25.494   519  2578 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW dat=ghprotocol://connect/... flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
-10-25 09:33:25.495   828   865 V WindowManagerShell: Transition requested: android.os.BinderProxy@5f992b TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=51588 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@ba18188} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{6bc721 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 09:33:25.781  3465  3465 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-25 09:33:25.793  3465  3465 I AndroidRuntime: Using default boot image
-10-25 09:33:25.795  3465  3465 I AndroidRuntime: Leaving lock profiling enabled
-10-25 09:33:26.067  3465  3465 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-25 09:33:26.085  2758  2758 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 09:33:26.085  2758  2758 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 09:33:26.152  3509  3509 W libxraycore.so: type=1400 audit(0.0:18): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 09:33:26.152  3509  3509 W libxraycore.so: type=1400 audit(0.0:19): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 09:33:26.152  3509  3509 W libxraycore.so: type=1400 audit(0.0:20): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 09:33:26.152  3509  3509 W libxraycore.so: type=1400 audit(0.0:21): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 09:33:26.394  2758  2758 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 09:33:26.438  2758  2758 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 09:33:26.499  2758  2758 D GhDiag  : connect: core.start=true 
-10-25 09:33:26.558   519  2630 D CoreBackPreview: Window{dbf6425 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@7aa9e80, mPriority=0, mIsAnimationCallback=false}
-10-25 09:33:27.352  3465  3465 D AndroidRuntime: Shutting down VM
-10-25 09:33:27.503   828   865 V WindowManagerShell: onTransitionReady android.os.BinderProxy@5f992b: {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a05d142 u0 com.ghprotocol.app/.MainActivity)/@0x72dd571 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{53a9394 u0 com.ghprotocol.app/.MainActivity)/@0xbf27f56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 09:33:27.513   519   536 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +2s153ms
-10-25 09:33:27.513   519   536 V WindowManager: Sent Transition #7 createdAt=10-25 09:33:25.360 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=51588 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{1239ea4 Task{b601e3d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{7693204 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 09:33:27.513   828   865 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a05d142 u0 com.ghprotocol.app/.MainActivity)/@0x72dd571 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{53a9394 u0 com.ghprotocol.app/.MainActivity)/@0xbf27f56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 09:33:27.518   828   865 V WindowManagerShell: start default transition animation, info = {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a05d142 u0 com.ghprotocol.app/.MainActivity)/@0x72dd571 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{53a9394 u0 com.ghprotocol.app/.MainActivity)/@0xbf27f56 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 09:33:27.525   519   536 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a05d142 u0 com.ghprotocol.app/.MainActivity)/@0x5faedb1 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{53a9394 u0 com.ghprotocol.app/.MainActivity)/@0x391e858 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 09:33:27.915   828   865 V WindowManagerShell: Transition requested: android.os.BinderProxy@44dfce1 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=53637 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@f476a06} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{a5a28c7 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 09:33:27.930  2758  3627 D ProfileInstaller: Installing profile for com.ghprotocol.app
-10-25 09:33:27.936  3535  3535 W libxraycore.so: type=1400 audit(0.0:30): avc:  denied  { read } for  name="somaxconn" dev="proc" ino=54168 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:proc_net:s0 tclass=file permissive=0 app=com.ghprotocol.app
-10-25 09:33:27.984   519   991 I ImeTracker: com.ghprotocol.app:c5679ea5: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-25 09:33:27.985   519   991 I ImeTracker: com.ghprotocol.app:c5679ea5: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 09:33:27.999  1555  1555 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 09:33:28.062  2758  2773 W .ghprotocol.app: Cleared Reference was only reachable from finalizer (only reported once)
-10-25 09:33:28.064  2758  2773 I .ghprotocol.app: Background concurrent copying GC freed 97971(5160KB) AllocSpace objects, 26(740KB) LOS objects, 49% free, 6129KB/11MB, paused 27us,9us total 332.966ms
-10-25 09:33:28.523   519  2637 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
-10-25 09:33:28.528   519  2637 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
-10-25 09:33:28.528   519  2637 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
-10-25 09:33:29.102  3746  3746 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-25 09:33:29.107  3746  3746 I AndroidRuntime: Using default boot image
-10-25 09:33:29.107  3746  3746 I AndroidRuntime: Leaving lock profiling enabled
-10-25 09:33:29.299  3746  3746 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-25 09:33:29.579   519   536 V WindowManager: Sent Transition #8 createdAt=10-25 09:33:27.533 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=53637 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{1239ea4 Task{b601e3d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{5dc0af5 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 09:33:31.305  3746  3746 D AndroidRuntime: Shutting down VM
-10-25 09:33:31.701   519  2397 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{13b0562 com.google.android.gm/10147} BLOCKED
-10-25 09:33:32.549   519   816 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
-10-25 09:33:33.164   519   816 I ActivityManager: Background started FGS: Allowed [callingPackage: com.ghprotocol.app; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.ghprotocol.app/.core.VpnTunnelService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
-10-25 09:33:33.165  2758  2758 D GhDiag  : tunnel: startTunnel called (running=false)
-10-25 09:33:33.205   519  2401 I Vpn     : Established by com.ghprotocol.app on tun0
-10-25 09:33:33.206  2758  2758 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@b539f8e} — relay loop started
-10-25 09:33:33.256   519   899 I ImeTracker: com.ghprotocol.app:1bdef4c4: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
-10-25 09:33:33.256   519   899 I ImeTracker: com.ghprotocol.app:1bdef4c4: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 09:33:33.274  1555  1555 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 09:33:33.533  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.534  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:33.580  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.611  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=73
-10-25 09:33:33.683  2758  4023 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
-10-25 09:33:33.766  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.809  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=78
-10-25 09:33:33.812  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=40
-10-25 09:33:33.815  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:33.844  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=57
-10-25 09:33:34.160  2758  4023 D GhDiag  : tun pkt proto=6 dst=5.106.x.x len=197
-10-25 09:33:34.297   519  1167 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{f78e813 com.google.android.settings.intelligence/10118} BLOCKED
-10-25 09:33:34.298   519  2402 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{ee2ca50 com.google.android.settings.intelligence/10118} BLOCKED
-10-25 09:33:34.412  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.426  2758  4174 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
-10-25 09:33:34.426  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
-10-25 09:33:34.427  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.429  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.531  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.718  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:34.732  2758  4023 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
-10-25 09:33:34.741  2758  4023 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
-10-25 09:33:35.549  2758  4117 D GhDiag  : relay dns -> 274B ok
-10-25 09:33:35.549  2758  4110 D GhDiag  : relay dns -> 178B ok
-10-25 09:33:35.552  2758  4085 D GhDiag  : relay dns -> 269B ok
-10-25 09:33:35.554  2758  4078 D GhDiag  : relay dns -> 173B ok
-10-25 09:33:35.592  2758  4285 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:35.982  1417  3284 I FontLog : Package com.ghprotocol.app has no metadata [CONTEXT service_id=132 ]
-10-25 09:33:36.084  1468  3196 I BlockstoreStorage: Clearing Blockstore Data for package com.ghprotocol.app [CONTEXT service_id=258 ]
-10-25 09:33:36.146  2758  4120 D GhDiag  : relay dns -> 45B ok
-10-25 09:33:36.236  2758  4215 D GhDiag  : relay dns -> 260B ok
-10-25 09:33:36.253  2758  4216 D GhDiag  : relay dns -> 164B ok
-10-25 09:33:36.257  2758  4323 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{2716419 com.google.android.googlequicksearchbox/10132} BLOCKED
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{b1d6cde com.android.camera2/10145} BLOCKED
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{4672ebf com.google.android.gm/10147} BLOCKED
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{6e7498c com.google.android.devicelockcontroller/10170} BLOCKED
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{72b28d5 com.google.android.rkpdapp/10171} BLOCKED
-10-25 09:33:36.472   519   570 I AppsFilter: interaction: PackageSetting{8c54071 com.ghprotocol.app/10192} -> PackageSetting{7624b7 com.google.android.projection.gearhead/10123} BLOCKED
-10-25 09:33:36.508  2758  4232 D GhDiag  : relay dns -> 273B ok
-10-25 09:33:36.514  2758  4231 D GhDiag  : relay dns -> 177B ok
-10-25 09:33:36.693  2758  4338 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.694  2758  4126 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:36.737  2758  4340 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:36.984  2758  4348 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:37.208  2758  4293 D GhDiag  : relay dns -> 44B ok
-10-25 09:33:37.225  2758  4292 D GhDiag  : relay dns -> 112B ok
-10-25 09:33:37.752  1645  1645 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is added.].
-10-25 09:33:37.909  1645  1645 I AiAiEcho: AppFetcherImpl onPackageChanged com.ghprotocol.app.
-10-25 09:33:37.928  1645  3831 I AiAiEcho: AppIndexer Package:[com.ghprotocol.app] UserProfile:[0] Enabled:[true].
-10-25 09:33:37.928  1645  3831 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is updated.].
-10-25 09:33:38.912  2758  4392 D GhDiag  : relay dns -> 160B ok
-10-25 09:33:38.921  2758  4393 D GhDiag  : relay dns -> 256B ok
-10-25 09:33:38.926  2758  4562 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
-10-25 09:33:39.245  2758  4565 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
-10-25 09:33:39.318  2758  4570 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
-10-25 09:33:39.370  2758  4339 D GhDiag  : relay dns -> 29B ok
-10-25 09:33:39.392  2758  4576 D GhDiag  : relay tcp 5.61.x.x:443 -> socks5 ok
-10-25 09:33:39.925  2758  4538 D GhDiag  : relay dns -> 160B ok
-10-25 09:33:39.944  2758  4539 D GhDiag  : relay dns -> 256B ok
+/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=1 lastActiveTime=45267 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@9232551} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{6fbc1b6 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:49:59.082   524  2524 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-25 09:49:59.183   524  2524 D CoreBackPreview: Window{fe8d8f u0 Splash Screen com.ghprotocol.app}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@481b04c, mPriority=0, mIsAnimationCallback=false}
+10-25 09:49:59.932   524   541 V WindowManager: Sent Transition #6 createdAt=10-25 09:49:58.915 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=1 lastActiveTime=45267 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{c443401 Task{bc2938d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{aa8a2a6 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=false isVisible=false isVisibleRequested=false isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:49:59.932   524   541 V WindowManager:     info={id=6 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{c443401 Task{bc2938d #8 type=standard A=10192:com.ghprotocol.app}}} m=OPEN f=NONE leash=Surface(name=Task=8)/@0x475709 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{RemoteToken{dc004e7 Task{4d0fe10 #1 type=home}}} m=TO_BACK f=SHOW_WALLPAPER leash=Surface(name=Task=1)/@0xb42fa7f sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 09:49:59.942   524   803 I SdkSandboxManager: No SDKs used. Skipping SDK data reconcilation for CallingInfo{mUid=10192, mPackageName='com.ghprotocol.app, mAppProcessToken='null'}
+10-25 09:49:59.945   524   553 I ActivityManager: Start proc 2997:com.ghprotocol.app/u0a192 for next-top-activity {com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+10-25 09:50:00.062  2997  2997 I .ghprotocol.app: Late-enabling -Xcheck:jni
+10-25 09:50:00.073  2997  2997 I .ghprotocol.app: Using CollectorTypeCC GC.
+10-25 09:50:00.075  2997  2997 W .ghprotocol.app: Unexpected CPU variant for x86: x86_64.
+10-25 09:50:00.075  2997  2997 W .ghprotocol.app: Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, tremont, kabylake, default
+10-25 09:50:00.459  2997  2997 W ziparchive: Unable to open '/data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/base.dm': No such file or directory
+10-25 09:50:00.459  2997  2997 W ziparchive: Unable to open '/data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/base.dm': No such file or directory
+10-25 09:50:00.910  2997  2997 D nativeloader: Configuring clns-6 for other apk /data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/base.apk. target_sdk_version=35, uses_libraries=, library_path=/data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/lib/x86_64:/data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/com.ghprotocol.app
+10-25 09:50:00.965  2997  2997 V GraphicsEnvironment: ANGLE GameManagerService for com.ghprotocol.app: false
+10-25 09:50:00.966  2997  2997 V GraphicsEnvironment: com.ghprotocol.app is not listed in per-application setting
+10-25 09:50:02.044  2997  2997 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-25 09:50:02.044  2997  2997 W .ghprotocol.app: Common causes for lock verification issues are non-optimized dex code
+10-25 09:50:02.044  2997  2997 W .ghprotocol.app: and incorrect proguard optimizations.
+10-25 09:50:02.046  2997  2997 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-25 09:50:02.046  2997  2997 W .ghprotocol.app: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-25 09:50:02.046  2997  2997 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-25 09:50:02.047  2997  2997 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-25 09:50:02.167   524  2577 D CoreBackPreview: Window{ba5322a u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@5613e01, mPriority=0, mIsAnimationCallback=false}
+10-25 09:50:03.972   524   541 W ziparchive: Unable to open '/data/app/~~__yDMYckClH5zmNBRlH0Ew==/com.ghprotocol.app-lor4fkyqV-9UCyTV4UQujw==/base.dm': No such file or directory
+10-25 09:50:04.057   524   541 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +5s47ms
+10-25 09:50:04.079   524  2078 I ImeTracker: com.ghprotocol.app:cdb0672f: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-25 09:50:04.079   524  2078 I ImeTracker: com.ghprotocol.app:cdb0672f: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-25 09:50:04.119   524  1784 W InputManager-JNI: Input channel object 'fe8d8f Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
+10-25 09:50:04.120   524   905 D CoreBackPreview: Window{fe8d8f u0 Splash Screen com.ghprotocol.app EXITING}: Setting back callback null
+10-25 09:50:04.124  1504  1504 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-25 09:50:04.570  1049  1049 D CarrierSvcBindHelper: onPackageAdded: com.ghprotocol.app
+10-25 09:50:04.626  1049  1331 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
+10-25 09:50:04.642  1049  1049 D CarrierSvcBindHelper: onPackageModified: com.ghprotocol.app
+10-25 09:50:04.745  1049  1331 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
+10-25 09:50:06.267   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{38b6689 com.google.android.googlequicksearchbox/10132} BLOCKED
+10-25 09:50:06.267   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{28e968e com.google.android.gm/10142} BLOCKED
+10-25 09:50:06.267   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{8698eaf com.google.android.dialer/10128} BLOCKED
+10-25 09:50:06.267   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{8c542bc com.google.android.contacts/10154} BLOCKED
+10-25 09:50:06.267   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{fbae245 com.google.android.apps.youtube.music/10155} BLOCKED
+10-25 09:50:07.164  2997  3529 D ProfileInstaller: Installing profile for com.ghprotocol.app
+10-25 09:50:07.811   524   594 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW dat=ghprotocol://connect/... flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-25 09:50:07.812   831   861 V WindowManagerShell: Transition requested: android.os.BinderProxy@f52771f TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=54001 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@7625a6c} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{7f59835 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:50:07.910  2997  2997 V ActivityThread: getPackageInfo() caused update to cached ApplicationInfo for package com.ghprotocol.app
+10-25 09:50:07.992  3588  3588 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-25 09:50:07.996  3588  3588 I AndroidRuntime: Using default boot image
+10-25 09:50:07.996  3588  3588 I AndroidRuntime: Leaving lock profiling enabled
+10-25 09:50:08.214  3588  3588 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-25 09:50:08.330  2997  2997 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-25 09:50:08.454  3661  3661 W libxraycore.so: type=1400 audit(0.0:18): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-25 09:50:08.474  3661  3661 W libxraycore.so: type=1400 audit(0.0:19): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-25 09:50:08.474  3661  3661 W libxraycore.so: type=1400 audit(0.0:20): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-25 09:50:08.474  3661  3661 W libxraycore.so: type=1400 audit(0.0:21): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-25 09:50:08.644  2997  2997 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-25 09:50:08.691  2997  2997 D GhDiag  : connect: config written bytes=5089 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-25 09:50:09.048  2997  2997 D GhDiag  : connect: core.start=true 
+10-25 09:50:09.098   524  2524 D CoreBackPreview: Window{4716618 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@87832b0, mPriority=0, mIsAnimationCallback=false}
+10-25 09:50:09.568   831   861 V WindowManagerShell: onTransitionReady android.os.BinderProxy@f52771f: {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{c56a0ff u0 com.ghprotocol.app/.MainActivity)/@0x550b158 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{7cfd5e7 u0 com.ghprotocol.app/.MainActivity)/@0xb7482b1 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 09:50:09.569   524   541 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +1s764ms
+10-25 09:50:09.569   524   541 V WindowManager: Sent Transition #7 createdAt=10-25 09:50:07.806 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=54001 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{c443401 Task{bc2938d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{e6187ec com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:50:09.569   524   541 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{c56a0ff u0 com.ghprotocol.app/.MainActivity)/@0x88a2c3e sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{7cfd5e7 u0 com.ghprotocol.app/.MainActivity)/@0xe6604f9 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 09:50:09.570   831   861 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{c56a0ff u0 com.ghprotocol.app/.MainActivity)/@0x550b158 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{7cfd5e7 u0 com.ghprotocol.app/.MainActivity)/@0xb7482b1 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 09:50:09.570   831   861 V WindowManagerShell: start default transition animation, info = {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{c56a0ff u0 com.ghprotocol.app/.MainActivity)/@0x550b158 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{7cfd5e7 u0 com.ghprotocol.app/.MainActivity)/@0xb7482b1 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-25 09:50:09.985  3588  3588 D AndroidRuntime: Shutting down VM
+10-25 09:50:10.075   831   861 V WindowManagerShell: Transition requested: android.os.BinderProxy@b43547a TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=56091 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@fc4542b} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{c7f2088 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:50:10.163   524  2829 I ImeTracker: com.ghprotocol.app:fe748460: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-25 09:50:10.164   524  2829 I ImeTracker: com.ghprotocol.app:fe748460: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-25 09:50:10.208  1504  1504 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-25 09:50:10.449  2997  3016 I .ghprotocol.app: Background concurrent copying GC freed 91343(4932KB) AllocSpace objects, 26(740KB) LOS objects, 49% free, 5953KB/11MB, paused 155us,8us total 281.592ms
+10-25 09:50:10.729   524  2332 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
+10-25 09:50:10.734   524  2332 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
+10-25 09:50:10.734   524  2332 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
+10-25 09:50:10.806  3701  3701 W libxraycore.so: type=1400 audit(0.0:30): avc:  denied  { read } for  name="somaxconn" dev="proc" ino=55551 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:proc_net:s0 tclass=file permissive=0 app=com.ghprotocol.app
+10-25 09:50:11.857  3870  3870 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-25 09:50:11.864  3870  3870 I AndroidRuntime: Using default boot image
+10-25 09:50:11.864  3870  3870 I AndroidRuntime: Leaving lock profiling enabled
+10-25 09:50:12.018   524   541 V WindowManager: Sent Transition #8 createdAt=10-25 09:50:09.828 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=56091 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{c443401 Task{bc2938d #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{d0b98b1 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-25 09:50:12.538  3870  3870 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-25 09:50:12.900   524   893 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{9b5eb2 com.google.android.gm/10142} BLOCKED
+10-25 09:50:14.399   524   891 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{e724337 com.google.android.settings.intelligence/10118} BLOCKED
+10-25 09:50:14.511   524   893 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{8327af6 com.google.android.settings.intelligence/10118} BLOCKED
+10-25 09:50:14.519  3870  3870 D AndroidRuntime: Shutting down VM
+10-25 09:50:15.369  1569  1569 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is added.].
+10-25 09:50:15.759   524   594 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
+10-25 09:50:16.091   524   893 I ActivityManager: Background started FGS: Allowed [callingPackage: com.ghprotocol.app; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.ghprotocol.app/.core.VpnTunnelService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-25 09:50:16.092  2997  2997 D GhDiag  : tunnel: startTunnel called (running=false)
+10-25 09:50:16.131   524   893 I Vpn     : Established by com.ghprotocol.app on tun0
+10-25 09:50:16.131  2997  2997 D GhDiag  : tunnel: established fd={ParcelFileDescriptor: java.io.FileDescriptor@7ceea89} — relay loop started
+10-25 09:50:16.185   524  2104 I ImeTracker: com.ghprotocol.app:b74540a3: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
+10-25 09:50:16.193   524  2104 I ImeTracker: com.ghprotocol.app:b74540a3: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-25 09:50:16.213  1504  1504 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-25 09:50:16.333   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{9c92570 com.google.android.googlequicksearchbox/10132} BLOCKED
+10-25 09:50:16.334   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{8ad40e9 com.android.camera2/10146} BLOCKED
+10-25 09:50:16.334   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{6ee6e2b com.google.android.gm/10142} BLOCKED
+10-25 09:50:16.335   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{7232421 com.google.android.devicelockcontroller/10170} BLOCKED
+10-25 09:50:16.335   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{17ea046 com.google.android.rkpdapp/10172} BLOCKED
+10-25 09:50:16.335   524   576 I AppsFilter: interaction: PackageSetting{97dd90 com.ghprotocol.app/10192} -> PackageSetting{6493ede com.google.android.projection.gearhead/10123} BLOCKED
+10-25 09:50:17.359  2997  4329 D GhDiag  : tun pkt proto=1 dst=172.217.x.x len=28
+10-25 09:50:17.384  2997  4329 D GhDiag  : tun pkt proto=17 dst=172.217.x.x len=1278
+10-25 09:50:17.391  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.394  2997  4371 D GhDiag  : relay tcp 10.8.x.x:853 -> socks5 ok
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=40
+10-25 09:50:17.394  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=270
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.395  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.403  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.409  2997  4329 D GhDiag  : tun pkt proto=17 dst=10.8.x.x len=64
+10-25 09:50:17.417  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.430  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=69
+10-25 09:50:17.438  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=144
+10-25 09:50:17.475  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=346
+10-25 09:50:17.499  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=440
+10-25 09:50:17.538  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=61
+10-25 09:50:17.624  2997  4329 D GhDiag  : tun pkt proto=6 dst=142.251.x.x len=40
+10-25 09:50:17.644  2997  4329 D GhDiag  : tun pkt proto=17 dst=142.251.x.x len=78
+10-25 09:50:17.700  2997  4329 D GhDiag  : tun pkt proto=6 dst=10.8.x.x len=60
+10-25 09:50:18.923  2997  4375 D GhDiag  : relay dns -> 164B ok
+10-25 09:50:18.925  2997  4374 D GhDiag  : relay dns -> 260B ok
+10-25 09:50:18.948  2997  4566 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.283  2997  4624 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.347  2997  4423 D GhDiag  : relay dns -> 177B ok
+10-25 09:50:19.362  2997  4425 D GhDiag  : relay dns -> 273B ok
+10-25 09:50:19.378  2997  4642 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.415  2997  4643 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:19.421  1448  3179 I BlockstoreStorage: Clearing Blockstore Data for package com.ghprotocol.app [CONTEXT service_id=258 ]
+10-25 09:50:19.492  1394  4051 I FontLog : Package com.ghprotocol.app has no metadata [CONTEXT service_id=132 ]
+10-25 09:50:19.511  2997  4434 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:19.511  2997  4435 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:19.523  2997  4654 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
+10-25 09:50:20.512  2997  4578 D GhDiag  : relay dns -> 160B ok
+10-25 09:50:20.531  2997  4580 D GhDiag  : relay dns -> 256B ok
+10-25 09:50:20.664  2997  4598 D GhDiag  : relay dns -> 112B ok
+10-25 09:50:20.674  2997  4597 D GhDiag  : relay dns -> 44B ok
+10-25 09:50:20.686  1569  1569 I AiAiEcho: AppFetcherImpl onPackageChanged com.ghprotocol.app.
+10-25 09:50:20.688  1569  3379 I AiAiEcho: AppIndexer Package:[com.ghprotocol.app] UserProfile:[0] Enabled:[true].
+10-25 09:50:20.688  1569  3379 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is updated.].
+10-25 09:50:22.006  2997  3016 I .ghprotocol.app: Background young concurrent copying GC freed 60413(5327KB) AllocSpace objects, 0(0B) LOS objects, 42% free, 6824KB/11MB, paused 70us,16us total 124.460ms
+10-25 09:50:22.233  2997  4732 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.505  2997  4746 D GhDiag  : relay tcp 172.217.x.x:443 -> socks5 ok
+10-25 09:50:22.775  2997  4758 D GhDiag  : relay tcp 1.1.x.x:443 -> socks5 ok
+10-25 09:50:23.044  2997  4703 D GhDiag  : relay dns -> 57B ok
+10-25 09:50:23.044  2997  4704 D GhDiag  : relay dns -> 45B ok
+10-25 09:50:23.074  2997  4775 D GhDiag  : relay tcp 142.251.x.x:443 -> socks5 ok
 
 ### e2e-xray-err.log (Xray core)
 
