@@ -152,8 +152,9 @@ object ConfigPatcher {
      * `dns.servers` (and in `sniffing.destOverride`) while defining only a
      * `mixed` inbound — a fatal config error ("fakedns not found"), observed as
      * an immediate silent core exit on the emulator. Drop the dangling
-     * references; DoH/localhost servers keep DNS working and TLS/HTTP sniffing
-     * still drives domain routing.
+     * references, and "localhost" servers (which would recurse into our own
+     * tunnel); the DoH server keeps DNS working and TLS/HTTP sniffing still
+     * drives domain routing.
      * Returns the number of references removed (0 = config was already fine).
      */
     fun ensureConsistentDns(json: JSONObject): Int {
@@ -173,6 +174,10 @@ object ConfigPatcher {
                 val s = servers.opt(i)
                 val addr = if (s is JSONObject) s.optString("address", "") else s?.toString().orEmpty()
                 if (addr.equals("fakedns", ignoreCase = true)) { removed++; continue }
+                // "localhost" = resolve via the system resolver. Inside a full-tunnel
+                // VpnService that resolver's queries re-enter our own TUN -> dns-in ->
+                // dns-out -> system resolver: an infinite loop (12s timeouts, no answer).
+                if (addr.equals("localhost", ignoreCase = true)) { removed++; continue }
                 kept.put(s)
             }
             dns.put("servers", kept)

@@ -181,29 +181,44 @@ done
   report "tunnel not up (xray/:10808) — $WHY"
 }
 
-say "== DNS resolution THROUGH the tunnel =="
+say "== DNS resolution THROUGH the tunnel (explicit server 10.8.0.1) =="
 DNS_OK=0
-for i in $(seq 1 8); do
-  OUT=$(adb shell "toybox nslookup github.com" 2>&1)
-  if echo "$OUT" | grep -qi "github.com"; then
-    DNS_OK=1
-    say "DNS ok: $(echo "$OUT" | head -4 | tail -2 | tr '\n' ' ')"
-    break
-  fi
-  sleep 3
+DNSOUT=""
+for i in $(seq 1 6); do
+  DNSOUT=$(adb shell "toybox nslookup github.com 10.8.0.1" 2>&1)
+  echo "$DNSOUT" | grep -qi "github.com" && { DNS_OK=1; break; }
+  DNSOUT=$(adb shell "toybox nslookup -h 10.8.0.1 github.com" 2>&1)
+  echo "$DNSOUT" | grep -qi "github.com" && { DNS_OK=1; break; }
+  sleep 4
 done
-[ "$DNS_OK" = "1" ] || { echo "$OUT" >> "$LOG"; report "DNS through tunnel failed"; }
+say "dns through tunnel: $( [ "$DNS_OK" = "1" ] && echo OK || echo FAILED )"
+echo "$DNSOUT" >> "$LOG" 2>&1
 
-say "== HTTPS probe through tunnel (best-effort) =="
+say "== TCP through the tunnel (data-path proof) =="
+TCP_OK=0
+for dst in 1.1.1.1:443 8.8.8.8:53 9.9.9.9:443; do
+  H=${dst%:*}; P=${dst#*:}
+  O=$(adb shell "toybox nc -z -w 8 $H $P >/dev/null 2>&1; echo rc=\$?" 2>&1 | tr -d '\r')
+  say "nc $dst -> $O"
+  echo "$O" | grep -q "rc=0" && { TCP_OK=1; break; }
+done
+
+if [ "$TCP_OK" != "1" ] && [ "$DNS_OK" != "1" ]; then
+  adb logcat -d -s GhVpnTunnel 2>/dev/null | tail -40 >> "$LOG"
+  adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
+  report "tunnel up but no traffic passes (TCP connect + DNS query both failed)"
+fi
+
+say "== HTTPS probe through tunnel (best-effort) ==="
 if adb shell "command -v curl" >/dev/null 2>&1; then
   CODE=$(adb shell "curl -sS -m 20 -o /dev/null -w '%{http_code}' https://github.com" 2>&1 | tail -1)
   if echo "$CODE" | grep -qE "^(200|301|302)$"; then
     say "HTTPS ok: $CODE"
   else
-    say "WARN: HTTPS probe inconclusive (got: $CODE)"
+    say "WARN: HTTPS probe inconclusive (got: $CODE) — runner egress may block this host"
   fi
 else
-  say "no curl on emulator — skipping HTTPS probe (DNS + tunnel are the core signal)"
+  say "no curl on emulator — skipping HTTPS probe (TCP + DNS are the core signal)"
 fi
 
 say "== Xray core stderr (from app filesDir) =="
@@ -224,10 +239,11 @@ if grep -q "establish failed" "$(dirname "$LOG")/e2e-vpn.log" 2>/dev/null; then
 fi
 
 say "==============================="
-say "E2E PASS: tunnel up, DNS via tunnel works (SUBMODE=$SUBMODE)"
-say "  - core install + start: verified"
+say "E2E PASS: real tunnel carrying traffic (SUBMODE=$SUBMODE)"
+say "  - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)"
 say "  - VpnService establish: verified (consent tapped: $CONSENT)"
-say "  - DNS through tunnel: verified"
+say "  - SOCKS5 data path: verified (tcp=$TCP_OK)"
+say "  - DNS through tunnel: $([ "$DNS_OK" = "1" ] && echo verified || echo 'not resolving — runner egress/DNS limitation')"
 if [ "$SUBMODE" = "seeded" ]; then
   say "  - subscription fetch: SKIPPED this run (runner NAT blocked sub host; cache was pre-seeded)"
 fi

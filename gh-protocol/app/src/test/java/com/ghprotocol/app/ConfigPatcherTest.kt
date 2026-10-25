@@ -98,9 +98,9 @@ class ConfigPatcherTest {
                  "sniffing": {"enabled": true, "destOverride": ["fakedns", "tls", "http"]}}],
                 "dns": {"servers": ["fakedns", "https://cloudflare-dns.com/dns-query", "localhost"]}}"""
         )
-        assertEquals(2, ConfigPatcher.ensureConsistentDns(c)) // fakedns server + 1 destOverride
+        assertEquals(3, ConfigPatcher.ensureConsistentDns(c)) // fakedns + localhost + 1 destOverride
         val servers = c.getJSONObject("dns").getJSONArray("servers")
-        assertEquals(2, servers.length())
+        assertEquals(1, servers.length())
         assertEquals("https://cloudflare-dns.com/dns-query", servers.getString(0))
         val ov = c.getJSONArray("inbounds").getJSONObject(0)
             .getJSONObject("sniffing").getJSONArray("destOverride")
