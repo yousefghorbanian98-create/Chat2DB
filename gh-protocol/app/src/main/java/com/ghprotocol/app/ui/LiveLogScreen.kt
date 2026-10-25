@@ -116,7 +116,19 @@ fun LiveLogScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            // 1. Real-time Traffic & Ping Telemetry Cards (Psiphon / Hiddify style)
+            // 1. n8n-Inspired 5-Node Live Pipeline + Waveform Oscilloscope
+            N8nPipelineFlowCard(
+                telemetry = telemetry,
+                isConnected = ui.connectPhase == ConnectPhase.CONNECTED
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            LiveTrafficWaveformCard(telemetry = telemetry)
+
+            Spacer(Modifier.height(10.dp))
+
+            // 2. Real-time Traffic & Ping Telemetry Cards (Psiphon / Hiddify style)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)

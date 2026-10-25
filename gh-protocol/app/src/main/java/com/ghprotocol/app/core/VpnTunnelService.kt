@@ -522,10 +522,12 @@ class VpnTunnelService : VpnService() {
         if (udpPacket.size <= ihl + 8 || clientIp.isEmpty() || clientPort == 0) return
         val payload = udpPacket.copyOfRange(ihl + 8, udpPacket.size)
         Thread({
-            val answer = queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 3500)
-                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 3500)
-                ?: queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 3500)
-                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { !isPoisonedDnsAnswer(it) }
+            val answer = queryUdpDns(DNS_UPSTREAM_HOST, DNS_UPSTREAM_PORT, payload, protectSocket = false, timeoutMs = 3000)
+                ?.takeIf { isUsableDnsResponse(it) }
+                ?: queryTcpDnsOverSocks5("1.1.1.1", 53, payload, timeoutMs = 3000)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryTcpDnsOverSocks5("8.8.8.8", 53, payload, timeoutMs = 3000)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("1.1.1.1", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { isUsableDnsResponse(it) }
+                ?: queryUdpDns("8.8.8.8", 53, payload, protectSocket = true, timeoutMs = 2000)?.takeIf { isUsableDnsResponse(it) }
             if (answer != null && answer.isNotEmpty()) {
                 val reply = Socks5.buildUdpSegment(
                     srcIp = dnsServerIp, srcPort = 53,
@@ -537,6 +539,17 @@ class VpnTunnelService : VpnService() {
                 writeTun(tunOut, reply)
             }
         }, "gh-dns-$clientPort").apply { isDaemon = true; start() }
+    }
+
+    /**
+     * Reject DNS SERVFAIL (rcode=2), REFUSED (rcode=5), truncated headers,
+     * and Iranian ISP DNS-poisoning responses (10.10.34.*).
+     */
+    private fun isUsableDnsResponse(ans: ByteArray): Boolean {
+        if (ans.size < 12) return false
+        val rcode = ans[3].toInt() and 0x0F
+        if (rcode == 2 || rcode == 4 || rcode == 5) return false
+        return !isPoisonedDnsAnswer(ans)
     }
 
     /** RFC 1035 §4.2.2 DNS-over-TCP (2-byte big-endian length prefix) via Xray SOCKS5. */

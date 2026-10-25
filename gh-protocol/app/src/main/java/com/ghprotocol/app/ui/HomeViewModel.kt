@@ -496,16 +496,28 @@ class HomeViewModel(
             val scanner = CleanIpScanner()
             val report = scanner.scan()
             val best = report.best
+            val sub = _ui.value.subscription ?: repository.cachedAnyAge() ?: repository.embeddedFallback()
             if (best != null) {
                 scanner.saveBest(best.ip, app)
                 _ui.update { it.copy(cleanIp = best.ip, scanResults = report.healthy) }
                 TunnelLogBuffer.log(
                     LogLevel.SUCCESS,
                     LogCategory.PROBE,
-                    "IP تمیز جایگزین شد: ${best.ip} (${best.latencyMs} ms) — بازنشانی هستهٔ Xray...",
-                    "Auto-Heal applying cleanIp=${best.ip} (${best.latencyMs}ms)"
+                    "IP تمیز کلودفلر برای DoH/پروکسی تنظیم شد: ${best.ip} (${best.latencyMs} ms) — بازنشانی هستهٔ Xray...",
+                    "Auto-Heal applying smart cleanIp=${best.ip} (${best.latencyMs}ms)"
                 )
-                val sub = _ui.value.subscription ?: repository.cachedAnyAge() ?: repository.embeddedFallback()
+            } else if ((sub?.entries?.size ?: 0) > 1) {
+                val nextIdx = (_ui.value.activeEntryIndex + 1) % sub!!.entries.size
+                prefs.edit().putInt("active_entry", nextIdx).apply()
+                _ui.update { it.copy(activeEntryIndex = nextIdx) }
+                TunnelLogBuffer.log(
+                    LogLevel.INFO,
+                    LogCategory.STEP,
+                    "سوییچ خودکار به مسیر جایگزین (${sub.entries[nextIdx].remarks})...",
+                    "Auto-Heal switching route to index=$nextIdx (${sub.entries[nextIdx].remarks})"
+                )
+            }
+            if (sub != null) {
                 val cfgFile = writeRuntimeConfig(sub)
                 core.stop()
                 core.start(cfgFile)
@@ -513,13 +525,14 @@ class HomeViewModel(
                 val secondCheck = TunnelVerifier.verifyThroughSocks5(timeoutMs = 4500)
                 TunnelLogBuffer.ingestXrayLogTail(xrayOut)
                 if (secondCheck.ok) {
-                    TunnelLogBuffer.updatePingAndProfile(secondCheck.latencyMs, cleanIp = best.ip)
-                    TunnelLogBuffer.updateStep(5, "متصل با IP تمیز ${best.ip} (پینگ: ${secondCheck.latencyMs} ms)", isAutoHealing = false)
+                    val activeIp = best?.ip ?: _ui.value.cleanIp
+                    TunnelLogBuffer.updatePingAndProfile(secondCheck.latencyMs, cleanIp = activeIp)
+                    TunnelLogBuffer.updateStep(5, "متصل و خودترمیمی‌شده (پینگ: ${secondCheck.latencyMs} ms)", isAutoHealing = false)
                     TunnelLogBuffer.log(
                         LogLevel.SUCCESS,
                         LogCategory.PROBE,
-                        "✓ خودترمیمی (Auto-Heal) موفق بود! اتصال با IP تمیز ${best.ip} برقرار شد (${secondCheck.latencyMs} ms)",
-                        "Auto-Heal PASS via cleanIp=${best.ip} latency=${secondCheck.latencyMs}ms"
+                        "✓ خودترمیمی (Auto-Heal) موفق بود! عبور دوطرفهٔ ترافیک تایید شد (${secondCheck.latencyMs} ms)",
+                        "Auto-Heal PASS via cleanIp=${activeIp ?: "default"} latency=${secondCheck.latencyMs}ms"
                     )
                     _ui.update { it.copy(verifiedPingMs = secondCheck.latencyMs, isAutoHealing = false) }
                     return@launch
@@ -583,10 +596,10 @@ private fun String.activeEntryConfigJson(index: Int, cleanIp: String?, tcpFirst:
     return try {
         val arr = org.json.JSONArray(this)
         val c = arr.getJSONObject(index.coerceIn(0, (arr.length() - 1).coerceAtLeast(0)))
-        if (cleanIp != null) ConfigPatcher.patchCleanEgress(c, cleanIp)
         if (tcpFirst) ConfigPatcher.tcpFirstProfile(c)
         ConfigPatcher.addLocalDnsInbound(c)
         ConfigPatcher.ensureConsistentDns(c)
+        if (!cleanIp.isNullOrBlank()) ConfigPatcher.applySmartCleanIp(c, cleanIp)
         c.toString()
     } catch (e: Exception) {
         this

@@ -244,82 +244,38 @@ private fun WorldClassConnectHub(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // 1. Honest Network Status Card
         StatusCard(state = ui.network)
 
-        // 2. Hero Circular Connect Button with 5-Step Progress Ring (Defyx / Outline / 21st.dev style)
-        Box(
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .size(184.dp)
-                .scale(heroScale),
-            contentAlignment = Alignment.Center
-        ) {
-            val stepProgress = when (ui.connectPhase) {
-                ConnectPhase.IDLE -> 0.15f
-                ConnectPhase.CHECKING -> 0.30f
-                ConnectPhase.PREPARING -> 0.55f
-                ConnectPhase.TUNNELING -> 0.80f
-                ConnectPhase.CONNECTED -> 1.0f
-                ConnectPhase.FAILED -> 1.0f
-            }
-            CircularProgressIndicator(
-                progress = { stepProgress },
-                modifier = Modifier.size(180.dp),
-                color = ringColor,
-                strokeWidth = 6.dp,
-                trackColor = ringColor.copy(alpha = 0.14f)
-            )
-            Box(
-                modifier = Modifier
-                    .size(152.dp)
-                    .clip(CircleShape)
-                    .background(ringColor.copy(alpha = 0.14f))
-                    .border(2.dp, ringColor.copy(alpha = 0.55f), CircleShape)
-                    .clickable {
-                        if (isConnected) onDisconnect() else viewModel.onConnectTap()
-                    }
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = when {
-                            isConnected -> "قطع اتصال"
-                            isBusy -> "در حال اتصال..."
-                            ui.connectPhase == ConnectPhase.FAILED -> "تلاش مجدد"
-                            else -> "اتصال"
-                        },
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = ringColor,
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = when {
-                            isConnected && ui.verifiedPingMs != null -> "${ui.verifiedPingMs} ms · تاییدشده"
-                            isConnected && ui.isAutoHealing -> "Auto-Heal..."
-                            isConnected -> "تونل فعال"
-                            isBusy -> "گام ${telemetry.stepIndex} از ۵"
-                            else -> "یک تپ · بدون سرور"
-                        },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
+        // 2. Hero Orb Button with Particle Field & Rotating SweepGradient Ring (Particles Casberry + Vengeance UI + Framer Spring)
+        OrbParticleHeroButton(
+            phase = ui.connectPhase,
+            verifiedPingMs = ui.verifiedPingMs,
+            isAutoHealing = ui.isAutoHealing,
+            stepIndex = telemetry.stepIndex,
+            onTapConnect = { viewModel.onConnectTap() },
+            onTapDisconnect = onDisconnect,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
 
-        // 3. Psiphon-style Mini Live-Log Strip (tappable -> jumps to Live Log tab)
+        // 3. n8n-Inspired 5-Node Live Data-Flow Pipeline (tappable -> jumps to Live Log tab)
+        N8nPipelineFlowCard(
+            telemetry = telemetry,
+            isConnected = isConnected,
+            onClick = onOpenLogs
+        )
+
+        // 4. Live Dual-Wave Traffic Oscilloscope (Upload Cyan + Download Emerald)
+        LiveTrafficWaveformCard(telemetry = telemetry)
+
+        // 5. Psiphon-style Mini Live-Log Strip (tappable -> jumps to Live Log tab)
         val latestLog = logs.lastOrNull()
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onOpenLogs),
+                .springPressClickable(onClick = onOpenLogs),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)),
             shape = RoundedCornerShape(14.dp)
         ) {
@@ -336,10 +292,11 @@ private fun WorldClassConnectHub(
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = telemetry.stepTitleFa,
+                        text = latestLog?.messageFa ?: telemetry.stepTitleFa,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
                     )
                     Text(
                         text = latestLog?.let { "[${it.timeText}] ${it.rawTech}" }
@@ -355,7 +312,7 @@ private fun WorldClassConnectHub(
             }
         }
 
-        // 4. Bento Grid: Active Route/Clean IP + Live Traffic & URL Ping Test
+        // 6. Bento Grid: Active Route/Clean IP + Live Traffic & URL Ping Test (with 21st.dev Spring Press)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -363,19 +320,19 @@ private fun WorldClassConnectHub(
             Card(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable(onClick = onOpenRadar),
+                    .springPressClickable(onClick = onOpenRadar),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text("مسیر و IP تمیز", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("مسیر و IP تمیز DoH", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(4.dp))
                     val activeRemark = ui.subscription?.entries?.getOrNull(ui.activeEntryIndex)?.remarks
                         ?: ui.subscription?.entries?.firstOrNull()?.remarks
                         ?: "Serverless-v52"
                     Text(activeRemark, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, maxLines = 1)
                     Text(
-                        text = "IP: ${ui.cleanIp ?: "خودکار (Auto)"}",
+                        text = "IP: ${ui.cleanIp ?: "خودکار (1.1.1.1)"}",
                         style = MaterialTheme.typography.labelSmall,
                         color = GhBlue
                     )
@@ -385,12 +342,12 @@ private fun WorldClassConnectHub(
             Card(
                 modifier = Modifier
                     .weight(1f)
-                    .clickable { viewModel.runUrlPingTest() },
+                    .springPressClickable { viewModel.runUrlPingTest() },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)),
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Column(Modifier.padding(14.dp)) {
-                    Text("تست پینگ و ترافیک", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("تست پینگ واقعی تونل", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = when {

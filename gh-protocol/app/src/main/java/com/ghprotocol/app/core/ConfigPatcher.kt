@@ -74,8 +74,54 @@ object ConfigPatcher {
     }
 
     /**
+     * Smart Clean-IP application (v1.2):
+     * - For proxy outbounds (`vless`, `trojan`, `vmess`, `shadowsocks` with `vnext`/`servers`),
+     *   replaces the server `address` with [cleanIp].
+     * - For `direct`/`freedom` outbounds (`Serverless-for-Iran.json`'s `tcp-fragment` and
+     *   `tcp-fragment-tls`), NEVER sets `settings.address` (which would hijack all non-Cloudflare
+     *   internet traffic to Cloudflare and cause `Down=0 B`); instead injects [cleanIp] into
+     *   `dns.hosts` for `cloudflare-dns.com` and `challenges.cloudflare.com` so DoH uses the
+     *   fastest verified Clean IP while `tcp-fragment-tls` connects to each site's real IP.
+     */
+    fun applySmartCleanIp(json: JSONObject, cleanIp: String): Int {
+        var patched = 0
+        val outbounds = json.optJSONArray("outbounds")
+        if (outbounds != null) {
+            for (i in 0 until outbounds.length()) {
+                val ob = outbounds.getJSONObject(i)
+                val proto = ob.optString("protocol", "").lowercase()
+                val settings = ob.optJSONObject("settings")
+                val vnext = settings?.optJSONArray("vnext")
+                val servers = settings?.optJSONArray("servers")
+                when {
+                    vnext != null && vnext.length() > 0 -> {
+                        vnext.getJSONObject(0).put("address", cleanIp)
+                        patched++
+                    }
+                    servers != null && servers.length() > 0 -> {
+                        servers.getJSONObject(0).put("address", cleanIp)
+                        patched++
+                    }
+                    proto == "direct" || proto == "freedom" -> {
+                        // Ensure direct/fragment outbounds never hijack non-Cloudflare destination IPs
+                        settings?.remove("address")
+                    }
+                }
+            }
+        }
+        val dns = json.optJSONObject("dns") ?: JSONObject().also { json.put("dns", it) }
+        val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
+        hosts.put("cloudflare-dns.com", cleanIp)
+        hosts.put("challenges.cloudflare.com", cleanIp)
+        hosts.put("one.one.one.one", cleanIp)
+        patched++
+        return patched
+    }
+
+    /**
      * F-15: TCP-first profile — move TCP fragment rules ahead of UDP noise rules
-     * in the routing table (pure reorder; content untouched).
+     * in the routing table when `udp-noises` is present, without moving catch-all
+     * `0.0.0.0/0` rules ahead of `dns-out`, `10.10.34.0/24`, or `domain:ir`.
      */
     fun tcpFirstProfile(json: JSONObject): Boolean {
         val routing = json.optJSONObject("routing") ?: return false
@@ -89,6 +135,10 @@ object ConfigPatcher {
                 else -> emptyList()
             }
             r to tags
+        }
+        val hasUdpNoises = tagged.any { (_, tags) -> tags.any { it.startsWith("udp-noise") } }
+        if (!hasUdpNoises) {
+            return true
         }
         val scored = tagged.map { (r, tags) ->
             val score = when {
@@ -189,11 +239,18 @@ object ConfigPatcher {
             }
             dns.put("servers", kept)
             val hosts = dns.optJSONObject("hosts") ?: JSONObject().also { dns.put("hosts", it) }
-            if (!hosts.has("cloudflare-dns.com")) hosts.put("cloudflare-dns.com", "1.1.1.1")
+            val cfHost = hosts.optString("cloudflare-dns.com", "")
+            val cfIp = if (cfHost.isNotBlank() && cfHost.first().isDigit()) cfHost else "1.1.1.1"
+            hosts.put("cloudflare-dns.com", cfIp)
+            val chHost = hosts.optString("challenges.cloudflare.com", "")
+            if (chHost.isBlank() || !chHost.first().isDigit()) {
+                hosts.put("challenges.cloudflare.com", cfIp)
+            }
             if (!hosts.has("dns.google")) hosts.put("dns.google", "8.8.8.8")
         }
         for (i in 0 until ibs.length()) {
             val sniff = ibs.getJSONObject(i).optJSONObject("sniffing") ?: continue
+            sniff.put("routeOnly", true)
             val ov = sniff.optJSONArray("destOverride") ?: continue
             val kept = JSONArray()
             for (j in 0 until ov.length()) {
@@ -202,6 +259,16 @@ object ConfigPatcher {
                 kept.put(v)
             }
             sniff.put("destOverride", kept)
+        }
+        val obs = json.optJSONArray("outbounds")
+        if (obs != null) {
+            for (i in 0 until obs.length()) {
+                val ob = obs.getJSONObject(i)
+                val he = ob.optJSONObject("streamSettings")
+                    ?.optJSONObject("sockopt")
+                    ?.optJSONObject("happyEyeballs")
+                he?.put("prioritizeIPv6", false)
+            }
         }
         return removed
     }

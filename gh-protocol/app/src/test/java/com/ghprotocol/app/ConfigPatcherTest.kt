@@ -197,4 +197,68 @@ class ConfigPatcherTest {
         assertEquals(4096L, t.bytesDown)
         assertEquals(3, t.activeTcpSessions)
     }
+
+    @Test fun serverlessForIranConfigFixesDohLoopAndPreservesDirectOutbounds() {
+        val serverless = JSONObject(
+            """
+            {
+              "dns": {
+                "hosts": {
+                  "geosite:category-ads-all": "#3",
+                  "cloudflare-dns.com": "challenges.cloudflare.com"
+                },
+                "servers": [
+                  {"address": "fakedns"},
+                  {"tag": "no-filter-dns", "address": "https://cloudflare-dns.com/dns-query"},
+                  {"tag": "domestic-dns", "address": "localhost"}
+                ]
+              },
+              "inbounds": [{
+                "tag": "mixed-in",
+                "port": 10808,
+                "protocol": "mixed",
+                "sniffing": {"enabled": true, "destOverride": ["fakedns", "tls", "http"], "routeOnly": false}
+              }],
+              "outbounds": [
+                {
+                  "tag": "tcp-fragment-tls",
+                  "protocol": "direct",
+                  "streamSettings": {
+                    "finalmask": {"tcp": [{"type": "fragment"}]},
+                    "sockopt": {"happyEyeballs": {"prioritizeIPv6": true}}
+                  }
+                }
+              ],
+              "routing": {
+                "rules": [
+                  {"outboundTag": "dns-out", "port": 53},
+                  {"outboundTag": "tcp-fragment-tls", "network": "tcp", "port": "443", "ip": ["0.0.0.0/0"]}
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+        ConfigPatcher.tcpFirstProfile(serverless)
+        ConfigPatcher.ensureConsistentDns(serverless)
+        ConfigPatcher.applySmartCleanIp(serverless, "172.64.33.229")
+
+        // 1. DoH hosts must resolve to numeric clean IP, breaking the challenges.cloudflare.com loop
+        val hosts = serverless.getJSONObject("dns").getJSONObject("hosts")
+        assertEquals("172.64.33.229", hosts.getString("cloudflare-dns.com"))
+        assertEquals("172.64.33.229", hosts.getString("challenges.cloudflare.com"))
+
+        // 2. Direct/fragment outbound must NOT have settings.address hijacked to Cloudflare IP
+        val fragOb = serverless.getJSONArray("outbounds").getJSONObject(0)
+        assertFalse(fragOb.optJSONObject("settings")?.has("address") == true)
+
+        // 3. sniffing.routeOnly=true and happyEyeballs.prioritizeIPv6=false
+        val sniff = serverless.getJSONArray("inbounds").getJSONObject(0).getJSONObject("sniffing")
+        assertTrue(sniff.getBoolean("routeOnly"))
+        val he = fragOb.getJSONObject("streamSettings").getJSONObject("sockopt").getJSONObject("happyEyeballs")
+        assertFalse(he.getBoolean("prioritizeIPv6"))
+
+        // 4. Routing order preserved (dns-out stays ahead of 0.0.0.0/0 catch-all)
+        val rules = serverless.getJSONObject("routing").getJSONArray("rules")
+        assertEquals("dns-out", rules.getJSONObject(0).getString("outboundTag"))
+    }
 }
