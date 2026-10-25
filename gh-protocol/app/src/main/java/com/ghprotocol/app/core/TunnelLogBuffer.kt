@@ -202,6 +202,9 @@ object TunnelLogBuffer {
 
     // ---------------------------------------------------------------- export / ingest
 
+    /** Name used by the log screen (kept stable for the existing UI). */
+    fun exportAllText(): String = exportText()
+
     fun exportText(): String {
         val t = _telemetry.value
         val header = buildString {

@@ -68,7 +68,9 @@ class DohTransport(
                 raw.soTimeout = timeoutMs
                 raw.tcpNoDelay = true
                 val ssl = sslSocketFactory().createSocket(raw, endpoint.host, endpoint.port, true) as SSLSocket
-                ssl.use { tls ->
+                // No `break`/`continue` inside the inline lambda: the outcome is returned as a
+                // value and the loop decides what to do next (Kotlin blocks non-local flow).
+                val body: ByteArray? = ssl.use { tls ->
                     tls.soTimeout = timeoutMs
                     if (verifyHostname) {
                         val params = tls.sslParameters
@@ -89,8 +91,9 @@ class DohTransport(
                     out.write(request)
                     out.write(query)
                     out.flush()
-                    val body = readHttpBody(tls.getInputStream(), timeoutMs, failures, ip)
-                    if (body == null) continue
+                    readHttpBody(tls.getInputStream(), timeoutMs, failures, ip)
+                }
+                if (body != null) {
                     return DnsTransportResult(body, "ok ip=$ip sni=${endpoint.host}", elapsed())
                 }
             } catch (e: Exception) {
