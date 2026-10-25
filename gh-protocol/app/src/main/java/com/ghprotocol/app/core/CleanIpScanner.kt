@@ -31,24 +31,6 @@ class CleanIpScanner(
 
     companion object {
         val DEFAULT_POOL: List<String> = CleanIpPool.CLOUDFLARE_EDGES
-
-        /** v1.5's truncated ClientHello is kept only so tests can assert it is *not* proof. */
-        internal val MINIMAL_CLIENT_HELLO = byteArrayOf(
-            0x16, 0x03, 0x01, 0x00, 0x2E,
-            0x01, 0x00, 0x00, 0x2A,
-            0x03, 0x03,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-            0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
-            0x00,
-            0x00, 0x08,
-            0xC0.toByte(), 0x2F.toByte(),
-            0xC0.toByte(), 0x2B.toByte(),
-            0x00, 0x9C.toByte(),
-            0x13, 0x01,
-            0x01, 0x00
-        )
     }
 
     data class ScanResult(val ip: String, val latencyMs: Long)
@@ -102,10 +84,4 @@ class CleanIpScanner(
             examined = detailed.results.size
         )
     }
-
-    /**
-     * Legacy synchronous probe hook: kept for the UI preview path, same acceptance rules.
-     * `probeFn` returns true only when the candidate passed the full TLS/HTTP/CF checks.
-     */
-    fun probeOne(ip: String): IpProbeResult = probe.probe(ip)
 }

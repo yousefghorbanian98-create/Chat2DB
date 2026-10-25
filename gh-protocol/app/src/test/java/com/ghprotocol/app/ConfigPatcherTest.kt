@@ -6,6 +6,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -308,6 +309,43 @@ class ConfigPatcherTest {
                 !audit.contains("doh_bootstrap_ip_blocked_in_ir")
             )
             assertTrue("audit[$index] must not keep fakedns: $audit", !audit.contains("fakedns"))
+        }
+    }
+
+    /**
+     * Evidence for requirement 3: print the **effective** DNS configuration of both embedded
+     * profiles after the full runtime transform, so every CI run contains the real numbers
+     * (`servers`, `hosts`, `doh`, `dohIps`, `dohOutbound`) instead of a claim in prose.
+     * The Gradle test task shows standard streams, so this lands in the CI log verbatim.
+     */
+    @Test fun printsEffectiveDnsPlanForBothEmbeddedProfiles() {
+        val raw = com.ghprotocol.app.domain.Subscription.EMBEDDED_FALLBACK_JSON
+        for (index in 0..1) {
+            val cfg = ConfigPatcher.runtimeConfigForEntry(raw, index, cleanIp = null).getOrThrow()
+            val plan = ConfigPatcher.effectiveDnsPlan(cfg)
+            val remarks = cfg.optString("remarks", "entry-$index")
+            val dnsInbound = cfg.optJSONArray("inbounds")
+                ?.let { arr ->
+                    (0 until arr.length()).mapNotNull { arr.optJSONObject(it) }
+                        .firstOrNull { it.optString("tag") == "dns-in" }
+                }
+            println("=== profile[$index] $remarks ===")
+            println("  plan      : " + plan.describe())
+            println("  dns.inbound: " + (dnsInbound?.toString() ?: "none"))
+            println("  dns.hosts  : " + cfg.optJSONObject("dns")?.optJSONObject("hosts")?.toString())
+            println("  dns.servers: " + cfg.optJSONObject("dns")?.optJSONArray("servers")?.toString())
+            // The transaction that really becomes DoH must be identifiable from the plan alone.
+            assertEquals("https://" + ConfigPatcher.DOH_HOST + "/dns-query", plan.dohEndpoints.firstOrNull())
+            assertEquals(listOf(ConfigPatcher.DOH_BOOTSTRAP_IPV4), plan.dohBootstrapIps)
+            assertNotNull("profile[$index] must route DoH through a named outbound", plan.dohOutbound)
+            assertNotNull("profile[$index] must expose a local dns inbound for the tunnel", dnsInbound)
+            assertFalse("profile[$index] must not use fakedns", plan.servers.any { it == "fakedns" })
+            assertEquals(
+                "profile[$index] dns-in must be a loopback dokodemo-door on " + ConfigPatcher.DNS_IN_PORT,
+                "dokodemo-door",
+                dnsInbound?.optString("protocol")
+            )
+            assertEquals("127.0.0.1", dnsInbound?.optString("listen"))
         }
     }
 

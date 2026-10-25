@@ -32,6 +32,9 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.testLogging {
+                    // Requirement-3 evidence (effective fragA/fragB DNS plan) is printed from
+                    // ConfigPatcherTest; keep standard streams so it appears in the CI log.
+                    showStandardStreams = true
                     events("failed")
                     exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
                 }
