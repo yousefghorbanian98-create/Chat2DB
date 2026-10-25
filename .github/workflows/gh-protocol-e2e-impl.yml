@@ -53,9 +53,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: /usr/local/lib/android/sdk/system-images
-          key: gh-protocol-android-34-x86_64-v1-${{ github.run_id }}
+          key: gh-protocol-android-34-x86_64-gms-v1-${{ github.run_id }}
           restore-keys: |
-            gh-protocol-android-34-x86_64-v1-
+            gh-protocol-android-34-x86_64-gms-v1-
 
       - name: "Pre-flight: KVM check + pre-install emulator SDK (diagnostic)"
         # Known failure mode (observed 2026-10-24): runners without /dev/kvm make
@@ -91,7 +91,7 @@ jobs:
           yes | "$SM" --licenses > /dev/null 2>&1 || true
           "$SM" --install \
             'build-tools;37.0.0' platform-tools "platforms;android-34" \
-            'emulator' 'system-images;android-34;default;x86_64' > /tmp/sm.log 2>&1
+            'emulator' 'system-images;android-34;google_apis;x86_64' > /tmp/sm.log 2>&1
           RC=$?
           if [ $RC -eq 0 ]; then
             echo "sdk pre-install OK: $(du -sh "$ANDROID_HOME/system-images" 2>/dev/null | cut -f1) system-images" >> "$DIAG"
@@ -122,7 +122,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: /usr/local/lib/android/sdk/system-images
-          key: gh-protocol-android-34-x86_64-v1-${{ github.run_id }}
+          key: gh-protocol-android-34-x86_64-gms-v1-${{ github.run_id }}
 
       # Custom (not reactivecircus/android-emulator-runner): on GH runners the
       # process user frequently LACKS access to /dev/kvm (mode 660 root:kvm,
@@ -137,6 +137,10 @@ jobs:
           export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
           AVD=gh_test
+          # GMS (google_apis) image: AOSP "default" image's sepolicy DENIES
+          # untrusted_app execute_no_trans on app_data_file — the app cannot
+          # exec its bundled Xray binary there (observed 2026-10-24, avc audit).
+          # Real devices run GMS images; this matches production.
           # AVD: created MANUALLY (avdmanager under CI stdin/pipe conditions
           # silently exits 0 without creating — observed 2026-10-24). The AVD
           # layout is a stable, simple file format; the root-launched emulator
@@ -159,7 +163,7 @@ jobs:
             "hw.camera.back=emulated" \
             "hw.camera.front=none" \
             "disk.dataPartition.size=10G" \
-            "image.sysdir.1=system-images/android-34/default/x86_64/" \
+            "image.sysdir.1=system-images/android-34/google_apis/x86_64/" \
             "tag.id=default" \
             "tag.ids=default" \
             "tag.x86=true" > "$AVD_DIR/config.ini"
@@ -170,7 +174,7 @@ jobs:
             "path.rel=$AVD.avd" > "$AVD_HOME/$AVD.ini"
           ls -la "$AVD_HOME" > avd-create.log 2>&1
           [ -f "$AVD_DIR/config.ini" ] || { echo "AVD config missing:"; cat avd-create.log; exit 1; }
-          [ -d "$ANDROID_HOME/system-images/android-34/default/x86_64" ] || { echo "system image dir missing under $ANDROID_HOME"; ls "$ANDROID_HOME"; ls "$ANDROID_HOME/system-images" 2>&1; exit 1; }
+          [ -d "$ANDROID_HOME/system-images/android-34/google_apis/x86_64" ] || { echo "system image dir missing under $ANDROID_HOME"; ls "$ANDROID_HOME"; ls "$ANDROID_HOME/system-images" 2>&1; exit 1; }
           echo "Launching emulator as root (KVM), console -> emulator-console.log"
           sudo env HOME=/root ANDROID_AVD_HOME="$AVD_HOME" "$ANDROID_HOME/emulator/emulator" \
             -avd "$AVD" -port 5554 \
