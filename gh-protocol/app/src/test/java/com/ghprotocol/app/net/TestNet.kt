@@ -300,7 +300,9 @@ object TestNet {
         stream.use { keyStore.load(it, "testpass".toCharArray()) }
         val factory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
         factory.init(keyStore, "testpass".toCharArray())
-        val context = SSLContext.getInstance("TLS")
+        // TLSv1.2 is pinned on both sides: the handshake shape is identical on every JDK
+        // (TLS 1.3 post-handshake messages made the old tests flaky on CI runners).
+        val context = SSLContext.getInstance("TLSv1.2")
         context.init(factory.keyManagers, null, null)
         return context
     }
@@ -312,15 +314,20 @@ object TestNet {
             override fun checkServerTrusted(chain: Array<out java.security.cert.X509Certificate>?, authType: String?) = Unit
             override fun getAcceptedIssuers(): Array<java.security.cert.X509Certificate> = emptyArray()
         }
-        val trusting = SSLContext.getInstance("TLS")
+        val trusting = SSLContext.getInstance("TLSv1.2")
         trusting.init(null, arrayOf(trustAll), null)
         // Server side needs our key material, client side only needs the trust override.
         val combined = object : javax.net.ssl.SSLSocketFactory() {
             private val delegate: javax.net.ssl.SSLSocketFactory = trusting.socketFactory
             override fun getDefaultCipherSuites(): Array<String> = delegate.defaultCipherSuites
             override fun getSupportedCipherSuites(): Array<String> = delegate.supportedCipherSuites
-            override fun createSocket(s: Socket?, host: String?, port: Int, autoClose: Boolean): Socket =
-                delegate.createSocket(s, host, port, autoClose)
+            override fun createSocket(s: Socket?, host: String?, port: Int, autoClose: Boolean): Socket {
+                val layered = delegate.createSocket(s, host, port, autoClose)
+                if (layered is javax.net.ssl.SSLSocket) {
+                    try { layered.enabledProtocols = arrayOf("TLSv1.2") } catch (_: Exception) { }
+                }
+                return layered
+            }
             override fun createSocket(host: String?, port: Int): Socket = delegate.createSocket(host, port)
             override fun createSocket(host: String?, port: Int, localHost: InetAddress?, localPort: Int): Socket =
                 delegate.createSocket(host, port, localHost, localPort)

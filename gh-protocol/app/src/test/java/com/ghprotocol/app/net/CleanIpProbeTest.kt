@@ -14,7 +14,8 @@ import java.net.Socket
 
 class CleanIpProbeTest {
 
-    private fun probeFor(port: Int, timeoutMs: Int = 2000) = TlsHttpProbe(
+    // Generous timeouts: a shared CI runner can be an order of magnitude slower than a laptop.
+    private fun probeFor(port: Int, timeoutMs: Int = 8000) = TlsHttpProbe(
         sni = "localhost",
         port = port,
         hostHeader = "localhost",

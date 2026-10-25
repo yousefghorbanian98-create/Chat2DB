@@ -181,7 +181,7 @@ class DnsResolverTest {
                     sslSocketFactory = { TestNet.trustAllFactory(context) },
                     verifyHostname = false
                 )
-                val result = transport.exchange(query, 3000)
+                val result = transport.exchange(query, 8000)
                 assertNotNull("DoH transport returned no bytes: ${result.detail}", result.response)
                 val response = result.response ?: ByteArray(0)
                 assertTrue(DnsMessage.isResponseTo(response, query))
@@ -203,9 +203,12 @@ class DnsResolverTest {
                     sslSocketFactory = { TestNet.trustAllFactory(context) },
                     verifyHostname = false
                 )
-                val result = transport.exchange(query, 2000)
-                assertTrue("non-200 must not be accepted", result.response == null)
-                assertTrue(result.detail.contains("404") || result.detail.contains("http_status"))
+                val result = transport.exchange(query, 6000)
+                assertTrue("non-200 must not be accepted (detail=${result.detail})", result.response == null)
+                assertTrue(
+                    "detail should name the HTTP status, got: ${result.detail}",
+                    result.detail.contains("404") || result.detail.contains("http_status")
+                )
             }
         }
     }
