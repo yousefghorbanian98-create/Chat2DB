@@ -28,6 +28,8 @@ class VpnTunnelService : VpnService() {
 
     private var vpnFd: ParcelFileDescriptor? = null
     private var running = false
+    /** First N relay decisions are logged under GhDiag (E2E-visible diagnostics). */
+    private var diagBudget = 12
     private val conns = HashMap<String, Pair<Socket, Long>>()
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -97,6 +99,10 @@ class VpnTunnelService : VpnService() {
             if (n < 20) continue
             val pkt = buf.copyOfRange(0, n)
             val ip = Socks5.parseIp4(pkt) ?: continue
+            if (diagBudget > 0) {
+                diagBudget--
+                Log.d("GhDiag", "tun pkt proto=${ip.first} dst=${ip.second} len=$n")
+            }
             val (proto, dstIp, totalLen) = ip
             val len: Int = if (totalLen < n) totalLen else n
             if (proto == 17) {
@@ -122,6 +128,10 @@ class VpnTunnelService : VpnService() {
         val sock = conns[key]?.first ?: try {
             val s = openSocks5(dstIp, dstPort) ?: return
             conns[key] = Pair(s, now)
+            if (diagBudget > 0) {
+                diagBudget--
+                Log.d("GhDiag", "relay tcp $dstIp:$dstPort -> socks5 ok")
+            }
             s
         } catch (_: Exception) {
             return

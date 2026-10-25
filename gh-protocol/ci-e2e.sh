@@ -181,30 +181,31 @@ done
   report "tunnel not up (xray/:10808) — $WHY"
 }
 
-say "== DNS resolution THROUGH the tunnel (explicit server 10.8.0.1) =="
+# NB: traffic must be generated AS THE APP UID — the adb shell UID bypasses the
+# VPN, so plain `adb shell nc` never enters the tunnel (verified: zero TUN packets).
+say "== DNS resolution THROUGH the tunnel (as app uid) =="
 DNS_OK=0
 DNSOUT=""
 for i in $(seq 1 6); do
-  DNSOUT=$(adb shell "toybox nslookup github.com 10.8.0.1" 2>&1)
-  echo "$DNSOUT" | grep -qi "github.com" && { DNS_OK=1; break; }
-  DNSOUT=$(adb shell "toybox nslookup -h 10.8.0.1 github.com" 2>&1)
+  DNSOUT=$(adb shell "run-as $PKG toybox nslookup github.com" 2>&1)
   echo "$DNSOUT" | grep -qi "github.com" && { DNS_OK=1; break; }
   sleep 4
 done
 say "dns through tunnel: $( [ "$DNS_OK" = "1" ] && echo OK || echo FAILED )"
 echo "$DNSOUT" >> "$LOG" 2>&1
 
-say "== TCP through the tunnel (data-path proof) =="
+say "== TCP through the tunnel (as app uid — data-path proof) =="
 TCP_OK=0
 for dst in 1.1.1.1:443 8.8.8.8:53 9.9.9.9:443; do
   H=${dst%:*}; P=${dst#*:}
-  O=$(adb shell "toybox nc -z -w 8 $H $P >/dev/null 2>&1; echo rc=\$?" 2>&1 | tr -d '\r')
+  O=$(adb shell "run-as $PKG toybox nc -z -w 8 $H $P >/dev/null 2>&1; echo rc=\$?" 2>&1 | tr -d '\r')
   say "nc $dst -> $O"
   echo "$O" | grep -q "rc=0" && { TCP_OK=1; break; }
 done
 
+say "== relay diagnostics (GhVpnTunnel + GhDiag) =="
+adb logcat -d -s GhVpnTunnel GhDiag 2>/dev/null | tail -45 >> "$LOG"
 if [ "$TCP_OK" != "1" ] && [ "$DNS_OK" != "1" ]; then
-  adb logcat -d -s GhVpnTunnel 2>/dev/null | tail -40 >> "$LOG"
   adb shell "run-as $PKG cat files/xray/xray-out.log 2>/dev/null" >> "$LOG" 2>&1
   report "tunnel up but no traffic passes (TCP connect + DNS query both failed)"
 fi
