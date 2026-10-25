@@ -88,6 +88,8 @@ core/net suites: TOTAL passed=55 failed=0
 ```
 
 CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real Android SDK):
+the green runs execute 125 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
+quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan, APK size).
 
 | run | commit | result |
 |---|---|---|
@@ -95,7 +97,7 @@ CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real And
 | `40241130457` | DNS-plan evidence test | failure → found 2 real defects (my new assertion was wrong about the outbound; the idle-timeout test raced `closeFlow`), both fixed |
 | `40241715874` | app-only counters, heartbeat, DoH outbound | **success** — `gh-protocol-release-114` |
 | `40242388573` | notices + asset cleanup | failure: one flaky assertion (`upstreamFailureResetsTheClientAndIsReported`) — `closeFlow()` publishes its event *after* the RST it sends, so the test could read the event list too early. All five event assertions now use a deadline-based `awaitClose()` helper. |
-| final run on the last commit of this branch | + real TLS ClientHello through the relay, flake-free event assertions | see the run attached to the newest commit |
+| `40242773230` | `1870c08` — TLS ClientHello through the relay, flake-free event assertions | **success**, 6m19s, artifact `gh-protocol-release-116` (220 MB, all ABIs) — **this is the verified commit** |
 
 Golden/Roborazzi (`:app:recordRoborazziDebug`/`verifyRoborazziDebug`) and the emulator E2E
 (`ci-e2e.sh`) are part of the workflow; the E2E script hard-fails unless the on-device relay
@@ -144,7 +146,8 @@ Proof requires **all** of:
 
 ## 7. APK
 
-The workflow builds and signs a release APK; the artifact of the green run is downloadable from
-the run page (`gh-protocol-release-<runNumber>`, contains `arm64-v8a`/`x86_64` APKs). It is a
-**CI artifact**, not a published release: no version bump, no GitHub release, no tag — that is
+Run **40242773230** on commit `1870c08` built and signed the APKs; the artifact is
+`gh-protocol-release-116` (220.3 MB, `arm64-v8a` + `x86_64`), downloadable from
+<https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/40242773230>.
+It is a **CI artifact**, not a published release: no version bump, no GitHub release, no tag — that is
 withheld until the phone log in §6 confirms the data path, exactly as requirement 9 asks.
