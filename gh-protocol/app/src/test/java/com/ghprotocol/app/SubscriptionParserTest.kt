@@ -45,7 +45,7 @@ class SubscriptionParserTest {
 
     @Test fun embeddedFallbackConfigIsValid() {
         val info = SubscriptionParser.parse(Subscription.EMBEDDED_FALLBACK_JSON)
-        assertEquals(1, info.entries.size)
+        assertEquals(2, info.entries.size)
         assertEquals(10808, info.entries[0].inboundPort)
         assertEquals("26.6.27", info.entries[0].minCoreVersion)
     }
