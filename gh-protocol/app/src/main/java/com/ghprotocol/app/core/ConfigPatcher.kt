@@ -2,13 +2,17 @@ package com.ghprotocol.app.core
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.net.URI
+import java.net.URLDecoder
 
 /**
  * Pure JSON transforms over the Xray config (JVM unit-tested).
  *
  * F-17: replace the egress address only — SNI/Host/Path untouched.
  * F-15: TCP-first profile when UDP is dropped.
- * F-16: validate an imported custom config.
+ * F-16: validate & normalize imported custom configs (JSON array, single JSON
+ *       object, or Simorgh-pattern `vless://` and `trojan://` URIs with automatic
+ *       TLS fragmentation injection and optional clean-IP address override).
  */
 object ConfigPatcher {
 
@@ -16,8 +20,7 @@ object ConfigPatcher {
      * Loopback port the VpnService relays client DNS to. MUST be > 1024:
      * Android denies binding privileged ports to apps
      * ("listen tcp 127.0.0.1:53: bind: permission denied", verified on API 34).
-     * Also avoids 5353 (the system mDNS daemon already owns it:
-     * "listen udp 127.0.0.1:5353: bind: address already in use").
+     * Also avoids 5353 (the system mDNS daemon already owns it).
      */
     const val DNS_IN_PORT = 15353
 
@@ -35,18 +38,36 @@ object ConfigPatcher {
 
     /**
      * F-17: point the given outbound tags at [cleanIp] (egress replacement).
-     * Only `settings.address` is touched; SNI/Host/Path/finalmask stay untouched.
+     * Only `settings.address` (or vnext/servers address) is touched;
+     * SNI/Host/Path/finalmask stay untouched.
      * Returns the number of outbounds patched.
      */
-    fun patchCleanEgress(json: JSONObject, cleanIp: String, tags: List<String> = listOf("tcp-fragment", "tcp-fragment-tls")): Int {
+    fun patchCleanEgress(
+        json: JSONObject,
+        cleanIp: String,
+        tags: List<String> = listOf("tcp-fragment", "tcp-fragment-tls", "proxy")
+    ): Int {
         val outbounds = json.optJSONArray("outbounds") ?: return 0
         var patched = 0
         for (i in 0 until outbounds.length()) {
             val ob = outbounds.getJSONObject(i)
-            if (tags.contains(ob.optString("tag", ""))) {
-                val settings = ob.optJSONObject("settings") ?: JSONObject().also { ob.put("settings", it) }
-                settings.put("address", cleanIp)
-                patched++
+            if (!tags.contains(ob.optString("tag", ""))) continue
+            val settings = ob.optJSONObject("settings") ?: JSONObject().also { ob.put("settings", it) }
+            val vnext = settings.optJSONArray("vnext")
+            val servers = settings.optJSONArray("servers")
+            when {
+                vnext != null && vnext.length() > 0 -> {
+                    vnext.getJSONObject(0).put("address", cleanIp)
+                    patched++
+                }
+                servers != null && servers.length() > 0 -> {
+                    servers.getJSONObject(0).put("address", cleanIp)
+                    patched++
+                }
+                else -> {
+                    settings.put("address", cleanIp)
+                    patched++
+                }
             }
         }
         return patched
@@ -71,7 +92,7 @@ object ConfigPatcher {
         }
         val scored = tagged.map { (r, tags) ->
             val score = when {
-                tags.any { it.startsWith("tcp-fragment") } -> 0
+                tags.any { it.startsWith("tcp-fragment") || it == "proxy" } -> 0
                 tags.any { it.startsWith("udp-") } -> 1
                 else -> 2
             }
@@ -87,11 +108,6 @@ object ConfigPatcher {
     /**
      * Inject a loopback DNS inbound (127.0.0.1:15353, tag `dns-in`) so the VpnService
      * can relay client DNS queries into Xray's own resolver (config dns.servers).
-     *
-     * Xray 26.x has NO `dns` inbound protocol — using one aborts startup with
-     * "failed to build inbound config with tag dns-in > unknown config id: dns"
-     * (verified on Xray 26.10.21). The canonical form is dokodemo-door plus a
-     * routing rule that hands its traffic to the config's `dns` outbound.
      * Idempotent: returns false if such an inbound already exists.
      */
     fun addLocalDnsInbound(json: JSONObject): Boolean {
@@ -115,8 +131,6 @@ object ConfigPatcher {
                     .put("userLevel", 12))
         )
 
-        // Which outbound speaks the internal DNS protocol? Use the config's own
-        // dns outbound (tag `dns-out` in the official subscription) or add one.
         var dnsTag: String? = null
         val outbounds = json.optJSONArray("outbounds")
         if (outbounds != null) {
@@ -131,8 +145,6 @@ object ConfigPatcher {
             ob.put(JSONObject().put("tag", dnsTag).put("protocol", "dns"))
         }
 
-        // Prepend the route so the config's catch-all `block` rule can't swallow
-        // the tunnel's DNS queries.
         val routing = json.optJSONObject("routing") ?: JSONObject().also { json.put("routing", it) }
         val rules = routing.optJSONArray("rules") ?: JSONArray().also { routing.put("rules", it) }
         val newRules = JSONArray()
@@ -147,15 +159,8 @@ object ConfigPatcher {
     }
 
     /**
-     * Xray refuses to start when `dns.servers` references a FakeDNS engine that
-     * no inbound provides. The official subscription lists "fakedns" in
-     * `dns.servers` (and in `sniffing.destOverride`) while defining only a
-     * `mixed` inbound — a fatal config error ("fakedns not found"), observed as
-     * an immediate silent core exit on the emulator. Drop the dangling
-     * references, and "localhost" servers (which would recurse into our own
-     * tunnel); the DoH server keeps DNS working and TLS/HTTP sniffing still
-     * drives domain routing.
-     * Returns the number of references removed (0 = config was already fine).
+     * Strip dangling `fakedns` and recursive `localhost` DNS references when no
+     * `fakedns` inbound is present.
      */
     fun ensureConsistentDns(json: JSONObject): Int {
         var removed = 0
@@ -174,9 +179,6 @@ object ConfigPatcher {
                 val s = servers.opt(i)
                 val addr = if (s is JSONObject) s.optString("address", "") else s?.toString().orEmpty()
                 if (addr.equals("fakedns", ignoreCase = true)) { removed++; continue }
-                // "localhost" = resolve via the system resolver. Inside a full-tunnel
-                // VpnService that resolver's queries re-enter our own TUN -> dns-in ->
-                // dns-out -> system resolver: an infinite loop (12s timeouts, no answer).
                 if (addr.equals("localhost", ignoreCase = true)) { removed++; continue }
                 kept.put(s)
             }
@@ -196,11 +198,206 @@ object ConfigPatcher {
         return removed
     }
 
+    /**
+     * F-16 (Simorgh pattern): Convert a `vless://` or `trojan://` URI into a complete
+     * Xray JSON config with mixed-in :10808, TLS ClientHello fragmentation, and
+     * optional [cleanIp] address override (preserving SNI/Host/Path).
+     */
+    fun parseUriToConfig(rawUri: String, cleanIp: String? = null): Result<JSONObject> = try {
+        val trimmed = rawUri.trim()
+        val u = URI(trimmed)
+        val scheme = u.scheme?.lowercase().orEmpty()
+        require(scheme == "vless" || scheme == "trojan") { "unsupported URI scheme: $scheme" }
+        val cred = u.rawUserInfo?.let { URLDecoder.decode(it, "UTF-8") }.orEmpty()
+        require(cred.isNotBlank()) { "missing credential in $scheme URI" }
+        val origHost = u.host ?: throw IllegalArgumentException("missing host in $scheme URI")
+        val port = if (u.port > 0) u.port else 443
+        val params = parseQueryParams(u.rawQuery.orEmpty())
+        val remark = u.rawFragment?.let { URLDecoder.decode(it, "UTF-8") }?.takeIf { it.isNotBlank() }
+            ?: "$scheme-$origHost"
+
+        val connectHost = if (!cleanIp.isNullOrBlank()) cleanIp.trim() else origHost
+        val sni = params["sni"]?.takeIf { it.isNotBlank() } ?: origHost
+        val wsHost = params["host"]?.takeIf { it.isNotBlank() } ?: origHost
+        val netType = params["type"]?.lowercase() ?: "tcp"
+        val security = params["security"]?.lowercase() ?: "tls"
+        val fp = params["fp"]?.takeIf { it.isNotBlank() } ?: "chrome"
+
+        val settings = if (scheme == "vless") {
+            val user = JSONObject()
+                .put("id", cred)
+                .put("encryption", params["encryption"] ?: "none")
+            params["flow"]?.takeIf { it.isNotBlank() }?.let { user.put("flow", it) }
+            JSONObject().put(
+                "vnext",
+                JSONArray().put(
+                    JSONObject()
+                        .put("address", connectHost)
+                        .put("port", port)
+                        .put("users", JSONArray().put(user))
+                )
+            )
+        } else {
+            JSONObject().put(
+                "servers",
+                JSONArray().put(
+                    JSONObject()
+                        .put("address", connectHost)
+                        .put("port", port)
+                        .put("password", cred)
+                )
+            )
+        }
+
+        val streamSettings = JSONObject()
+            .put("network", netType)
+            .put("security", security)
+            .put("sockopt", JSONObject().put("dialerProxy", "tcp-fragment").put("tcpNoDelay", true))
+
+        if (security == "tls") {
+            streamSettings.put(
+                "tlsSettings",
+                JSONObject()
+                    .put("serverName", sni)
+                    .put("fingerprint", fp)
+            )
+        } else if (security == "reality") {
+            streamSettings.put(
+                "realitySettings",
+                JSONObject()
+                    .put("serverName", sni)
+                    .put("fingerprint", fp)
+                    .put("publicKey", params["pbk"].orEmpty())
+                    .put("shortId", params["sid"].orEmpty())
+                    .put("spiderX", params["spx"] ?: "/")
+            )
+        }
+
+        if (netType == "ws") {
+            streamSettings.put(
+                "wsSettings",
+                JSONObject()
+                    .put("path", params["path"] ?: "/")
+                    .put("headers", JSONObject().put("Host", wsHost))
+            )
+        } else if (netType == "grpc") {
+            streamSettings.put(
+                "grpcSettings",
+                JSONObject().put("serviceName", params["serviceName"].orEmpty())
+            )
+        }
+
+        val proxyOutbound = JSONObject()
+            .put("tag", "proxy")
+            .put("protocol", scheme)
+            .put("settings", settings)
+            .put("streamSettings", streamSettings)
+
+        val fragmentOutbound = JSONObject()
+            .put("tag", "tcp-fragment")
+            .put("protocol", "freedom")
+            .put(
+                "settings",
+                JSONObject().put(
+                    "fragment",
+                    JSONObject()
+                        .put("packets", "tlshello")
+                        .put("length", "10-20")
+                        .put("interval", "10-20")
+                )
+            )
+
+        val cfg = JSONObject()
+            .put("remarks", remark)
+            .put("version", JSONObject().put("min", "26.6.27"))
+            .put("dns", JSONObject().put("servers", JSONArray().put("https://cloudflare-dns.com/dns-query").put("8.8.8.8")))
+            .put(
+                "inbounds",
+                JSONArray().put(
+                    JSONObject()
+                        .put("tag", "mixed-in")
+                        .put("listen", "127.0.0.1")
+                        .put("port", 10808)
+                        .put("protocol", "mixed")
+                        .put("settings", JSONObject().put("udp", true))
+                        .put("sniffing", JSONObject().put("enabled", true).put("destOverride", JSONArray().put("tls").put("http")))
+                )
+            )
+            .put(
+                "outbounds",
+                JSONArray()
+                    .put(proxyOutbound)
+                    .put(fragmentOutbound)
+                    .put(JSONObject().put("tag", "dns-out").put("protocol", "dns"))
+                    .put(JSONObject().put("tag", "block").put("protocol", "blackhole"))
+            )
+            .put(
+                "routing",
+                JSONObject().put(
+                    "rules",
+                    JSONArray().put(
+                        JSONObject()
+                            .put("type", "field")
+                            .put("inboundTag", JSONArray().put("mixed-in"))
+                            .put("outboundTag", "proxy")
+                    )
+                )
+            )
+        addLocalDnsInbound(cfg)
+        Result.success(cfg)
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
+    private fun parseQueryParams(rawQuery: String): Map<String, String> {
+        if (rawQuery.isBlank()) return emptyMap()
+        val map = mutableMapOf<String, String>()
+        for (part in rawQuery.split('&')) {
+            val idx = part.indexOf('=')
+            if (idx > 0) {
+                val k = URLDecoder.decode(part.substring(0, idx), "UTF-8")
+                val v = URLDecoder.decode(part.substring(idx + 1), "UTF-8")
+                map[k] = v
+            }
+        }
+        return map
+    }
+
+    /**
+     * Normalize any supported user import (JSON array, single JSON object, or
+     * newline-separated `vless://` / `trojan://` URIs) into a canonical JSONArray string.
+     */
+    fun normalizeImport(raw: String, cleanIp: String? = null): Result<String> = try {
+        val text = raw.trim()
+        require(text.isNotEmpty()) { "empty import" }
+        val arr = when {
+            text.startsWith("[") -> JSONArray(text)
+            text.startsWith("{") -> JSONArray().put(JSONObject(text))
+            else -> {
+                val lines = text.lineSequence()
+                    .map { it.trim() }
+                    .filter { it.startsWith("vless://", ignoreCase = true) || it.startsWith("trojan://", ignoreCase = true) }
+                    .toList()
+                require(lines.isNotEmpty()) { "not a JSON config or vless/trojan URI" }
+                val built = JSONArray()
+                for (line in lines) {
+                    built.put(parseUriToConfig(line, cleanIp).getOrThrow())
+                }
+                built
+            }
+        }
+        require(arr.length() > 0) { "empty config list" }
+        Result.success(arr.toString())
+    } catch (e: Exception) {
+        Result.failure(e)
+    }
+
     data class ImportInfo(val inbound: InboundInfo, val minCoreVersion: String, val entries: Int)
 
-    /** F-16: validate a pasted/imported Xray config (array of one or more configs). */
+    /** F-16: validate a pasted/imported Xray config (JSON array/object or vless/trojan URIs). */
     fun validateImport(raw: String): Result<ImportInfo> = try {
-        val parsed = JSONArray(raw)
+        val normalized = normalizeImport(raw).getOrThrow()
+        val parsed = JSONArray(normalized)
         require(parsed.length() > 0) { "empty config list" }
         val first = parsed.getJSONObject(0)
         val inbound = findInbound(first) ?: return Result.failure(IllegalArgumentException("no inbound with a port"))

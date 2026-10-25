@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.ghprotocol.app.core.CleanIpScanner
 import com.ghprotocol.app.core.ConfigPatcher
 import com.ghprotocol.app.core.XrayCore
 import com.ghprotocol.app.core.xrayVersionOk
@@ -11,6 +12,7 @@ import com.ghprotocol.app.domain.NetworkMonitor
 import com.ghprotocol.app.domain.NetworkState
 import com.ghprotocol.app.domain.Subscription
 import com.ghprotocol.app.domain.SubscriptionInfo
+import com.ghprotocol.app.domain.SubscriptionParser
 import com.ghprotocol.app.domain.SubscriptionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +31,9 @@ data class HomeUiState(
     val configError: String? = null,
     val coreVersion: String? = null,
     val tunnelError: String? = null,
-    val vpnPending: Boolean = false
+    val vpnPending: Boolean = false,
+    val cleanIp: String? = null,
+    val prepReady: Boolean = false
 )
 
 class HomeViewModel(
@@ -83,13 +87,65 @@ class HomeViewModel(
     }
 
     /**
+     * F-16: Import a custom config (JSON array/object or Simorgh-pattern
+     * `vless://` / `trojan://` URI) and persist it as the active subscription.
+     */
+    fun importCustomConfig(raw: String, cleanIp: String? = null): Boolean {
+        val norm = ConfigPatcher.normalizeImport(raw, cleanIp).getOrNull() ?: return false
+        val parsed = try {
+            SubscriptionParser.parse(norm).copy(source = "custom")
+        } catch (_: Exception) {
+            return false
+        }
+        return try {
+            val app = getApplication<Application>()
+            File(app.filesDir, "subscription.json").writeText(norm)
+            File(app.filesDir, "subscription.meta").writeText(parsed.fetchedAt.toString())
+            _ui.update { it.copy(subscription = parsed, configError = null) }
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** F-17: Scan Cloudflare clean IPs and persist the lowest-latency egress. */
+    fun runCleanIpScan(scanner: CleanIpScanner = CleanIpScanner()) {
+        viewModelScope.launch {
+            val report = scanner.scan()
+            val bestIp = report.best?.ip
+            if (bestIp != null) {
+                scanner.saveBest(bestIp, getApplication())
+            }
+            _ui.update { it.copy(cleanIp = bestIp) }
+        }
+    }
+
+    /** F-13: Prepare offline survival cache (subscription + embedded fallback + geo data). */
+    fun runBlackoutPrep(): Boolean {
+        return try {
+            val app = getApplication<Application>()
+            val subFile = File(app.filesDir, "subscription.json")
+            if (!subFile.exists() || subFile.length() == 0L) {
+                subFile.writeText(Subscription.EMBEDDED_FALLBACK_JSON)
+                File(app.filesDir, "subscription.meta").writeText(System.currentTimeMillis().toString())
+            }
+            core.ensureInstalled()
+            val sub = repository.cachedAnyAge() ?: repository.embeddedFallback()
+            _ui.update { it.copy(subscription = sub, prepReady = true) }
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun diag(msg: String) = android.util.Log.d("GhDiag", msg)
+
+    /**
      * F-1 → F-2/F-3/F-4: one-tap connect, now real.
      * CHECKING (config fresh) → PREPARING (core extract + version) →
      * TUNNELING (patched config written + Xray started) → vpnPending
      * (Activity establishes VpnService) → CONNECTED.
      */
-    private fun diag(msg: String) = android.util.Log.d("GhDiag", msg)
-
     fun onConnectTap() {
         if (_ui.value.connectPhase != ConnectPhase.IDLE && _ui.value.connectPhase != ConnectPhase.FAILED) return
         viewModelScope.launch {

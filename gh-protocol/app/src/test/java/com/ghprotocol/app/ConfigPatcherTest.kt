@@ -1,6 +1,7 @@
 package com.ghprotocol.app
 
 import com.ghprotocol.app.core.ConfigPatcher
+import com.ghprotocol.app.ui.theme.MotionSpec
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -36,14 +37,11 @@ class ConfigPatcherTest {
     }
 
     @Test fun cleanEgressPatchesOnlyAddress() {
-        val before = sample.toString()
         val patched = ConfigPatcher.patchCleanEgress(sample, "104.16.132.229")
         assertEquals(2, patched)
         val frag = sample.getJSONArray("outbounds").getJSONObject(1)
         assertEquals("104.16.132.229", frag.getJSONObject("settings").getString("address"))
-        // SNI/Host/Path untouched: finalmask intact
         assertTrue(frag.getJSONObject("streamSettings").has("finalmask"))
-        // udp-noises NOT patched
         val udp = sample.getJSONArray("outbounds").getJSONObject(3)
         assertEquals(0, udp.optJSONObject("settings")?.optString("address", "-")?.let { 1 } ?: 0)
     }
@@ -66,15 +64,12 @@ class ConfigPatcherTest {
         assertEquals("dokodemo-door", dnsIn.getString("protocol"))
         assertEquals(ConfigPatcher.DNS_IN_PORT, dnsIn.getInt("port"))
         assertEquals("127.0.0.1", dnsIn.getString("listen"))
-        // routed into a dns-protocol outbound, ahead of everything else
         val rules = c.getJSONObject("routing").getJSONArray("rules")
         assertEquals("dns-in", rules.getJSONObject(0).getJSONArray("inboundTag").getString(0))
         assertEquals("dns-out", rules.getJSONObject(0).getString("outboundTag"))
         assertEquals("dns", c.getJSONArray("outbounds").getJSONObject(0).getString("protocol"))
-        // idempotent
         assertFalse(ConfigPatcher.addLocalDnsInbound(c))
         assertEquals(2, c.getJSONArray("inbounds").length())
-        // existing dns:53 inbound not duplicated
         val c2 = JSONObject("""{"inbounds": [{"tag": "x", "port": 15353, "protocol": "dokodemo-door"}]}""")
         assertFalse(ConfigPatcher.addLocalDnsInbound(c2))
     }
@@ -98,7 +93,7 @@ class ConfigPatcherTest {
                  "sniffing": {"enabled": true, "destOverride": ["fakedns", "tls", "http"]}}],
                 "dns": {"servers": ["fakedns", "https://cloudflare-dns.com/dns-query", "localhost"]}}"""
         )
-        assertEquals(3, ConfigPatcher.ensureConsistentDns(c)) // fakedns + localhost + 1 destOverride
+        assertEquals(3, ConfigPatcher.ensureConsistentDns(c))
         val servers = c.getJSONObject("dns").getJSONArray("servers")
         assertEquals(1, servers.length())
         assertEquals("https://cloudflare-dns.com/dns-query", servers.getString(0))
@@ -106,7 +101,6 @@ class ConfigPatcherTest {
             .getJSONObject("sniffing").getJSONArray("destOverride")
         assertEquals(2, ov.length())
         assertEquals("tls", ov.getString(0))
-        // idempotent
         assertEquals(0, ConfigPatcher.ensureConsistentDns(c))
     }
 
@@ -127,5 +121,49 @@ class ConfigPatcherTest {
         assertEquals("26.6.27", r.minCoreVersion)
         assertTrue(ConfigPatcher.validateImport("not json").isFailure)
         assertTrue(ConfigPatcher.validateImport("[]").isFailure)
+    }
+
+    @Test fun vlessUriConvertsWithFragmentAndCleanIpOverride() {
+        val uri = "vless://11111111-2222-3333-4444-555555555555@edge.example.com:443?type=ws&security=tls&sni=sni.example.com&host=cdn.example.com&path=%2Fws&fp=chrome#Iran-CF-Node"
+        val cfg = ConfigPatcher.parseUriToConfig(uri, cleanIp = "104.16.132.229").getOrThrow()
+        assertEquals("Iran-CF-Node", cfg.getString("remarks"))
+        val proxy = cfg.getJSONArray("outbounds").getJSONObject(0)
+        assertEquals("vless", proxy.getString("protocol"))
+        val vnext = proxy.getJSONObject("settings").getJSONArray("vnext").getJSONObject(0)
+        // Clean IP overrides address while SNI and Host header remain intact
+        assertEquals("104.16.132.229", vnext.getString("address"))
+        assertEquals(443, vnext.getInt("port"))
+        assertEquals("11111111-2222-3333-4444-555555555555", vnext.getJSONArray("users").getJSONObject(0).getString("id"))
+        val ss = proxy.getJSONObject("streamSettings")
+        assertEquals("tcp-fragment", ss.getJSONObject("sockopt").getString("dialerProxy"))
+        assertEquals("sni.example.com", ss.getJSONObject("tlsSettings").getString("serverName"))
+        assertEquals("cdn.example.com", ss.getJSONObject("wsSettings").getJSONObject("headers").getString("Host"))
+        assertEquals("/ws", ss.getJSONObject("wsSettings").getString("path"))
+        // Fragment outbound injected
+        val frag = cfg.getJSONArray("outbounds").getJSONObject(1)
+        assertEquals("tcp-fragment", frag.getString("tag"))
+        assertEquals("tlshello", frag.getJSONObject("settings").getJSONObject("fragment").getString("packets"))
+    }
+
+    @Test fun trojanAndRealityUrisNormalizeAndValidate() {
+        val batch = """
+            vless://aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee@198.51.100.10:443?security=reality&sni=www.cloudflare.com&pbk=PUBKEY123&sid=01ab&type=tcp&flow=xtls-rprx-vision#Reality1
+            trojan://my-secret-pass@trojan.example.com:8443?type=grpc&security=tls&sni=trojan.example.com&serviceName=grpc-tun#Trojan1
+        """.trimIndent()
+        val info = ConfigPatcher.validateImport(batch).getOrThrow()
+        assertEquals(2, info.entries)
+        assertEquals(10808, info.inbound.port)
+        val arr = JSONArray(ConfigPatcher.normalizeImport(batch).getOrThrow())
+        val realitySs = arr.getJSONObject(0).getJSONArray("outbounds").getJSONObject(0).getJSONObject("streamSettings")
+        assertEquals("PUBKEY123", realitySs.getJSONObject("realitySettings").getString("publicKey"))
+        val trojanOb = arr.getJSONObject(1).getJSONArray("outbounds").getJSONObject(0)
+        assertEquals("trojan", trojanOb.getString("protocol"))
+        assertEquals("grpc-tun", trojanOb.getJSONObject("streamSettings").getJSONObject("grpcSettings").getString("serviceName"))
+    }
+
+    @Test fun motionSpecRespectsReducedMotionAndCap() {
+        assertEquals(0, MotionSpec.resolveDurationMs(0f, 200))
+        assertEquals(200, MotionSpec.resolveDurationMs(1f, 200))
+        assertEquals(300, MotionSpec.resolveDurationMs(2f, 250))
     }
 }

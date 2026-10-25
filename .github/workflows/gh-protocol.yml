@@ -86,6 +86,40 @@ jobs:
           set -o pipefail
           ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace 2>&1 | tee gradle-build.log
 
+      - name: P3/G3 Quality Gates (Dependency Freeze, Privacy URL Whitelist, Null-Safety Hygiene)
+        working-directory: gh-protocol
+        run: |
+          echo "::group::1. Dependency Freeze (D-freeze)"
+          UNAPPROVED=$(grep -E '^[[:space:]]*implementation\(' app/build.gradle.kts | grep -vE 'androidx\.|kotlinx-coroutines-android|com\.google\.zxing:core' || true)
+          if [ -n "$UNAPPROVED" ]; then
+            echo "ERROR: Unapproved runtime dependency detected after P3 freeze:"
+            echo "$UNAPPROVED"
+            exit 1
+          fi
+          echo "Dependency freeze OK."
+          echo "::endgroup::"
+
+          echo "::group::2. Privacy URL Whitelist (§6.4)"
+          URLS=$(grep -rhoE 'https://[^"'\'' )>]+' app/src/main/ || true)
+          BAD_URLS=$(echo "$URLS" | grep -vE '^https://(schemas\.android\.com|raw\.githubusercontent\.com/patterniha/Serverless-for-Iran|github\.com/patterniha/Serverless-for-Iran|cloudflare-dns\.com/dns-query|www\.google\.com/generate_204|1\.1\.1\.1/cdn-cgi/trace|github\.com|www\.mci\.ir|www\.iplc\.ir)' || true)
+          if [ -n "$BAD_URLS" ]; then
+            echo "ERROR: Non-whitelisted URL(s) found in app/src/main:"
+            echo "$BAD_URLS"
+            exit 1
+          fi
+          echo "URL whitelist OK."
+          echo "::endgroup::"
+
+          echo "::group::3. Core/Domain Null-Safety Hygiene (zero !! operator)"
+          BANGS=$(grep -rn '!!' app/src/main/java/com/ghprotocol/app/core/ app/src/main/java/com/ghprotocol/app/domain/ || true)
+          if [ -n "$BANGS" ]; then
+            echo "ERROR: Prohibited !! operator found in core/ or domain/:"
+            echo "$BANGS"
+            exit 1
+          fi
+          echo "Zero !! in core/ and domain/ OK."
+          echo "::endgroup::"
+
       - name: Golden screenshots (Roborazzi)
         id: golden
         working-directory: gh-protocol

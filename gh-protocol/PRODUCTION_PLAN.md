@@ -263,7 +263,13 @@ stateDiagram-v2
 - **۵۵ تست JVM سبز** (Socks5/ConfigPatcher/RouteBalancer/XrayVersion + قبلی‌ها).
 - دروس CI ثبت‌شده: `skipNBytes(int)` در استاب‌های Android ندارد (readFully/readShort به‌جای آن)؛ بایتهای >۰x7F در `byteArrayOf` نیاز به `.toByte()`؛ `ParcelFileDescriptor` (نه FileDescriptor) + null-guard روی `establish()`.
 
-**باقی‌مانده‌ی P2 = P2b (اتصال واقعی instrumented روی emulator):** VPN grant روی emulator، E2E (DNS + HTTPS از داخل emulator)، تله‌متری شبکه، سبز کردن G2 (F-2..F-18 + اتصال واقعی).
+**باقی‌مانده‌ی P2 = P2b (اتصال واقعی instrumented روی emulator): ✅ تکمیل و گیت G2 بسته شد (۲۵ اکتبر ۲۰۲۶ — کامیت `05eca92`، بیلد سبز `40180751401` و تست امولاتور سبز `40180751415`):**
+- ممیزی کامل Finn-loop v1.4 (`QUALITY_GATES.md`) روی تمام کدهای P0–P2 انجام شد.
+- باگ جدا نبودن آدرس محلی `tun0` (`10.8.0.2/24`) از آدرس peer سرور DNS (`10.8.0.1`) که باعث می‌شد کرنل لینوکس بسته‌های DNS را در جدول `local` نگه دارد و وارد `tun0` نکند، کشف و رفع شد.
+- ماشین وضعیت کامل دوطرفهٔ `IPv4+TCP` (`SYN → SYN-ACK → PSH-ACK / FIN-ACK` با چک‌سام استاندارد RFC 1071 و RFC 793) و تزریق پاسخ `UDP DNS` روی `FileOutputStream(fd.fileDescriptor)` در `VpnTunnelService` و `Socks5` پیاده‌سازی شد.
+- جلوگیری از نشت IPv6 (`addRoute("::", 0)` + `fd00:1::1/128`)، ارتقا به Foreground Service (`FOREGROUND_SERVICE_SPECIAL_USE`)، ماسک کردن IPهای مقصد در لاگ‌ها (`1.1.x.x`)، رفع باگ `ClientHello` در `CleanIpScanner`، افزودن `TunnelEngine` + Watchdog با Exponential Backoff در `XrayCore` و کانفیگ Embedded پیش‌فرض در `SubscriptionRepository` اعمال شد.
+- خروجی واقعی امولاتور در اجرای `40180751415`:
+  `E2E PASS: real tunnel carrying traffic (SUBMODE=live) — core install + start: verified (Xray 26.10.21), VpnService establish: verified (consent tapped: 1, vpnUp: 1), SOCKS5 data path: verified (tcp=1, nc 1.1.1.1:443 -> rc=0), DNS through tunnel: verified (github.com -> 140.82.114.3)`.
 
 ### ۳.۶ کنترل درift (کمترین لغزش)
 1. **قرارداد اول:** هیچ issue‌ای بدون AC مشاهده‌پذیر وارد صف نمی‌شود (finn-spec سخت‌گیر: اگر AC مبهم → بازپس)
