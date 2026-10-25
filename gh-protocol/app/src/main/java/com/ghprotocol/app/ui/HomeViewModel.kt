@@ -470,11 +470,16 @@ class HomeViewModel(
                 "پلن مؤثر DNS برای مسیر فعال ثبت شد",
                 "effective_dns $audit"
             )
+            val altAudit = ConfigPatcher.runtimeDnsAudit(sub.rawJson, if (active == 0) 1 else 0, cleanIp)
             TunnelLogBuffer.log(
                 LogLevel.INFO, LogCategory.DNS,
                 "پلن مؤثر DNS برای مسیر جایگزین ثبت شد",
-                "effective_dns " + ConfigPatcher.runtimeDnsAudit(sub.rawJson, if (active == 0) 1 else 0, cleanIp)
+                "effective_dns $altAudit"
             )
+            // Same two lines on logcat, so requirement-3 evidence can be captured with
+            // `adb logcat -s GhDiag:D` without exporting the in-app log.
+            android.util.Log.i("GhDiag", "effective_dns active $audit")
+            android.util.Log.i("GhDiag", "effective_dns alternate $altAudit")
             cfg
         } catch (e: Exception) {
             File(app.filesDir, "missing.json")

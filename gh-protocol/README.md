@@ -67,4 +67,7 @@ apksigner verify --verbose --print-certs GhProtocol-v1.0.0-arm64-v8a.apk
 
 ## مجوز (License)
 
-MIT (کد کلاینت Gh Protocol) + MPL-2.0 (باینری رسمی Xray-core از پروژهٔ XTLS).
+MIT (کد کلاینت Gh Protocol) + MPL-2.0 (باینری رسمی Xray-core از پروژهٔ XTLS)
++ MIT (آیکون‌ها و کد رابط کاربری DefyxVPN، © 2025 UnboundTechCo).
+
+فهرست کامل منابع و متن مجوزها: [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
