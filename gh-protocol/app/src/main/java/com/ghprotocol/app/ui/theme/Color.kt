@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 // Gh Protocol — baseline tokens (see DESIGN.md; refined in P3)
 val GhBlue = Color(0xFF2E6BFF)
 val GhBlueDark = Color(0xFF8FB0FF)
+val GhGreen = Color(0xFF34D399)
 val GhInk = Color(0xFF0B1220)
 val GhInkSurface = Color(0xFF111A2E)
 val GhInkOn = Color(0xFFE8EDF7)

@@ -2,6 +2,8 @@ package com.ghprotocol.app.ui.theme
 
 import android.content.Context
 import android.provider.Settings
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
 
 /**
  * P3 Motion specification (`design-motion-principles`, Emil Kowalski lens):
@@ -40,4 +42,7 @@ object MotionSpec {
     } catch (_: Exception) {
         baseMs.coerceIn(0, MAX_DURATION_MS)
     }
+
+    fun <T> tweenMs(context: Context, baseMs: Int = DEFAULT_DURATION_MS): TweenSpec<T> =
+        tween(durationMillis = durationMs(context, baseMs))
 }

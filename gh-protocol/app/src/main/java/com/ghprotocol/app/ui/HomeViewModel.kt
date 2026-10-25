@@ -8,7 +8,6 @@ import com.ghprotocol.app.core.CleanIpScanner
 import com.ghprotocol.app.core.ConfigPatcher
 import com.ghprotocol.app.core.LogCategory
 import com.ghprotocol.app.core.LogLevel
-import com.ghprotocol.app.core.ScanResult
 import com.ghprotocol.app.core.TunnelLogBuffer
 import com.ghprotocol.app.core.TunnelVerifier
 import com.ghprotocol.app.core.XrayCore
@@ -43,7 +42,7 @@ data class HomeUiState(
     val prepReady: Boolean = false,
     val verifiedPingMs: Int? = null,
     val isScanningIps: Boolean = false,
-    val scanResults: List<ScanResult> = emptyList(),
+    val scanResults: List<CleanIpScanner.ScanResult> = emptyList(),
     val activeEntryIndex: Int = 0,
     val tcpFirstEnabled: Boolean = true,
     val isAutoHealing: Boolean = false,
@@ -178,7 +177,7 @@ class HomeViewModel(
                 LogLevel.INFO,
                 LogCategory.PROBE,
                 "شروع اسکن رادار IP تمیز کلودفلر (هندشیک واقعی TLS 1.2 روی پورت 443)...",
-                "CleanIpScanner.scan() started across ${scanner.candidates.size} Cloudflare edges"
+                "CleanIpScanner.scan() started across ${CleanIpScanner.DEFAULT_POOL.size} Cloudflare edges"
             )
             val report = withContext(Dispatchers.IO) { scanner.scan() }
             val bestIp = report.best?.ip
@@ -203,7 +202,7 @@ class HomeViewModel(
                 it.copy(
                     isScanningIps = false,
                     cleanIp = bestIp ?: it.cleanIp,
-                    scanResults = report.results
+                    scanResults = report.healthy
                 )
             }
         }
@@ -499,7 +498,7 @@ class HomeViewModel(
             val best = report.best
             if (best != null) {
                 scanner.saveBest(best.ip, app)
-                _ui.update { it.copy(cleanIp = best.ip, scanResults = report.results) }
+                _ui.update { it.copy(cleanIp = best.ip, scanResults = report.healthy) }
                 TunnelLogBuffer.log(
                     LogLevel.SUCCESS,
                     LogCategory.PROBE,

@@ -131,20 +131,19 @@ fun RadarScreen(
                         ui.scanResults.take(8).forEach { item ->
                             val isSelected = ui.cleanIp == item.ip
                             val color = when {
-                                !item.ok -> Color(0xFF64748B)
-                                item.latencyMs < 180 -> RadarEmerald
-                                item.latencyMs < 350 -> RadarCyan
+                                item.latencyMs < 180L -> RadarEmerald
+                                item.latencyMs < 350L -> RadarCyan
                                 else -> RadarAmber
                             }
                             val fillFraction by animateFloatAsState(
-                                targetValue = if (!item.ok) 0.05f else (1f - (item.latencyMs.coerceAtMost(1000) / 1100f)).coerceIn(0.15f, 1f),
+                                targetValue = (1f - (item.latencyMs.coerceAtMost(1000L).toFloat() / 1100f)).coerceIn(0.15f, 1f),
                                 animationSpec = MotionSpec.tweenMs(context, 250),
                                 label = "ip-bar"
                             )
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable(enabled = item.ok) { viewModel.applyCleanIp(item.ip) },
+                                    .clickable { viewModel.applyCleanIp(item.ip) },
                                 colors = CardDefaults.cardColors(
                                     containerColor = if (isSelected) RadarEmerald.copy(alpha = 0.16f)
                                     else MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
@@ -164,7 +163,7 @@ fun RadarScreen(
                                             color = if (isSelected) RadarEmerald else MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = if (item.ok) "${item.latencyMs} ms" else "مسدود / تایم‌اوت",
+                                            text = "${item.latencyMs} ms",
                                             style = MaterialTheme.typography.labelMedium,
                                             color = color,
                                             fontWeight = FontWeight.Bold
