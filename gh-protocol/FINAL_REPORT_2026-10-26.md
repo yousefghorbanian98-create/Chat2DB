@@ -57,8 +57,10 @@ failed the identical tests minutes earlier.
 4. **IPv6** is measured in three states, never assumed: `unavailable` (platform refused the
    address/route — no leak claim), `route_only` (tunnelled, payload not proven) and `verified`
    (the Cloudflare v6 target `2606:4700:4700::1111` received real remote bytes through the relay).
-   The E2E prints the state it reached; the emulator run reached `route_only`, so no v6
-   protection claim is made there.
+   The emulator reached `route_only`: its NAT has no IPv6, and Xray dials **outside** the tunnel,
+   so v6 egress is the device network's property, not something the tunnel can add. In that
+   state the relay now resets new v6 flows immediately (`ipv6_no_egress`) so apps fall back to
+   IPv4 instead of hanging for five minutes.
 5. **Truthfulness of the UI**: `CONNECTED` only after in-tunnel payload verification; the
    5-second heartbeat
    `stats t=15s packets=… tcp=… dns53=… activeTcp=… flowsOpened=… appUp=… appDown=… probeUp=… dnsOk=… dnsFail=… state=… ipv6=…`
@@ -88,8 +90,8 @@ failed the identical tests minutes earlier.
 Local (JDK 25 + kotlinc, no Gradle, no device):
 
 ```
-core/net suites: TOTAL passed=58 failed=0
-  TcpRelayIntegrationTest 11 · DnsResolverTest 12 · PacketCodecTest 9 · DnsMessageTest 7
+core/net suites: TOTAL passed=59 failed=0
+  TcpRelayIntegrationTest 12 · DnsResolverTest 12 · PacketCodecTest 9 · DnsMessageTest 7
   TunnelVerifierTest 7 · CleanIpProbeTest 6 · TunnelSelfTestTest 6
 ```
 
@@ -111,7 +113,7 @@ stats t=5s packets=145 tcp=113 dns53=10 activeTcp=9 flowsOpened=16 flowsEstablis
 That run also produced the two new proven defects D7/D8 and the harness change below.
 
 CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real Android SDK):
-the green runs execute 128 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
+the green runs execute 129 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
 quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan, APK size).
 
 | run | commit | result |
@@ -133,7 +135,7 @@ sufficient (requirement 5). It also reports whether tunnel-local destinations we
 
 ## 5. Remaining limitations (stated, not hidden)
 
-1. **No physical phone was available in this environment.** CI proves compilation, 128 unit /
+1. **No physical phone was available in this environment.** CI proves compilation, 129 unit /
    integration tests and a signed APK; the emulator E2E proves the data path on Android — it cannot prove that *a specific carrier* passes the
    fragmented TLS outbound. That still needs the log in §6.
 2. QUIC/HTTP-3 is not relayed: UDP ≠ 53 is counted, answered with ICMP port-unreachable and

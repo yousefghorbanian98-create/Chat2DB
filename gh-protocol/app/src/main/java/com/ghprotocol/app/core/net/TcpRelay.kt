@@ -202,6 +202,16 @@ class TcpRelay(
     @Volatile
     var packetObserver: ((ByteArray) -> Unit)? = null
 
+    /**
+     * IPv6 policy switch, set from measured evidence only ([VpnTunnelService] flips it after the
+     * v6 self-test). Xray dials *outside* the tunnel, so IPv6 payload needs the device's own v6
+     * egress; when that is missing, a v6 flow would otherwise hang until the idle timeout
+     * (5 minutes) while apps wait for Happy-Eyeballs. Instead the flow is reset at once with
+     * `ipv6_no_egress`, which makes apps fall back to IPv4 immediately.
+     */
+    @Volatile
+    var rejectIpv6Flows: Boolean = false
+
     fun stats(): RelayStats = RelayStats(
         flowsOpened = flowsOpened.get(),
         flowsEstablished = flowsEstablished.get(),
@@ -260,6 +270,19 @@ class TcpRelay(
     }
 
     private fun onSyn(key: FlowKey, packet: PacketCodec.IpFlow) {
+        if (packet.family == 6 && rejectIpv6Flows) {
+            // Measured, not assumed: the v6 path produced no payload, so fail fast instead of
+            // keeping the flow open for the idle timeout.
+            localRejects.incrementAndGet()
+            events.onFlowRejected(key.toString(), "ipv6_no_egress")
+            sendReset(
+                packet.family, key,
+                seq = 0L, ack = PacketCodec.seqAdd(packet.seq, 1),
+                reasonFor = "ipv6_no_egress"
+            )
+            publishStats(force = true)
+            return
+        }
         if (isTunnelLocalDestination(packet.dstIp)) {
             // A tunnel-local address is not reachable through the upstream proxy by definition.
             // Answer with a real RST (what a closed port looks like) so the client fails fast and

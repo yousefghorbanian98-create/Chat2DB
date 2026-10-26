@@ -29,7 +29,7 @@ This document codifies the updated **Finn-loop v1.4** quality gates, the **25-po
 - [x] Clean-IP candidates need a full TLS handshake (system trust store) + complete HTTP response
       + Cloudflare marker; a bare TCP connect or a partial ClientHello is never "healthy"
 - [x] UDP that cannot be relayed is counted (`udpDropped`) and answered with ICMP port-unreachable
-- [x] 58 hermetic JVM data-path tests (relay, DNS, codec, probes, verifier, self-test)
+- [x] 59 hermetic JVM data-path tests (relay, DNS, codec, probes, verifier, self-test)
 
 ### Gate 4: Security & Privacy
 - [x] **No Secret Leak:** Zero hardcoded private server IPs, API keys, or tokens
@@ -39,7 +39,8 @@ This document codifies the updated **Finn-loop v1.4** quality gates, the **25-po
       claim, DIAGNOSIS §D3), `route_only` (tunnelled, but no v6 payload proven yet) or `verified`
       (the Cloudflare v6 self-test target received real remote bytes through the relay). The
       state is logged, exported and printed by the E2E; nothing claims protection it did not
-      measure.
+      measure. When the v6 payload test fails, new v6 flows are reset at once
+      (`ipv6_no_egress`) instead of hanging — IPv4 is unaffected.
 - [x] **DNS Leak & Loop Prevention:** every TUN port-53 query is answered by the app's own
       resolver (DoH over the tunnel's SOCKS5 → DoH Google → TCP DNS → Xray `dns-in`) with a hard
       5 s budget and a real SERVFAIL on failure; responses must match transaction ID *and*

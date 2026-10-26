@@ -674,6 +674,8 @@ class VpnTunnelService : VpnService() {
             timeoutMs = 9_000
         )
         if (result.ok) {
+            // v6 payload proven: stop rejecting v6 flows (a later network change may restore it).
+            relay?.rejectIpv6Flows = false
             TunnelLogBuffer.setIpv6Mode(IPV6_VERIFIED)
             Log.d(
                 "GhDiag",
@@ -687,6 +689,18 @@ class VpnTunnelService : VpnService() {
             )
         } else {
             TunnelLogBuffer.setIpv6Mode(IPV6_ROUTE_ONLY)
+            // Xray is excluded from the tunnel, so it dials with the device's own network. A
+            // SOCKS "connected" followed by no payload means that network has no usable IPv6
+            // path: stop letting v6 flows hang and make apps fall back to IPv4 at once.
+            if (result.stage == TunnelSelfTestResult.STAGE_PAYLOAD) {
+                relay?.rejectIpv6Flows = true
+                Log.d(
+                    "GhDiag",
+                    "ipv6_egress_unproven reason=no_payload_via_socks " +
+                        "note=xray_dials_outside_the_tunnel_so_v6_needs_device_v6_egress " +
+                        "action=reject_v6_flows_fast"
+                )
+            }
             Log.d("GhDiag", "relay_selftest_v6 ok=false stage=${result.stage} detail=${result.detail}")
             TunnelLogBuffer.log(
                 LogLevel.WARN, LogCategory.TUN,

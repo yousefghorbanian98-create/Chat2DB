@@ -137,11 +137,11 @@ Everything else stays `TUNNELING`/`DEGRADED` with the failing stage in the log.
 
 ## 5. Verification performed in this change
 
-58 hermetic JVM tests (loopback only, no external network):
+59 hermetic JVM tests (loopback only, no external network):
 
 | suite | what it proves |
 |---|---|
-| `TcpRelayIntegrationTest` (11) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes, **self-test bytes never leak into the app counters** |
+| `TcpRelayIntegrationTest` (12) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes, **self-test bytes never leak into the app counters** |
 | `DnsResolverTest` (12) | DoH over TLS handshake + HTTP exchange, transaction/question validation, budget enforcement, cache TTL, real SERVFAIL, **no synthesised AAAA** |
 | `DnsMessageTest` (7) | RFC 1035 parse/validate, SERVFAIL/TC construction |
 | `PacketCodecTest` (9) | IPv4/IPv6 TCP/UDP checksums, sequence wrap, MAS options, fragment rejection |
@@ -276,6 +276,22 @@ real `::1` server (13 ms, real v6 payload).
 The E2E now reports `ipv6=route_only` when v6 payload is not proven and only `ipv6=verified`
 after a real v6 round trip, so the phone log can settle this on a network that actually has
 IPv6 egress.
+
+### Why the emulator stayed at `route_only` — and the policy that follows
+
+Run `40254223708` reached `relay_selftest_v6 ok=false stage=payload detail=no_response_bytes`:
+the SYN-ACK arrived (the v6 packet path, checksums and SOCKS dial all worked) but no payload
+came back. Xray is excluded from the tunnel (`addDisallowedApplication`), so it dials with the
+**device's own** network — a QEMU NAT without IPv6, and, for most Iranian mobile carriers, no
+IPv6 at all. A tunnel cannot create v6 egress that the underlying network does not have.
+
+Consequence (requirement 4, "choose a safe, tested policy"): when the v6 self-test fails at the
+payload stage, the service logs
+`ipv6_egress_unproven … action=reject_v6_flows_fast` and sets `TcpRelay.rejectIpv6Flows`, so
+new v6 flows are reset immediately (`ipv6_no_egress`) instead of hanging for the 5-minute idle
+timeout while apps wait in Happy Eyeballs. IPv4 is untouched. The state remains `route_only`
+and **no leak-prevention claim** is made.
+Regression test: `TcpRelayIntegrationTest.ipv6FlowsAreRejectedFastOnceEgressIsUnproven`.
 
 ## 11. Not relayed on purpose (no claim made)
 

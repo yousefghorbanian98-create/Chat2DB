@@ -387,6 +387,47 @@ class TcpRelayIntegrationTest {
     }
 
     /**
+     * Requirement 4 policy: when the device/proxy has no working IPv6 egress (measured by the
+     * v6 self-test ending at `payload: no_response_bytes`), v6 flows must fail fast instead of
+     * hanging for the 5-minute idle timeout, while IPv4 keeps working untouched.
+     */
+    @Test
+    fun ipv6FlowsAreRejectedFastOnceEgressIsUnproven() {
+        TestNet.EchoServer().use { echo ->
+            TestNet.SocksServer().use { socks ->
+                val sink = RecordingSink()
+                val events = Events()
+                val relay = TcpRelay(sink, TestNet.connectorFor(socks), events, config())
+                try {
+                    relay.rejectIpv6Flows = true
+                    relay.onPacket(
+                        TestNet.clientPacket(6, "fd00:1::2", clientPort, "2001:db8::1", 443, 500, 0, PacketCodec.FLAG_SYN)
+                    )
+                    val reset = sink.await(2000) { it.isRst && it.family == 6 }
+                    assertNotNull("a v6 flow must be reset instead of hanging", reset)
+                    assertEquals("no upstream dial for v6", 0, socks.connections)
+                    assertEquals(0, relay.stats().activeFlows)
+
+                    // IPv4 must be unaffected.
+                    val isn = 600L
+                    relay.onPacket(
+                        TestNet.clientPacket(4, clientIp, clientPort, "127.0.0.1", echo.port, isn, 0, PacketCodec.FLAG_SYN)
+                    )
+                    val synAck = sink.await(3000) { it.isSyn && it.isAck }
+                    assertNotNull("IPv4 must still be relayed", synAck)
+                    assertEquals(1, socks.connections)
+                    assertTrue(
+                        "the reason must be reported, got=${events.rejected}",
+                        events.rejected.contains("ipv6_no_egress")
+                    )
+                } finally {
+                    relay.shutdown()
+                }
+            }
+        }
+    }
+
+    /**
      * `closeFlow()` removes the flow from the map *before* it emits `onFlowClosed`, so a test that
      * waits for `activeFlows == 0` and then reads the event list is racy on a loaded CI runner.
      * Every event assertion goes through this helper instead.
