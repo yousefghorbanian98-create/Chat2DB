@@ -649,6 +649,53 @@ class VpnTunnelService : VpnService() {
         }, "gh-selftest").apply { isDaemon = true; start() }
     }
 
+    /**
+     * One v6 TCP flow through the relay. Success promotes the IPv6 state to [IPV6_VERIFIED];
+     * failure keeps it at [IPV6_ROUTE_ONLY] and logs the stage, so no log or UI ever claims v6
+     * protection that was not measured.
+     */
+    private fun measureIpv6Payload(selfTest: TunnelSelfTest) {
+        if (!hasIpv6Route) {
+            TunnelLogBuffer.setIpv6Mode(IPV6_UNAVAILABLE)
+            Log.d("GhDiag", "ipv6_state=$IPV6_UNAVAILABLE reason=no_route")
+            return
+        }
+        val target = SELF_TEST_TARGET_V6
+        val request = (
+            "GET ${target.path} HTTP/1.0\r\n" +
+                "Host: ${target.hostHeader}\r\n" +
+                "User-Agent: GhProtocol-selftest/1.6\r\n\r\n"
+            ).toByteArray(Charsets.US_ASCII)
+        val result = selfTest.run(
+            targetIp = target.ip,
+            targetPort = target.port,
+            request = request,
+            expected = { bytes -> String(bytes, Charsets.ISO_8859_1).startsWith("HTTP/1.") },
+            timeoutMs = 9_000
+        )
+        if (result.ok) {
+            TunnelLogBuffer.setIpv6Mode(IPV6_VERIFIED)
+            Log.d(
+                "GhDiag",
+                "relay_selftest_v6 ok=true target=${result.target} up=${result.upBytesDelta} " +
+                    "down=${result.downBytesDelta} checksums=${result.checksumErrors}"
+            )
+            TunnelLogBuffer.log(
+                LogLevel.SUCCESS, LogCategory.TUN,
+                "عبور واقعی IPv6 هم تایید شد (${result.target})",
+                "ipv6_state=$IPV6_VERIFIED target=${result.target} down=${result.downBytesDelta}"
+            )
+        } else {
+            TunnelLogBuffer.setIpv6Mode(IPV6_ROUTE_ONLY)
+            Log.d("GhDiag", "relay_selftest_v6 ok=false stage=${result.stage} detail=${result.detail}")
+            TunnelLogBuffer.log(
+                LogLevel.WARN, LogCategory.TUN,
+                "IPv6 تونل شد اما عبور دادهٔ واقعی آن تایید نشد",
+                "ipv6_state=$IPV6_ROUTE_ONLY stage=${result.stage} detail=${result.detail}"
+            )
+        }
+    }
+
     /** Runs a real payload exchange through the relay (blocking; call off the main thread). */
     fun runSelfTest(): TunnelSelfTestResult {
         val activeRelay = relay
