@@ -21,6 +21,8 @@ can be re-executed, or explicitly marked as **still needs the phone**.
 | **D4** | The Clean-IP scanner scored an IP healthy from a bounded TCP connect / truncated ClientHello. | `CleanIpProbe.kt` requires full TLS handshake + complete HTTP response + `cf-ray`/`Server: cloudflare`; `CleanIpProbeTest` (6 tests) rejects a plain listener, a TLS server without the marker, and any private/reserved/non-literal entry. |
 | **D5** | "Connected"/"Verified" was reported before anything proved payload flow. | `HomeViewModel.verifyAndAutoHealIfNeeded` sets `CONNECTED` only after `verify.ok`; `TunnelSelfTest` requires remote payload; `lastSelfTest` is cleared on every request so a stale result can never be reused. |
 | **D6** | The `Up/Down` a user saw **included the self-test's own bytes** (the probe injects a flow into the same relay), which is why a device with no app traffic could still read `Up=3.4 KB`. | `RelayConfig.probeSourceIps` + `RelayStats.probeBytesUp/Down` + `applicationOnly()`; `TcpRelayIntegrationTest.selfTestBytesAreReportedApartFromApplicationBytes`. |
+| **D7** | On a real device the self-test collided with **its own previous flow** (fixed source port + half-close grace) and rejected a healthy tunnel with `syn_ack: bad_ack_…` | `TunnelSelfTest.nextClientPort()` + run lock; `TunnelSelfTestTest.consecutiveSelfTestsToTheSameTargetBothPass` (failed with the exact E2E message before the fix). |
+| **D8** | Android Private DNS dials the tunnel's own resolver (`10.8.0.1` / `fd00:1::1`) on port 853; those flows were pushed through SOCKS5 and died with `upstream_eof up=517 down=0` | `RelayConfig.localDestinationPrefixes` → local RST + `RelayStats.localRejects` + one `flow_rejected` log; `TcpRelayIntegrationTest.tunnelLocalDestinationsAreResetWithoutUpstreamDial`. |
 
 The 4 CI-only unit-test failures that blocked the branch are also closed, with a proven cause:
 the in-test TLS servers relied on `SSLServerSocket`'s implicit handshake and a single
@@ -82,13 +84,30 @@ failed the identical tests minutes earlier.
 Local (JDK 25 + kotlinc, no Gradle, no device):
 
 ```
-core/net suites: TOTAL passed=55 failed=0
-  TcpRelayIntegrationTest 10 · DnsResolverTest 12 · PacketCodecTest 9 · DnsMessageTest 7
-  TunnelVerifierTest 7 · CleanIpProbeTest 6 · TunnelSelfTestTest 4
+core/net suites: TOTAL passed=57 failed=0
+  TcpRelayIntegrationTest 11 · DnsResolverTest 12 · PacketCodecTest 9 · DnsMessageTest 7
+  TunnelVerifierTest 7 · CleanIpProbeTest 6 · TunnelSelfTestTest 5
 ```
 
+Emulator E2E (`gh-protocol-e2e (P2b)`, run `40244228075`, **pass**) — the first Android-side
+end-to-end evidence, published to the `ci-diag` branch as `gh-protocol/e2e-log.md`:
+
+```
+effective_dns … doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249
+                    dohOutbound=tcp-fragment-tls doh_bootstrap_zone_ok
+tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1
+relay_selftest ok=true target=1.1.1.1:80            up=91  down=402 response=402 checksums=0
+relay_selftest ok=true target=104.16.248.249:80     up=323 down=794 response=794 checksums=0
+dns_ok path=doh:cloudflare-dns.com × 15 (dnsFail=0)   ← D1 fixed on a device
+stats t=5s packets=145 tcp=113 dns53=10 activeTcp=9 flowsOpened=16 flowsEstablished=16
+      appUp=38575 appDown=30180 probeUp=184 probeDown=1196 probeFlows=2 dnsOk=10 dnsFail=0
+      state=VERIFIED ipv6=tunneled                  ← D6 fixed on a device
+```
+
+That run also produced the two new proven defects D7/D8 and the harness change below.
+
 CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real Android SDK):
-the green runs execute 125 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
+the green runs execute 127 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
 quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan, APK size).
 
 | run | commit | result |
@@ -100,23 +119,30 @@ quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan
 | `40242773230` | `1870c08` — TLS ClientHello through the relay, flake-free event assertions | **success**, 6m19s, artifact `gh-protocol-release-116` (220 MB, all ABIs) — **this is the verified commit** |
 
 Golden/Roborazzi (`:app:recordRoborazziDebug`/`verifyRoborazziDebug`) and the emulator E2E
-(`ci-e2e.sh`) are part of the workflow; the E2E script hard-fails unless the on-device relay
-self-test reports `ok=true` with real payload.
+(`ci-e2e.sh`) are part of the workflow. The E2E now requires **application** evidence, not just
+our own probe: it opens a real page and fails unless the 5-second heartbeat reports `appUp > 0`
+or a finished non-probe flow carried remote bytes; `relay_selftest ok=true` alone is no longer
+sufficient (requirement 5). It also reports whether tunnel-local destinations were reset locally
+(D8).
 
 ---
 
 ## 5. Remaining limitations (stated, not hidden)
 
-1. **No physical phone was available in this environment.** CI proves compilation, 125 unit /
-   integration tests and a signed APK — it cannot prove that *a specific carrier* passes the
+1. **No physical phone was available in this environment.** CI proves compilation, 127 unit /
+   integration tests and a signed APK; the emulator E2E proves the data path on Android — it cannot prove that *a specific carrier* passes the
    fragmented TLS outbound. That still needs the log in §6.
 2. QUIC/HTTP-3 is not relayed: UDP ≠ 53 is counted, answered with ICMP port-unreachable and
-   the app falls back to TCP. This is deliberate (no half-working UDP proxy).
-3. IPv6 depends on the platform accepting `fd00:1::2/64` + `::/0`; when it refuses, IPv6 is
+   the app falls back to TCP. ICMP echo (`ping`) is not relayed either — the E2E log shows
+   `100% packet loss` for a ping inside the tunnel, by design.
+3. Android's opportunistic **Private DNS (DoT, port 853)** is not served on the tunnel address:
+   the flow is reset locally so Android falls back to UDP 53, which `DnsResolver` answers. No
+   TLS is terminated by us.
+4. IPv6 depends on the platform accepting `fd00:1::2/64` + `::/0`; when it refuses, IPv6 is
    reported unavailable and is not silently "protected".
-4. DoH availability still depends on the fragmenting outbound reaching a Cloudflare edge; the
+5. DoH availability still depends on the fragmenting outbound reaching a Cloudflare edge; the
    chain then degrades to Google DoH / TCP DNS / Xray `dns-in` rather than hanging.
-5. `Up/Down` now describe application traffic only; the self-test share is exposed separately
+6. `Up/Down` now describe application traffic only; the self-test share is exposed separately
    (`probeUp/probeDown`) and is not included in the numbers a user reads.
 
 ---

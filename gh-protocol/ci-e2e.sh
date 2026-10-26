@@ -250,6 +250,39 @@ if [ "$SELFTEST" != "1" ]; then
   report "no in-tunnel payload self-test passed (relay_selftest ok=true never logged)"
 fi
 
+say "== real app traffic through the tunnel (requirement 5) =="
+# A self-test proves our own datapath; it does NOT prove that an ordinary app's traffic flows.
+# Drive a real browser page and read the 5-second heartbeat, whose appUp/appDown exclude the
+# self-test's own bytes.
+adb shell am start -a android.intent.action.VIEW -d "https://cloudflare.com/" >/dev/null 2>&1 \
+  || say "WARN: could not launch a browser on this image"
+APPUP=0
+STATSLINE=""
+for i in $(seq 1 12); do
+  STATSLINE=$(adb logcat -d -s GhDiag 2>/dev/null | grep "stats t=" | tail -1)
+  VAL=$(echo "$STATSLINE" | sed -n 's/.*appUp=\([0-9][0-9]*\).*/\1/p')
+  if [ -n "$VAL" ] && [ "$VAL" -gt 0 ]; then APPUP=$VAL; break; fi
+  sleep 5
+done
+say "app traffic: appUp=$APPUP bytes"
+echo "$STATSLINE" >> "$LOG" 2>&1
+if [ "$APPUP" = "0" ]; then
+  # Fallback evidence: a finished, non-probe flow that carried remote bytes.
+  APPDOWN=$(adb logcat -d -s GhDiag 2>/dev/null \
+    | grep "flow_closed" | grep "probe=false" \
+    | sed -n 's/.*down=\([0-9][0-9]*\).*/\1/p' | sort -n | tail -1)
+  if [ -n "$APPDOWN" ] && [ "$APPDOWN" -gt 0 ]; then
+    say "app traffic confirmed from flow_closed down=${APPDOWN}B (heartbeat not sampled yet)"
+  else
+    adb logcat -d -s GhDiag 2>/dev/null | grep -E "stats t=|no_app_packets|flow_rejected|flow_closed" | tail -20 >> "$LOG" 2>&1
+    report "no application bytes entered the tunnel (appUp=0 and no non-probe flow carried data) — the self-test alone is not app proof"
+  fi
+fi
+# The tunnel's own addresses must never be dialled upstream (they were, before 2026-10-26).
+if adb logcat -d -s GhDiag 2>/dev/null | grep -q "flow_rejected reason=tunnel_local_destination"; then
+  say "tunnel-local destinations are reset locally (no wasted upstream dial)"
+fi
+
 say "== HTTPS probe through tunnel (best-effort) ==="
 if adb shell "command -v curl" >/dev/null 2>&1; then
   CODE=$(adb shell "curl -sS -m 20 -o /dev/null -w '%{http_code}' https://github.com" 2>&1 | tail -1)

@@ -137,16 +137,16 @@ Everything else stays `TUNNELING`/`DEGRADED` with the failing stage in the log.
 
 ## 5. Verification performed in this change
 
-54 hermetic JVM tests (loopback only, no external network):
+57 hermetic JVM tests (loopback only, no external network):
 
 | suite | what it proves |
 |---|---|
-| `TcpRelayIntegrationTest` (9) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes, **self-test bytes never leak into the app counters** |
+| `TcpRelayIntegrationTest` (11) | SYN→SYN-ACK→payload→response, multi-segment, IPv6 flow, checksums, retransmit, idle timeout, both close directions, counters == real bytes, **self-test bytes never leak into the app counters** |
 | `DnsResolverTest` (12) | DoH over TLS handshake + HTTP exchange, transaction/question validation, budget enforcement, cache TTL, real SERVFAIL, **no synthesised AAAA** |
 | `DnsMessageTest` (7) | RFC 1035 parse/validate, SERVFAIL/TC construction |
 | `PacketCodecTest` (9) | IPv4/IPv6 TCP/UDP checksums, sequence wrap, MAS options, fragment rejection |
 | `CleanIpProbeTest` (6) | only full TLS+HTTP+CF marker is healthy; private/invalid IPs never probed |
-| `TunnelSelfTestTest` (4) | self-test needs real payload and moves the relay's counters |
+| `TunnelSelfTestTest` (5) | self-test needs real payload, moves the relay's counters, and two runs back-to-back must both pass (D7) |
 | `TunnelVerifierTest` (7) | stages, bare-connect is not success, `combine` requires tunnel payload |
 
 ## 6. D6 — the shown `Up/Down/ActiveTCP` included the self-test's own bytes  **[proven]**
@@ -188,7 +188,81 @@ would emit RST and discard the response). Each connection records `stage`, `byte
 Evidence: run `40240521661` — 123 tests, 0 failures, release APK produced, on the same runner
 that failed the identical test bodies minutes earlier.
 
-## 8. What still requires the phone (cannot be substituted by CI)
+## 8. Emulator E2E evidence (2026-10-25, run 40244228075) — what it proved and what it broke
+
+The P2b workflow boots an x86_64 emulator with a **real VpnService**, taps the consent dialog
+and runs the whole app. Its log (published to the `ci-diag` branch, `gh-protocol/e2e-log.md`)
+is the first end-to-end evidence from an Android device:
+
+```
+effective_dns active   fragA :: doh=https://cloudflare-dns.com/dns-query
+        dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls notes=doh_bootstrap_zone_ok
+tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1 mtu=1500
+relay_selftest ok=true stage=ok target=1.1.1.1:80        up=91  down=402 response=402 checksums=0
+relay_selftest ok=true stage=ok target=104.16.248.249:80 up=323 down=794 response=794 checksums=0
+dns_ok path=doh:cloudflare-dns.com  (15 answered queries, dnsFail=0)
+stats t=5s packets=145 tcp=113 dns53=10 otherUdp=12 activeTcp=9 flowsOpened=16
+      flowsEstablished=16 connectFailures=0 retransmits=0
+      appUp=38575 appDown=30180 probeUp=184 probeDown=1196 probeFlows=2 dnsOk=10 dnsFail=0
+      state=VERIFIED ipv6=tunneled
+E2E PASS: real tunnel carrying traffic (SUBMODE=live)
+```
+
+So **D1 (DoH dead end) is proven fixed on a device**: 15 real DoH answers, zero failures, no
+`context deadline exceeded`. **D6 is proven fixed on a device**: `appUp/appDown` carry only
+application bytes (38,575 / 30,180 B) while the self-test's share (184 / 1,196 B) is reported
+separately — the exact counter confusion of the original bug report.
+
+The same log exposed two defects that no unit test had covered, both now fixed:
+
+## 9. D7 — the self-test collided with its own previous flow  **[proven, regression test]**
+
+```
+23:23:25.440  relay_selftest ok=true  target=1.1.1.1:80            (first run passed)
+23:23:25.458  selftest 1.1.1.1:80 failed at syn_ack:
+              bad_ack_1477468113_expected_1191517255              (second run, 18 ms later)
+```
+
+`TunnelSelfTest` used a fixed source port (`10.8.0.99:41234`). A second run against the same
+target — the service re-runs the test after every core restart, and the E2E harness nudges one —
+hit the previous flow while it was still inside the half-close grace window. The relay correctly
+treated the SYN as a retransmit and replayed the **old** SYN-ACK (old ISN), and the new run
+rejected a perfectly healthy tunnel. Fix: every run takes a fresh source port from a rotating
+range and runs are serialised (`TunnelSelfTest.nextClientPort`, `runLock`).
+Regression test: `TunnelSelfTestTest.consecutiveSelfTestsToTheSameTargetBothPass` — it failed
+with the exact message above before the fix and passes now.
+
+## 10. D8 — flows to the tunnel's *own* addresses were dialled upstream  **[proven, regression test]**
+
+```
+tun v4 proto=6 dst=10.8.x.x:853   ·  flow_open 10.8.x.x:853
+tun v6 proto=6 dst=fd00:1:…:853   ·  flow_open fd00:1:…:853
+flow_closed reason=upstream_eof up=517 down=0     (both)
+```
+
+Android's opportunistic Private DNS dials the VPN's DNS server (our gateway `10.8.0.1` /
+`fd00:1::1`) on 853. Our relay forwarded those to SOCKS5, i.e. asked the upstream proxy to
+connect to an address that only exists inside our tunnel; the dial ended in EOF after 517 bytes.
+Fix: `RelayConfig.localDestinationPrefixes` marks the tunnel subnet (`10.8.0.`, `fd00:1:`); such
+flows are answered with a real RST and counted in `RelayStats.localRejects`, and the service logs
+`flow_rejected reason=tunnel_local_destination` once. The client fails fast and falls back to
+UDP 53, which [DnsResolver] serves.
+Regression test: `TcpRelayIntegrationTest.tunnelLocalDestinationsAreResetWithoutUpstreamDial`
+(RST, `socks.connections == 0`, `localRejects == 2`, `connectFailures == 0`).
+
+Also fixed for diagnosability: `flow_open`/`flow_closed` now log the **masked destination and
+the address family**, and `flow_closed` carries `probe=<bool>`, so a phone log can prove which
+peer (v4 or v6) carried which bytes — previously `flow_closed` had no destination at all, so the
+`ipv6=tunneled` claim could not be checked from the log.
+
+## 11. Not relayed on purpose (no claim made)
+
+- **ICMP**: `ping` inside the tunnel is dropped (`E2E: 100% packet loss` in the log). The tunnel
+  relays TCP and DNS; it does not answer echo requests.
+- **QUIC/HTTP-3** (`otherUdp=12` in the sample): counted and answered with a real ICMP
+  port-unreachable so apps fall back to TCP.
+
+## 12. What still requires the phone (cannot be substituted by CI)
 
 Run the build, connect with `fragB` + `CleanIP=auto`, then:
 

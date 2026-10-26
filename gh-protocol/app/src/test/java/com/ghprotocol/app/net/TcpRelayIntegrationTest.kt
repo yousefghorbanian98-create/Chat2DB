@@ -49,10 +49,24 @@ class TcpRelayIntegrationTest {
         val closed = Collections.synchronizedList(ArrayList<String>())
         val failed = Collections.synchronizedList(ArrayList<String>())
         val warnings = Collections.synchronizedList(ArrayList<String>())
+        val rejected = Collections.synchronizedList(ArrayList<String>())
+        val closedProbeFlags = Collections.synchronizedList(ArrayList<Boolean>())
         @Volatile var lastStats: RelayStats? = null
 
-        override fun onFlowClosed(key: String, reason: String, upBytes: Long, downBytes: Long, durationMs: Long) {
+        override fun onFlowClosed(
+            key: String,
+            reason: String,
+            upBytes: Long,
+            downBytes: Long,
+            durationMs: Long,
+            probe: Boolean
+        ) {
             closed.add(reason)
+            closedProbeFlags.add(probe)
+        }
+
+        override fun onFlowRejected(key: String, reason: String) {
+            rejected.add(reason)
         }
 
         override fun onFlowFailed(key: String, stage: String, detail: String) {
@@ -72,7 +86,8 @@ class TcpRelayIntegrationTest {
         idleTimeoutMs: Long = 300_000,
         retransmitIntervalMs: Long = 400,
         maxRetransmits: Int = 6,
-        halfCloseGraceMs: Long = 200
+        halfCloseGraceMs: Long = 200,
+        localDestinationPrefixes: List<String> = emptyList()
     ) = RelayConfig(
         mss = 512,
         connectTimeoutMs = 2000,
@@ -81,7 +96,8 @@ class TcpRelayIntegrationTest {
         retransmitIntervalMs = retransmitIntervalMs,
         maxRetransmits = maxRetransmits,
         halfCloseGraceMs = halfCloseGraceMs,
-        tickerIntervalMs = 25
+        tickerIntervalMs = 25,
+        localDestinationPrefixes = localDestinationPrefixes
     )
 
     @Test
@@ -312,6 +328,61 @@ class TcpRelayIntegrationTest {
             }
             worker.join(5000)
             return captured.toByteArray()
+        }
+    }
+
+    /**
+     * Regression for the 2026-10-25 emulator E2E:
+     *
+     *   tun v6 proto=6 dst=fd00:1:…:853 · flow_open fd00:1:…:853
+     *   tun v4 proto=6 dst=10.8.x.x:853  · flow_open 10.8.x.x:853
+     *   flow_closed reason=upstream_eof up=517 down=0     (twice)
+     *
+     * Android's opportunistic Private DNS dials the VPN's own resolver address on 853. Those
+     * flows were pushed through SOCKS5 against an address that only exists inside our tunnel, so
+     * they could never succeed. They must be reset locally, without a single upstream dial.
+     */
+    @Test
+    fun tunnelLocalDestinationsAreResetWithoutUpstreamDial() {
+        TestNet.SocksServer().use { socks ->
+            val sink = RecordingSink()
+            val events = Events()
+            val relay = TcpRelay(
+                sink,
+                TestNet.connectorFor(socks),
+                events,
+                config(localDestinationPrefixes = listOf("10.8.0.", "fd00:1:"))
+            )
+            try {
+                // IPv4 gateway (Private DNS / DoT) and IPv6 gateway (TCP DNS).
+                relay.onPacket(
+                    TestNet.clientPacket(4, clientIp, clientPort, "10.8.0.1", 853, 100, 0, PacketCodec.FLAG_SYN)
+                )
+                relay.onPacket(
+                    TestNet.clientPacket(6, "fd00:1::2", clientPort, "fd00:1::1", 53, 200, 0, PacketCodec.FLAG_SYN)
+                )
+                val reset = sink.await(3000) { it.isRst }
+                assertNotNull("a tunnel-local destination must be answered with RST", reset)
+                Thread.sleep(150)
+                val stats = relay.stats()
+                assertEquals("both local flows must be counted", 2L, stats.localRejects)
+                assertEquals("no upstream connection may be attempted", 0, socks.connections)
+                assertEquals("no flow may be left open", 0, stats.activeFlows)
+                assertEquals("a local reject is not an upstream failure", 0L, stats.connectFailures)
+                assertEquals(0L, stats.flowsOpened)
+                assertEquals(
+                    "each rejected flow must be reported, got=${events.rejected}",
+                    2,
+                    events.rejected.size
+                )
+                assertTrue(
+                    "the rejection reason must be reported, got=${events.rejected}",
+                    events.rejected.all { it == "tunnel_local_destination" }
+                )
+                assertTrue(sink.packets.all { PacketCodec.hasValidTcpChecksum(it) })
+            } finally {
+                relay.shutdown()
+            }
         }
     }
 

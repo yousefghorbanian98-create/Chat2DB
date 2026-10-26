@@ -35,7 +35,16 @@ data class RelayConfig(
      * [RelayStats.applicationOnly] values and the self-test reads the [RelayStats.probeBytesUp]
      * fields, which is what makes "Up/Down" mean "traffic the apps really sent".
      */
-    val probeSourceIps: Set<String> = setOf("10.8.0.99")
+    val probeSourceIps: Set<String> = setOf("10.8.0.99"),
+    /**
+     * Destination address prefixes that only exist **inside our own tunnel** (the TUN address,
+     * the gateway and the loopback DNS listener). Dialling them through SOCKS5 is guaranteed to
+     * fail — the 2026-10-25 emulator E2E showed Android's opportunistic Private DNS doing
+     * exactly that: `flow_open 10.8.x.x:853` → `upstream_eof up=517 down=0`, and the same for
+     * `fd00:1:…:853`. Such flows are reset locally and counted in
+     * [RelayStats.localRejects] instead of wasting a SOCKS dial.
+     */
+    val localDestinationPrefixes: List<String> = emptyList()
 )
 
 data class RelayStats(
@@ -53,6 +62,7 @@ data class RelayStats(
     val parseFailures: Long = 0,
     val closeReasons: Map<String, Long> = emptyMap(),
     /** Bytes/flows produced by the in-tunnel self-test, included in the totals above. */
+    val localRejects: Long = 0,
     val probeBytesUp: Long = 0,
     val probeBytesDown: Long = 0,
     val probeFlowsOpened: Long = 0,
@@ -73,9 +83,18 @@ interface RelayEvents {
     fun onFlowOpened(key: String, dstIp: String, dstPort: Int) {}
     fun onFlowEstablished(key: String, connectMs: Long) {}
     fun onFlowFailed(key: String, stage: String, detail: String) {}
-    fun onFlowClosed(key: String, reason: String, upBytes: Long, downBytes: Long, durationMs: Long) {}
+    fun onFlowClosed(
+        key: String,
+        reason: String,
+        upBytes: Long,
+        downBytes: Long,
+        durationMs: Long,
+        probe: Boolean
+    ) {}
     fun onTraffic(upBytes: Long, downBytes: Long, activeFlows: Int) {}
     fun onStats(stats: RelayStats) {}
+    /** A flow that was refused locally, without any upstream connection attempt. */
+    fun onFlowRejected(key: String, reason: String) {}
     fun onWarning(stage: String, detail: String) {}
 }
 
@@ -166,6 +185,7 @@ class TcpRelay(
     private val droppedFragments = AtomicLong()
     private val parseFailures = AtomicLong()
     private val closeReasons = ConcurrentHashMap<String, AtomicLong>()
+    private val localRejects = AtomicLong()
     private val probeBytesUp = AtomicLong()
     private val probeBytesDown = AtomicLong()
     private val probeFlowsOpened = AtomicLong()
@@ -196,6 +216,7 @@ class TcpRelay(
         droppedFragments = droppedFragments.get(),
         parseFailures = parseFailures.get(),
         closeReasons = closeReasons.mapValues { it.value.get() },
+        localRejects = localRejects.get(),
         probeBytesUp = probeBytesUp.get(),
         probeBytesDown = probeBytesDown.get(),
         probeFlowsOpened = probeFlowsOpened.get(),
@@ -239,6 +260,20 @@ class TcpRelay(
     }
 
     private fun onSyn(key: FlowKey, packet: PacketCodec.IpFlow) {
+        if (isTunnelLocalDestination(packet.dstIp)) {
+            // A tunnel-local address is not reachable through the upstream proxy by definition.
+            // Answer with a real RST (what a closed port looks like) so the client fails fast and
+            // falls back, instead of waiting for a SOCKS dial that ends in EOF.
+            localRejects.incrementAndGet()
+            events.onFlowRejected(key.toString(), "tunnel_local_destination")
+            sendReset(
+                packet.family, key,
+                seq = 0L, ack = PacketCodec.seqAdd(packet.seq, 1),
+                reasonFor = "local_destination"
+            )
+            publishStats(force = true)
+            return
+        }
         val existing = flows[key]
         if (existing != null) {
             synchronized(existing) {
@@ -303,6 +338,10 @@ class TcpRelay(
             publishStats(force = true)
         }, "gh-relay-connect-${key.srcPort}").apply { isDaemon = true; start() }
     }
+
+    /** True when [ip] belongs to the tunnel's own subnet (see [RelayConfig.localDestinationPrefixes]). */
+    fun isTunnelLocalDestination(ip: String): Boolean =
+        config.localDestinationPrefixes.any { prefix -> prefix.isNotEmpty() && ip.startsWith(prefix) }
 
     private fun sendSynAck(flow: Flow) {
         val packet = PacketCodec.buildTcp(
@@ -663,7 +702,8 @@ class TcpRelay(
             reason = reason,
             upBytes = flow.upBytes,
             downBytes = flow.downBytes,
-            durationMs = (clock() - flow.openedAtMs).coerceAtLeast(0L)
+            durationMs = (clock() - flow.openedAtMs).coerceAtLeast(0L),
+            probe = flow.isProbe
         )
         publishStats(force = true)
     }

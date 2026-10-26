@@ -36,11 +36,37 @@ data class TunnelSelfTestResult(
 class TunnelSelfTest(
     private val relay: TcpRelay,
     private val clientIp: String = "10.8.0.99",
-    private val clientPort: Int = 41_234,
     private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
 
     private data class Observed(val raw: ByteArray, val flow: PacketCodec.IpFlow)
+
+    companion object {
+        /**
+         * Every run must use a **fresh** 5-tuple. With a fixed source port, a second run against
+         * the same target — the service re-runs the self-test after each core restart and the E2E
+         * harness nudges one — hits the previous flow while it is still inside the half-close
+         * grace window. The relay correctly treats that SYN as a retransmit and replays the *old*
+         * SYN-ACK, so the new run rejected a healthy tunnel with
+         * `syn_ack: bad_ack_<old_isn+1>_expected_<new_isn+1>` (observed on the 2026-10-25
+         * emulator E2E). Rotating the port makes every run a genuinely new flow.
+         */
+        private const val PORT_MIN = 41_000
+        private const val PORT_MAX = 60_999
+        private val portCursor = java.util.concurrent.atomic.AtomicInteger(PORT_MIN)
+
+        /** Only one self-test may own [TcpRelay.packetObserver] at a time. */
+        private val runLock = Any()
+
+        fun nextClientPort(): Int {
+            while (true) {
+                val current = portCursor.getAndUpdate { next ->
+                    if (next >= PORT_MAX) PORT_MIN else next + 1
+                }
+                if (current in PORT_MIN..PORT_MAX) return current
+            }
+        }
+    }
 
     fun run(
         targetIp: String,
@@ -48,8 +74,21 @@ class TunnelSelfTest(
         request: ByteArray,
         expected: (ByteArray) -> Boolean,
         timeoutMs: Int = 8000
+    ): TunnelSelfTestResult = synchronized(runLock) {
+        runLocked(targetIp, targetPort, request, expected, timeoutMs)
+    }
+
+    private fun runLocked(
+        targetIp: String,
+        targetPort: Int,
+        request: ByteArray,
+        expected: (ByteArray) -> Boolean,
+        timeoutMs: Int
     ): TunnelSelfTestResult {
         val started = clock()
+        // A fresh source port per run keeps a lingering probe flow from being mistaken for a
+        // duplicate SYN (see the companion-object note).
+        val clientPort = nextClientPort()
         val before = relay.stats()
         val queue = Collections.synchronizedList(ArrayList<Observed>())
         val previousObserver = relay.packetObserver
@@ -118,7 +157,7 @@ class TunnelSelfTest(
             var clientNext = PacketCodec.seqAdd(isn, 1)
             var serverNext = PacketCodec.seqAdd(synAck.flow.seq, 1)
 
-            sendClientPacket(family, targetIp, targetPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
+            sendClientPacket(family, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
 
             // Two segments: exercises multi-segment upstream forwarding, not just one happy write.
             val split = (request.size / 2).coerceAtLeast(1).coerceAtMost(request.size)
@@ -126,7 +165,7 @@ class TunnelSelfTest(
             for (part in parts) {
                 if (part.isEmpty()) continue
                 sendClientPacket(
-                    family, targetIp, targetPort, clientNext, serverNext,
+                    family, targetIp, targetPort, clientPort, clientNext, serverNext,
                     PacketCodec.FLAG_PSH or PacketCodec.FLAG_ACK, part
                 )
                 clientNext = PacketCodec.seqAdd(clientNext, part.size.toLong())
@@ -146,7 +185,7 @@ class TunnelSelfTest(
                 if (diff > 0) {
                     // Gap: ACK what we already have so the relay retransmits the missing segment.
                     sendClientPacket(
-                        family, targetIp, targetPort, clientNext, serverNext,
+                        family, targetIp, targetPort, clientPort, clientNext, serverNext,
                         PacketCodec.FLAG_ACK, ByteArray(0)
                     )
                     continue
@@ -154,7 +193,7 @@ class TunnelSelfTest(
                 if (diff < 0) {
                     // Duplicate of an already delivered segment.
                     sendClientPacket(
-                        family, targetIp, targetPort, clientNext, serverNext,
+                        family, targetIp, targetPort, clientPort, clientNext, serverNext,
                         PacketCodec.FLAG_ACK, ByteArray(0)
                     )
                     continue
@@ -162,7 +201,7 @@ class TunnelSelfTest(
                 accumulated.write(observed.flow.payload)
                 serverNext = PacketCodec.seqAdd(serverNext, observed.flow.payload.size.toLong())
                 if (firstByteMs < 0) firstByteMs = clock() - started
-                sendClientPacket(family, targetIp, targetPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
+                sendClientPacket(family, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
                 if (expected(accumulated.toByteArray())) {
                     contentOk = true
                     break
@@ -170,7 +209,7 @@ class TunnelSelfTest(
             }
 
             sendClientPacket(
-                family, targetIp, targetPort, clientNext, serverNext,
+                family, targetIp, targetPort, clientPort, clientNext, serverNext,
                 PacketCodec.FLAG_FIN or PacketCodec.FLAG_ACK, ByteArray(0)
             )
 
@@ -196,6 +235,7 @@ class TunnelSelfTest(
         family: Int,
         targetIp: String,
         targetPort: Int,
+        clientPort: Int,
         seq: Long,
         ack: Long,
         flags: Int,

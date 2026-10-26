@@ -275,7 +275,12 @@ class VpnTunnelService : VpnService() {
                 mss = 1300,
                 connectTimeoutMs = 8_000,
                 connectReplyTimeoutMs = 12_000,
-                idleTimeoutMs = 300_000L
+                idleTimeoutMs = 300_000L,
+                // Everything inside our own tunnel subnet (TUN address + gateway + the local DNS
+                // listener) is unreachable through the upstream proxy: reset it locally instead
+                // of dialling 10.8.0.1/fd00:1::1 through SOCKS (E2E 2026-10-25: Android Private
+                // DNS tried 10.8.0.1:853 and fd00:1::1:853 and both ended in `upstream_eof`).
+                localDestinationPrefixes = listOf("10.8.0.", "fd00:1:")
             )
         )
         dnsResolver = DnsResolver(
@@ -312,6 +317,19 @@ class VpnTunnelService : VpnService() {
         stopTunnel()
         dnsPool.shutdownNow()
         super.onDestroy()
+    }
+
+    /**
+     * `ip:port->ip:port` with both addresses masked, so flow logs can be shared and still show
+     * which peer (and which family) carried the bytes.
+     */
+    private fun maskFlowKey(key: String): String = key.split("->").joinToString("->") { side ->
+        val idx = side.lastIndexOf(':')
+        if (idx <= 0) {
+            side
+        } else {
+            PacketCodec.maskIp(side.substring(0, idx)) + ":" + side.substring(idx + 1)
+        }
     }
 
     private fun writeTun(output: FileOutputStream, packet: ByteArray): Boolean {
@@ -499,8 +517,28 @@ class VpnTunnelService : VpnService() {
     }
 
     private inner class RelayEventsImpl : RelayEvents {
+        /** One warning per reason: Private DNS retries can be frequent. */
+        private val loggedRejections = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
+        override fun onFlowRejected(key: String, reason: String) {
+            Log.d("GhDiag", "flow_rejected reason=$reason dst=${maskFlowKey(key)}")
+            if (loggedRejections.add(reason)) {
+                TunnelLogBuffer.log(
+                    LogLevel.WARN, LogCategory.TUN,
+                    "اتصال به آدرس داخلی خود تونل رد شد (به‌جای انتظار بی‌نتیجه)",
+                    "flow_rejected reason=$reason count=${relay?.stats()?.localRejects ?: -1} note=" +
+                        "tunnel-local destination is not reachable through the proxy; " +
+                        "client gets a real RST and falls back (UDP 53 is served by DnsResolver)"
+                )
+            }
+        }
+
         override fun onFlowOpened(key: String, dstIp: String, dstPort: Int) {
-            Log.d("GhDiag", "flow_open ${PacketCodec.maskIp(dstIp)}:$dstPort")
+            Log.d(
+                "GhDiag",
+                "flow_open v${if (dstIp.contains(':')) 6 else 4} " +
+                    "dst=${PacketCodec.maskIp(dstIp)}:$dstPort probe=${dstPort == 0}"
+            )
         }
 
         override fun onFlowEstablished(key: String, connectMs: Long) {
@@ -516,8 +554,21 @@ class VpnTunnelService : VpnService() {
             )
         }
 
-        override fun onFlowClosed(key: String, reason: String, upBytes: Long, downBytes: Long, durationMs: Long) {
-            Log.d("GhDiag", "flow_closed reason=$reason up=$upBytes down=$downBytes ms=$durationMs")
+        override fun onFlowClosed(
+            key: String,
+            reason: String,
+            upBytes: Long,
+            downBytes: Long,
+            durationMs: Long,
+            probe: Boolean
+        ) {
+            // Masked destination keeps the log shareable while still proving which family and
+            // which peer got the bytes (requirement 1/4: v4 vs v6 evidence from a phone log).
+            Log.d(
+                "GhDiag",
+                "flow_closed dst=${maskFlowKey(key)} reason=$reason " +
+                    "up=$upBytes down=$downBytes ms=$durationMs probe=$probe"
+            )
         }
 
         override fun onTraffic(upBytes: Long, downBytes: Long, activeFlows: Int) {

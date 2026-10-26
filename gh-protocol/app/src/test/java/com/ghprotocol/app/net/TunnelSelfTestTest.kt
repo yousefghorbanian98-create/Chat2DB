@@ -130,4 +130,43 @@ class TunnelSelfTestTest {
             }
         }
     }
+
+    /**
+     * Regression for the 2026-10-25 emulator E2E log:
+     *
+     *   relay_selftest ok=true  target=1.1.1.1:80 …        (first run, 23:23:25.440)
+     *   selftest 1.1.1.1:80 failed at syn_ack: bad_ack_1477468113_expected_1191517255   (18 ms later)
+     *
+     * The self-test used a fixed source port, so a second run against the same target while the
+     * first flow was still in its half-close grace window was treated by the relay as a SYN
+     * retransmit: it replayed the *old* SYN-ACK (old ISN) and the new run rejected a perfectly
+     * healthy tunnel as "bad_ack". Two consecutive runs must both pass.
+     */
+    @Test
+    fun consecutiveSelfTestsToTheSameTargetBothPass() {
+        val body = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok"
+        TestNet.ReplyServer(body.toByteArray()).use { origin ->
+            TestNet.SocksServer().use { socks ->
+                val relay = relayFor(socks.port)
+                try {
+                    val request = "GET /probe HTTP/1.0\r\nHost: test\r\n\r\n".toByteArray()
+                    val expected: (ByteArray) -> Boolean = { bytes -> String(bytes).startsWith("HTTP/1.1 200") }
+                    val tester = TunnelSelfTest(relay)
+                    val first = tester.run("127.0.0.1", origin.port, request, expected, timeoutMs = 5000)
+                    assertTrue("first run failed at ${first.stage}: ${first.detail}", first.ok)
+                    // Immediately again, exactly like VpnTunnelService.runSelfTest() does when it
+                    // re-verifies after a restart: the previous flow is still alive here.
+                    val second = tester.run("127.0.0.1", origin.port, request, expected, timeoutMs = 5000)
+                    assertTrue(
+                        "second run must not collide with its own lingering flow: " +
+                            "${second.stage}: ${second.detail}",
+                        second.ok
+                    )
+                    assertTrue("both runs must count as probe flows", relay.stats().probeFlowsOpened >= 2)
+                } finally {
+                    relay.shutdown()
+                }
+            }
+        }
+    }
 }
