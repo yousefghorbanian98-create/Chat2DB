@@ -1,4 +1,4 @@
-## gh-protocol E2E log — 2026-10-26T01:11:14Z
+## gh-protocol E2E log — 2026-10-26T01:13:24Z
 
 
 
@@ -23,29 +23,30 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:generateDebugBuildConfig
 > Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResources
 > Task :app:extractDeepLinksDebug
-> Task :app:packageDebugResources
+> Task :app:generateDebugResources
 > Task :app:mapDebugSourceSetPaths
-> Task :app:parseDebugLocalResources
-> Task :app:javaPreCompileDebug
 > Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies
+> Task :app:javaPreCompileDebug
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugAssets
-> Task :app:mergeDebugResources
+> Task :app:packageDebugResources
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
+> Task :app:desugarDebugFileDependencies
+> Task :app:mergeDebugAssets
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:checkDebugDuplicateClasses
 > Task :app:compressDebugAssets
 > Task :app:mergeDebugJniLibFolders
 > Task :app:mergeLibDexDebug
-> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
 > Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
 > Task :app:writeDebugSigningConfigVersions
@@ -54,15 +55,12 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
 
-> Task :app:compileDebugKotlin
+> Task :app:compileDebugKotlin FAILED
 e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/VpnTunnelService.kt:692:17 Unresolved reference 'measureIpv6Payload'.
 e: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/core/VpnTunnelService.kt:697:9 Unresolved reference 'measureIpv6Payload'.
-
-> Task :app:compileDebugKotlin FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792976958959.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792977106377.json
 
 FAILURE: Build failed with an exception.
 
@@ -271,7 +269,7 @@ Caused by: org.jetbrains.kotlin.gradle.tasks.CompilationErrorException: Compilat
 	... 2 more
 
 
-BUILD FAILED in 2m 1s
+BUILD FAILED in 1m 44s
 29 actionable tasks: 29 executed
 Configuration cache entry stored.
 
