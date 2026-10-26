@@ -53,8 +53,11 @@ failed the identical tests minutes earlier.
    (the string form of the DoH server carries no tag, so Xray selects the first outbound — now
    named explicitly by `DnsPlan.defaultOutbound` instead of being reported as unknown; the app's
    own DoH enters on `mixed-in`, which is routed to `tcp-fragment`).
-4. **IPv6**: tunneled when the platform accepts the address/route, otherwise logged and
-   exported as `ipv6=unavailable` — no leak-protection claim is made in that case.
+4. **IPv6** is measured in three states, never assumed: `unavailable` (platform refused the
+   address/route — no leak claim), `route_only` (tunnelled, payload not proven) and `verified`
+   (the Cloudflare v6 target `2606:4700:4700::1111` received real remote bytes through the relay).
+   The E2E prints the state it reached; the emulator run reached `route_only`, so no v6
+   protection claim is made there.
 5. **Truthfulness of the UI**: `CONNECTED` only after in-tunnel payload verification; the
    5-second heartbeat
    `stats t=15s packets=… tcp=… dns53=… activeTcp=… flowsOpened=… appUp=… appDown=… probeUp=… dnsOk=… dnsFail=… state=… ipv6=…`

@@ -69,12 +69,30 @@ class VpnTunnelService : VpnService() {
 
         data class SelfTestTarget(val ip: String, val port: Int, val hostHeader: String, val path: String?)
 
+        /**
+         * IPv6 policy (requirement 4), as three states that are measured, never assumed:
+         *  - `unavailable` — the platform refused `fd00:1::2/64` + `::/0`: no v6 claim is made;
+         *  - `route_only`  — the address/route exist but no v6 flow was ever proven to carry
+         *                    payload (this was the state an E2E run could not distinguish before);
+         *  - `verified`    — a v6 TCP flow through the relay received real remote bytes.
+         */
+        const val IPV6_UNAVAILABLE = "unavailable"
+        const val IPV6_ROUTE_ONLY = "route_only"
+        const val IPV6_VERIFIED = "verified"
+
         /** Targets used to prove real payload through the tunnel, in preference order. */
         val SELF_TEST_TARGETS = listOf(
             SelfTestTarget("1.1.1.1", 80, "one.one.one.one", "/cdn-cgi/trace"),
             SelfTestTarget("104.16.248.249", 80, "cp.cloudflare.com", "/cdn-cgi/trace"),
             SelfTestTarget("8.8.8.8", 53, "dns.google", null)
         )
+
+        /**
+         * IPv6 counterpart of [SELF_TEST_TARGETS]: Cloudflare's v6 anycast edge. Only used to
+         * *measure* whether IPv6 really passes payload; an unreachable v6 path leaves the mode at
+         * [IPV6_ROUTE_ONLY] instead of pretending it is protected.
+         */
+        val SELF_TEST_TARGET_V6 = SelfTestTarget("2606:4700:4700::1111", 80, "one.one.one.one", "/cdn-cgi/trace")
 
         @Volatile
         var isRunning: Boolean = false
@@ -95,6 +113,10 @@ class VpnTunnelService : VpnService() {
             }
         }
     }
+
+    /** True when the platform accepted the v6 address + `::/0` route for this session. */
+    @Volatile
+    private var hasIpv6Route: Boolean = false
 
     private var vpnFd: ParcelFileDescriptor? = null
     private var tunInput: FileInputStream? = null
@@ -235,23 +257,24 @@ class VpnTunnelService : VpnService() {
         running.set(true)
         isRunning = true
 
-        TunnelLogBuffer.setIpv6Mode(if (ipv6) "tunneled" else "unavailable")
+        hasIpv6Route = ipv6
+        TunnelLogBuffer.setIpv6Mode(if (ipv6) IPV6_ROUTE_ONLY else IPV6_UNAVAILABLE)
         TunnelLogBuffer.log(
             LogLevel.SUCCESS, LogCategory.TUN,
             if (ipv6) {
-                "رابط tun0 برقرار شد — IPv4 و IPv6 هر دو تونل می‌شوند"
+                "رابط tun0 برقرار شد — IPv4 تونل شد و IPv6 در حال سنجش است"
             } else {
                 "رابط tun0 برقرار شد (فقط IPv4)؛ IPv6 در این دستگاه تونل نمی‌شود"
             },
             "tun0 established ipv4=$TUNNEL_ADDR/24 ipv6=" +
-                (if (ipv6) "$TUNNEL_ADDR_V6/64 route=::/0" else "unavailable") +
+                (if (ipv6) "$TUNNEL_ADDR_V6/64 route=::/0 state=$IPV6_ROUTE_ONLY" else IPV6_UNAVAILABLE) +
                 " dns=$TUNNEL_GW mtu=$MTU"
         )
 
         Log.d(
             "GhDiag",
             "tun0 established ipv4=$TUNNEL_ADDR/24 ipv6=" +
-                (if (ipv6) "$TUNNEL_ADDR_V6/64 route=::/0" else "unavailable") +
+                (if (ipv6) "$TUNNEL_ADDR_V6/64 route=::/0 state=$IPV6_ROUTE_ONLY" else IPV6_UNAVAILABLE) +
                 " dns=$TUNNEL_GW mtu=$MTU"
         )
         buildDatapath(output)
@@ -663,9 +686,15 @@ class VpnTunnelService : VpnService() {
                 timeoutMs = 9_000
             )
             last = result
-            if (result.ok) return result
+            if (result.ok) {
+                // v4 works — still measure IPv6 before returning, so the "ipv6" state in the
+                // heartbeat is evidence-based rather than a copy of the accepted route.
+                measureIpv6Payload(selfTest)
+                return result
+            }
             Log.d("GhDiag", "selftest ${target.ip}:${target.port} failed at ${result.stage}: ${result.detail}")
         }
+        measureIpv6Payload(selfTest)
         return last ?: TunnelSelfTestResult(
             ok = false, stage = "no_target", detail = "no_self_test_target",
             target = "-", latencyMs = 0, requestBytes = 0, responseBytes = 0,

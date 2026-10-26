@@ -33,10 +33,13 @@ This document codifies the updated **Finn-loop v1.4** quality gates, the **25-po
 
 ### Gate 4: Security & Privacy
 - [x] **No Secret Leak:** Zero hardcoded private server IPs, API keys, or tokens
-- [x] **IPv6 policy is real or honestly reported:** `VpnService.Builder` routes `0.0.0.0/0`; IPv6
-      (`fd00:1::2/64` + `::/0`) is added and IPv6 TCP/DNS are relayed through the same datapath.
-      When the platform refuses the IPv6 address, the app stores `ipv6=unavailable`, logs it and
-      makes **no** leak-prevention claim (v1.6, DIAGNOSIS §D3)
+- [x] **IPv6 policy is measured, in three states:** `VpnService.Builder` routes `0.0.0.0/0`; IPv6
+      (`fd00:1::2/64` + `::/0`) is added and IPv6 TCP/DNS go through the same relay.
+      `ipv6=` is then `unavailable` (platform refused the address/route — **no** leak-prevention
+      claim, DIAGNOSIS §D3), `route_only` (tunnelled, but no v6 payload proven yet) or `verified`
+      (the Cloudflare v6 self-test target received real remote bytes through the relay). The
+      state is logged, exported and printed by the E2E; nothing claims protection it did not
+      measure.
 - [x] **DNS Leak & Loop Prevention:** every TUN port-53 query is answered by the app's own
       resolver (DoH over the tunnel's SOCKS5 → DoH Google → TCP DNS → Xray `dns-in`) with a hard
       5 s budget and a real SERVFAIL on failure; responses must match transaction ID *and*

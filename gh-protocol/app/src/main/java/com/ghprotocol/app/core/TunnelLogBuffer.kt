@@ -301,5 +301,10 @@ data class TunnelTelemetry(
     val relaySegmentsDown: Long = 0L,
     val relayUdpFragmentsDropped: Long = 0L,
     val closeReasons: Map<String, Long> = emptyMap(),
-    val ipv6Mode: String = "tunneled"
+    /**
+     * IPv6 policy state (requirement 4): `unknown` before measurement, then `unavailable`
+     * (platform refused the v6 address/route), `route_only` (tunneled but no v6 payload proven)
+     * or `verified` (a v6 flow through the relay received real remote bytes). Never "protected".
+     */
+    val ipv6Mode: String = "unknown"
 )

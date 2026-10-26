@@ -283,6 +283,17 @@ if adb logcat -d -s GhDiag 2>/dev/null | grep -q "flow_rejected reason=tunnel_lo
   say "tunnel-local destinations are reset locally (no wasted upstream dial)"
 fi
 
+# IPv6 policy (requirement 4) is measured, never assumed: report which state the device reached.
+IPV6_STATE=$(adb logcat -d -s GhDiag 2>/dev/null | grep -o "ipv6=[a-z_]*" | tail -1 | cut -d= -f2)
+[ -n "$IPV6_STATE" ] || IPV6_STATE=unknown
+case "$IPV6_STATE" in
+  verified)   say "IPv6: verified (a v6 flow through the relay received real payload)" ;;
+  route_only) say "IPv6: route_only (tunnelled, payload NOT proven — no protection claimed)" ;;
+  unavailable) say "IPv6: unavailable (platform refused the v6 route)" ;;
+  *)          say "IPv6: $IPV6_STATE" ;;
+esac
+adb logcat -d -s GhDiag 2>/dev/null | grep -E "relay_selftest_v6|ipv6_state=" | tail -5 >> "$LOG" 2>&1
+
 say "== HTTPS probe through tunnel (best-effort) ==="
 if adb shell "command -v curl" >/dev/null 2>&1; then
   CODE=$(adb shell "curl -sS -m 20 -o /dev/null -w '%{http_code}' https://github.com" 2>&1 | tail -1)
