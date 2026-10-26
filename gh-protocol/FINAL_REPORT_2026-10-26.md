@@ -112,6 +112,22 @@ stats t=5s packets=145 tcp=113 dns53=10 activeTcp=9 flowsOpened=16 flowsEstablis
 
 That run also produced the two new proven defects D7/D8 and the harness change below.
 
+Later E2E runs on this branch closed the loop on the fixes (all published to `ci-diag`):
+
+```
+run 40251929321 (c09cddf): flow_rejected reason=tunnel_local_destination dst=…->10.8.x.x:853
+                           flow_rejected reason=tunnel_local_destination dst=…->fd00:1:…:853
+                           (previously: two × 'upstream_eof up=517 down=0')
+                           probe flows on ports 41000/41001, both 'half_close_complete … probe=true'
+run 40254223708 (719c0f4): relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
+                           → v6 packet path works, v6 *egress* does not (QEMU NAT has no IPv6,
+                             and Xray dials outside the tunnel)  [D9]
+run 40255160586 (c9b92f1): ipv6_egress_unproven … action=reject_v6_flows_fast
+                           flow_rejected reason=ipv6_no_egress dst=…->2001:4860:…:443 (fast)
+                           stats … appUp=56718 appDown=15360 dnsOk=4 state=VERIFIED
+                                 ipv6=route_only
+```
+
 CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real Android SDK):
 the green runs execute 129 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
 quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan, APK size).
@@ -122,7 +138,10 @@ quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan
 | `40241130457` | DNS-plan evidence test | failure → found 2 real defects (my new assertion was wrong about the outbound; the idle-timeout test raced `closeFlow`), both fixed |
 | `40241715874` | app-only counters, heartbeat, DoH outbound | **success** — `gh-protocol-release-114` |
 | `40242388573` | notices + asset cleanup | failure: one flaky assertion (`upstreamFailureResetsTheClientAndIsReported`) — `closeFlow()` publishes its event *after* the RST it sends, so the test could read the event list too early. All five event assertions now use a deadline-based `awaitClose()` helper. |
-| `40242773230` | `1870c08` — TLS ClientHello through the relay, flake-free event assertions | **success**, 6m19s, artifact `gh-protocol-release-116` (220 MB, all ABIs) — **this is the verified commit** |
+| `40242773230` | `1870c08` — TLS ClientHello through the relay, flake-free event assertions | **success**, 6m19s, artifact `gh-protocol-release-116` (220 MB, all ABIs) |
+| `40251929284` + `40251929321` | `c09cddf` — D7/D8 fixes | **success** — build + emulator E2E |
+| `40254223703` + `40254223708` | `719c0f4` — v6 source + canonical addresses | **success** — build + E2E (E2E showed `ipv6=route_only`, v6 payload unproven → D9) |
+| `40255160493` + `40255160586` | `c9b92f1` — v6 fail-fast policy | **success**, artifact `gh-protocol-release-130` (220.3 MB) — **this is the verified commit** |
 
 Golden/Roborazzi (`:app:recordRoborazziDebug`/`verifyRoborazziDebug`) and the emulator E2E
 (`ci-e2e.sh`) are part of the workflow. The E2E now requires **application** evidence, not just
@@ -178,8 +197,9 @@ Proof requires **all** of:
 
 ## 7. APK
 
-Run **40242773230** on commit `1870c08` built and signed the APKs; the artifact is
-`gh-protocol-release-116` (220.3 MB, `arm64-v8a` + `x86_64`), downloadable from
-<https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/40242773230>.
+Run **40255160493** on commit `c9b92f1` built and signed the APKs (and run `40255160586` ran
+the emulator E2E on the same commit); the artifact is `gh-protocol-release-130` (220.3 MB,
+`arm64-v8a` + `x86_64`), downloadable from
+<https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/40255160493>.
 It is a **CI artifact**, not a published release: no version bump, no GitHub release, no tag — that is
 withheld until the phone log in §6 confirms the data path, exactly as requirement 9 asks.
