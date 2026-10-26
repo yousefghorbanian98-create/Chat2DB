@@ -36,6 +36,13 @@ data class TunnelSelfTestResult(
 class TunnelSelfTest(
     private val relay: TcpRelay,
     private val clientIp: String = "10.8.0.99",
+    /**
+     * Source address for IPv6 targets. A family-6 packet needs a family-6 source; using the v4
+     * probe address made `PacketCodec.buildTcp` return null, which is why the 2026-10-26 E2E
+     * logged `relay_selftest_v6 ok=false stage=build detail=cannot_build_syn` and IPv6 could
+     * never be verified. It lives inside the tunnel's own `fd00:1::/64`.
+     */
+    private val clientIpV6: String = "fd00:1::99",
     private val clock: () -> Long = { System.currentTimeMillis() }
 ) {
 
@@ -89,14 +96,19 @@ class TunnelSelfTest(
         // A fresh source port per run keeps a lingering probe flow from being mistaken for a
         // duplicate SYN (see the companion-object note).
         val clientPort = nextClientPort()
+        val srcIp = if (targetIp.contains(':')) clientIpV6 else clientIp
+        // The relay reports addresses in the form it parsed out of the packet bytes
+        // (`fd00:1:0:0:0:0:0:99`), so compare canonical forms, never the literals as typed.
+        val srcIpCanonical = PacketCodec.normalizeIp(srcIp)
+        val dstIpCanonical = PacketCodec.normalizeIp(targetIp)
         val before = relay.stats()
         val queue = Collections.synchronizedList(ArrayList<Observed>())
         val previousObserver = relay.packetObserver
         relay.packetObserver = { packet ->
             val flow = PacketCodec.parse(packet)
             if (flow != null && flow.protocol == PacketCodec.PROTO_TCP &&
-                flow.srcIp == targetIp && flow.srcPort == targetPort &&
-                flow.dstIp == clientIp && flow.dstPort == clientPort
+                flow.srcIp == dstIpCanonical && flow.srcPort == targetPort &&
+                flow.dstIp == srcIpCanonical && flow.dstPort == clientPort
             ) {
                 queue.add(Observed(packet, flow))
             }
@@ -135,7 +147,7 @@ class TunnelSelfTest(
             val deadline = clock() + timeoutMs
             val syn = PacketCodec.buildTcp(
                 family = family,
-                srcIp = clientIp, srcPort = clientPort,
+                srcIp = srcIp, srcPort = clientPort,
                 dstIp = targetIp, dstPort = targetPort,
                 seq = isn, ack = 0L, flags = PacketCodec.FLAG_SYN,
                 window = 65535, mss = 1200
@@ -157,7 +169,7 @@ class TunnelSelfTest(
             var clientNext = PacketCodec.seqAdd(isn, 1)
             var serverNext = PacketCodec.seqAdd(synAck.flow.seq, 1)
 
-            sendClientPacket(family, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
+            sendClientPacket(family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
 
             // Two segments: exercises multi-segment upstream forwarding, not just one happy write.
             val split = (request.size / 2).coerceAtLeast(1).coerceAtMost(request.size)
@@ -165,7 +177,7 @@ class TunnelSelfTest(
             for (part in parts) {
                 if (part.isEmpty()) continue
                 sendClientPacket(
-                    family, targetIp, targetPort, clientPort, clientNext, serverNext,
+                    family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext,
                     PacketCodec.FLAG_PSH or PacketCodec.FLAG_ACK, part
                 )
                 clientNext = PacketCodec.seqAdd(clientNext, part.size.toLong())
@@ -185,7 +197,7 @@ class TunnelSelfTest(
                 if (diff > 0) {
                     // Gap: ACK what we already have so the relay retransmits the missing segment.
                     sendClientPacket(
-                        family, targetIp, targetPort, clientPort, clientNext, serverNext,
+                        family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext,
                         PacketCodec.FLAG_ACK, ByteArray(0)
                     )
                     continue
@@ -193,7 +205,7 @@ class TunnelSelfTest(
                 if (diff < 0) {
                     // Duplicate of an already delivered segment.
                     sendClientPacket(
-                        family, targetIp, targetPort, clientPort, clientNext, serverNext,
+                        family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext,
                         PacketCodec.FLAG_ACK, ByteArray(0)
                     )
                     continue
@@ -201,7 +213,7 @@ class TunnelSelfTest(
                 accumulated.write(observed.flow.payload)
                 serverNext = PacketCodec.seqAdd(serverNext, observed.flow.payload.size.toLong())
                 if (firstByteMs < 0) firstByteMs = clock() - started
-                sendClientPacket(family, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
+                sendClientPacket(family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext, PacketCodec.FLAG_ACK, ByteArray(0))
                 if (expected(accumulated.toByteArray())) {
                     contentOk = true
                     break
@@ -209,7 +221,7 @@ class TunnelSelfTest(
             }
 
             sendClientPacket(
-                family, targetIp, targetPort, clientPort, clientNext, serverNext,
+                family, srcIp, targetIp, targetPort, clientPort, clientNext, serverNext,
                 PacketCodec.FLAG_FIN or PacketCodec.FLAG_ACK, ByteArray(0)
             )
 
@@ -233,6 +245,7 @@ class TunnelSelfTest(
 
     private fun sendClientPacket(
         family: Int,
+        srcIp: String,
         targetIp: String,
         targetPort: Int,
         clientPort: Int,
@@ -243,7 +256,7 @@ class TunnelSelfTest(
     ) {
         val packet = PacketCodec.buildTcp(
             family = family,
-            srcIp = clientIp, srcPort = clientPort,
+            srcIp = srcIp, srcPort = clientPort,
             dstIp = targetIp, dstPort = targetPort,
             seq = seq, ack = ack, flags = flags,
             payload = payload, window = 65535

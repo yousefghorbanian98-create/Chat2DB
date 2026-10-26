@@ -29,7 +29,7 @@ This document codifies the updated **Finn-loop v1.4** quality gates, the **25-po
 - [x] Clean-IP candidates need a full TLS handshake (system trust store) + complete HTTP response
       + Cloudflare marker; a bare TCP connect or a partial ClientHello is never "healthy"
 - [x] UDP that cannot be relayed is counted (`udpDropped`) and answered with ICMP port-unreachable
-- [x] 57 hermetic JVM data-path tests (relay, DNS, codec, probes, verifier, self-test)
+- [x] 58 hermetic JVM data-path tests (relay, DNS, codec, probes, verifier, self-test)
 
 ### Gate 4: Security & Privacy
 - [x] **No Secret Leak:** Zero hardcoded private server IPs, API keys, or tokens

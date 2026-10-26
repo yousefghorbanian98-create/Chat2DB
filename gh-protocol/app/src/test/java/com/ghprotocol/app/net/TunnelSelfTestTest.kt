@@ -132,6 +132,41 @@ class TunnelSelfTestTest {
     }
 
     /**
+     * The 2026-10-26 E2E logged `relay_selftest_v6 ok=false stage=build
+     * detail=cannot_build_syn`: the self-test built every packet with the IPv4 probe source, so a
+     * family-6 SYN could not even be constructed and IPv6 could never be verified. A v6 target
+     * must be exercised with a v6 source over a real v6 socket.
+     */
+    @Test
+    fun selfTestReachesAnIpv6TargetWithAnIpv6Source() {
+        val body = "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok"
+        // IPv6 loopback; if the sandbox has no v6 stack this fails loudly instead of silently
+        // "passing" — the point is to exercise the family-6 build path.
+        TestNet.ReplyServer(body.toByteArray(), host = "::1").use { origin ->
+            TestNet.SocksServer().use { socks ->
+                val relay = relayFor(socks.port)
+                try {
+                    val request = "GET /probe HTTP/1.0\r\nHost: test\r\n\r\n".toByteArray()
+                    val result = TunnelSelfTest(relay).run(
+                        targetIp = "::1",
+                        targetPort = origin.port,
+                        request = request,
+                        expected = { bytes -> String(bytes).startsWith("HTTP/1.1 200") },
+                        timeoutMs = 5000
+                    )
+                    assertTrue(
+                        "v6 self-test failed at ${result.stage}: ${result.detail}",
+                        result.ok
+                    )
+                    assertTrue("real v6 payload must come back", result.responseBytes >= body.length)
+                } finally {
+                    relay.shutdown()
+                }
+            }
+        }
+    }
+
+    /**
      * Regression for the 2026-10-25 emulator E2E log:
      *
      *   relay_selftest ok=true  target=1.1.1.1:80 …        (first run, 23:23:25.440)

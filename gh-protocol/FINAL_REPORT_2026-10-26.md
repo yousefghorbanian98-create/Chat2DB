@@ -22,6 +22,7 @@ can be re-executed, or explicitly marked as **still needs the phone**.
 | **D5** | "Connected"/"Verified" was reported before anything proved payload flow. | `HomeViewModel.verifyAndAutoHealIfNeeded` sets `CONNECTED` only after `verify.ok`; `TunnelSelfTest` requires remote payload; `lastSelfTest` is cleared on every request so a stale result can never be reused. |
 | **D6** | The `Up/Down` a user saw **included the self-test's own bytes** (the probe injects a flow into the same relay), which is why a device with no app traffic could still read `Up=3.4 KB`. | `RelayConfig.probeSourceIps` + `RelayStats.probeBytesUp/Down` + `applicationOnly()`; `TcpRelayIntegrationTest.selfTestBytesAreReportedApartFromApplicationBytes`. |
 | **D7** | On a real device the self-test collided with **its own previous flow** (fixed source port + half-close grace) and rejected a healthy tunnel with `syn_ack: bad_ack_…` | `TunnelSelfTest.nextClientPort()` + run lock; `TunnelSelfTestTest.consecutiveSelfTestsToTheSameTargetBothPass` (failed with the exact E2E message before the fix). |
+| **D9** | The IPv6 self-test could not even build a v6 packet (IPv4 probe source) and, once it could, compared `::1` with the repository's canonical form — so IPv6 could never be *proven*, only assumed | `TunnelSelfTest.clientIpV6` + `PacketCodec.normalizeIp`; `TunnelSelfTestTest.selfTestReachesAnIpv6TargetWithAnIpv6Source`. |
 | **D8** | Android Private DNS dials the tunnel's own resolver (`10.8.0.1` / `fd00:1::1`) on port 853; those flows were pushed through SOCKS5 and died with `upstream_eof up=517 down=0` | `RelayConfig.localDestinationPrefixes` → local RST + `RelayStats.localRejects` + one `flow_rejected` log; `TcpRelayIntegrationTest.tunnelLocalDestinationsAreResetWithoutUpstreamDial`. |
 
 The 4 CI-only unit-test failures that blocked the branch are also closed, with a proven cause:
@@ -87,9 +88,9 @@ failed the identical tests minutes earlier.
 Local (JDK 25 + kotlinc, no Gradle, no device):
 
 ```
-core/net suites: TOTAL passed=57 failed=0
+core/net suites: TOTAL passed=58 failed=0
   TcpRelayIntegrationTest 11 · DnsResolverTest 12 · PacketCodecTest 9 · DnsMessageTest 7
-  TunnelVerifierTest 7 · CleanIpProbeTest 6 · TunnelSelfTestTest 5
+  TunnelVerifierTest 7 · CleanIpProbeTest 6 · TunnelSelfTestTest 6
 ```
 
 Emulator E2E (`gh-protocol-e2e (P2b)`, run `40244228075`, **pass**) — the first Android-side
@@ -110,7 +111,7 @@ stats t=5s packets=145 tcp=113 dns53=10 activeTcp=9 flowsOpened=16 flowsEstablis
 That run also produced the two new proven defects D7/D8 and the harness change below.
 
 CI (`gh-protocol-build`, same workflow the project uses; Ubuntu runner, real Android SDK):
-the green runs execute 127 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
+the green runs execute 128 test cases (`testDebugUnitTest` + `testReleaseUnitTest`) plus the
 quality gates (dependency freeze, `https://` whitelist, null-safety, secret scan, APK size).
 
 | run | commit | result |
@@ -132,7 +133,7 @@ sufficient (requirement 5). It also reports whether tunnel-local destinations we
 
 ## 5. Remaining limitations (stated, not hidden)
 
-1. **No physical phone was available in this environment.** CI proves compilation, 127 unit /
+1. **No physical phone was available in this environment.** CI proves compilation, 128 unit /
    integration tests and a signed APK; the emulator E2E proves the data path on Android — it cannot prove that *a specific carrier* passes the
    fragmented TLS outbound. That still needs the log in §6.
 2. QUIC/HTTP-3 is not relayed: UDP ≠ 53 is counted, answered with ICMP port-unreachable and

@@ -137,7 +137,7 @@ Everything else stays `TUNNELING`/`DEGRADED` with the failing stage in the log.
 
 ## 5. Verification performed in this change
 
-57 hermetic JVM tests (loopback only, no external network):
+58 hermetic JVM tests (loopback only, no external network):
 
 | suite | what it proves |
 |---|---|
@@ -146,7 +146,7 @@ Everything else stays `TUNNELING`/`DEGRADED` with the failing stage in the log.
 | `DnsMessageTest` (7) | RFC 1035 parse/validate, SERVFAIL/TC construction |
 | `PacketCodecTest` (9) | IPv4/IPv6 TCP/UDP checksums, sequence wrap, MAS options, fragment rejection |
 | `CleanIpProbeTest` (6) | only full TLS+HTTP+CF marker is healthy; private/invalid IPs never probed |
-| `TunnelSelfTestTest` (5) | self-test needs real payload, moves the relay's counters, and two runs back-to-back must both pass (D7) |
+| `TunnelSelfTestTest` (6) | self-test needs real payload, moves the relay's counters, and two runs back-to-back must both pass (D7) |
 | `TunnelVerifierTest` (7) | stages, bare-connect is not success, `combine` requires tunnel payload |
 
 ## 6. D6 — the shown `Up/Down/ActiveTCP` included the self-test's own bytes  **[proven]**
@@ -254,6 +254,28 @@ Also fixed for diagnosability: `flow_open`/`flow_closed` now log the **masked de
 the address family**, and `flow_closed` carries `probe=<bool>`, so a phone log can prove which
 peer (v4 or v6) carried which bytes — previously `flow_closed` had no destination at all, so the
 `ipv6=tunneled` claim could not be checked from the log.
+
+## 10b. D9 — the IPv6 self-test could not build a packet, and never matched one  **[proven, regression test]**
+
+Making the IPv6 state measurable (see §D3) immediately produced:
+
+```
+relay_selftest_v6 ok=false stage=build detail=cannot_build_syn
+```
+
+`TunnelSelfTest` always used the IPv4 probe source (`10.8.0.99`), so a family-6 SYN could not
+be constructed at all — IPv6 could therefore never be *proven*, only assumed. After giving it a
+v6 source inside the tunnel (`fd00:1::99`) the run then failed at `syn_ack: no_syn_ack`,
+because the observer compared the target literal (`::1`) with the canonical form the relay
+parses out of the packet bytes (`0:0:0:0:0:0:0:1`) — `InetAddress.getHostAddress()` never
+compresses `::`. Fix: `PacketCodec.normalizeIp()` and comparisons on canonical forms in both
+the observer and the packet builder.
+Regression test: `TunnelSelfTestTest.selfTestReachesAnIpv6TargetWithAnIpv6Source` against a
+real `::1` server (13 ms, real v6 payload).
+
+The E2E now reports `ipv6=route_only` when v6 payload is not proven and only `ipv6=verified`
+after a real v6 round trip, so the phone log can settle this on a network that actually has
+IPv6 egress.
 
 ## 11. Not relayed on purpose (no claim made)
 

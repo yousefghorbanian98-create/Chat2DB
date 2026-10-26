@@ -144,8 +144,12 @@ object TestNet {
     }
 
     /** Plain TCP server that replies with a fixed payload after the first request bytes. */
-    class ReplyServer(private val reply: ByteArray, val readBytes: Int = 1) : AutoCloseable {
-        private val server = ServerSocket(0, 16, InetAddress.getByName("127.0.0.1"))
+    class ReplyServer(
+        private val reply: ByteArray,
+        val readBytes: Int = 1,
+        host: String = "127.0.0.1"
+    ) : AutoCloseable {
+        private val server = ServerSocket(0, 16, InetAddress.getByName(host))
         @Volatile
         var received = 0
             private set

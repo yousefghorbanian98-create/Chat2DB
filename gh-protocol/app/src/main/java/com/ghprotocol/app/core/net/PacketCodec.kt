@@ -473,6 +473,19 @@ object PacketCodec {
         return null
     }
 
+    /**
+     * Canonical text form of an address, so a literal written by a human (`fd00:1::99`,
+     * `::1`) compares equal to the form [parse] produces from the packet bytes.
+     * `InetAddress.getHostAddress()` never compresses `::`, which silently broke every IPv6
+     * string comparison (the 2026-10-26 IPv6 self-test was reported as `no_syn_ack` for that
+     * reason). Non-literals are returned unchanged.
+     */
+    fun normalizeIp(ip: String): String = try {
+        java.net.InetAddress.getByName(ip).hostAddress ?: ip
+    } catch (_: Exception) {
+        ip
+    }
+
     /** Privacy-safe masking used for all destination logging. */
     fun maskIp(ip: String): String {
         if (ip.contains(':')) {
