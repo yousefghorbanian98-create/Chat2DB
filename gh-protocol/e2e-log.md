@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-25T23:23:32Z
+## gh-protocol E2E log — 2026-10-26T01:03:13Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-25T23:22:11Z ==
+== pre-flight 2026-10-26T01:01:47Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 25 23:18 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Oct 26 00:58 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 25 23:22 .
-drwxr-xr-x 3 runner runner 4096 Oct 25 23:22 ..
-drwxr-xr-x 3 runner runner 4096 Oct 25 23:22 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 25 23:22 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Oct 26 01:02 .
+drwxr-xr-x 3 runner runner 4096 Oct 26 01:02 ..
+drwxr-xr-x 3 runner runner 4096 Oct 26 01:02 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Oct 26 01:02 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.12.0 (build_id 16428233) (CL:N/A)
@@ -50,7 +50,7 @@ USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (a
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 2825
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.12.db, detection is enabled for process: 2810
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -120,29 +120,27 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7ff9f7401000 as it is in the protected range from 0x7ff8f7400000 to 0x7ff9f7600000
+WARNING: cannnot unmap ptr 0x7f50b9601000 as it is in the protected range from 0x7f4fb9600000 to 0x7f50b9800000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
-INFO         | Successfully initialized netsim WiFi
 INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Successfully initialized netsim WiFi
 INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420 
 INFO         | setDisplayActiveConfig: id:0, 1080x2400
 INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 27048 ms
+INFO         | Boot completed in 29687 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
-ERROR        | Failed to find ColorBuffer: 122
-ERROR        | Failed to bind to texture: invalid color buffer.
-INFO         | Wait for emulator (pid 2825) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
+INFO         | Wait for emulator (pid 2810) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
 
 USER_INFO    | Snapshots have been disabled by the user, save request is ignored.
 INFO         | Saving snapshot 'default_boot' took 0 ms
 ERROR        | stop: Not implemented
 WARNING      | Emulator client has not yet been configured.. Call configure me first!
 INFO         | removeAll
-WARNING      | Netsim Wifi dns:///localhost:39425 is gone due to Stream removed (CANCELLED)
+WARNING      | Netsim Wifi dns:///localhost:45969 is gone due to Stream removed (CANCELLED)
 
 ### gradle-build.log (tail)
 Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
@@ -165,36 +163,36 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
 > Task :app:createDebugCompatibleScreenManifests
-> Task :app:generateDebugResValues
 > Task :app:generateDebugBuildConfig
-> Task :app:extractDeepLinksDebug
+> Task :app:generateDebugResValues
 > Task :app:generateDebugResources
-> Task :app:packageDebugResources
-> Task :app:mapDebugSourceSetPaths
-> Task :app:parseDebugLocalResources
-> Task :app:checkDebugAarMetadata
 > Task :app:javaPreCompileDebug
+> Task :app:mapDebugSourceSetPaths
+> Task :app:extractDeepLinksDebug
+> Task :app:checkDebugAarMetadata
+> Task :app:packageDebugResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
 > Task :app:mergeDebugShaders
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:desugarDebugFileDependencies
-> Task :app:processDebugMainManifest
-> Task :app:processDebugManifest
 > Task :app:processDebugManifestForPackage
+> Task :app:desugarDebugFileDependencies
+> Task :app:parseDebugLocalResources
 > Task :app:mergeDebugAssets
-> Task :app:compressDebugAssets
 > Task :app:checkDebugDuplicateClasses
-> Task :app:mergeDebugResources
+> Task :app:compressDebugAssets
 > Task :app:mergeDebugJniLibFolders
+> Task :app:mergeDebugResources
+> Task :app:mergeLibDexDebug
 > Task :app:validateSigningDebug
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
 > Task :app:mergeDebugNativeLibs
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:mergeLibDexDebug
-> Task :app:writeDebugAppMetadata
-> Task :app:writeDebugSigningConfigVersions
 > Task :app:processDebugResources
 > Task :app:mergeExtDexDebug
 
@@ -211,9 +209,9 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792970387740.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1792976349456.json
 
-BUILD SUCCESSFUL in 2m 2s
+BUILD SUCCESSFUL in 2m 16s
 37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
@@ -228,11 +226,11 @@ emulator-5554	device
 Performing Streamed Install
 Success
 == probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 20s) ==
-emulator can reach raw.githubusercontent.com after ~8s
+emulator can reach raw.githubusercontent.com after ~4s
 SUBMODE=live — app will fetch the subscription itself (full E2E)
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 3095)
+app up (try 1, pid 3125)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
@@ -246,177 +244,182 @@ vpn established after ~6s
        valid_lft forever preferred_lft forever
     inet6 fd00:1::2/64 scope global 
        valid_lft forever preferred_lft forever
-    inet6 fe80::bfee:bc35:93e8:a645/64 scope link stable-privacy 
+    inet6 fe80::cb36:dd94:5232:5463/64 scope link stable-privacy 
        valid_lft forever preferred_lft forever
 == DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) ==
 dns through tunnel: OK
-Ping github.com (140.82.113.3): 56(84) bytes.
+Ping github.com (140.82.114.4): 56(84) bytes.
 
---- 140.82.113.3 ping statistics ---
+--- 140.82.114.4 ping statistics ---
 1 packets transmitted, 0 received, 100% packet loss
 == TCP through the tunnel (as app uid — data-path proof; toybox nc has no -z) ==
 nc 1.1.1.1:443 -> rc=0
 == in-tunnel payload self-test (the only accepted proof, requirement 5) ==
 relay self-test PASS (real remote payload through the relay)
-10-25 23:23:25.440  3095  4560 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=146 firstByteMs=320 checksums=0
-10-25 23:23:25.605  3095  4597 D GhDiag  : relay_selftest ok=true stage=ok target=104.16.248.249:80 up=323 down=794 response=794 synAckMs=58 firstByteMs=141 checksums=0
+10-26 01:03:04.254  3125  4410 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=26 firstByteMs=70 checksums=0
+10-26 01:03:04.729  3125  4430 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=60 firstByteMs=269 checksums=0
 == relay diagnostics (GhVpnTunnel + GhDiag) ==
-10-25 23:23:25.874  3095  4615 D GhDiag  : flow_established 39ms
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:25.998  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.067  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.283  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=216
-10-25 23:23:26.293  3095  4622 D GhDiag  : flow_established 28ms
-10-25 23:23:26.294  3095  4623 D GhDiag  : flow_established 25ms
-10-25 23:23:26.295  3095  4624 D GhDiag  : flow_established 35ms
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=231
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=230
-10-25 23:23:26.424  3095  4559 D GhDiag  : flow_open 10.8.x.x:853
-10-25 23:23:26.459  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=778
-10-25 23:23:26.553  3095  4633 D GhDiag  : flow_established 63ms
-10-25 23:23:26.610  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=151
-10-25 23:23:26.740  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=128
-10-25 23:23:26.936  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=188
-10-25 23:23:27.007  3095  4618 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1186
-10-25 23:23:27.115  3095  4620 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1307
-10-25 23:23:27.215  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=274
-10-25 23:23:27.468  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=245
-10-25 23:23:27.473  3095  4559 D GhDiag  : flow_open 172.217.x.x:443
-10-25 23:23:27.597  3095  4665 D GhDiag  : flow_established 2ms
-10-25 23:23:27.679  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:27.710  3095  4699 D GhDiag  : flow_established 9ms
-10-25 23:23:27.797  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=134
-10-25 23:23:27.944  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=146
-10-25 23:23:28.252  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.259  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.313  3095  4717 D GhDiag  : flow_established 14ms
-10-25 23:23:28.317  3095  4718 D GhDiag  : flow_established 17ms
-10-25 23:23:28.956  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=414
-10-25 23:23:28.974  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:28.991  3095  4732 D GhDiag  : flow_established 7ms
-10-25 23:23:29.223  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=249
-10-25 23:23:29.249  3095  4559 D GhDiag  : flow_open 142.250.x.x:443
-10-25 23:23:29.508  3095  4758 D GhDiag  : flow_established 23ms
-10-25 23:23:29.944  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:29.954  3095  4787 D GhDiag  : flow_established 1ms
-10-25 23:23:30.116  3095  4558 D GhDiag  : stats t=5s packets=145 tcp=113 dns53=10 otherUdp=12 activeTcp=9 flowsOpened=16 flowsEstablished=16 connectFailures=0 retransmits=0 appUp=38575 appDown=30180 probeUp=184 probeDown=1196 probeFlows=2 dnsOk=10 dnsFail=0 state=VERIFIED ipv6=tunneled
-10-25 23:23:30.126  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.130  3095  4796 D GhDiag  : flow_established 3ms
-10-25 23:23:30.486  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=230
-10-25 23:23:30.539  3095  4566 D GhDiag  : flow_closed reason=half_close_complete up=91 down=402 ms=5424
+10-26 01:03:05.086  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.116  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=323
+10-26 01:03:05.121  3125  4429 D GhDiag  : dns_reply 780ms path=doh:cloudflare-dns.com bytes=269
+10-26 01:03:05.130  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:05.290  3125  4409 D GhDiag  : tun v4 proto=1 dst=172.217.x.x:0 len=28
+10-26 01:03:05.326  3125  4409 D GhDiag  : tun v4 proto=6 dst=10.8.x.x:853 len=60
+10-26 01:03:05.326  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.0.x.x:33496->10.8.x.x:853
+10-26 01:03:05.336  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.0.2.16:33496->10.8.0.1:853
+10-26 01:03:05.499  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=216
+10-26 01:03:05.502  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=899
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.683  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=551
+10-26 01:03:05.684  3125  4429 D GhDiag  : dns_reply 1156ms path=doh:cloudflare-dns.com bytes=257
+10-26 01:03:05.852  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=167
+10-26 01:03:05.854  3125  4429 D GhDiag  : dns_reply 1324ms path=doh:cloudflare-dns.com bytes=49
+10-26 01:03:05.863  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=60
+10-26 01:03:05.864  3125  4409 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
+10-26 01:03:05.893  3125  4488 D GhDiag  : flow_established 2ms
+10-26 01:03:05.895  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.903  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=221
+10-26 01:03:05.964  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.108  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=253
+10-26 01:03:06.137  3125  4429 D GhDiag  : dns_reply 592ms path=doh:cloudflare-dns.com bytes=260
+10-26 01:03:06.142  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.144  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.236  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=99
+10-26 01:03:06.237  3125  4429 D GhDiag  : dns_reply 692ms path=doh:cloudflare-dns.com bytes=164
+10-26 01:03:06.241  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.280  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.366  3125  4492 D GhDiag  : flow_established 60ms
+10-26 01:03:06.384  3125  4501 D GhDiag  : flow_established 7ms
+10-26 01:03:07.487  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=85
+10-26 01:03:07.595  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=107
+10-26 01:03:07.612  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:07.668  3125  4571 D GhDiag  : flow_established 51ms
+10-26 01:03:08.440  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.457  3125  4600 D GhDiag  : flow_established 6ms
+10-26 01:03:08.458  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.469  3125  4603 D GhDiag  : flow_established 5ms
+10-26 01:03:09.183  3125  4408 D GhDiag  : stats t=5s packets=112 tcp=85 dns53=8 otherUdp=9 activeTcp=6 flowsOpened=8 flowsEstablished=8 connectFailures=0 retransmits=0 appUp=32441 appDown=58275 probeUp=182 probeDown=804 probeFlows=2 dnsOk=8 dnsFail=0 state=VERIFIED ipv6=tunneled
+10-26 01:03:09.273  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41000->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5061 probe=true
+10-26 01:03:09.315  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.323  3125  4613 D GhDiag  : flow_established 7ms
+10-26 01:03:09.596  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.659  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:09.679  3125  4627 D GhDiag  : flow_established 25ms
+10-26 01:03:09.702  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=110
+10-26 01:03:09.717  3125  4633 D GhDiag  : flow_established 49ms
+10-26 01:03:09.810  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41001->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5352 probe=true
+== real app traffic through the tunnel (requirement 5) ==
+app traffic: appUp=32441 bytes
+10-26 01:03:09.183  3125  4408 D GhDiag  : stats t=5s packets=112 tcp=85 dns53=8 otherUdp=9 activeTcp=6 flowsOpened=8 flowsEstablished=8 connectFailures=0 retransmits=0 appUp=32441 appDown=58275 probeUp=182 probeDown=804 probeFlows=2 dnsOk=8 dnsFail=0 state=VERIFIED ipv6=tunneled
+tunnel-local destinations are reset locally (no wasted upstream dial)
 == HTTPS probe through tunnel (best-effort) ===
 no curl on emulator — skipping HTTPS probe (TCP + DNS are the core signal)
 == Xray core stderr (from app filesDir) ==
 == logcat sanity (crashes + GhVpnTunnel) ==
 --------- beginning of main
-10-25 23:23:18.291  3095  3095 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 23:23:18.291  3095  3095 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 23:23:18.755  3095  3095 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 23:23:18.825  3095  3095 I GhDiag  : effective_dns active Serverless-v52-fragA :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-25 23:23:18.826  3095  3095 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-25 23:23:18.826  3095  3095 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 23:23:18.967  3095  3095 D GhDiag  : connect: core.start=true 
-10-25 23:23:25.110  3095  3095 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1 mtu=1500
-10-25 23:23:25.115  3095  4560 D GhDiag  : flow_open 1.1.x.x:80
-10-25 23:23:25.206  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.257  3095  4567 D GhDiag  : flow_established 3ms
-10-25 23:23:25.440  3095  4560 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=146 firstByteMs=320 checksums=0
-10-25 23:23:25.458  3095  4597 D GhDiag  : selftest 1.1.1.1:80 failed at syn_ack: bad_ack_1477468113_expected_1191517255
-10-25 23:23:25.463  3095  4597 D GhDiag  : flow_open 104.16.x.x:80
-10-25 23:23:25.475  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.475  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
-10-25 23:23:25.476  3095  4559 D GhDiag  : flow_open fd00:1:…:853
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=65
-10-25 23:23:25.515  3095  4598 D GhDiag  : flow_established 6ms
-10-25 23:23:25.518  3095  4599 D GhDiag  : flow_established 2ms
-10-25 23:23:25.543  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=60
-10-25 23:23:25.543  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=290
-10-25 23:23:25.546  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-25 23:23:25.605  3095  4597 D GhDiag  : relay_selftest ok=true stage=ok target=104.16.248.249:80 up=323 down=794 response=794 synAckMs=58 firstByteMs=141 checksums=0
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:25.808  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:25.821  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-25 23:23:25.822  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-25 23:23:25.822  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.874  3095  4616 D GhDiag  : flow_established 16ms
-10-25 23:23:25.874  3095  4615 D GhDiag  : flow_established 39ms
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:25.998  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.067  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.283  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=216
-10-25 23:23:26.293  3095  4622 D GhDiag  : flow_established 28ms
-10-25 23:23:26.294  3095  4623 D GhDiag  : flow_established 25ms
-10-25 23:23:26.295  3095  4624 D GhDiag  : flow_established 35ms
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=231
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=230
-10-25 23:23:26.424  3095  4559 D GhDiag  : flow_open 10.8.x.x:853
-10-25 23:23:26.459  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=778
-10-25 23:23:26.553  3095  4633 D GhDiag  : flow_established 63ms
-10-25 23:23:26.610  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=151
-10-25 23:23:26.740  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=128
-10-25 23:23:26.936  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=188
-10-25 23:23:27.007  3095  4618 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1186
-10-25 23:23:27.115  3095  4620 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1307
-10-25 23:23:27.215  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=274
-10-25 23:23:27.468  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=245
-10-25 23:23:27.473  3095  4559 D GhDiag  : flow_open 172.217.x.x:443
-10-25 23:23:27.597  3095  4665 D GhDiag  : flow_established 2ms
-10-25 23:23:27.679  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:27.710  3095  4699 D GhDiag  : flow_established 9ms
-10-25 23:23:27.797  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=134
-10-25 23:23:27.944  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=146
-10-25 23:23:28.252  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.259  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.313  3095  4717 D GhDiag  : flow_established 14ms
-10-25 23:23:28.317  3095  4718 D GhDiag  : flow_established 17ms
-10-25 23:23:28.956  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=414
-10-25 23:23:28.974  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:28.991  3095  4732 D GhDiag  : flow_established 7ms
-10-25 23:23:29.223  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=249
-10-25 23:23:29.249  3095  4559 D GhDiag  : flow_open 142.250.x.x:443
-10-25 23:23:29.508  3095  4758 D GhDiag  : flow_established 23ms
-10-25 23:23:29.944  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:29.954  3095  4787 D GhDiag  : flow_established 1ms
-10-25 23:23:30.116  3095  4558 D GhDiag  : stats t=5s packets=145 tcp=113 dns53=10 otherUdp=12 activeTcp=9 flowsOpened=16 flowsEstablished=16 connectFailures=0 retransmits=0 appUp=38575 appDown=30180 probeUp=184 probeDown=1196 probeFlows=2 dnsOk=10 dnsFail=0 state=VERIFIED ipv6=tunneled
-10-25 23:23:30.126  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.130  3095  4796 D GhDiag  : flow_established 3ms
-10-25 23:23:30.486  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=230
-10-25 23:23:30.539  3095  4566 D GhDiag  : flow_closed reason=half_close_complete up=91 down=402 ms=5424
-10-25 23:23:30.638  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=140
-10-25 23:23:30.640  3095  4566 D GhDiag  : flow_closed reason=half_close_complete up=93 down=794 ms=5177
-10-25 23:23:30.658  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.776  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.828  3095  4820 D GhDiag  : flow_established 37ms
-10-25 23:23:30.830  3095  4816 D GhDiag  : flow_established 100ms
-10-25 23:23:31.069  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=158
-10-25 23:23:31.299  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=200
+10-26 01:02:57.008  3125  3125 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-26 01:02:57.008  3125  3125 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-26 01:02:57.225  3125  3125 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-26 01:02:57.289  3125  3125 I GhDiag  : effective_dns active Serverless-v52-fragA :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
+10-26 01:02:57.289  3125  3125 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
+10-26 01:02:57.290  3125  3125 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-26 01:02:57.427  3125  3125 D GhDiag  : connect: core.start=true 
+10-26 01:03:04.137  3125  3125 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1 mtu=1500
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:04.204  3125  4410 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
+10-26 01:03:04.207  3125  4413 D GhDiag  : flow_established 3ms
+10-26 01:03:04.254  3125  4410 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=26 firstByteMs=70 checksums=0
+10-26 01:03:04.301  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.301  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58234->fd00:1:…:853
+10-26 01:03:04.310  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58234->fd00:1::1:853
+10-26 01:03:04.315  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.316  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58238->fd00:1:…:853
+10-26 01:03:04.316  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58238->fd00:1::1:853
+10-26 01:03:04.339  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=73
+10-26 01:03:04.341  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=73
+10-26 01:03:04.357  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.250.x.x:443 len=61
+10-26 01:03:04.384  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:04.396  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
+10-26 01:03:04.397  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.250.x.x:443 len=79
+10-26 01:03:04.458  3125  4430 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
+10-26 01:03:04.511  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
+10-26 01:03:04.529  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
+10-26 01:03:04.529  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.529  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58250->fd00:1:…:853
+10-26 01:03:04.530  3125  4431 D GhDiag  : flow_established 28ms
+10-26 01:03:04.530  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58250->fd00:1::1:853
+10-26 01:03:04.640  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:04.729  3125  4430 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=60 firstByteMs=269 checksums=0
+10-26 01:03:04.790  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=434
+10-26 01:03:04.792  3125  4429 D GhDiag  : dns_reply 453ms path=doh:cloudflare-dns.com bytes=173
+10-26 01:03:05.064  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:05.086  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.116  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=323
+10-26 01:03:05.121  3125  4429 D GhDiag  : dns_reply 780ms path=doh:cloudflare-dns.com bytes=269
+10-26 01:03:05.130  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:05.290  3125  4409 D GhDiag  : tun v4 proto=1 dst=172.217.x.x:0 len=28
+10-26 01:03:05.326  3125  4409 D GhDiag  : tun v4 proto=6 dst=10.8.x.x:853 len=60
+10-26 01:03:05.326  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.0.x.x:33496->10.8.x.x:853
+10-26 01:03:05.336  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.0.2.16:33496->10.8.0.1:853
+10-26 01:03:05.499  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=216
+10-26 01:03:05.502  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=899
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.683  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=551
+10-26 01:03:05.684  3125  4429 D GhDiag  : dns_reply 1156ms path=doh:cloudflare-dns.com bytes=257
+10-26 01:03:05.852  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=167
+10-26 01:03:05.854  3125  4429 D GhDiag  : dns_reply 1324ms path=doh:cloudflare-dns.com bytes=49
+10-26 01:03:05.863  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=60
+10-26 01:03:05.864  3125  4409 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
+10-26 01:03:05.893  3125  4488 D GhDiag  : flow_established 2ms
+10-26 01:03:05.895  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.903  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=221
+10-26 01:03:05.964  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.108  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=253
+10-26 01:03:06.137  3125  4429 D GhDiag  : dns_reply 592ms path=doh:cloudflare-dns.com bytes=260
+10-26 01:03:06.142  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.144  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.236  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=99
+10-26 01:03:06.237  3125  4429 D GhDiag  : dns_reply 692ms path=doh:cloudflare-dns.com bytes=164
+10-26 01:03:06.241  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.280  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.366  3125  4492 D GhDiag  : flow_established 60ms
+10-26 01:03:06.384  3125  4501 D GhDiag  : flow_established 7ms
+10-26 01:03:07.487  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=85
+10-26 01:03:07.595  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=107
+10-26 01:03:07.612  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:07.668  3125  4571 D GhDiag  : flow_established 51ms
+10-26 01:03:08.440  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.457  3125  4600 D GhDiag  : flow_established 6ms
+10-26 01:03:08.458  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.469  3125  4603 D GhDiag  : flow_established 5ms
+10-26 01:03:09.183  3125  4408 D GhDiag  : stats t=5s packets=112 tcp=85 dns53=8 otherUdp=9 activeTcp=6 flowsOpened=8 flowsEstablished=8 connectFailures=0 retransmits=0 appUp=32441 appDown=58275 probeUp=182 probeDown=804 probeFlows=2 dnsOk=8 dnsFail=0 state=VERIFIED ipv6=tunneled
+10-26 01:03:09.273  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41000->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5061 probe=true
+10-26 01:03:09.315  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.323  3125  4613 D GhDiag  : flow_established 7ms
+10-26 01:03:09.596  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.659  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:09.679  3125  4627 D GhDiag  : flow_established 25ms
+10-26 01:03:09.702  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=110
+10-26 01:03:09.717  3125  4633 D GhDiag  : flow_established 49ms
+10-26 01:03:09.810  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41001->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5352 probe=true
+10-26 01:03:09.857  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=141
+10-26 01:03:09.862  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:10.062  3125  4647 D GhDiag  : flow_established 66ms
+10-26 01:03:10.216  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=358
+10-26 01:03:10.365  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:10.461  3125  4660 D GhDiag  : flow_established 6ms
+10-26 01:03:10.714  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=497
+10-26 01:03:10.726  3125  4409 D GhDiag  : flow_open v4 dst=142.250.x.x:443 probe=false
+10-26 01:03:10.799  3125  4684 D GhDiag  : flow_established 23ms
+10-26 01:03:10.892  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:10.934  3125  4691 D GhDiag  : flow_established 6ms
+10-26 01:03:11.581  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=184
+10-26 01:03:11.700  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=109
+10-26 01:03:11.730  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
 ===============================
 E2E PASS: real tunnel carrying traffic (SUBMODE=live)
   - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)
@@ -428,185 +431,184 @@ E2E PASS: real tunnel carrying traffic (SUBMODE=live)
 
 
 ### e2e-logcat.log (crashes + app + vpn, tail)
-  522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{f8edc5f com.google.android.as/10125} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{772f6ac com.google.android.gm/10142} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{8239f75 com.google.android.dialer/10128} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{b3ebb0a com.google.android.contacts/10155} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{a6edf7b com.google.android.partnersetup/10124} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{d6ed198 com.google.android.apps.youtube.music/10156} BLOCKED
-10-25 23:23:13.431   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{f9bbdf1 com.google.android.cellbroadcastreceiver/10188} BLOCKED
-10-25 23:23:13.713   522   540 W ziparchive: Unable to open '/data/app/~~e8cmNWdUh5w9j3dcm9z4nw==/com.ghprotocol.app-t9WKmKtR075zd7o_uFW3iA==/base.dm': No such file or directory
-10-25 23:23:13.713   522   540 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +4s123ms
-10-25 23:23:13.833   522   536 W InputManager-JNI: Input channel object 'c498414 Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
-10-25 23:23:13.841   522  2440 D CoreBackPreview: Window{c498414 u0 Splash Screen com.ghprotocol.app EXITING}: Setting back callback null
-10-25 23:23:14.072  3095  3353 W .ghprotocol.app: Verification of void kotlin.io.FilesKt__FileReadWriteKt.writeTextImpl(java.io.OutputStream, java.lang.String, java.nio.charset.Charset) took 108.228ms (1515.31 bytecodes/s) (4464B approximate peak alloc)
-10-25 23:23:15.563   522   902 I ImeTracker: com.ghprotocol.app:1a132d43: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-25 23:23:15.563   522   902 I ImeTracker: com.ghprotocol.app:1a132d43: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 23:23:15.573  1531  1531 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 23:23:15.662   522  2443 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{7a02d49 com.google.android.settings.intelligence/10118} BLOCKED
-10-25 23:23:16.005  1624  1624 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is added.].
-10-25 23:23:16.588  1624  1624 I AiAiEcho: AppFetcherImpl onPackageChanged com.ghprotocol.app.
-10-25 23:23:16.594  1624  2384 I AiAiEcho: AppIndexer Package:[com.ghprotocol.app] UserProfile:[0] Enabled:[true].
-10-25 23:23:16.594  1624  2384 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is updated.].
-10-25 23:23:16.598  3095  3847 D ProfileInstaller: Installing profile for com.ghprotocol.app
-10-25 23:23:16.854   522  2569 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{e27bb23 com.google.android.gm/10142} BLOCKED
-10-25 23:23:18.177   522   590 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW dat=ghprotocol://connect/... flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
-10-25 23:23:18.177   830   875 V WindowManagerShell: Transition requested: android.os.BinderProxy@c8b4c9e TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=41158 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@8dbf37f} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{d118f4c com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 23:23:18.291  3095  3095 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-25 23:23:18.291  3095  3095 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-25 23:23:18.347  4063  4063 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-25 23:23:18.351  4063  4063 I AndroidRuntime: Using default boot image
-10-25 23:23:18.351  4063  4063 I AndroidRuntime: Leaving lock profiling enabled
-10-25 23:23:18.531  4063  4063 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-25 23:23:18.608  4124  4124 W libxraycore.so: type=1400 audit(0.0:18): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 23:23:18.608  4124  4124 W libxraycore.so: type=1400 audit(0.0:19): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 23:23:18.608  4124  4124 W libxraycore.so: type=1400 audit(0.0:20): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 23:23:18.608  4124  4124 W libxraycore.so: type=1400 audit(0.0:21): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
-10-25 23:23:18.755  3095  3095 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-25 23:23:18.825  3095  3095 I GhDiag  : effective_dns active Serverless-v52-fragA :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-25 23:23:18.826  3095  3095 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-25 23:23:18.826  3095  3095 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-25 23:23:18.967  3095  3095 D GhDiag  : connect: core.start=true 
-10-25 23:23:19.006  1397  4159 I FontLog : Package com.ghprotocol.app has no metadata [CONTEXT service_id=132 ]
-10-25 23:23:19.031  1450  3623 I BlockstoreStorage: Clearing Blockstore Data for package com.ghprotocol.app [CONTEXT service_id=258 ]
-10-25 23:23:19.141   522  2444 D CoreBackPreview: Window{67591fe u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@3e2383e, mPriority=0, mIsAnimationCallback=false}
-10-25 23:23:19.565  4063  4063 D AndroidRuntime: Shutting down VM
-10-25 23:23:20.008  4162  4162 W libxraycore.so: type=1400 audit(0.0:32): avc:  denied  { read } for  name="somaxconn" dev="proc" ino=56401 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:proc_net:s0 tclass=file permissive=0 app=com.ghprotocol.app
-10-25 23:23:20.417   522   620 I InputDispatcher: 72f441f com.ghprotocol.app/com.ghprotocol.app.MainActivity (server) spent 2208ms processing FocusEvent(hasFocus=false)
-10-25 23:23:20.427   830   875 V WindowManagerShell: onTransitionReady android.os.BinderProxy@c8b4c9e: {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a2a5b68 u0 com.ghprotocol.app/.MainActivity)/@0x36d377 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{535bf5b u0 com.ghprotocol.app/.MainActivity)/@0xd07be4 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 23:23:20.428   522   540 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +2s260ms
-10-25 23:23:20.428   522   540 V WindowManager: Sent Transition #7 createdAt=10-25 23:23:18.169 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=41158 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ed90a27 Task{8cbdb27 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{dcf473f com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 23:23:20.434   830   875 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a2a5b68 u0 com.ghprotocol.app/.MainActivity)/@0x36d377 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{535bf5b u0 com.ghprotocol.app/.MainActivity)/@0xd07be4 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 23:23:20.434   830   875 V WindowManagerShell: start default transition animation, info = {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a2a5b68 u0 com.ghprotocol.app/.MainActivity)/@0x36d377 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{535bf5b u0 com.ghprotocol.app/.MainActivity)/@0xd07be4 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 23:23:20.448   522   540 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{a2a5b68 u0 com.ghprotocol.app/.MainActivity)/@0x7f0a899 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{535bf5b u0 com.ghprotocol.app/.MainActivity)/@0xdbf9de0 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-25 23:23:20.675   830   875 V WindowManagerShell: Transition requested: android.os.BinderProxy@ac22b81 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=43495 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@4b40426} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{54d8867 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 23:23:20.949   522  2569 I ImeTracker: com.ghprotocol.app:29fe3a5e: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-25 23:23:20.951  3095  3125 I .ghprotocol.app: Background concurrent copying GC freed 119515(5981KB) AllocSpace objects, 26(740KB) LOS objects, 49% free, 7015KB/13MB, paused 20us,13us total 458.810ms
-10-25 23:23:20.954   522  2569 I ImeTracker: com.ghprotocol.app:29fe3a5e: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 23:23:20.961  1531  1531 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 23:23:21.254  4323  4323 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-25 23:23:21.261  4323  4323 I AndroidRuntime: Using default boot image
-10-25 23:23:21.264  4323  4323 I AndroidRuntime: Leaving lock profiling enabled
-10-25 23:23:21.540  4323  4323 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-25 23:23:21.686   522  2445 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
-10-25 23:23:21.686   522  2445 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
-10-25 23:23:21.686   522  2445 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
-10-25 23:23:22.255   522   540 V WindowManager: Sent Transition #8 createdAt=10-25 23:23:20.506 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=43495 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{ed90a27 Task{8cbdb27 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{2ad52c5 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-25 23:23:23.290  4323  4323 D AndroidRuntime: Shutting down VM
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{fa9f9c4 com.google.android.googlequicksearchbox/10132} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{71140ad com.google.android.apps.messaging/10130} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{6db6fe2 com.android.camera2/10144} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{251af73 com.google.android.gm/10142} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{62eee30 com.google.android.devicelockcontroller/10180} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{7ae3aa9 com.google.android.rkpdapp/10189} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{2c4a82e com.google.android.settings.intelligence/10118} BLOCKED
-10-25 23:23:24.166   522   574 I AppsFilter: interaction: PackageSetting{32d3280 com.ghprotocol.app/10192} -> PackageSetting{bb16adb com.google.android.projection.gearhead/10123} BLOCKED
-10-25 23:23:24.597   522  1894 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
-10-25 23:23:24.866   522   537 I ImeTracker: com.ghprotocol.app:684fb35f: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
-10-25 23:23:24.866   522   537 I ImeTracker: com.ghprotocol.app:684fb35f: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-25 23:23:24.870  1531  1531 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-25 23:23:24.877   522   537 I ActivityManager: Background started FGS: Allowed [callingPackage: com.ghprotocol.app; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.ghprotocol.app/.core.VpnTunnelService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
-10-25 23:23:25.109   522  1724 I Vpn     : Established by com.ghprotocol.app on tun0
-10-25 23:23:25.110  3095  3095 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1 mtu=1500
-10-25 23:23:25.115  3095  4560 D GhDiag  : flow_open 1.1.x.x:80
-10-25 23:23:25.206  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.210  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.257  3095  4567 D GhDiag  : flow_established 3ms
-10-25 23:23:25.440  3095  4560 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=146 firstByteMs=320 checksums=0
-10-25 23:23:25.458  3095  4597 D GhDiag  : selftest 1.1.1.1:80 failed at syn_ack: bad_ack_1477468113_expected_1191517255
-10-25 23:23:25.463  3095  4597 D GhDiag  : flow_open 104.16.x.x:80
-10-25 23:23:25.475  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.475  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=64
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
-10-25 23:23:25.476  3095  4559 D GhDiag  : flow_open fd00:1:…:853
-10-25 23:23:25.476  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=65
-10-25 23:23:25.515  3095  4598 D GhDiag  : flow_established 6ms
-10-25 23:23:25.518  3095  4599 D GhDiag  : flow_established 2ms
-10-25 23:23:25.543  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=60
-10-25 23:23:25.543  3095  4559 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=290
-10-25 23:23:25.546  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-25 23:23:25.585  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-25 23:23:25.605  3095  4597 D GhDiag  : relay_selftest ok=true stage=ok target=104.16.248.249:80 up=323 down=794 response=794 synAckMs=58 firstByteMs=141 checksums=0
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:25.808  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
-10-25 23:23:25.808  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:25.821  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
-10-25 23:23:25.821  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-25 23:23:25.822  3095  4559 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-25 23:23:25.822  3095  4559 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-25 23:23:25.874  3095  4616 D GhDiag  : flow_established 16ms
-10-25 23:23:25.874  3095  4615 D GhDiag  : flow_established 39ms
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
-10-25 23:23:25.913  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=60
-10-25 23:23:25.914  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:25.998  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=577
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.067  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.067  3095  4559 D GhDiag  : tun v6 proto=6 dst=2607:f8b0:…:443 len=80
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.068  3095  4559 D GhDiag  : flow_open 2607:f8b0:…:443
-10-25 23:23:26.259  3095  3124 I .ghprotocol.app: Compiler allocated 4270KB to compile void com.ghprotocol.app.ui.MotionComponentsKt.DefyxHeaderSection(com.ghprotocol.app.ui.ConnectPhase, java.lang.Integer, boolean, java.lang.String, java.lang.String, com.ghprotocol.app.core.TunnelTelemetry, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.runtime.Composer, int, int)
-10-25 23:23:26.283  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=216
-10-25 23:23:26.293  3095  4622 D GhDiag  : flow_established 28ms
-10-25 23:23:26.294  3095  4623 D GhDiag  : flow_established 25ms
-10-25 23:23:26.295  3095  4624 D GhDiag  : flow_established 35ms
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=231
-10-25 23:23:26.298  3095  4559 D GhDiag  : flow_closed reason=client_rst up=0 down=0 ms=230
-10-25 23:23:26.424  3095  4559 D GhDiag  : flow_open 10.8.x.x:853
-10-25 23:23:26.459  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=778
-10-25 23:23:26.553  3095  4633 D GhDiag  : flow_established 63ms
-10-25 23:23:26.610  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=151
-10-25 23:23:26.657  3095  3125 I .ghprotocol.app: Background young concurrent copying GC freed 108329(6406KB) AllocSpace objects, 2(40KB) LOS objects, 29% free, 9875KB/13MB, paused 2.818ms,25us total 230.621ms
-10-25 23:23:26.740  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=128
-10-25 23:23:26.936  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=188
-10-25 23:23:27.007  3095  4618 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1186
-10-25 23:23:27.115  3095  4620 D GhDiag  : flow_closed reason=upstream_eof up=517 down=0 ms=1307
-10-25 23:23:27.215  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=274
-10-25 23:23:27.272  3095  3124 I .ghprotocol.app: Compiler allocated 4270KB to compile void com.ghprotocol.app.ui.MotionComponentsKt.DefyxHeaderSection(com.ghprotocol.app.ui.ConnectPhase, java.lang.Integer, boolean, java.lang.String, java.lang.String, com.ghprotocol.app.core.TunnelTelemetry, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.runtime.Composer, int, int)
-10-25 23:23:27.462  3095  3125 I .ghprotocol.app: Background young concurrent copying GC freed 96874(8415KB) AllocSpace objects, 0(0B) LOS objects, 42% free, 9603KB/16MB, paused 23us,10us total 243.007ms
-10-25 23:23:27.468  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=245
-10-25 23:23:27.473  3095  4559 D GhDiag  : flow_open 172.217.x.x:443
-10-25 23:23:27.597  3095  4665 D GhDiag  : flow_established 2ms
-10-25 23:23:27.679  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:27.710  3095  4699 D GhDiag  : flow_established 9ms
-10-25 23:23:27.797  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=134
-10-25 23:23:27.944  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=146
-10-25 23:23:28.252  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.259  3095  4559 D GhDiag  : flow_open 74.125.x.x:443
-10-25 23:23:28.313  3095  4717 D GhDiag  : flow_established 14ms
-10-25 23:23:28.317  3095  4718 D GhDiag  : flow_established 17ms
-10-25 23:23:28.948  3095  3125 I .ghprotocol.app: Background concurrent copying GC freed 113088(9127KB) AllocSpace objects, 12(240KB) LOS objects, 49% free, 8455KB/16MB, paused 10.567ms,9us total 285.687ms
-10-25 23:23:28.956  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=414
-10-25 23:23:28.974  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:28.991  3095  4732 D GhDiag  : flow_established 7ms
-10-25 23:23:29.223  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=249
-10-25 23:23:29.249  3095  4559 D GhDiag  : flow_open 142.250.x.x:443
-10-25 23:23:29.508  3095  4758 D GhDiag  : flow_established 23ms
-10-25 23:23:29.684  3095  3125 I .ghprotocol.app: Background young concurrent copying GC freed 97366(8425KB) AllocSpace objects, 0(0B) LOS objects, 9% free, 15MB/16MB, paused 18us,26us total 356.362ms
-10-25 23:23:29.944  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:29.954  3095  4787 D GhDiag  : flow_established 1ms
-10-25 23:23:30.116  3095  4558 D GhDiag  : stats t=5s packets=145 tcp=113 dns53=10 otherUdp=12 activeTcp=9 flowsOpened=16 flowsEstablished=16 connectFailures=0 retransmits=0 appUp=38575 appDown=30180 probeUp=184 probeDown=1196 probeFlows=2 dnsOk=10 dnsFail=0 state=VERIFIED ipv6=tunneled
-10-25 23:23:30.126  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.130  3095  4796 D GhDiag  : flow_established 3ms
-10-25 23:23:30.486  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=230
-10-25 23:23:30.530  3095  3125 I .ghprotocol.app: Background young concurrent copying GC freed 98614(8560KB) AllocSpace objects, 0(0B) LOS objects, 38% free, 10MB/16MB, paused 21us,15us total 249.628ms
-10-25 23:23:30.539  3095  4566 D GhDiag  : flow_closed reason=half_close_complete up=91 down=402 ms=5424
-10-25 23:23:30.638  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=140
-10-25 23:23:30.640  3095  4566 D GhDiag  : flow_closed reason=half_close_complete up=93 down=794 ms=5177
-10-25 23:23:30.658  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.776  3095  4559 D GhDiag  : flow_open 2001:4860:…:443
-10-25 23:23:30.828  3095  4820 D GhDiag  : flow_established 37ms
-10-25 23:23:30.830  3095  4816 D GhDiag  : flow_established 100ms
-10-25 23:23:31.069  3095  4611 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=158
+tocol.app/10192} -> PackageSetting{7420c68 com.google.android.dialer/10128} BLOCKED
+10-26 01:02:50.088   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{7572881 com.google.android.contacts/10155} BLOCKED
+10-26 01:02:50.088   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{339bd26 com.google.android.partnersetup/10124} BLOCKED
+10-26 01:02:50.088   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{89b4d67 com.google.android.apps.youtube.music/10156} BLOCKED
+10-26 01:02:50.088   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{5f8714 com.google.android.cellbroadcastreceiver/10184} BLOCKED
+10-26 01:02:50.106   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{2a6b575 com.google.android.inputmethod.latin/10144} BLOCKED
+10-26 01:02:50.108  1042  1356 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
+10-26 01:02:50.111  1042  1042 D CarrierSvcBindHelper: onPackageModified: com.ghprotocol.app
+10-26 01:02:50.126  1042  1356 D ImsResolver: maybeAddedImsService, packageName: com.ghprotocol.app
+10-26 01:02:50.234  3125  3125 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-26 01:02:50.234  3125  3125 W .ghprotocol.app: Common causes for lock verification issues are non-optimized dex code
+10-26 01:02:50.234  3125  3125 W .ghprotocol.app: and incorrect proguard optimizations.
+10-26 01:02:50.234  3125  3125 W .ghprotocol.app: Method boolean androidx.compose.runtime.snapshots.SnapshotStateList.conditionalUpdate$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-26 01:02:50.234  3125  3125 W .ghprotocol.app: Method java.lang.Object androidx.compose.runtime.snapshots.SnapshotStateList.mutate(kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-26 01:02:50.239  3125  3125 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update(boolean, kotlin.jvm.functions.Function1) failed lock verification and will run slower.
+10-26 01:02:50.239  3125  3125 W .ghprotocol.app: Method void androidx.compose.runtime.snapshots.SnapshotStateList.update$default(androidx.compose.runtime.snapshots.SnapshotStateList, boolean, kotlin.jvm.functions.Function1, int, java.lang.Object) failed lock verification and will run slower.
+10-26 01:02:50.680   526  2764 D CoreBackPreview: Window{57a817c u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@ee8677f, mPriority=0, mIsAnimationCallback=false}
+10-26 01:02:52.128   526   543 W ziparchive: Unable to open '/data/app/~~5TDHGldFw52PFnL9MehBNQ==/com.ghprotocol.app-POFnVczQ8e6EKZvhD5_hEg==/base.dm': No such file or directory
+10-26 01:02:52.143   526   543 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +3s881ms
+10-26 01:02:52.184   526   539 D CoreBackPreview: Window{6ef92a1 u0 Splash Screen com.ghprotocol.app EXITING}: Setting back callback null
+10-26 01:02:52.184   526  1152 W InputManager-JNI: Input channel object '6ef92a1 Splash Screen com.ghprotocol.app (client)' was disposed without first being removed with the input manager!
+10-26 01:02:54.691   526   622 I InputDispatcher: 57a817c com.ghprotocol.app/com.ghprotocol.app.MainActivity (server) spent 2553ms processing FocusEvent(hasFocus=true)
+10-26 01:02:54.731   526   902 I ImeTracker: com.ghprotocol.app:730af666: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-26 01:02:54.732   526   902 I ImeTracker: com.ghprotocol.app:730af666: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-26 01:02:54.751  1529  1529 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-26 01:02:55.666  3125  3891 D ProfileInstaller: Installing profile for com.ghprotocol.app
+10-26 01:02:55.910   526  2551 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{fed4999 com.google.android.gm/10143} BLOCKED
+10-26 01:02:56.171  1585  1585 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is added.].
+10-26 01:02:56.596  1585  1585 I AiAiEcho: AppFetcherImpl onPackageChanged com.ghprotocol.app.
+10-26 01:02:56.600  1585  2852 I AiAiEcho: AppIndexer Package:[com.ghprotocol.app] UserProfile:[0] Enabled:[true].
+10-26 01:02:56.600  1585  2852 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is updated.].
+10-26 01:02:56.695   526   902 I ActivityTaskManager: START u0 {act=android.intent.action.VIEW dat=ghprotocol://connect/... flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity} with LAUNCH_MULTIPLE from uid 2000 (BAL_ALLOW_PERMISSION) result code=0
+10-26 01:02:56.697   834   865 V WindowManagerShell: Transition requested: android.os.BinderProxy@aa96a57 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=44483 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@ed2f944} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{65f0a2d com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-26 01:02:56.723  3125  3125 V ActivityThread: getPackageInfo() caused update to cached ApplicationInfo for package com.ghprotocol.app
+10-26 01:02:56.876  3962  3962 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-26 01:02:56.880  3962  3962 I AndroidRuntime: Using default boot image
+10-26 01:02:56.880  3962  3962 I AndroidRuntime: Leaving lock profiling enabled
+10-26 01:02:57.008  3125  3125 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+10-26 01:02:57.008  3125  3125 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
+10-26 01:02:57.034  3962  3962 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-26 01:02:57.070  3991  3991 W libxraycore.so: type=1400 audit(0.0:20): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-26 01:02:57.074  3991  3991 W libxraycore.so: type=1400 audit(0.0:21): avc:  denied  { search } for  name="tests" dev="dm-40" ino=65540 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:shell_test_data_file:s0 tclass=dir permissive=0 app=com.ghprotocol.app
+10-26 01:02:57.225  3125  3125 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+10-26 01:02:57.289  3125  3125 I GhDiag  : effective_dns active Serverless-v52-fragA :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
+10-26 01:02:57.289  3125  3125 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
+10-26 01:02:57.290  3125  3125 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
+10-26 01:02:57.427  3125  3125 D GhDiag  : connect: core.start=true 
+10-26 01:02:57.585   526   916 D CoreBackPreview: Window{b5a39a u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@708b568, mPriority=0, mIsAnimationCallback=false}
+10-26 01:02:58.408   834   865 V WindowManagerShell: onTransitionReady android.os.BinderProxy@aa96a57: {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{9c868e1 u0 com.ghprotocol.app/.MainActivity)/@0xfb74fd2 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{d2f3cec u0 com.ghprotocol.app/.MainActivity)/@0x9cb28a3 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-26 01:02:58.409   526   543 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +1s724ms
+10-26 01:02:58.409   526   543 V WindowManager: Sent Transition #7 createdAt=10-26 01:02:56.686 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=44483 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{4b13d46 Task{c3508b5 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{cbf7a24 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-26 01:02:58.409   526   543 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{9c868e1 u0 com.ghprotocol.app/.MainActivity)/@0x3c715b6 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{d2f3cec u0 com.ghprotocol.app/.MainActivity)/@0xf774951 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-26 01:02:58.410   834   865 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{9c868e1 u0 com.ghprotocol.app/.MainActivity)/@0xfb74fd2 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{d2f3cec u0 com.ghprotocol.app/.MainActivity)/@0x9cb28a3 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-26 01:02:58.413   834   865 V WindowManagerShell: start default transition animation, info = {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{9c868e1 u0 com.ghprotocol.app/.MainActivity)/@0xfb74fd2 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{d2f3cec u0 com.ghprotocol.app/.MainActivity)/@0x9cb28a3 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
+10-26 01:02:58.585  3125  3145 I .ghprotocol.app: Background concurrent copying GC freed 105848(5460KB) AllocSpace objects, 26(740KB) LOS objects, 49% free, 6993KB/13MB, paused 24us,3.529ms total 207.672ms
+10-26 01:02:58.825  3962  3962 D AndroidRuntime: Shutting down VM
+10-26 01:02:58.908   834   865 V WindowManagerShell: Transition requested: android.os.BinderProxy@4513b68 TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=46246 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@1202b81} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{eba0426 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-26 01:02:59.461   526   886 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
+10-26 01:02:59.465   526   886 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
+10-26 01:02:59.465   526   886 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
+10-26 01:02:59.711  1445  3709 I BlockstoreStorage: Clearing Blockstore Data for package com.ghprotocol.app [CONTEXT service_id=258 ]
+10-26 01:02:59.816  1402  3998 I FontLog : Package com.ghprotocol.app has no metadata [CONTEXT service_id=132 ]
+10-26 01:03:00.135   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{ad38d43 com.google.android.googlequicksearchbox/10132} BLOCKED
+10-26 01:03:00.139   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{5efbfc0 com.android.camera2/10146} BLOCKED
+10-26 01:03:00.139   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{20154f9 com.google.android.devicelockcontroller/10190} BLOCKED
+10-26 01:03:00.139   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{40b3c3e com.google.android.rkpdapp/10186} BLOCKED
+10-26 01:03:00.139   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{6c0de53 com.google.android.projection.gearhead/10123} BLOCKED
+10-26 01:03:00.139   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{b17ba9f com.google.android.apps.youtube.music/10156} BLOCKED
+10-26 01:03:00.239   526   543 V WindowManager: Sent Transition #8 createdAt=10-26 01:02:58.449 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=46246 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{4b13d46 Task{c3508b5 #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{b78eca2 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
+10-26 01:03:00.956  4274  4274 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+10-26 01:03:00.962  4274  4274 I AndroidRuntime: Using default boot image
+10-26 01:03:00.963  4274  4274 I AndroidRuntime: Leaving lock profiling enabled
+10-26 01:03:01.155  4274  4274 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+10-26 01:03:02.597  4274  4274 D AndroidRuntime: Shutting down VM
+10-26 01:03:03.862   526  2681 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
+10-26 01:03:04.108   526  2574 I ActivityManager: Background started FGS: Allowed [callingPackage: com.ghprotocol.app; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.ghprotocol.app/.core.VpnTunnelService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
+10-26 01:03:04.136   526  1407 I Vpn     : Established by com.ghprotocol.app on tun0
+10-26 01:03:04.137  3125  3125 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 dns=10.8.0.1 mtu=1500
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
+10-26 01:03:04.192  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:04.204  3125  4410 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
+10-26 01:03:04.207  3125  4413 D GhDiag  : flow_established 3ms
+10-26 01:03:04.254  3125  4410 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=26 firstByteMs=70 checksums=0
+10-26 01:03:04.301  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.301  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58234->fd00:1:…:853
+10-26 01:03:04.310  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58234->fd00:1::1:853
+10-26 01:03:04.315  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.316  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58238->fd00:1:…:853
+10-26 01:03:04.316  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58238->fd00:1::1:853
+10-26 01:03:04.339  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=73
+10-26 01:03:04.341  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=73
+10-26 01:03:04.357  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.250.x.x:443 len=61
+10-26 01:03:04.384  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:04.396  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
+10-26 01:03:04.397  3125  4409 D GhDiag  : tun v4 proto=17 dst=142.250.x.x:443 len=79
+10-26 01:03:04.415   526  2551 I ImeTracker: com.ghprotocol.app:adb9c762: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-26 01:03:04.415   526  2551 I ImeTracker: com.ghprotocol.app:adb9c762: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-26 01:03:04.426  1529  1529 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
+10-26 01:03:04.458  3125  4430 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
+10-26 01:03:04.511  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
+10-26 01:03:04.529  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
+10-26 01:03:04.529  3125  4409 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
+10-26 01:03:04.529  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:58250->fd00:1:…:853
+10-26 01:03:04.530  3125  4431 D GhDiag  : flow_established 28ms
+10-26 01:03:04.530  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:58250->fd00:1::1:853
+10-26 01:03:04.640  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:04.729  3125  4430 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=60 firstByteMs=269 checksums=0
+10-26 01:03:04.790  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=434
+10-26 01:03:04.792  3125  4429 D GhDiag  : dns_reply 453ms path=doh:cloudflare-dns.com bytes=173
+10-26 01:03:05.043  3125  3144 I .ghprotocol.app: Compiler allocated 4270KB to compile void com.ghprotocol.app.ui.MotionComponentsKt.DefyxHeaderSection(com.ghprotocol.app.ui.ConnectPhase, java.lang.Integer, boolean, java.lang.String, java.lang.String, com.ghprotocol.app.core.TunnelTelemetry, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.runtime.Composer, int, int)
+10-26 01:03:05.064  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:05.070  3125  3145 I .ghprotocol.app: Background young concurrent copying GC freed 102425(5934KB) AllocSpace objects, 2(40KB) LOS objects, 37% free, 8744KB/13MB, paused 326us,12us total 208.105ms
+10-26 01:03:05.086  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.116  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=323
+10-26 01:03:05.121  3125  4429 D GhDiag  : dns_reply 780ms path=doh:cloudflare-dns.com bytes=269
+10-26 01:03:05.130  3125  4409 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
+10-26 01:03:05.290  3125  4409 D GhDiag  : tun v4 proto=1 dst=172.217.x.x:0 len=28
+10-26 01:03:05.326  3125  4409 D GhDiag  : tun v4 proto=6 dst=10.8.x.x:853 len=60
+10-26 01:03:05.326  3125  4409 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.0.x.x:33496->10.8.x.x:853
+10-26 01:03:05.336  3125  4409 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.0.2.16:33496->10.8.0.1:853
+10-26 01:03:05.499  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=216
+10-26 01:03:05.502  3125  4409 D GhDiag  : tun v4 proto=17 dst=172.217.x.x:443 len=899
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.545  3125  4409 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=64
+10-26 01:03:05.683  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=551
+10-26 01:03:05.684  3125  4429 D GhDiag  : dns_reply 1156ms path=doh:cloudflare-dns.com bytes=257
+10-26 01:03:05.758  3125  3145 I .ghprotocol.app: Background concurrent copying GC freed 91404(7373KB) AllocSpace objects, 19(380KB) LOS objects, 49% free, 9231KB/18MB, paused 62us,15us total 208.839ms
+10-26 01:03:05.852  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=167
+10-26 01:03:05.854  3125  4429 D GhDiag  : dns_reply 1324ms path=doh:cloudflare-dns.com bytes=49
+10-26 01:03:05.863  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=60
+10-26 01:03:05.864  3125  4409 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
+10-26 01:03:05.893  3125  4488 D GhDiag  : flow_established 2ms
+10-26 01:03:05.895  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:05.903  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=221
+10-26 01:03:05.964  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.108  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=253
+10-26 01:03:06.137  3125  4429 D GhDiag  : dns_reply 592ms path=doh:cloudflare-dns.com bytes=260
+10-26 01:03:06.142  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.144  3125  4409 D GhDiag  : tun v4 proto=6 dst=142.251.x.x:443 len=40
+10-26 01:03:06.236  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=99
+10-26 01:03:06.237  3125  4429 D GhDiag  : dns_reply 692ms path=doh:cloudflare-dns.com bytes=164
+10-26 01:03:06.241  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.280  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:06.366  3125  4492 D GhDiag  : flow_established 60ms
+10-26 01:03:06.368  3125  3145 I .ghprotocol.app: Background young concurrent copying GC freed 118043(10212KB) AllocSpace objects, 0(0B) LOS objects, 47% free, 9665KB/18MB, paused 30us,17us total 190.722ms
+10-26 01:03:06.384  3125  4501 D GhDiag  : flow_established 7ms
+10-26 01:03:07.487  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=85
+10-26 01:03:07.595  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=107
+10-26 01:03:07.612  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:07.668  3125  4571 D GhDiag  : flow_established 51ms
+10-26 01:03:08.440  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.457  3125  4600 D GhDiag  : flow_established 6ms
+10-26 01:03:08.458  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:08.469  3125  4603 D GhDiag  : flow_established 5ms
+10-26 01:03:09.183  3125  4408 D GhDiag  : stats t=5s packets=112 tcp=85 dns53=8 otherUdp=9 activeTcp=6 flowsOpened=8 flowsEstablished=8 connectFailures=0 retransmits=0 appUp=32441 appDown=58275 probeUp=182 probeDown=804 probeFlows=2 dnsOk=8 dnsFail=0 state=VERIFIED ipv6=tunneled
+10-26 01:03:09.273  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41000->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5061 probe=true
+10-26 01:03:09.315  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.323  3125  4613 D GhDiag  : flow_established 7ms
+10-26 01:03:09.596  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:09.659  3125  4409 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
+10-26 01:03:09.679  3125  4627 D GhDiag  : flow_established 25ms
+10-26 01:03:09.702  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=110
+10-26 01:03:09.717  3125  4633 D GhDiag  : flow_established 49ms
+10-26 01:03:09.810  3125  4412 D GhDiag  : flow_closed dst=10.8.x.x:41001->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5352 probe=true
+10-26 01:03:09.857  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=141
+10-26 01:03:09.862  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:10.062  3125  4647 D GhDiag  : flow_established 66ms
+10-26 01:03:10.216  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=358
+10-26 01:03:10.365  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
+10-26 01:03:10.461  3125  4660 D GhDiag  : flow_established 6ms
+10-26 01:03:10.714  3125  4429 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=497
+10-26 01:03:10.726  3125  4409 D GhDiag  : flow_open v4 dst=142.250.x.x:443 probe=false
+10-26 01:03:10.795   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{cb8e69f com.google.android.gm/10143} BLOCKED
+10-26 01:03:10.795   526   577 I AppsFilter: interaction: PackageSetting{bdb24e com.ghprotocol.app/10192} -> PackageSetting{ef8d3ec com.google.android.contacts/10155} BLOCKED
+10-26 01:03:10.799  3125  4684 D GhDiag  : flow_established 23ms
+10-26 01:03:10.832  3125  3145 I .ghprotocol.app: Background young concurrent copying GC freed 104919(8606KB) AllocSpace objects, 0(0B) LOS objects, 44% free, 9146KB/16MB, paused 18.884ms,27us total 305.349ms
+10-26 01:03:10.892  3125  4409 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
 
 ### e2e-xray-err.log (Xray core)
 
