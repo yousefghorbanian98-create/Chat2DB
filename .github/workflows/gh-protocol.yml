@@ -218,6 +218,10 @@ jobs:
         run: |
           mkdir -p release-dist
           VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts | head -1)
+          # VERSION must be exported: the publish step runs in a separate shell and an
+          # unexported variable made it create a release titled "Gh Protocol " with no assets
+          # (run 41185924609). Every consumer below now reads the same exported value.
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "versionName=$VERSION" >> "$GITHUB_ENV"
           echo "ARTIFACT_TAG=gh-protocol-v$VERSION" >> "$GITHUB_ENV"
           cp app/build/outputs/apk/release/app-arm64-v8a-release.apk "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk"
@@ -227,13 +231,37 @@ jobs:
           (cd release-dist && sha256sum "GhProtocol-v$VERSION-arm64-v8a.apk" "GhProtocol-v$VERSION-universal.apk" core-version.txt FINAL_REPORT.html > SHA256SUMS)
           cp release-dist/SHA256SUMS SHA256SUMS
           cat SHA256SUMS
+          # Fail here — not after creating a release — if any asset is missing.
+          for f in "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk" \
+                   "release-dist/GhProtocol-v$VERSION-universal.apk" \
+                   release-dist/SHA256SUMS release-dist/core-version.txt release-dist/FINAL_REPORT.html; do
+            if [ ! -s "$f" ]; then
+              echo "::error::release asset missing or empty after staging: $f"
+              exit 1
+            fi
+          done
+          echo "release assets staged:" && ls -l release-dist
 
-      - name: P5/G5 Publish GitHub Release (manual, green build only)
-        if: github.event_name == 'workflow_dispatch' && inputs.publish == true
+      # Publication is never a side effect of an ordinary push. It happens only when
+      #  (a) a human dispatches this workflow with publish=true, or
+      #  (b) the pushed commit message contains the [publish] marker — i.e. a reviewed,
+      #      merged commit whose message says so (used when the CI token cannot dispatch).
+      # In both cases the step runs *after* the build, the full test suite, the quality gates,
+      # the goldens and the APK hardening gate have passed in this very run.
+      - name: P5/G5 Publish GitHub Release (manual or [publish] marker, green build only)
+        if: |
+          (github.event_name == 'workflow_dispatch' && inputs.publish == true) ||
+          (github.event_name == 'push' && contains(github.event.head_commit.message, '[publish]'))
         working-directory: gh-protocol
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -e
+          if [ -z "${VERSION:-}" ] || [ -z "${ARTIFACT_TAG:-}" ]; then
+            echo "::error::VERSION/ARTIFACT_TAG not set — refusing to publish an unnamed release"
+            exit 1
+          fi
+          echo "publishing $ARTIFACT_TAG (versionName=$VERSION) from $GITHUB_SHA"
           NOTES_FILE="RELEASE_NOTES_v$VERSION.md"
           if [ -f "$NOTES_FILE" ]; then
             BODY_ARGS=(--notes-file "$NOTES_FILE")
@@ -241,26 +269,35 @@ jobs:
             BODY_ARGS=(--notes "Built from $GITHUB_SHA by the gh-protocol-build workflow after green tests.")
           fi
           gh release view "$ARTIFACT_TAG" >/dev/null 2>&1 || \
-            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" "${BODY_ARGS[@]}"
+            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" --target "$GITHUB_SHA" "${BODY_ARGS[@]}"
           # Re-running with publish=true refreshes the description as well.
           gh release edit "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" "${BODY_ARGS[@]}"
-          gh release upload "$ARTIFACT_TAG" \
+          if ! gh release upload "$ARTIFACT_TAG" \
             "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk" \
             "release-dist/GhProtocol-v$VERSION-universal.apk" \
             release-dist/SHA256SUMS \
             release-dist/core-version.txt \
             release-dist/FINAL_REPORT.html \
-            --clobber
+            --clobber; then
+            # A release with no APK is worse than no release: remove the tag and the release so
+            # a retry starts clean (this is what the 2026-10-31 run left behind).
+            echo "::error::asset upload failed — deleting the empty release $ARTIFACT_TAG"
+            gh release delete "$ARTIFACT_TAG" --yes --cleanup-tag || true
+            exit 1
+          fi
+          gh release view "$ARTIFACT_TAG" --json assets --jq '.assets[] | "published: \(.name) \(.size) bytes"' 
+          # The release is already published at this point: mirroring the checksums to the
+          # ci-diag branch is a convenience and must never fail the run.
+          set +e
           cd "$GITHUB_WORKSPACE"
           git config user.name "gh-protocol-ci"
           git config user.email "gh-protocol-ci@users.noreply.github.com"
           git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
           git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
-          mkdir -p gh-protocol
-          cp gh-protocol/release-dist/SHA256SUMS "gh-protocol/SHA256SUMS.v$VERSION"
+          cp "gh-protocol/release-dist/SHA256SUMS" "gh-protocol/SHA256SUMS.v$VERSION"
           git add "gh-protocol/SHA256SUMS.v$VERSION"
           git commit -m "ci-diag: v$VERSION SHA256SUMS $(date -u +%Y%m%d-%H%M%S)" --allow-empty
-          git push origin HEAD:ci-diag --force
+          git push origin HEAD:ci-diag --force || echo "::warning::ci-diag mirror failed (release is published anyway)"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
