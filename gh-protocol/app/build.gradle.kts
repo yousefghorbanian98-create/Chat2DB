@@ -13,8 +13,11 @@ android {
         applicationId = "com.ghprotocol.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4.0"
+        // 6 / 1.6.0: the v1.6 data path (TcpRelay + DnsResolver + in-tunnel payload
+        // verification) replaces the v1.4.0 verification path. Bumped only now, after the
+        // build and the full test suite went green on main (DIAGNOSIS 2026-10-25, §5).
+        versionCode = 6
+        versionName = "1.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

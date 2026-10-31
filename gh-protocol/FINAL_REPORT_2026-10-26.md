@@ -1,7 +1,12 @@
 # Final report — Gh Protocol Android, 2026-10-26
 
-Branch: `arena/c0144157-chat2db` · version unchanged (`versionCode=5`, `versionName="1.4.0"`)
-· no new dependency · no new screen · **no release published**
+Branch: `arena/c0144157-chat2db` (merged as PR #9) · no new dependency · no new screen.
+
+**Release status:** the code above is merged and green on `main`; `versionCode 5 → 6` and
+`versionName "1.4.0" → "1.6.0"` were applied in a follow-up commit so the build can be
+published as `gh-protocol-v1.6.0` (see §7). The version was **not** touched before the build
+and the full test suite were green, and the release is published by a manual
+`workflow_dispatch` run — never by an ordinary push (requirement 9).
 
 Scope: close the device report for `Serverless-v52-fragB` + `CleanIP=auto`
 (`ActiveTCP=0`, no real app traffic, repeating
@@ -201,5 +206,21 @@ Run **40255160493** on commit `c9b92f1` built and signed the APKs (and run `4025
 the emulator E2E on the same commit); the artifact is `gh-protocol-release-130` (220.3 MB,
 `arm64-v8a` + `x86_64`), downloadable from
 <https://github.com/yousefghorbanian98-create/Chat2DB/actions/runs/40255160493>.
+
+With `versionName = 1.6.0` the same workflow publishes a GitHub Release (manual `publish=true`)
+containing:
+
+```
+GhProtocol-v1.6.0-arm64-v8a.apk   ← the file to install on a phone
+GhProtocol-v1.6.0-universal.apk
+SHA256SUMS · core-version.txt · FINAL_REPORT.html
+```
+
+**Signing caveat (must be read):** the workflow uses the persistent keystore only when the
+repository secrets `KEYSTORE_PKCS12` + `KEYSTORE_PASS` are set; otherwise it generates a
+throwaway keystore per run (the workflow header documents this). An APK signed with a different
+key **cannot** be installed over an existing install — Android reports `App not installed`, and
+the previous app must be uninstalled first. Set those two secrets to make future updates
+installable in place.
 It is a **CI artifact**, not a published release: no version bump, no GitHub release, no tag — that is
 withheld until the phone log in §6 confirms the data path, exactly as requirement 9 asks.

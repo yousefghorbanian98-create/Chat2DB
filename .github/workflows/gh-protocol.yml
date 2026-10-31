@@ -234,9 +234,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          NOTES_FILE="RELEASE_NOTES_v$VERSION.md"
+          if [ -f "$NOTES_FILE" ]; then
+            BODY_ARGS=(--notes-file "$NOTES_FILE")
+          else
+            BODY_ARGS=(--notes "Built from $GITHUB_SHA by the gh-protocol-build workflow after green tests.")
+          fi
           gh release view "$ARTIFACT_TAG" >/dev/null 2>&1 || \
-            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" \
-              --notes "Built from $GITHUB_SHA by the gh-protocol-build workflow after green tests."
+            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" "${BODY_ARGS[@]}"
+          # Re-running with publish=true refreshes the description as well.
+          gh release edit "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" "${BODY_ARGS[@]}"
           gh release upload "$ARTIFACT_TAG" \
             "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk" \
             "release-dist/GhProtocol-v$VERSION-universal.apk" \
