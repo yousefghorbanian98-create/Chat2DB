@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+# Fetch + SHA-256-verify Xray-core Android builds into app assets.
+# Self-diagnosing: on ANY failure, commits fetch-diag.log to the ci-diag branch.
+set -uo pipefail
+
+VERSION="v26.10.21"
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+DIAG="${REPO_DIR}/fetch-diag.log"
+: > "$DIAG"
+log() { echo "$@"; echo "$@" >> "$DIAG"; }
+
+publish_diag() {
+  local rc=$1
+  [ "$rc" -eq 0 ] && return 0
+  log "=== fetch script exiting rc=${rc} — publishing diag ==="
+  cd "$REPO_DIR" || return 1
+  git config user.name "gh-protocol-ci"
+  git config user.email "gh-protocol-ci@users.noreply.github.com"
+  git checkout -B ci-diag >>"$DIAG" 2>&1 || true
+  {
+    echo "## gh-protocol Xray fetch diag — $(date -u +%FT%TZ) (exit=${rc})"
+    echo
+    cat "$DIAG"
+  } > "${REPO_DIR}/ci-failure.log"
+  git add ci-failure.log
+  git commit -m "ci-diag: fetch diag $(date -u +%Y%m%d-%H%M%S)" --allow-empty >>"$DIAG" 2>&1 || true
+  git push origin HEAD:ci-diag --force >>"$DIAG" 2>&1 || true
+  log "diag published (push rc=$?)"
+  return 1
+}
+trap 'publish_diag $?' EXIT
+
+log "== tools =="
+for t in curl unzip sha256sum git tr cut grep; do
+  if command -v "$t" >/dev/null 2>&1; then log "have $t: $(command -v $t)"; else log "MISSING $t"; fi
+done
+unzip -v 2>/dev/null | head -1 >> "$DIAG" 2>&1 || log "unzip -v failed"
+
+for ABI in arm64-v8a amd64; do
+  ZIP="Xray-android-${ABI}.zip"
+  # AGP accepts only its own ABI dir names (amd64 is not one; x86_64 is)
+  case "$ABI" in
+    amd64) GRADLE_ABI="x86_64" ;;
+    *)     GRADLE_ABI="$ABI" ;;
+  esac
+  DEST="app/src/main/jniLibs/${GRADLE_ABI}/libxraycore.so"
+  log "== ${ZIP} =="
+  if ! curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}" \
+       "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}" 2>>"$DIAG"; then
+    log "FATAL: curl download failed for ${ZIP} (see curl stderr above)"
+    exit 41
+  fi
+  if ! curl -fSL --retry 3 --retry-delay 2 -o "/tmp/${ZIP}.dgst" \
+       "https://github.com/XTLS/Xray-core/releases/download/${VERSION}/${ZIP}.dgst" 2>>"$DIAG"; then
+    log "FATAL: curl download failed for ${ZIP}.dgst (see curl stderr above)"
+    exit 41
+  fi
+  log "dgst file: $(cat /tmp/${ZIP}.dgst | tr '\n' '|')"
+  EXPECTED=$(grep "^SHA2-256=" "/tmp/${ZIP}.dgst" | cut -d= -f2 | tr -d " " | tr "[:upper:]" "[:lower:]")
+  ACTUAL=$(sha256sum "/tmp/${ZIP}" | awk '{print $1}')
+  log "expected=${EXPECTED} actual=${ACTUAL}"
+  if [ -z "$EXPECTED" ] || [ "$EXPECTED" != "$ACTUAL" ]; then
+    log "FATAL: SHA-256 MISMATCH for ${ZIP}"
+    exit 43
+  fi
+  log "sha256 verified ${ZIP}"
+  rm -rf "/tmp/xray-${ABI}" && mkdir -p "/tmp/xray-${ABI}"
+  if ! unzip -o "/tmp/${ZIP}" -d "/tmp/xray-${ABI}" >> "$DIAG" 2>&1; then
+    log "FATAL: unzip failed; zip layout:"
+    ls -la /tmp/ | grep -i xray >> "$DIAG" 2>&1
+    head -c 300 "/tmp/${ZIP}" | od -c | head -5 >> "$DIAG" 2>&1
+    exit 44
+  fi
+  BIN=$(find "/tmp/xray-${ABI}" -type f -iname "xray*" ! -name "*.dat" ! -name "*.json" ! -name "*.txt" -perm -u+x | head -n 1)
+  [ -n "$BIN" ] || BIN=$(find "/tmp/xray-${ABI}" -type f -iname "xray*" ! -name "*.dat" ! -name "*.json" ! -name "*.txt" | head -n 1)
+  if [ -z "$BIN" ]; then
+    log "FATAL: no Xray binary in ${ZIP}; extracted files:"
+    find "/tmp/xray-${ABI}" -type f | head -20 >> "$DIAG" 2>&1
+    exit 45
+  fi
+  log "binary: ${BIN} ($(du -h "$BIN" | cut -f1))"
+  mkdir -p "$(dirname "$DEST")"
+  cp "$BIN" "$DEST"
+  # geo data are NOT code — they stay in assets and are extracted to filesDir at runtime
+  mkdir -p app/src/main/assets/xray
+  for DAT in /tmp/xray-${ABI}/*.dat; do [ -f "$DAT" ] && cp "$DAT" app/src/main/assets/xray/; done
+  chmod 755 "$DEST"
+  log "installed ${ZIP} -> ${DEST}"
+done
+
+log "ALL FETCHES OK"
+exit 0

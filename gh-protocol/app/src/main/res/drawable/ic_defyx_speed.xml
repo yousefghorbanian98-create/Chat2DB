@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Directly imported from UnboundTechCo/defyxVPN/assets/icons/speed.svg -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="28dp"
+    android:height="28dp"
+    android:viewportWidth="28"
+    android:viewportHeight="28">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF696969"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M6.57533 22.5913C5.10689 21.1229 4.10688 19.2519 3.70174 17.2151C3.29661 15.1784 3.50455 13.0672 4.29927 11.1485C5.094 9.22993 6.43981 7.59006 8.16652 6.43631C9.89324 5.28256 11.9233 4.66675 14 4.66675C16.0767 4.66675 18.1068 5.28256 19.8335 6.43631C21.5602 7.59006 22.906 9.22993 23.7007 11.1485C24.4954 13.0672 24.7034 15.1784 24.2983 17.2151C23.8931 19.2519 22.8931 21.1229 21.4247 22.5913" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF696969"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M18.6667 10.5L14 15.1667" />
+</vector>

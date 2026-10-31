@@ -1,0 +1,26 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+build/
+!gradle/wrapper/gradle-wrapper.jar
+captures/
+.externalNativeBuild/
+.cxx/
+# CI-generated / transient (never commit)
+app/src/main/assets/xray/
+app/src/main/jniLibs/
+sub.json
+e2e.log
+e2e-*.log
+e2e-log.md
+fetch-diag.log
+ci-failure.log
+gradle-build.log
+*.apk.idsig
+# decoded keystore never committed
+build/keystore/
+pre-flight-diag.log
+emulator-console.log
+avd-create.log

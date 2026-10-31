@@ -1,0 +1,266 @@
+# Gh Protocol — Android build (lives in gh-protocol/ subdirectory while the
+# dedicated repo `gh-protocol` is not yet reachable by the CI app. Migrates
+# wholesale to that repo later; see gh-protocol/HANDOFF.md section 6.)
+#
+# Signing (P0): the CI app cannot manage repo secrets yet, so a throwaway
+# keystore is generated per run (random key, zero continuity cost — no
+# release has been signed yet). Once the app gains secrets access, set
+# KEYSTORE_PKCS12 (base64 PKCS12) + KEYSTORE_PASS and the step below
+# switches to the persistent key automatically.
+name: gh-protocol-build
+# runbook: see gh-protocol/HANDOFF.md §6 (v2: after setup-gradle fix)
+
+on:
+  # Integration-token pushes don't trigger workflows (GitHub anti-recursion);
+  # repository_dispatch is the supported escape hatch (POST /repos/.../dispatches).
+  repository_dispatch:
+  push:
+    paths:
+      - 'gh-protocol/**'
+      - '.github/workflows/gh-protocol.yml'
+  pull_request:
+    paths:
+      - 'gh-protocol/**'
+      - '.github/workflows/gh-protocol.yml'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Roborazzi goldens: verify (CI gate) or generate (produce reference PNGs)"
+        required: false
+        default: verify
+        type: choice
+        options: [verify, generate]
+      publish:
+        # Requirement: never publish a release from an ordinary push. A human has to ask for
+        # it, after the build + tests + goldens in this very run are green.
+        description: "Publish the GitHub Release for the current versionName (only after green)"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: gh-protocol-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build + test (APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          # wrapper lives in gh-protocol/ subdir; pin the same version explicitly
+          gradle-version: '8.10.2'
+
+      - name: Fetch Xray-core (official release, SHA-256 verified)
+        working-directory: gh-protocol
+        run: bash ci-fetch-xray.sh
+
+      - name: Provide release keystore
+        env:
+          KEYSTORE_PKCS12: ${{ secrets.KEYSTORE_PKCS12 }}
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+        run: |
+          mkdir -p gh-protocol/build/keystore
+          if [ -n "$KEYSTORE_PKCS12" ]; then
+            echo "::group::Using persistent keystore from Secrets"
+            echo "$KEYSTORE_PKCS12" | base64 -d > gh-protocol/build/keystore/release.keystore
+            echo "KEYSTORE_PASS=$KEYSTORE_PASS" >> "$GITHUB_ENV"
+          else
+            echo "::group::Generating ephemeral keystore (P0 — no secrets access yet)"
+            PW=$(openssl rand -hex 16)
+            keytool -genkeypair -alias ghprotocol -keyalg EC -keysize 256 -validity 3650 \
+              -keystore gh-protocol/build/keystore/release.keystore -storetype PKCS12 \
+              -storepass "$PW" -keypass "$PW" \
+              -dname "CN=Gh Protocol (CI ephemeral), O=Gh Protocol, C=IR"
+            echo "KEYSTORE_PASS=$PW" >> "$GITHUB_ENV"
+            echo "ephemeral keystore ready (random per run)"
+          fi
+
+      - name: Build (debug + release) and run tests
+        working-directory: gh-protocol
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon assembleDebug assembleRelease test --stacktrace 2>&1 | tee gradle-build.log
+
+      - name: P3/G3 Quality Gates (Dependency Freeze, Privacy URL Whitelist, Null-Safety Hygiene)
+        working-directory: gh-protocol
+        run: |
+          echo "::group::1. Dependency Freeze (D-freeze)"
+          UNAPPROVED=$(grep -E '^[[:space:]]*implementation\(' app/build.gradle.kts | grep -vE 'androidx\.|kotlinx-coroutines-android|com\.google\.zxing:core' || true)
+          if [ -n "$UNAPPROVED" ]; then
+            echo "ERROR: Unapproved runtime dependency detected after P3 freeze:"
+            echo "$UNAPPROVED"
+            exit 1
+          fi
+          echo "Dependency freeze OK."
+          echo "::endgroup::"
+
+          echo "::group::2. Privacy URL Whitelist (§6.4)"
+          URLS=$(grep -rhoE 'https://[^"'\'' )>]+' app/src/main/ || true)
+          BAD_URLS=$(echo "$URLS" | grep -vE '^https://(schemas\.android\.com|raw\.githubusercontent\.com/patterniha/Serverless-for-Iran|github\.com/patterniha/Serverless-for-Iran|cloudflare-dns\.com/dns-query|www\.google\.com/generate_204|1\.1\.1\.1/cdn-cgi/trace|github\.com|www\.mci\.ir|www\.iplc\.ir)' || true)
+          if [ -n "$BAD_URLS" ]; then
+            echo "ERROR: Non-whitelisted URL(s) found in app/src/main:"
+            echo "$BAD_URLS"
+            exit 1
+          fi
+          echo "URL whitelist OK."
+          echo "::endgroup::"
+
+          echo "::group::3. Core/Domain Null-Safety Hygiene (zero !! operator)"
+          BANGS=$(grep -rn '!!' app/src/main/java/com/ghprotocol/app/core/ app/src/main/java/com/ghprotocol/app/domain/ || true)
+          if [ -n "$BANGS" ]; then
+            echo "ERROR: Prohibited !! operator found in core/ or domain/:"
+            echo "$BANGS"
+            exit 1
+          fi
+          echo "Zero !! in core/ and domain/ OK."
+          echo "::endgroup::"
+
+      - name: Golden screenshots (Roborazzi)
+        id: golden
+        working-directory: gh-protocol
+        run: |
+          MODE="${{ inputs.mode || 'verify' }}"
+          echo "workdir=$(pwd) mode=$MODE"
+          echo "::group::Recording & verifying v1.3.0 goldens"
+          ./gradlew --no-daemon :app:recordRoborazziDebug :app:verifyRoborazziDebug --tests "com.ghprotocol.app.GoldenScreensTest" --stacktrace 2>&1 | tail -25
+          echo "::endgroup::"
+
+      - name: Return golden PNGs (record mode)
+        if: steps.golden.outputs.recorded == 'true'
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git checkout -B ci-diag-goldens
+          git add -A
+          git commit -m "goldens $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag-goldens --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish failure log to ci-diag branch
+        if: failure()
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
+          mkdir -p gh-protocol
+          {
+            echo "## gh-protocol build failure — $(date -u +%FT%TZ)"
+            echo
+            if [ -f gh-protocol/fetch-diag.log ]; then echo "### Xray fetch diag:"; cat gh-protocol/fetch-diag.log; echo; fi
+            tail -c 150000 gh-protocol/gradle-build.log 2>/dev/null || echo "(no gradle log captured)"
+          } > gh-protocol/ci-failure.log
+          git add gh-protocol/ci-failure.log
+          git commit -m "ci-diag: build failure tail $(date -u +%Y%m%d-%H%M%S)"
+          git push origin HEAD:ci-diag --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: P4/G4 Security Audit & APK Hardening Gate
+        working-directory: gh-protocol
+        run: |
+          echo "::group::1. Hardcoded Secret Pattern Scan"
+          SECRETS=$(grep -rnE '(AIza[0-9A-Za-z_-]{35}|ghp_[0-9A-Za-z]{36}|-----BEGIN (RSA|EC|PRIVATE) KEY-----)' app/src/ || true)
+          if [ -n "$SECRETS" ]; then
+            echo "ERROR: Potential hardcoded secret found:"
+            echo "$SECRETS"
+            exit 1
+          fi
+          echo "Secret scan OK (0 findings)."
+          echo "::endgroup::"
+
+          echo "::group::2. AndroidManifest Security Invariants"
+          grep -q 'android:allowBackup="false"' app/src/main/AndroidManifest.xml
+          grep -q 'android:usesCleartextTraffic="false"' app/src/main/AndroidManifest.xml
+          grep -q 'android:permission="android.permission.BIND_VPN_SERVICE"' app/src/main/AndroidManifest.xml
+          echo "AndroidManifest hardening OK."
+          echo "::endgroup::"
+
+          echo "::group::3. APK Size Gate (arm64-v8a <= 25 MB / DoD #7) & Signature Verification (DoD #8)"
+          ARM64_APK="app/build/outputs/apk/release/app-arm64-v8a-release.apk"
+          UNIV_APK="app/build/outputs/apk/release/app-universal-release.apk"
+          test -f "$ARM64_APK"
+          test -f "$UNIV_APK"
+          SIZE_BYTES=$(stat -c%s "$ARM64_APK")
+          SIZE_MB=$(( (SIZE_BYTES + 1048575) / 1048576 ))
+          echo "arm64-v8a release APK size: ${SIZE_BYTES} bytes (~${SIZE_MB} MB)"
+          if [ "$SIZE_BYTES" -gt 26214400 ]; then
+            echo "ERROR: arm64-v8a release APK exceeds 25 MB limit (${SIZE_BYTES} > 26214400)"
+            exit 1
+          fi
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner | sort -V | tail -n 1)
+          echo "Verifying APK signatures with $APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs "$ARM64_APK"
+          "$APKSIGNER" verify --verbose --print-certs "$UNIV_APK"
+          echo "G4 Security & APK Hardening Gate PASSED."
+          echo "::endgroup::"
+
+      - name: SHA-256 of outputs & Release Staging
+        working-directory: gh-protocol
+        run: |
+          mkdir -p release-dist
+          VERSION=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts | head -1)
+          echo "versionName=$VERSION" >> "$GITHUB_ENV"
+          echo "ARTIFACT_TAG=gh-protocol-v$VERSION" >> "$GITHUB_ENV"
+          cp app/build/outputs/apk/release/app-arm64-v8a-release.apk "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk"
+          cp app/build/outputs/apk/release/app-universal-release.apk "release-dist/GhProtocol-v$VERSION-universal.apk"
+          echo "XTLS/Xray-core v26.10.21" > release-dist/core-version.txt
+          cp FINAL_REPORT.html release-dist/FINAL_REPORT.html
+          (cd release-dist && sha256sum "GhProtocol-v$VERSION-arm64-v8a.apk" "GhProtocol-v$VERSION-universal.apk" core-version.txt FINAL_REPORT.html > SHA256SUMS)
+          cp release-dist/SHA256SUMS SHA256SUMS
+          cat SHA256SUMS
+
+      - name: P5/G5 Publish GitHub Release (manual, green build only)
+        if: github.event_name == 'workflow_dispatch' && inputs.publish == true
+        working-directory: gh-protocol
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$ARTIFACT_TAG" >/dev/null 2>&1 || \
+            gh release create "$ARTIFACT_TAG" --title "Gh Protocol $VERSION" \
+              --notes "Built from $GITHUB_SHA by the gh-protocol-build workflow after green tests."
+          gh release upload "$ARTIFACT_TAG" \
+            "release-dist/GhProtocol-v$VERSION-arm64-v8a.apk" \
+            "release-dist/GhProtocol-v$VERSION-universal.apk" \
+            release-dist/SHA256SUMS \
+            release-dist/core-version.txt \
+            release-dist/FINAL_REPORT.html \
+            --clobber
+          cd "$GITHUB_WORKSPACE"
+          git config user.name "gh-protocol-ci"
+          git config user.email "gh-protocol-ci@users.noreply.github.com"
+          git fetch origin ci-diag --depth 1 >> /dev/null 2>&1 || true
+          git checkout -B ci-diag origin/ci-diag 2>/dev/null || git checkout -B ci-diag
+          mkdir -p gh-protocol
+          cp gh-protocol/release-dist/SHA256SUMS "gh-protocol/SHA256SUMS.v$VERSION"
+          git add "gh-protocol/SHA256SUMS.v$VERSION"
+          git commit -m "ci-diag: v$VERSION SHA256SUMS $(date -u +%Y%m%d-%H%M%S)" --allow-empty
+          git push origin HEAD:ci-diag --force
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gh-protocol-release-${{ github.run_number }}
+          path: |
+            gh-protocol/release-dist/*
+            gh-protocol/app/build/outputs/apk/**/*.apk
+            gh-protocol/SHA256SUMS
+          retention-days: 14

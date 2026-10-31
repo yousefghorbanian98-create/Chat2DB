@@ -1,0 +1,121 @@
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("io.github.takahirom.roborazzi")
+}
+
+android {
+    namespace = "com.ghprotocol.app"
+    compileSdk = 35
+
+    defaultConfig {
+        applicationId = "com.ghprotocol.app"
+        minSdk = 26
+        targetSdk = 35
+        versionCode = 5
+        versionName = "1.4.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = true
+        }
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.testLogging {
+                    // Requirement-3 evidence (effective fragA/fragB DNS plan) is printed from
+                    // ConfigPatcherTest; keep standard streams so it appears in the CI log.
+                    showStandardStreams = true
+                    events("failed")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
+            }
+        }
+    }
+
+    // Release signing: keystore arrives via CI (GitHub Secrets -> build/keystore/release.keystore).
+    // If the keystore is absent (local dev / secret missing), release falls back to debug signing
+    // so the build stays green; production releases are gated by G5 (DoD).
+    signingConfigs {
+        create("release") {
+            val ks = rootProject.file("build/keystore/release.keystore")
+            if (ks.exists()) {
+                storeFile = ks
+                storePassword = System.getenv("KEYSTORE_PASS") ?: ""
+                keyAlias = "ghprotocol"
+                keyPassword = System.getenv("KEYSTORE_PASS") ?: ""
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            val ks = rootProject.file("build/keystore/release.keystore")
+            signingConfig = if (ks.exists()) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
+
+    // Android 10+ W^X (b/112357170): files in the app data dir (app_data_file)
+    // cannot be exec'd for targetSdk > 28. Files in the read-only native lib
+    // dir (apk_data_file) CAN. Xray ships as jniLibs/<abi>/libxraycore.so
+    // (a real ELF executable with a .so name) => useLegacyPackaging=true makes
+    // the installer extract it to nativeLibraryDir where execve() is allowed.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+            keepDebugSymbols += "**/libxraycore.so"
+        }
+    }
+}
+
+dependencies {
+    implementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("com.google.zxing:core:3.5.3")
+    implementation("androidx.compose.material:material-icons-core")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.49.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.49.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-junit-rule:1.49.0")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.test:core:1.6.1")
+}
+
+roborazzi {
+    outputDir.set(file("src/test/snapshots"))
+}
