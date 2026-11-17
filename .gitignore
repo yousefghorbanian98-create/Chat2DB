@@ -90,3 +90,6 @@ image-search/
 
 # Master Loop runtime state (regenerated on every loop run)
 chat2db-community-client/scripts/master-loop/loop-state.json
+
+# Local third-party model source clones and weights
+/.local/
