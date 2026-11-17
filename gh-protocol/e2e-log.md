@@ -1,9 +1,9 @@
-## gh-protocol E2E log — 2026-10-31T09:00:42Z
+## gh-protocol E2E log — 2026-11-17T14:07:51Z
 
 ### pre-flight-diag.log (KVM/SDK)
-== pre-flight 2026-10-31T08:58:28Z ==
+== pre-flight 2026-11-17T13:56:40Z ==
 runner: x86_64, nproc=4, mem=15G
-kvm: crw-rw---- 1 root kvm 10, 232 Oct 31 08:56 /dev/kvm
+kvm: crw-rw---- 1 root kvm 10, 232 Nov 17 13:53 /dev/kvm
 ANDROID_HOME=/usr/local/lib/android/sdk
 dl.google.com repo xml: HTTP 200
 sdk pre-install OK: 4.2G system-images
@@ -12,10 +12,10 @@ pre-flight OK
 
 ### avd-create.log (tail)
 total 16
-drwxr-xr-x 3 runner runner 4096 Oct 31 08:59 .
-drwxr-xr-x 3 runner runner 4096 Oct 31 08:59 ..
-drwxr-xr-x 3 runner runner 4096 Oct 31 08:59 gh_test.avd
--rw-r--r-- 1 runner runner  115 Oct 31 08:59 gh_test.ini
+drwxr-xr-x 3 runner runner 4096 Nov 17 13:57 .
+drwxr-xr-x 3 runner runner 4096 Nov 17 13:57 ..
+drwxr-xr-x 3 runner runner 4096 Nov 17 13:57 gh_test.avd
+-rw-r--r-- 1 runner runner  115 Nov 17 13:57 gh_test.ini
 
 ### emulator-console.log (tail)
 INFO         | Android emulator version 37.2.13.0 (build_id 16740729) (CL:N/A)
@@ -50,7 +50,7 @@ USER_WARNING | Suggested minimum system RAM to run avd 'gh_test' is 16384 MiB (a
 WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
 WARNING      | Failed to open /root/.android/adbkey
 WARNING      | adbkey generation failed
-INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.13.db, detection is enabled for process: 2993
+INFO         | Storing crashdata in: /tmp/android-root/emu-crash-37.2.13.db, detection is enabled for process: 3010
 INFO         | Initializing gfxstream backend
 INFO         | startOpenglesRendererImpl: gpu info
 INFO         | 
@@ -120,7 +120,7 @@ INFO         |   androidboot.vbmeta.digest=451e57ed688ff746d2c636d52169ade253e2b
 INFO         |   androidboot.vbmeta.hash_alg=sha256
 INFO         |   androidboot.vbmeta.size=6656
 INFO         |   androidboot.veritymode=enforcing
-WARNING: cannnot unmap ptr 0x7f7b5fa01000 as it is in the protected range from 0x7f7a5fa00000 to 0x7f7b5fc00000
+WARNING: cannnot unmap ptr 0x761eb1a01000 as it is in the protected range from 0x761db1a00000 to 0x761eb1c00000
 pc_memory_init: above 4g size: 40000000
 INFO         | Monitoring duration of emulator setup.
 INFO         | Successfully initialized netsim WiFi
@@ -131,16 +131,22 @@ INFO         | emulatorSetupEnvironment: Environment scene is not required
 USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
 WARNING      | Failed to process .ini file /root/.android/emu-update-last-check.ini for reading.
-INFO         | Boot completed in 39400 ms
+INFO         | Boot completed in 28827 ms
 INFO         | Increasing screen off timeout, logcat buffer size to 2M.
-ERROR        | Failed to find ColorBuffer: 116
-ERROR        | Failed to bind to texture: invalid color buffer.
-INFO         | Wait for emulator (pid 2993) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds)
-
-USER_INFO    | Snapshots have been disabled by the user, save request is ignored.
-INFO         | Saving snapshot 'default_boot' took 0 ms
 
 ### gradle-build.log (tail)
+Downloading https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+.............10%.............20%.............30%.............40%.............50%.............60%.............70%.............80%.............90%.............100%
+
+Welcome to Gradle 8.10.2!
+
+Here are the highlights of this release:
+ - Support for Java 23
+ - Faster configuration cache
+ - Better configuration cache reports
+
+For more details see https://docs.gradle.org/8.10.2/release-notes.html
+
 To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
 Daemon will be stopped at the end of the build 
 Calculating task graph as no cached configuration is available for tasks: assembleDebug
@@ -148,39 +154,39 @@ Calculating task graph as no cached configuration is available for tasks: assemb
 > Task :app:preBuild UP-TO-DATE
 > Task :app:preDebugBuild UP-TO-DATE
 > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:generateDebugResValues FROM-CACHE
+> Task :app:generateDebugResValues
 > Task :app:createDebugCompatibleScreenManifests
 > Task :app:generateDebugBuildConfig
-> Task :app:generateDebugResources FROM-CACHE
-> Task :app:extractDeepLinksDebug FROM-CACHE
-> Task :app:packageDebugResources FROM-CACHE
-> Task :app:parseDebugLocalResources FROM-CACHE
+> Task :app:extractDeepLinksDebug
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
 > Task :app:mapDebugSourceSetPaths
-> Task :app:javaPreCompileDebug FROM-CACHE
 > Task :app:checkDebugAarMetadata
-> Task :app:desugarDebugFileDependencies FROM-CACHE
+> Task :app:javaPreCompileDebug
+> Task :app:parseDebugLocalResources
 > Task :app:mergeDebugShaders
+> Task :app:desugarDebugFileDependencies
 > Task :app:compileDebugShaders NO-SOURCE
 > Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugResources FROM-CACHE
 > Task :app:processDebugMainManifest
 > Task :app:processDebugManifest
+> Task :app:processDebugManifestForPackage
 > Task :app:mergeDebugAssets
 > Task :app:checkDebugDuplicateClasses
-> Task :app:compressDebugAssets FROM-CACHE
-> Task :app:mergeLibDexDebug FROM-CACHE
+> Task :app:mergeDebugResources
+> Task :app:compressDebugAssets
 > Task :app:mergeDebugJniLibFolders
-> Task :app:processDebugManifestForPackage
-> Task :app:mergeExtDexDebug FROM-CACHE
+> Task :app:mergeLibDexDebug
+> Task :app:validateSigningDebug
 > Task :app:writeDebugAppMetadata
-> Task :app:mergeDebugNativeLibs
 > Task :app:writeDebugSigningConfigVersions
+> Task :app:mergeDebugNativeLibs
+> Task :app:processDebugResources
 
 > Task :app:stripDebugDebugSymbols
 Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so.
 
-> Task :app:validateSigningDebug
-> Task :app:processDebugResources
+> Task :app:mergeExtDexDebug
 
 > Task :app:compileDebugKotlin
 w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/ghprotocol/app/MainActivity.kt:77:13 'fun updateConfiguration(p0: Configuration!, p1: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
@@ -190,15 +196,15 @@ w: file:///home/runner/work/Chat2DB/Chat2DB/gh-protocol/app/src/main/java/com/gh
 > Task :app:mergeDebugJavaResource
 > Task :app:compileDebugJavaWithJavac
 > Task :app:dexBuilderDebug
-> Task :app:mergeDebugGlobalSynthetics FROM-CACHE
+> Task :app:mergeDebugGlobalSynthetics
 > Task :app:mergeProjectDexDebug
 > Task :app:packageDebug
 > Task :app:assembleDebug
 > Task :app:createDebugApkListingFileRedirect
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1793437054330.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1794923674002.json
 
-BUILD SUCCESSFUL in 59s
-37 actionable tasks: 25 executed, 12 from cache
+BUILD SUCCESSFUL in 2m 14s
+37 actionable tasks: 37 executed
 Configuration cache entry stored.
 
 ### e2e.log
@@ -212,477 +218,576 @@ emulator-5554	device
 Performing Streamed Install
 Success
 == probe emulator reachability to sub host (raw.githubusercontent.com:443, up to 20s) ==
-emulator can reach raw.githubusercontent.com after ~4s
+emulator can reach raw.githubusercontent.com after ~8s
 SUBMODE=live — app will fetch the subscription itself (full E2E)
 == launch app (am start, up to 3 tries) ==
 Starting: Intent { cmp=com.ghprotocol.app/.MainActivity }
-app up (try 1, pid 3254)
+app up (try 1, pid 3318)
 == trigger connect via deep link ==
 Starting: Intent { act=android.intent.action.VIEW dat=ghprotocol://connect/... }
 == wait for tunnel; tap VPN consent when it appears (up to 6 min) ==
-tunnel up after ~4s (xray pid + :10808 listener)
-== wait for VpnService establish (consent result) ==
-tapped VPN consent at: 894 1519 (iter vpn-1)
-vpn established after ~6s
-18: tun0: <POINTOPOINT,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UNKNOWN group default qlen 500
-    link/none 
-    inet 10.8.0.2/24 scope global tun0
-       valid_lft forever preferred_lft forever
-    inet6 fd00:1::2/64 scope global 
-       valid_lft forever preferred_lft forever
-    inet6 fe80::b26f:4617:a04a:df10/64 scope link stable-privacy 
-       valid_lft forever preferred_lft forever
-== DNS resolution THROUGH the tunnel (as app uid; toybox has no nslookup) ==
-dns through tunnel: OK
-Ping github.com (140.82.113.4): 56(84) bytes.
+USER           PID  PPID        VSZ    RSS WCHAN            ADDR S NAME                       
+u0_a192       3318   335   13950184 183976 0                   0 S com.ghprotocol.app
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State      
+tcp        0      0 127.0.0.1:8872          0.0.0.0:*               LISTEN     
+tcp      130      0 10.0.2.16:44048         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:43976         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:44044         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:44042         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:44040         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:44024         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:47116         142.251.157.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:49582         172.217.115.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:44008         172.217.117.4:443       CLOSE_WAIT 
+tcp      130      0 10.0.2.16:42784         172.217.113.4:443       CLOSE_WAIT 
+tcp        0      0 10.0.2.16:45118         142.251.157.119:443     CLOSE_WAIT 
+tcp6       0      0 ::ffff:127.0.0.1:37763  [::]:*                  LISTEN     
+tcp6       0      0 [::]:5555               [::]:*                  LISTEN     
+tcp6       0      0 ::ffff:127.0.0.1:40797  [::]:*                  LISTEN     
+tcp6       0      0 ::ffff:10.0.2.16:57650  ::ffff:74.125.137.:5228 ESTABLISHED
+tcp6       1      0 ::ffff:10.0.2.16:58640  ::ffff:142.251.218.:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.16:57710  ::ffff:142.251.214.:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.16:50734  ::ffff:172.217.118.:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.16:46868  ::ffff:142.251.156.:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.16:50744  ::ffff:172.217.118.:443 CLOSE_WAIT 
+tcp6       1      0 ::ffff:10.0.2.16:45562  ::ffff:104.154.125.:443 CLOSE_WAIT 
+ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)
+Display #0 (activities from top to bottom):
+  * Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+    mLastPausedActivity: ActivityRecord{e06bdb1 u0 com.ghprotocol.app/.MainActivity t8}
+    mLastNonFullscreenBounds=Rect(291, 691 - 790, 1771)
+    isSleeping=false
+    topResumedActivity=ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+    * Hist  #1: ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+      packageName=com.ghprotocol.app processName=com.ghprotocol.app
+      launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
+      app=ProcessRecord{e51d46 3318:com.ghprotocol.app/u0a192}
+      Intent { act=android.intent.action.VIEW dat=ghprotocol://connect flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
+      rootOfTask=false task=Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+      taskAffinity=10192:com.ghprotocol.app
+      mActivityComponent=com.ghprotocol.app/.MainActivity
+      baseDir=/data/app/~~HC2R838sa3CulBQCEhUP6w==/com.ghprotocol.app-qHumodi3J291cfvOn-OPFA==/base.apk
+      dataDir=/data/user/0/com.ghprotocol.app
+      stateNotNeeded=false componentSpecified=false mActivityType=standard
+      compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
+      mLastReportedConfigurations:
+        mGlobalConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.36 fontWeightAdjustment=0}
+        mOverrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.1 fontWeightAdjustment=0}
+      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.1 fontWeightAdjustment=0}
+      taskDescription: label="null" icon=null iconResource=/0 iconFilename=null primaryColor=ff212121
+        backgroundColor=ff303030 statusBarColor=0 navigationBarColor=0
+--
+      mActivityType=standard
+      mImeInsetsFrozenUntilStartInput=false
+      windows=[Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windowType=2 waitingToShow=true
+      mOccludesParent=true
+      overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+      requestedOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+      mVisibleRequested=true mVisible=true mClientVisible=true reportedDrawn=true reportedVisible=true
+      mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+      startingData=null firstWindowDrawn=true mIsExiting=false
+      nowVisible=true lastVisibleTime=-9m3s972ms
+--
+      mCameraCompatControlState=hidden
+      mCameraCompatControlEnabled=true
+    * Hist  #0: ActivityRecord{e06bdb1 u0 com.ghprotocol.app/.MainActivity t8}
+      packageName=com.ghprotocol.app processName=com.ghprotocol.app
+      launchedFromUid=2000 launchedFromPackage=com.android.shell launchedFromFeature=null userId=0
+      app=ProcessRecord{e51d46 3318:com.ghprotocol.app/u0a192}
+      Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity }
+      rootOfTask=true task=Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+      taskAffinity=10192:com.ghprotocol.app
+      mActivityComponent=com.ghprotocol.app/.MainActivity
+      baseDir=/data/app/~~HC2R838sa3CulBQCEhUP6w==/com.ghprotocol.app-qHumodi3J291cfvOn-OPFA==/base.apk
+      dataDir=/data/user/0/com.ghprotocol.app
+      stateNotNeeded=false componentSpecified=false mActivityType=standard
+      compat={420dpi} labelRes=0x7f0a000f icon=0x7f090000 theme=0x7f0b000a
+      mLastReportedConfigurations:
+        mGlobalConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.36 fontWeightAdjustment=0}
+        mOverrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.2 fontWeightAdjustment=0}
+      CurrentConfiguration={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=standard mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.2 fontWeightAdjustment=0}
+      RequestedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=standard mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
+      ResolvedOverrideConfiguration={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=undefined mDisplayWindowingMode=undefined mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} s.2 ?fontWeightAdjustment}
+--
+      mActivityType=standard
+      mImeInsetsFrozenUntilStartInput=true
+      windows=[Window{57f7e67 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}]
+      windowType=2
+      mOccludesParent=true
+      overrideOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+      requestedOrientation=SCREEN_ORIENTATION_UNSPECIFIED
+      mVisibleRequested=false mVisible=false mClientVisible=false reportedDrawn=false reportedVisible=false
+      mAppStopped=true
+      mNumInterestingWindows=1 mNumDrawnWindows=1 allDrawn=true lastAllDrawn=true)
+      nowVisible=false lastVisibleTime=-9m9s732ms
+--
 
---- 140.82.113.4 ping statistics ---
-1 packets transmitted, 0 received, 100% packet loss
-== TCP through the tunnel (as app uid — data-path proof; toybox nc has no -z) ==
-nc 1.1.1.1:443 -> rc=0
-== in-tunnel payload self-test (the only accepted proof, requirement 5) ==
-Starting service: Intent { act=com.ghprotocol.app.action.SELF_TEST cmp=com.ghprotocol.app/.core.VpnTunnelService }
-Error: Requires permission not exported from uid 10192
-relay self-test PASS (real remote payload through the relay)
-10-31 09:00:36.063  3254  4486 D GhDiag  : relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
-10-31 09:00:36.070  3254  4486 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=197 firstByteMs=301 checksums=0
-== relay diagnostics (GhVpnTunnel + GhDiag) ==
-10-31 09:00:32.336  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=334
-10-31 09:00:32.395  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.503  3254  4713 D GhDiag  : flow_established 10ms
-10-31 09:00:32.540  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=94
-10-31 09:00:32.694  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.761  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.778  3254  4716 D GhDiag  : flow_established 16ms
-10-31 09:00:32.835  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.846  3254  4719 D GhDiag  : flow_established 56ms
-10-31 09:00:32.919  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=364
-10-31 09:00:33.096  3254  4721 D GhDiag  : flow_established 96ms
-10-31 09:00:34.347  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.351  3254  4742 D GhDiag  : flow_established 3ms
-10-31 09:00:34.669  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:34.684  3254  4752 D GhDiag  : flow_established 6ms
-10-31 09:00:34.791  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=285
-10-31 09:00:34.890  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=97
-10-31 09:00:34.922  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.965  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:35.039  3254  4756 D GhDiag  : flow_established 26ms
-10-31 09:00:35.042  3254  4757 D GhDiag  : flow_established 26ms
-10-31 09:00:36.063  3254  4486 D GhDiag  : ipv6_egress_unproven reason=no_payload_via_socks note=xray_dials_outside_the_tunnel_so_v6_needs_device_v6_egress action=reject_v6_flows_fast
-10-31 09:00:36.063  3254  4486 D GhDiag  : relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
-10-31 09:00:36.070  3254  4486 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=197 firstByteMs=301 checksums=0
-10-31 09:00:36.198  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=166
-10-31 09:00:36.543  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=331
-10-31 09:00:36.578  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:36.689  3254  4831 D GhDiag  : flow_established 57ms
-10-31 09:00:36.781  3254  4484 D GhDiag  : stats t=10s packets=216 tcp=166 dns53=20 otherUdp=10 activeTcp=17 flowsOpened=19 flowsEstablished=19 connectFailures=0 retransmits=0 appUp=61156 appDown=27482 probeUp=91 probeDown=402 probeFlows=0 dnsOk=18 dnsFail=0 state=VERIFIED ipv6=route_only
-10-31 09:00:37.020  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=476
-10-31 09:00:37.163  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:55398->2001:4860:…:443
-10-31 09:00:37.181  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:55398->2001:4860:4841:400:::443
-10-31 09:00:37.182  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:45964->2001:4860:…:443
-10-31 09:00:37.183  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:45964->2001:4860:4846:400:::443
-10-31 09:00:37.183  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:36924->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:36924->2001:4860:4843:400:::443
-10-31 09:00:37.184  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:37054->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:37054->2001:4860:4840:400:::443
-10-31 09:00:37.201  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:46696->2001:4860:…:443
-10-31 09:00:37.201  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:46696->2001:4860:4844:400:::443
-10-31 09:00:37.202  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:41824->2001:4860:…:443
-10-31 09:00:37.202  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:41824->2001:4860:4845:400:::443
-10-31 09:00:37.204  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:54288->2001:4860:…:443
-10-31 09:00:37.204  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:54288->2001:4860:4847:400:::443
-10-31 09:00:37.221  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:53836->2001:4860:…:443
-10-31 09:00:37.221  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:53836->2001:4860:4842:400:::443
-10-31 09:00:37.231  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:37.282  3254  4860 D GhDiag  : flow_established 23ms
-10-31 09:00:37.425  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=395
-10-31 09:00:37.592  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-== real app traffic through the tunnel (requirement 5) ==
-app traffic: appUp=61156 bytes
-10-31 09:00:36.781  3254  4484 D GhDiag  : stats t=10s packets=216 tcp=166 dns53=20 otherUdp=10 activeTcp=17 flowsOpened=19 flowsEstablished=19 connectFailures=0 retransmits=0 appUp=61156 appDown=27482 probeUp=91 probeDown=402 probeFlows=0 dnsOk=18 dnsFail=0 state=VERIFIED ipv6=route_only
-tunnel-local destinations are reset locally (no wasted upstream dial)
-IPv6: route_only (tunnelled, payload NOT proven — no protection claimed)
-10-31 09:00:36.063  3254  4486 D GhDiag  : relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
-== HTTPS probe through tunnel (best-effort) ===
-no curl on emulator — skipping HTTPS probe (TCP + DNS are the core signal)
-== Xray core stderr (from app filesDir) ==
-== logcat sanity (crashes + GhVpnTunnel) ==
+  Resumed activities in task display areas (from top to bottom):
+    Resumed: ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+
+  ResumedActivity: ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+
+ActivityTaskSupervisor state:
+  topDisplayFocusedRootTask=Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+  Display: mDisplayId=0 (organized)
+    init=1080x2400 420dpi mMinSizeOfResizeableTaskDp=220 cur=1080x2400 app=1080x2400 rng=1080x1017-2400x2337
+    deferred=false mLayoutNeeded=false mTouchExcludeRegion=SkRegion((0,0,1080,2400))
+
+  mLastOrientationSource=WindowedMagnification:0:31@119971744
+  deepestLastOrientationSource=ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+  overrideConfig={1.0 310mcc260mnc [en_US] ldltr sw411dp w411dp h890dp 420dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2400) mAppBounds=Rect(0, 0 - 1080, 2400) mMaxBounds=Rect(0, 0 - 1080, 2400) mDisplayRotation=ROTATION_0 mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} as.2 s.36 fontWeightAdjustment=0}
+  mLayoutSeq=87
+  mCurrentFocus=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+  mFocusedApp=ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+
+  mHoldScreenWindow=null
+  mObscuringWindow=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+  mLastWakeLockHoldingWindow=null
+  mLastWakeLockObscuringWindow=null
+
+  displayId=0
+  mWallpaperTarget=null
+  mLastWallpaperX=0.0 mLastWallpaperY=0.5
+
+  mSystemGestureExclusion=SkRegion()
+--
+    TaskDisplayArea DefaultTaskDisplayArea
+      overrideConfig={0.0 ?mcc0mnc ?localeList ?layoutDir ?swdp ?wdp ?hdp ?density ?lsize ?long ?ldr ?wideColorGamut ?orien ?uimode ?night ?touch ?keyb/?/? ?nav/? winConfig={ mBounds=Rect(0, 0 - 0, 0) mAppBounds=null mMaxBounds=Rect(0, 0 - 0, 0) mDisplayRotation=undefined mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=undefined} ?fontWeightAdjustment}
+      mPreferredTopFocusableRootTask=Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+      mLastFocusedRootTask=Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+      Application tokens in top down Z order:
+      * Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app U=0 visible=true visibleRequested=true mode=fullscreen translucent=false sz=2}
+        bounds=[0,0][1080,2400]
+        * ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}
+        * ActivityRecord{e06bdb1 u0 com.ghprotocol.app/.MainActivity t8}
+      * Task{1f9cf1e #1 type=home U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+        bounds=[0,0][1080,2400]
+        * Task{a17b5d2 #7 type=home I=com.google.android.apps.nexuslauncher/.NexusLauncherActivity U=0 rootTaskId=1 visible=false visibleRequested=false mode=fullscreen translucent=true sz=1}
+          bounds=[0,0][1080,2400]
+          * ActivityRecord{829f107 u0 com.google.android.apps.nexuslauncher/.NexusLauncherActivity t7}
+      * Task{418d474 #2 type=undefined U=0 visible=false visibleRequested=false mode=fullscreen translucent=true sz=2}
+        bounds=[0,0][1080,2400]
+        * Task{b410212 #4 type=undefined U=0 rootTaskId=2 visible=false visibleRequested=false mode=multi-window translucent=true sz=0}
+--
+    isKeyguardShowing=false
+    mTopGestureHost=Window{2bf6761 u0 StatusBar}
+    mFocusedWindow=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mTopFullscreenOpaqueWindowState=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mSystemBarColorApps={ActivityRecord{404eb72 u0 com.ghprotocol.app/.MainActivity t8}}
+    mLastStatusBarAppearanceRegions=
+      AppearanceRegion{LIGHT_STATUS_BARS bounds=[0,0][1080,2400]}
+    mLastLetterboxDetails=
+    mStatusBarBackgroundWindows=
+      Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+    mTopIsFullscreen=false
+    mForceShowNavigationBarEnabled=false mAllowLockscreenWhenOn=false
+    mRemoteInsetsControllerControlsSystemBars=false
+    mDecorInsetsInfo:
+      ROTATION_0={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][1080,2400], configFrame=[0,63][1080,2400]}
+      ROTATION_90={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][2400,1080], configFrame=[0,63][2400,1080]}
+      ROTATION_180={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][1080,2400], configFrame=[0,63][1080,2400]}
+      ROTATION_270={nonDecorInsets=[0,0][0,0], configInsets=[0,63][0,0], nonDecorFrame=[0,0][2400,1080], configFrame=[0,63][2400,1080]}
+--
+        InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= insetsRoundedCornerFrame=false
+    Control map:
+      Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}:
+        InsetsSourceControl: {3 mType=ime mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0}}
+        InsetsSourceControl: {83210000 mType=statusBars initiallyVisible mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=63, right=0, bottom=0}}
+    InsetsSourceProviders:
+      ImeInsetsSourceProvider
+        mSource=InsetsSource id=3 type=ime frame=[0,0][0,0] visible=false flags= insetsRoundedCornerFrame=false
+        mSourceFrame=Rect(0, 2400 - 1080, 2400)
+        mControl=InsetsSourceControl mId=3 mType=ime mLeash=Surface(name=Surface(name=cf2e7d4 InputMethod)/@0xf1ab472 - animation-leash of insets_animation)/@0x17c3e28 mInitiallyVisible=false mSurfacePosition=Point(0, 0) mInsetsHint=Insets{left=0, top=0, right=0, bottom=0} mSkipAnimationOnce=false
+        mIsLeashReadyForDispatching=true
+        mWindowContainer=Window{cf2e7d4 u0 InputMethod}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=cf2e7d4 InputMethod)/@0xf1ab472 - animation-leash of insets_animation)/@0x17c3e28
+        mControlTarget=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+        mImeShowing=false
+      InsetsSourceProvider
+        mSource=InsetsSource id=83210006 type=tappableElement frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
+        mSourceFrame=Rect(0, 0 - 1080, 63)
+        mIsLeashReadyForDispatching=true
+        mWindowContainer=Window{2bf6761 u0 StatusBar}
+      InsetsSourceProvider
+        mSource=InsetsSource id=83210005 type=mandatorySystemGestures frame=[0,0][1080,63] visible=true flags= insetsRoundedCornerFrame=false
+--
+        mWindowContainer=Window{2bf6761 u0 StatusBar}
+        mAdapter=ControlAdapter mCapturedLeash=Surface(name=Surface(name=2bf6761 StatusBar)/@0x3aa189d - animation-leash of insets_animation)/@0x7c6d741
+        mControlTarget=Window{e9616e u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}
+
+  KeyguardController:
+    mKeyguardShowing=false
+    mAodShowing=false
+    mKeyguardGoingAway=false
+   KeyguardShowing=false AodShowing=false KeyguardGoingAway=false DismissalRequested=false  Occluded=false DismissingKeyguardActivity=null TurnScreenOnActivity=null at display=0
+    mDismissalRequested=false
+
+--
+        (multi-window) Task{505fd9d #3 type=undefined}
+        (multi-window) Task{b410212 #4 type=undefined}
+        (fullscreen) Task{e90e296 #8 type=standard A=10192:com.ghprotocol.app}
+
+  VisibleActivityProcess:[ ProcessRecord{e51d46 3318:com.ghprotocol.app/u0a192}]
+  NumNonAppVisibleWindowUidMap:[ 10168:1]
+app filesDir/xray (geo data):
+total 6212
+drwx------ 2 u0_a192 u0_a192    4096 2026-11-17 13:58 .
+drwxrwx--x 3 u0_a192 u0_a192    4096 2026-11-17 13:58 ..
+-rw------- 1 u0_a192 u0_a192 3977011 2026-11-17 13:58 geoip.dat
+-rw------- 1 u0_a192 u0_a192 2358471 2026-11-17 13:58 geosite.dat
+nativeLibraryDir (bundled core must be here, exec_allowed):
+xray-err.log:
+xray-out.log (Xray writes its logs to stdout):
+runtime config (first 1400 bytes):
+core exit line:
+GhDiag (connect-flow trace):
 --------- beginning of main
-10-31 09:00:17.562  3254  3254 D GhDiag  : connect: tap -> CHECKING (have sub=true)
-10-31 09:00:17.568  3254  3254 D GhDiag  : connect: sub ok entries=2 -> PREPARING (core extract+version)
-10-31 09:00:17.935  3254  3254 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
-10-31 09:00:18.088  3254  3254 I GhDiag  : effective_dns active Serverless-v52-fragA :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-31 09:00:18.088  3254  3254 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-31 09:00:18.088  3254  3254 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-31 09:00:18.247  3254  3254 D GhDiag  : connect: core.start=true 
-10-31 09:00:26.733  3254  3254 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 state=route_only dns=10.8.0.1 mtu=1500
-10-31 09:00:26.759  3254  4486 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
-10-31 09:00:26.761  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
-10-31 09:00:26.761  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
-10-31 09:00:26.762  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:26.950  3254  4489 D GhDiag  : flow_established 59ms
-10-31 09:00:27.060  3254  4486 D GhDiag  : flow_open v6 dst=2606:4700:…:80 probe=false
-10-31 09:00:27.081  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=112
-10-31 09:00:27.082  3254  4506 D GhDiag  : flow_established 4ms
-10-31 09:00:27.088  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=108
-10-31 09:00:27.088  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=108
-10-31 09:00:27.092  3254  4485 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
-10-31 09:00:27.093  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:39502->fd00:1:…:853
-10-31 09:00:27.097  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:39502->fd00:1::1:853
-10-31 09:00:27.111  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
-10-31 09:00:27.112  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
-10-31 09:00:27.132  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-31 09:00:27.140  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-31 09:00:27.141  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-31 09:00:27.150  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-31 09:00:27.153  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:27.303  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=179
-10-31 09:00:27.304  3254  4514 D GhDiag  : dns_reply 193ms path=doh:cloudflare-dns.com bytes=61
-10-31 09:00:27.466  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=162
-10-31 09:00:27.477  3254  4514 D GhDiag  : dns_reply 365ms path=doh:cloudflare-dns.com bytes=49
-10-31 09:00:27.557  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=60
-10-31 09:00:27.567  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:27.571  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=60
-10-31 09:00:27.679  3254  4485 D GhDiag  : flow_open v4 dst=192.178.x.x:443 probe=false
-10-31 09:00:27.698  3254  4485 D GhDiag  : tun v4 proto=1 dst=172.217.x.x:0 len=28
-10-31 09:00:27.734  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.735  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=557
-10-31 09:00:27.736  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:27.736  3254  4527 D GhDiag  : flow_established 130ms
-10-31 09:00:27.736  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=242
-10-31 09:00:27.740  3254  4514 D GhDiag  : dns_reply 608ms path=doh:cloudflare-dns.com bytes=177
-10-31 09:00:27.778  3254  4485 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-31 09:00:27.780  3254  4485 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-31 09:00:27.817  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.820  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=68
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=68
-10-31 09:00:27.830  3254  4529 D GhDiag  : flow_established 40ms
-10-31 09:00:27.831  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=40
-10-31 09:00:27.831  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=297
-10-31 09:00:27.929  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=40
-10-31 09:00:27.977  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=214
-10-31 09:00:27.979  3254  4514 D GhDiag  : dns_reply 838ms path=doh:cloudflare-dns.com bytes=273
-10-31 09:00:27.988  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.0.x.x:57822->10.8.x.x:853
-10-31 09:00:27.989  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.0.2.16:57822->10.8.0.1:853
-10-31 09:00:28.023  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:39518->fd00:1:…:853
-10-31 09:00:28.027  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:39518->fd00:1::1:853
-10-31 09:00:28.027  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.8.x.x:38162->10.8.x.x:853
-10-31 09:00:28.027  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.8.0.2:38162->10.8.0.1:853
-10-31 09:00:28.089  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:28.119  3254  4509 W GhDiag  : relay_warning stage=relay_reset detail=upstream_read_error:SocketException fd00:1::99:41001->2606:4700:4700::1111:80
-10-31 09:00:28.122  3254  4509 D GhDiag  : flow_closed dst=fd00:1:…:41001->2606:4700:…:80 reason=upstream_read_error:SocketException up=91 down=0 ms=1062 probe=false
-10-31 09:00:28.199  3254  4543 D GhDiag  : flow_established 6ms
-10-31 09:00:28.332  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=352
-10-31 09:00:28.537  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=201
-10-31 09:00:28.687  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=128
-10-31 09:00:28.999  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=306
-10-31 09:00:29.013  3254  4485 D GhDiag  : flow_open v4 dst=34.3.x.x:443 probe=false
-10-31 09:00:29.017  3254  4569 D GhDiag  : flow_established 4ms
-10-31 09:00:30.139  3254  4485 D GhDiag  : flow_open v4 dst=192.178.x.x:443 probe=false
-10-31 09:00:30.163  3254  4639 D GhDiag  : flow_established 4ms
-10-31 09:00:30.666  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=427
-10-31 09:00:31.309  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=552
-10-31 09:00:31.323  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.482  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.486  3254  4670 D GhDiag  : flow_established 118ms
-10-31 09:00:31.593  3254  4672 D GhDiag  : flow_established 21ms
-10-31 09:00:31.710  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.732  3254  4679 D GhDiag  : flow_established 5ms
-10-31 09:00:31.781  3254  4484 D GhDiag  : stats t=5s packets=136 tcp=104 dns53=10 otherUdp=7 activeTcp=8 flowsOpened=10 flowsEstablished=10 connectFailures=0 retransmits=0 appUp=53182 appDown=26146 probeUp=91 probeDown=402 probeFlows=1 dnsOk=10 dnsFail=0 state=CORE_READY ipv6=route_only
-10-31 09:00:31.982  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=127
-10-31 09:00:32.148  3254  4488 D GhDiag  : flow_closed dst=10.8.x.x:41000->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5389 probe=true
-10-31 09:00:32.336  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=334
-10-31 09:00:32.395  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.503  3254  4713 D GhDiag  : flow_established 10ms
-10-31 09:00:32.540  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=94
-10-31 09:00:32.694  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.761  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.778  3254  4716 D GhDiag  : flow_established 16ms
-10-31 09:00:32.835  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.846  3254  4719 D GhDiag  : flow_established 56ms
-10-31 09:00:32.919  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=364
-10-31 09:00:33.096  3254  4721 D GhDiag  : flow_established 96ms
-10-31 09:00:34.347  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.351  3254  4742 D GhDiag  : flow_established 3ms
-10-31 09:00:34.669  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:34.684  3254  4752 D GhDiag  : flow_established 6ms
-10-31 09:00:34.791  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=285
-10-31 09:00:34.890  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=97
-10-31 09:00:34.922  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.965  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:35.039  3254  4756 D GhDiag  : flow_established 26ms
-10-31 09:00:35.042  3254  4757 D GhDiag  : flow_established 26ms
-10-31 09:00:36.063  3254  4486 D GhDiag  : ipv6_egress_unproven reason=no_payload_via_socks note=xray_dials_outside_the_tunnel_so_v6_needs_device_v6_egress action=reject_v6_flows_fast
-10-31 09:00:36.063  3254  4486 D GhDiag  : relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
-10-31 09:00:36.070  3254  4486 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=197 firstByteMs=301 checksums=0
-10-31 09:00:36.198  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=166
-10-31 09:00:36.543  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=331
-10-31 09:00:36.578  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:36.689  3254  4831 D GhDiag  : flow_established 57ms
-10-31 09:00:36.781  3254  4484 D GhDiag  : stats t=10s packets=216 tcp=166 dns53=20 otherUdp=10 activeTcp=17 flowsOpened=19 flowsEstablished=19 connectFailures=0 retransmits=0 appUp=61156 appDown=27482 probeUp=91 probeDown=402 probeFlows=0 dnsOk=18 dnsFail=0 state=VERIFIED ipv6=route_only
-10-31 09:00:37.020  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=476
-10-31 09:00:37.163  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:55398->2001:4860:…:443
-10-31 09:00:37.181  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:55398->2001:4860:4841:400:::443
-10-31 09:00:37.182  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:45964->2001:4860:…:443
-10-31 09:00:37.183  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:45964->2001:4860:4846:400:::443
-10-31 09:00:37.183  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:36924->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:36924->2001:4860:4843:400:::443
-10-31 09:00:37.184  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:37054->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:37054->2001:4860:4840:400:::443
-10-31 09:00:37.201  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:46696->2001:4860:…:443
-10-31 09:00:37.201  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:46696->2001:4860:4844:400:::443
-10-31 09:00:37.202  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:41824->2001:4860:…:443
-10-31 09:00:37.202  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:41824->2001:4860:4845:400:::443
-10-31 09:00:37.204  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:54288->2001:4860:…:443
-10-31 09:00:37.204  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:54288->2001:4860:4847:400:::443
-10-31 09:00:37.221  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:53836->2001:4860:…:443
-10-31 09:00:37.221  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:53836->2001:4860:4842:400:::443
-10-31 09:00:37.231  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:37.282  3254  4860 D GhDiag  : flow_established 23ms
-10-31 09:00:37.425  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=395
-10-31 09:00:37.592  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-10-31 09:00:37.694  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55366->2001:4860:…:443 reason=half_close_complete up=805 down=0 ms=6371 probe=false
-10-31 09:00:37.723  3254  4863 D GhDiag  : flow_established 108ms
-10-31 09:00:37.864  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55386->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6154 probe=false
-10-31 09:00:37.864  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55380->2001:4860:…:443 reason=half_close_complete up=805 down=0 ms=6382 probe=false
-10-31 09:00:37.920  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-10-31 09:00:38.087  3254  4874 D GhDiag  : flow_established 161ms
-10-31 09:00:38.975  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55392->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6213 probe=false
-10-31 09:00:39.335  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55394->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6500 probe=false
-10-31 09:00:39.737  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:44304->2001:4860:…:443 reason=half_close_complete up=767 down=0 ms=7328 probe=false
-10-31 09:00:39.940  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55390->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=7245 probe=false
-10-31 09:00:40.990  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:39362->2001:4860:…:443
-10-31 09:00:40.991  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:39362->2001:4860:482d:400:::443
-10-31 09:00:40.992  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:40758->2001:4860:…:443
-10-31 09:00:40.994  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:40758->2001:4860:482a:400:::443
-10-31 09:00:40.995  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:52752->2001:4860:…:443
-10-31 09:00:40.995  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:52752->2001:4860:4826:400:::443
-10-31 09:00:40.996  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:36116->2001:4860:…:443
-10-31 09:00:40.996  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:36116->2001:4860:482b:400:::443
-10-31 09:00:40.998  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:46664->2001:4860:…:443
-10-31 09:00:40.998  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:46664->2001:4860:4827:400:::443
-10-31 09:00:40.999  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:40258->2001:4860:…:443
-10-31 09:00:40.999  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:40258->2001:4860:482c:400:::443
-10-31 09:00:41.001  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:50880->2001:4860:…:443
-10-31 09:00:41.002  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:50880->2001:4860:4829:400:::443
-10-31 09:00:41.002  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:48930->2001:4860:…:443
-10-31 09:00:41.002  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:48930->2001:4860:4828:400:::443
-10-31 09:00:41.003  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-10-31 09:00:41.017  3254  4957 D GhDiag  : flow_established 3ms
-10-31 09:00:41.101  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=572
-10-31 09:00:41.261  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=159
-10-31 09:00:41.288  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-===============================
-E2E PASS: real tunnel carrying traffic (SUBMODE=live)
-  - core install + start: verified (Xray 26.10.21 exec from nativeLibraryDir)
-  - VpnService establish: verified (consent tapped: 1, vpnUp: 1)
-  - SOCKS5 data path: verified (tcp=1)
-  - in-tunnel payload self-test: PASS (real remote bytes through the relay)
-  - DNS through tunnel: verified
-===============================
+11-17 13:58:44.500  3318  3318 D GhDiag  : connect: tap -> CHECKING (have sub=true)
+11-17 13:58:44.500  3318  3318 D GhDiag  : connect: sub ok entries=3 -> PREPARING (core extract+version)
+11-17 13:58:44.765  3318  3318 D GhDiag  : connect: ensureInstalled=true version=26.10.21 err=null
+11-17 13:58:44.765  3318  3318 D GhDiag  : connect: FAILED — core unavailable/old (min=26.11.21)
+=== E2E FAILED: tunnel not up (xray/:10808) — xray process not running and :10808 not listening (core exited — see xray-out/err logs) ===
 
 
 ### e2e-logcat.log (crashes + app + vpn, tail)
-geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-31 09:00:18.088  3254  3254 I GhDiag  : effective_dns alternate Serverless-v52-fragB :: servers=https://cloudflare-dns.com/dns-query hosts=geosite:category-ads-all->#3,cloudflare-dns.com->104.16.248.249 strategy=UseIPv4 doh=https://cloudflare-dns.com/dns-query dohIps=104.16.248.249 dohOutbound=tcp-fragment-tls defaultOutbound=block notes=doh_bootstrap_zone_ok:cloudflare-dns.com->104.16.248.249
-10-31 09:00:18.088  3254  3254 D GhDiag  : connect: config written bytes=5087 path=/data/user/0/com.ghprotocol.app/files/xray-config.json
-10-31 09:00:18.247  3254  3254 D GhDiag  : connect: core.start=true 
-10-31 09:00:18.963  3991  3991 D AndroidRuntime: Shutting down VM
-10-31 09:00:19.005   519   918 D CoreBackPreview: Window{3b5b476 u0 com.ghprotocol.app/com.ghprotocol.app.MainActivity}: Setting back callback OnBackInvokedCallbackInfo{mCallback=android.window.IOnBackInvokedCallback$Stub$Proxy@a3cd7fa, mPriority=0, mIsAnimationCallback=false}
-10-31 09:00:19.800  4074  4074 W libxraycore.so: type=1400 audit(0.0:30): avc:  denied  { read } for  name="somaxconn" dev="proc" ino=54865 scontext=u:r:untrusted_app:s0:c192,c256,c512,c768 tcontext=u:object_r:proc_net:s0 tclass=file permissive=0 app=com.ghprotocol.app
-10-31 09:00:20.626  4278  4278 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
-10-31 09:00:20.629  4278  4278 I AndroidRuntime: Using default boot image
-10-31 09:00:20.629  4278  4278 I AndroidRuntime: Leaving lock profiling enabled
-10-31 09:00:20.794  4278  4278 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
-10-31 09:00:20.905   834   865 V WindowManagerShell: onTransitionReady android.os.BinderProxy@fe86bfe: {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity)/@0xad0a75 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{629e6e4 u0 com.ghprotocol.app/.MainActivity)/@0xe5b4a0a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-31 09:00:20.906   519   536 I ActivityTaskManager: Displayed com.ghprotocol.app/.MainActivity for user 0: +3s639ms
-10-31 09:00:20.921   834   865 V WindowManagerShell: Transition doesn't have explicit remote, search filters for match for {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity)/@0xad0a75 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{629e6e4 u0 com.ghprotocol.app/.MainActivity)/@0xe5b4a0a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-31 09:00:20.921   834   865 V WindowManagerShell: start default transition animation, info = {id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity)/@0xad0a75 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{629e6e4 u0 com.ghprotocol.app/.MainActivity)/@0xe5b4a0a sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-31 09:00:20.933   519   536 V WindowManager: Sent Transition #7 createdAt=10-31 09:00:17.267 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=2 lastActiveTime=57778 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{dbc16e2 Task{8a32eac #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{40f0779 com.ghprotocol.app.MainActivity} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-31 09:00:20.933   519   536 V WindowManager:     info={id=7 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{null m=OPEN f=FILLS_TASK leash=Surface(name=ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity)/@0x68abdc5 sb=Rect(0, 0 - 0, 0) eb=Rect(0, 0 - 1080, 2400) d=-1->0 r=-1->0:-1},{null m=TO_BACK f=FILLS_TASK leash=Surface(name=ActivityRecord{629e6e4 u0 com.ghprotocol.app/.MainActivity)/@0x6c55c3c sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-31 09:00:21.300   834   865 V WindowManagerShell: Transition requested: android.os.BinderProxy@86249ba TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=61743 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{android.window.IWindowContainerToken$Stub$Proxy@42c406b} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{3a37c8 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-31 09:00:21.753   519   539 W ActivityTaskManager: Activity top resumed state loss timeout for ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity t8}
-10-31 09:00:21.754   519   539 W ActivityTaskManager: Activity pause timeout for ActivityRecord{4d7c408 u0 com.ghprotocol.app/.MainActivity t8}
-10-31 09:00:21.851  3254  3322 I .ghprotocol.app: Background concurrent copying GC freed 101459(5300KB) AllocSpace objects, 26(740KB) LOS objects, 49% free, 6551KB/12MB, paused 32us,23us total 1.865s
-10-31 09:00:22.021   519   904 I ImeTracker: com.ghprotocol.app:6f6c9307: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
-10-31 09:00:22.022   519   904 I ImeTracker: com.ghprotocol.app:6f6c9307: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-31 09:00:22.068  1560  1560 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-31 09:00:22.597   519  2554 E AppOps  : Bad call made by uid 10097. Package "com.ghprotocol.app" does not belong to uid 10097.
-10-31 09:00:22.599   519  2554 E AppOps  : java.lang.SecurityException: Specified package "com.ghprotocol.app" under uid 10097 but it is not
-10-31 09:00:22.599   519  2554 E AppOps  : 	at com.android.server.connectivity.Vpn.isVpnServicePreConsented(Vpn.java:1543)
-10-31 09:00:23.729   519   536 V WindowManager: Sent Transition #8 createdAt=10-31 09:00:21.241 via request=TransitionRequestInfo { type = OPEN, triggerTask = TaskInfo{userId=0 taskId=8 displayId=0 isRunning=true baseIntent=Intent { flg=0x10000000 cmp=com.ghprotocol.app/.MainActivity } baseActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} topActivity=ComponentInfo{com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog} origActivity=null realActivity=ComponentInfo{com.ghprotocol.app/com.ghprotocol.app.MainActivity} numActivities=3 lastActiveTime=61743 supportsMultiWindow=true resizeMode=1 isResizeable=true minWidth=-1 minHeight=-1 defaultMinSize=220 token=WCT{RemoteToken{dbc16e2 Task{8a32eac #8 type=standard A=10192:com.ghprotocol.app}}} topActivityType=1 pictureInPictureParams=null shouldDockBigOverlays=false launchIntoPipHostTaskId=-1 lastParentTaskIdBeforePip=-1 displayCutoutSafeInsets=null topActivityInfo=ActivityInfo{5f99e51 com.android.vpndialogs.ConfirmDialog} launchCookies=[] positionInParent=Point(0, 0) parentTaskId=-1 isFocused=true isVisible=true isVisibleRequested=true isSleeping=false topActivityInSizeCompat=false topActivityEligibleForLetterboxEducation= false topActivityLetterboxed= false isFromDoubleTap= false topActivityLetterboxVerticalPosition= -1 topActivityLetterboxHorizontalPosition= -1 topActivityLetterboxWidth=-1 topActivityLetterboxHeight=-1 locusId=null displayAreaFeatureId=1 cameraCompatControlState=hidden}, remoteTransition = null, displayChange = null }
-10-31 09:00:24.613   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{c2ca70f com.google.android.googlequicksearchbox/10132} BLOCKED
-10-31 09:00:24.614   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{e83e39c com.google.android.apps.messaging/10129} BLOCKED
-10-31 09:00:24.614   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{429a1a5 com.google.android.gm/10144} BLOCKED
-10-31 09:00:24.614   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{f98497a com.google.android.rkpdapp/10179} BLOCKED
-10-31 09:00:24.614   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{9707b46 com.google.android.projection.gearhead/10123} BLOCKED
-10-31 09:00:24.800  4278  4278 D AndroidRuntime: Shutting down VM
-10-31 09:00:26.033   519   918 I Vpn     : Switched from [Legacy VPN] to com.ghprotocol.app
-10-31 09:00:26.564  1660  1660 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is added.].
-10-31 09:00:26.713   519  1810 I ActivityManager: Background started FGS: Allowed [callingPackage: com.ghprotocol.app; callingUid: 10192; uidState: TOP ; uidBFSL: [BFSL]; intent: Intent { cmp=com.ghprotocol.app/.core.VpnTunnelService }; code:PROC_STATE_TOP; tempAllowListReason:<null>; targetSdkVersion:35; callerTargetSdkVersion:35; startForegroundCount:0; bindFromPackage:null: isBindService:false]
-10-31 09:00:26.731   519  1935 I Vpn     : Established by com.ghprotocol.app on tun0
-10-31 09:00:26.733  3254  3254 D GhDiag  : tun0 established ipv4=10.8.0.2/24 ipv6=fd00:1::2/64 route=::/0 state=route_only dns=10.8.0.1 mtu=1500
-10-31 09:00:26.759  3254  4486 D GhDiag  : flow_open v4 dst=1.1.x.x:80 probe=false
-10-31 09:00:26.761  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=76
-10-31 09:00:26.761  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:2:…:0 len=48
-10-31 09:00:26.762  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:26.890   519  1935 I ImeTracker: com.ghprotocol.app:5bc073: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_SAME_WINDOW_FOCUSED_WITHOUT_EDITOR
-10-31 09:00:26.890   519  1935 I ImeTracker: com.ghprotocol.app:5bc073: onCancelled at PHASE_SERVER_SHOULD_HIDE
-10-31 09:00:26.895  1560  1560 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.ghprotocol.app fieldId=0 fieldName=null extras=null}, false)
-10-31 09:00:26.950  3254  4489 D GhDiag  : flow_established 59ms
-10-31 09:00:27.060  3254  4486 D GhDiag  : flow_open v6 dst=2606:4700:…:80 probe=false
-10-31 09:00:27.081  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=112
-10-31 09:00:27.082  3254  4506 D GhDiag  : flow_established 4ms
-10-31 09:00:27.088  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=108
-10-31 09:00:27.088  3254  4485 D GhDiag  : tun v6 proto=58 dst=2606:4700:…:0 len=108
-10-31 09:00:27.092  3254  4485 D GhDiag  : tun v6 proto=6 dst=fd00:1:…:853 len=84
-10-31 09:00:27.093  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:39502->fd00:1:…:853
-10-31 09:00:27.097  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:39502->fd00:1::1:853
-10-31 09:00:27.111  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
-10-31 09:00:27.112  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=61
-10-31 09:00:27.132  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-31 09:00:27.140  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=77
-10-31 09:00:27.141  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-31 09:00:27.150  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=78
-10-31 09:00:27.153  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:27.214  1660  1660 I AiAiEcho: AppFetcherImpl onPackageChanged com.ghprotocol.app.
-10-31 09:00:27.270  1660  2519 I AiAiEcho: AppIndexer Package:[com.ghprotocol.app] UserProfile:[0] Enabled:[true].
-10-31 09:00:27.270  1660  2519 I AiAiEcho: AppFetcherImplV2 updateApps package:[com.ghprotocol.app], userId:[0], reason:[package is updated.].
-10-31 09:00:27.303  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=179
-10-31 09:00:27.304  3254  4514 D GhDiag  : dns_reply 193ms path=doh:cloudflare-dns.com bytes=61
-10-31 09:00:27.466  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=162
-10-31 09:00:27.477  3254  4514 D GhDiag  : dns_reply 365ms path=doh:cloudflare-dns.com bytes=49
-10-31 09:00:27.557  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=60
-10-31 09:00:27.567  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:27.571  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=60
-10-31 09:00:27.679  3254  4485 D GhDiag  : flow_open v4 dst=192.178.x.x:443 probe=false
-10-31 09:00:27.698  3254  4485 D GhDiag  : tun v4 proto=1 dst=172.217.x.x:0 len=28
-10-31 09:00:27.734  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.735  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=557
-10-31 09:00:27.736  3254  4485 D GhDiag  : tun v6 proto=58 dst=ff02:16:…:0 len=96
-10-31 09:00:27.736  3254  4527 D GhDiag  : flow_established 130ms
-10-31 09:00:27.736  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=242
-10-31 09:00:27.740  3254  4514 D GhDiag  : dns_reply 608ms path=doh:cloudflare-dns.com bytes=177
-10-31 09:00:27.778  3254  4485 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-31 09:00:27.780  3254  4485 D GhDiag  : tun v4 proto=17 dst=142.251.x.x:443 len=78
-10-31 09:00:27.817  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.820  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=6 dst=172.217.x.x:443 len=40
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=68
-10-31 09:00:27.823  3254  4485 D GhDiag  : tun v4 proto=17 dst=10.8.x.x:53 len=68
-10-31 09:00:27.830  3254  4529 D GhDiag  : flow_established 40ms
-10-31 09:00:27.831  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=40
-10-31 09:00:27.831  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=297
-10-31 09:00:27.929  3254  4485 D GhDiag  : tun v4 proto=6 dst=192.178.x.x:443 len=40
-10-31 09:00:27.977  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=214
-10-31 09:00:27.979  3254  4514 D GhDiag  : dns_reply 838ms path=doh:cloudflare-dns.com bytes=273
-10-31 09:00:27.988  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.0.x.x:57822->10.8.x.x:853
-10-31 09:00:27.989  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.0.2.16:57822->10.8.0.1:853
-10-31 09:00:28.023  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=fd00:1:…:39518->fd00:1:…:853
-10-31 09:00:28.027  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination fd00:1::2:39518->fd00:1::1:853
-10-31 09:00:28.027  3254  4485 D GhDiag  : flow_rejected reason=tunnel_local_destination dst=10.8.x.x:38162->10.8.x.x:853
-10-31 09:00:28.027  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=local_destination 10.8.0.2:38162->10.8.0.1:853
-10-31 09:00:28.089  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:28.093  3254  3321 I .ghprotocol.app: Compiler allocated 4290KB to compile void com.ghprotocol.app.ui.MotionComponentsKt.DefyxHeaderSection(com.ghprotocol.app.ui.ConnectPhase, java.lang.Integer, boolean, java.lang.String, java.lang.String, com.ghprotocol.app.core.TunnelTelemetry, kotlin.jvm.functions.Function0, kotlin.jvm.functions.Function0, androidx.compose.ui.Modifier, androidx.compose.runtime.Composer, int, int)
-10-31 09:00:28.119  3254  4509 W GhDiag  : relay_warning stage=relay_reset detail=upstream_read_error:SocketException fd00:1::99:41001->2606:4700:4700::1111:80
-10-31 09:00:28.122  3254  4509 D GhDiag  : flow_closed dst=fd00:1:…:41001->2606:4700:…:80 reason=upstream_read_error:SocketException up=91 down=0 ms=1062 probe=false
-10-31 09:00:28.199  3254  4543 D GhDiag  : flow_established 6ms
-10-31 09:00:28.332  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=352
-10-31 09:00:28.537  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=201
-10-31 09:00:28.687  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=128
-10-31 09:00:28.999  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=306
-10-31 09:00:29.013  3254  4485 D GhDiag  : flow_open v4 dst=34.3.x.x:443 probe=false
-10-31 09:00:29.017  3254  4569 D GhDiag  : flow_established 4ms
-10-31 09:00:29.816  3254  3322 W .ghprotocol.app: Suspending all threads took: 8.655ms
-10-31 09:00:29.818  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 66215(4915KB) AllocSpace objects, 0(0B) LOS objects, 34% free, 8648KB/12MB, paused 801us,8.714ms total 616.737ms
-10-31 09:00:30.039  1457  3221 I BlockstoreStorage: Clearing Blockstore Data for package com.ghprotocol.app [CONTEXT service_id=258 ]
-10-31 09:00:30.114  1419  4108 I FontLog : Package com.ghprotocol.app has no metadata [CONTEXT service_id=132 ]
-10-31 09:00:30.139  3254  4485 D GhDiag  : flow_open v4 dst=192.178.x.x:443 probe=false
-10-31 09:00:30.163  3254  4639 D GhDiag  : flow_established 4ms
-10-31 09:00:30.666  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=427
-10-31 09:00:31.083  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 61348(5145KB) AllocSpace objects, 0(0B) LOS objects, 35% free, 8406KB/12MB, paused 44us,14us total 120.782ms
-10-31 09:00:31.309  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=552
-10-31 09:00:31.323  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.482  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.486  3254  4670 D GhDiag  : flow_established 118ms
-10-31 09:00:31.593  3254  4672 D GhDiag  : flow_established 21ms
-10-31 09:00:31.710  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:31.732  3254  4679 D GhDiag  : flow_established 5ms
-10-31 09:00:31.781  3254  4484 D GhDiag  : stats t=5s packets=136 tcp=104 dns53=10 otherUdp=7 activeTcp=8 flowsOpened=10 flowsEstablished=10 connectFailures=0 retransmits=0 appUp=53182 appDown=26146 probeUp=91 probeDown=402 probeFlows=1 dnsOk=10 dnsFail=0 state=CORE_READY ipv6=route_only
-10-31 09:00:31.982  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=127
-10-31 09:00:32.148  3254  4488 D GhDiag  : flow_closed dst=10.8.x.x:41000->1.1.x.x:80 reason=half_close_complete up=91 down=402 ms=5389 probe=true
-10-31 09:00:32.209   519  2228 W ActivityManager: Permission Denial: Accessing service com.ghprotocol.app/.core.VpnTunnelService from pid=4705, uid=2000 that is not exported from uid 10192
-10-31 09:00:32.312  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 52522(4492KB) AllocSpace objects, 0(0B) LOS objects, 27% free, 9511KB/12MB, paused 3.908ms,122us total 502.625ms
-10-31 09:00:32.336  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=334
-10-31 09:00:32.395  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.503  3254  4713 D GhDiag  : flow_established 10ms
-10-31 09:00:32.540  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=94
-10-31 09:00:32.694  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.761  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.778  3254  4716 D GhDiag  : flow_established 16ms
-10-31 09:00:32.835  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:32.846  3254  4719 D GhDiag  : flow_established 56ms
-10-31 09:00:32.919  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=364
-10-31 09:00:33.096  3254  4721 D GhDiag  : flow_established 96ms
-10-31 09:00:34.347  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.351  3254  4742 D GhDiag  : flow_established 3ms
-10-31 09:00:34.669  3254  4485 D GhDiag  : flow_open v6 dst=2001:4860:…:443 probe=false
-10-31 09:00:34.684  3254  4752 D GhDiag  : flow_established 6ms
-10-31 09:00:34.791  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=285
-10-31 09:00:34.890  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=97
-10-31 09:00:34.922  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:34.965  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:35.039  3254  4756 D GhDiag  : flow_established 26ms
-10-31 09:00:35.042  3254  4757 D GhDiag  : flow_established 26ms
-10-31 09:00:35.390  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 54137(4328KB) AllocSpace objects, 0(0B) LOS objects, 21% free, 10MB/12MB, paused 319us,15us total 128.247ms
-10-31 09:00:35.925   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{e2ec803 com.google.android.apps.messaging/10129} BLOCKED
-10-31 09:00:35.925   519   570 I AppsFilter: interaction: PackageSetting{1639f8d com.ghprotocol.app/10192} -> PackageSetting{2e4380 com.google.android.contacts/10153} BLOCKED
-10-31 09:00:36.063  3254  4486 D GhDiag  : ipv6_egress_unproven reason=no_payload_via_socks note=xray_dials_outside_the_tunnel_so_v6_needs_device_v6_egress action=reject_v6_flows_fast
-10-31 09:00:36.063  3254  4486 D GhDiag  : relay_selftest_v6 ok=false stage=payload detail=no_response_bytes
-10-31 09:00:36.070  3254  4486 D GhDiag  : relay_selftest ok=true stage=ok target=1.1.1.1:80 up=91 down=402 response=402 synAckMs=197 firstByteMs=301 checksums=0
-10-31 09:00:36.198  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=166
-10-31 09:00:36.543  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=331
-10-31 09:00:36.578  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:36.689  3254  4831 D GhDiag  : flow_established 57ms
-10-31 09:00:36.781  3254  4484 D GhDiag  : stats t=10s packets=216 tcp=166 dns53=20 otherUdp=10 activeTcp=17 flowsOpened=19 flowsEstablished=19 connectFailures=0 retransmits=0 appUp=61156 appDown=27482 probeUp=91 probeDown=402 probeFlows=0 dnsOk=18 dnsFail=0 state=VERIFIED ipv6=route_only
-10-31 09:00:37.020  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=476
-10-31 09:00:37.163  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:55398->2001:4860:…:443
-10-31 09:00:37.181  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:55398->2001:4860:4841:400:::443
-10-31 09:00:37.182  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:45964->2001:4860:…:443
-10-31 09:00:37.183  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:45964->2001:4860:4846:400:::443
-10-31 09:00:37.183  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:36924->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:36924->2001:4860:4843:400:::443
-10-31 09:00:37.184  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:37054->2001:4860:…:443
-10-31 09:00:37.184  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:37054->2001:4860:4840:400:::443
-10-31 09:00:37.201  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:46696->2001:4860:…:443
-10-31 09:00:37.201  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:46696->2001:4860:4844:400:::443
-10-31 09:00:37.202  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:41824->2001:4860:…:443
-10-31 09:00:37.202  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:41824->2001:4860:4845:400:::443
-10-31 09:00:37.204  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:54288->2001:4860:…:443
-10-31 09:00:37.204  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:54288->2001:4860:4847:400:::443
-10-31 09:00:37.221  3254  4485 D GhDiag  : flow_rejected reason=ipv6_no_egress dst=fd00:1:…:53836->2001:4860:…:443
-10-31 09:00:37.221  3254  4485 W GhDiag  : relay_warning stage=relay_reset detail=ipv6_no_egress fd00:1::2:53836->2001:4860:4842:400:::443
-10-31 09:00:37.231  3254  4485 D GhDiag  : flow_open v4 dst=172.217.x.x:443 probe=false
-10-31 09:00:37.282  3254  4860 D GhDiag  : flow_established 23ms
-10-31 09:00:37.425  3254  4514 D GhDiag  : dns_ok path=doh:cloudflare-dns.com ms=395
-10-31 09:00:37.592  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-10-31 09:00:37.694  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55366->2001:4860:…:443 reason=half_close_complete up=805 down=0 ms=6371 probe=false
-10-31 09:00:37.723  3254  4863 D GhDiag  : flow_established 108ms
-10-31 09:00:37.753  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 49228(3586KB) AllocSpace objects, 0(0B) LOS objects, 24% free, 9893KB/12MB, paused 7.231ms,24us total 396.807ms
-10-31 09:00:37.864  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55386->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6154 probe=false
-10-31 09:00:37.864  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55380->2001:4860:…:443 reason=half_close_complete up=805 down=0 ms=6382 probe=false
-10-31 09:00:37.920  3254  4485 D GhDiag  : flow_open v4 dst=142.251.x.x:443 probe=false
-10-31 09:00:38.087  3254  4874 D GhDiag  : flow_established 161ms
-10-31 09:00:38.975  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55392->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6213 probe=false
-10-31 09:00:39.335  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55394->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=6500 probe=false
-10-31 09:00:39.669   519   536 V WindowManager:     info={id=10 t=OPEN f=0x0 trk=0 r=[0@Point(0, 0)] c=[{WCT{RemoteToken{17da0a5 Task{d41f0ec #9 type=standard A=10150:com.android.chrome}}} m=OPEN f=NONE leash=Surface(name=Task=9)/@0xaa20b22 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0},{WCT{RemoteToken{dbc16e2 Task{8a32eac #8 type=standard A=10192:com.ghprotocol.app}}} m=TO_BACK f=NONE leash=Surface(name=Task=8)/@0x94a88c4 sb=Rect(0, 0 - 1080, 2400) eb=Rect(0, 0 - 1080, 2400) d=0}]}
-10-31 09:00:39.737  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:44304->2001:4860:…:443 reason=half_close_complete up=767 down=0 ms=7328 probe=false
-10-31 09:00:39.940  3254  4488 D GhDiag  : flow_closed dst=fd00:1:…:55390->2001:4860:…:443 reason=half_close_complete up=517 down=0 ms=7245 probe=false
-10-31 09:00:39.948  3254  3322 I .ghprotocol.app: Background young concurrent copying GC freed 42199(3285KB) AllocSpace objects, 0(0B) LOS objects, 23% free, 10036KB/12MB, paused 69.001ms,36us total 509.943ms
-10-31 09:00:40.340  3254  4488 W .ghprotocol.app: Long monitor contention with owner gh-relay-rx-48822 (4744) at void com.ghprotocol.app.core.net.TcpRelay.onUpstreamData(com.ghprotocol.app.core.net.TcpRelay$Flow, byte[], int)(TcpRelay.kt:481) waiters=0 in void com.ghprotocol.app.core.net.TcpRelay.tick() for 194ms
+d 2000 <<<<<<
+11-17 14:01:06.479  6467  6467 I AndroidRuntime: Using default boot image
+11-17 14:01:06.479  6467  6467 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:06.536  6467  6467 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:07.572  6467  6467 D AndroidRuntime: Shutting down VM
+11-17 14:01:12.494  6495  6495 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:12.497  6495  6495 I AndroidRuntime: Using default boot image
+11-17 14:01:12.497  6495  6495 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:12.561  6495  6495 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:13.601  6495  6495 D AndroidRuntime: Shutting down VM
+11-17 14:01:18.527  6526  6526 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:18.530  6526  6526 I AndroidRuntime: Using default boot image
+11-17 14:01:18.530  6526  6526 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:18.587  6526  6526 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:19.625  6526  6526 D AndroidRuntime: Shutting down VM
+11-17 14:01:24.545  6549  6549 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:24.548  6549  6549 I AndroidRuntime: Using default boot image
+11-17 14:01:24.548  6549  6549 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:24.607  6549  6549 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:25.657  6549  6549 D AndroidRuntime: Shutting down VM
+11-17 14:01:30.573  6578  6578 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:30.575  6578  6578 I AndroidRuntime: Using default boot image
+11-17 14:01:30.575  6578  6578 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:30.632  6578  6578 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:31.665  6578  6578 D AndroidRuntime: Shutting down VM
+11-17 14:01:36.575  6601  6601 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:36.577  6601  6601 I AndroidRuntime: Using default boot image
+11-17 14:01:36.577  6601  6601 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:36.634  6601  6601 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:37.672  6601  6601 D AndroidRuntime: Shutting down VM
+11-17 14:01:42.584  6626  6626 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:42.587  6626  6626 I AndroidRuntime: Using default boot image
+11-17 14:01:42.587  6626  6626 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:42.647  6626  6626 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:43.679  6626  6626 D AndroidRuntime: Shutting down VM
+11-17 14:01:48.606  6651  6651 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:48.609  6651  6651 I AndroidRuntime: Using default boot image
+11-17 14:01:48.609  6651  6651 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:48.666  6651  6651 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:49.693  6651  6651 D AndroidRuntime: Shutting down VM
+11-17 14:01:54.600  6676  6676 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:01:54.602  6676  6676 I AndroidRuntime: Using default boot image
+11-17 14:01:54.602  6676  6676 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:01:54.663  6676  6676 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:01:55.697  6676  6676 D AndroidRuntime: Shutting down VM
+11-17 14:02:00.603  6700  6700 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:00.606  6700  6700 I AndroidRuntime: Using default boot image
+11-17 14:02:00.606  6700  6700 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:00.662  6700  6700 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:01.690  6700  6700 D AndroidRuntime: Shutting down VM
+11-17 14:02:06.597  6725  6725 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:06.600  6725  6725 I AndroidRuntime: Using default boot image
+11-17 14:02:06.600  6725  6725 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:06.656  6725  6725 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:07.700  6725  6725 D AndroidRuntime: Shutting down VM
+11-17 14:02:12.609  6756  6756 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:12.612  6756  6756 I AndroidRuntime: Using default boot image
+11-17 14:02:12.612  6756  6756 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:12.671  6756  6756 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:13.710  6756  6756 D AndroidRuntime: Shutting down VM
+11-17 14:02:18.636  6782  6782 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:18.639  6782  6782 I AndroidRuntime: Using default boot image
+11-17 14:02:18.639  6782  6782 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:18.699  6782  6782 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:19.735  6782  6782 D AndroidRuntime: Shutting down VM
+11-17 14:02:24.648  6806  6806 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:24.651  6806  6806 I AndroidRuntime: Using default boot image
+11-17 14:02:24.651  6806  6806 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:24.712  6806  6806 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:25.746  6806  6806 D AndroidRuntime: Shutting down VM
+11-17 14:02:30.685  6829  6829 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:30.687  6829  6829 I AndroidRuntime: Using default boot image
+11-17 14:02:30.687  6829  6829 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:30.746  6829  6829 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:31.779  6829  6829 D AndroidRuntime: Shutting down VM
+11-17 14:02:36.688  6852  6852 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:36.690  6852  6852 I AndroidRuntime: Using default boot image
+11-17 14:02:36.690  6852  6852 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:36.749  6852  6852 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:37.785  6852  6852 D AndroidRuntime: Shutting down VM
+11-17 14:02:42.698  6875  6875 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:42.700  6875  6875 I AndroidRuntime: Using default boot image
+11-17 14:02:42.700  6875  6875 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:42.758  6875  6875 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:43.802  6875  6875 D AndroidRuntime: Shutting down VM
+11-17 14:02:48.728  6900  6900 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:48.731  6900  6900 I AndroidRuntime: Using default boot image
+11-17 14:02:48.731  6900  6900 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:48.790  6900  6900 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:49.829  6900  6900 D AndroidRuntime: Shutting down VM
+11-17 14:02:54.748  6937  6937 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:02:54.750  6937  6937 I AndroidRuntime: Using default boot image
+11-17 14:02:54.750  6937  6937 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:02:54.808  6937  6937 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:02:55.852  6937  6937 D AndroidRuntime: Shutting down VM
+11-17 14:03:00.761  6960  6960 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:00.763  6960  6960 I AndroidRuntime: Using default boot image
+11-17 14:03:00.763  6960  6960 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:00.819  6960  6960 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:01.850  6960  6960 D AndroidRuntime: Shutting down VM
+11-17 14:03:06.749  6985  6985 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:06.751  6985  6985 I AndroidRuntime: Using default boot image
+11-17 14:03:06.751  6985  6985 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:06.804  6985  6985 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:07.849  6985  6985 D AndroidRuntime: Shutting down VM
+11-17 14:03:12.756  7008  7008 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:12.759  7008  7008 I AndroidRuntime: Using default boot image
+11-17 14:03:12.759  7008  7008 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:12.812  7008  7008 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:13.852  7008  7008 D AndroidRuntime: Shutting down VM
+11-17 14:03:18.770  7037  7037 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:18.772  7037  7037 I AndroidRuntime: Using default boot image
+11-17 14:03:18.772  7037  7037 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:18.827  7037  7037 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:19.874  7037  7037 D AndroidRuntime: Shutting down VM
+11-17 14:03:24.797  7062  7062 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:24.799  7062  7062 I AndroidRuntime: Using default boot image
+11-17 14:03:24.799  7062  7062 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:24.861  7062  7062 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:25.896  7062  7062 D AndroidRuntime: Shutting down VM
+11-17 14:03:30.810  7090  7090 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:30.812  7090  7090 I AndroidRuntime: Using default boot image
+11-17 14:03:30.812  7090  7090 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:30.866  7090  7090 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:31.897  7090  7090 D AndroidRuntime: Shutting down VM
+11-17 14:03:36.805  7143  7143 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:36.808  7143  7143 I AndroidRuntime: Using default boot image
+11-17 14:03:36.808  7143  7143 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:36.863  7143  7143 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:37.892  7143  7143 D AndroidRuntime: Shutting down VM
+11-17 14:03:42.804  7167  7167 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:42.806  7167  7167 I AndroidRuntime: Using default boot image
+11-17 14:03:42.806  7167  7167 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:42.864  7167  7167 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:43.897  7167  7167 D AndroidRuntime: Shutting down VM
+11-17 14:03:48.814  7193  7193 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:48.817  7193  7193 I AndroidRuntime: Using default boot image
+11-17 14:03:48.817  7193  7193 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:48.874  7193  7193 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:49.930  7193  7193 D AndroidRuntime: Shutting down VM
+11-17 14:03:54.846  7217  7217 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:03:54.849  7217  7217 I AndroidRuntime: Using default boot image
+11-17 14:03:54.849  7217  7217 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:03:54.909  7217  7217 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:03:55.950  7217  7217 D AndroidRuntime: Shutting down VM
+11-17 14:04:00.854  7241  7241 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:00.857  7241  7241 I AndroidRuntime: Using default boot image
+11-17 14:04:00.857  7241  7241 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:00.917  7241  7241 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:01.948  7241  7241 D AndroidRuntime: Shutting down VM
+11-17 14:04:06.863  7266  7266 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:06.866  7266  7266 I AndroidRuntime: Using default boot image
+11-17 14:04:06.866  7266  7266 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:06.922  7266  7266 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:07.958  7266  7266 D AndroidRuntime: Shutting down VM
+11-17 14:04:12.863  7291  7291 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:12.866  7291  7291 I AndroidRuntime: Using default boot image
+11-17 14:04:12.866  7291  7291 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:12.923  7291  7291 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:13.968  7291  7291 D AndroidRuntime: Shutting down VM
+11-17 14:04:18.895  7317  7317 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:18.898  7317  7317 I AndroidRuntime: Using default boot image
+11-17 14:04:18.898  7317  7317 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:18.958  7317  7317 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:19.998  7317  7317 D AndroidRuntime: Shutting down VM
+11-17 14:04:24.928  7341  7341 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:24.930  7341  7341 I AndroidRuntime: Using default boot image
+11-17 14:04:24.930  7341  7341 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:24.987  7341  7341 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:26.017  7341  7341 D AndroidRuntime: Shutting down VM
+11-17 14:04:30.949   522   572 I AppsFilter: interaction: PackageSetting{f9fdf9b com.ghprotocol.app/10192} -> PackageSetting{42436b4 com.google.android.contacts/10155} BLOCKED
+11-17 14:04:30.973  7470  7470 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:30.976  7470  7470 I AndroidRuntime: Using default boot image
+11-17 14:04:30.976  7470  7470 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:31.036  7470  7470 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:32.058  7470  7470 D AndroidRuntime: Shutting down VM
+11-17 14:04:36.962  7496  7496 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:36.964  7496  7496 I AndroidRuntime: Using default boot image
+11-17 14:04:36.964  7496  7496 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:37.019  7496  7496 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:38.042  7496  7496 D AndroidRuntime: Shutting down VM
+11-17 14:04:40.983   522   572 I AppsFilter: interaction: PackageSetting{f9fdf9b com.ghprotocol.app/10192} -> PackageSetting{87b7020 com.google.android.contacts/10155} BLOCKED
+11-17 14:04:42.954  7536  7536 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:42.956  7536  7536 I AndroidRuntime: Using default boot image
+11-17 14:04:42.956  7536  7536 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:43.017  7536  7536 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:44.050  7536  7536 D AndroidRuntime: Shutting down VM
+11-17 14:04:48.976  7561  7561 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:48.978  7561  7561 I AndroidRuntime: Using default boot image
+11-17 14:04:48.978  7561  7561 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:49.034  7561  7561 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:50.076  7561  7561 D AndroidRuntime: Shutting down VM
+11-17 14:04:54.991  7584  7584 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:04:54.994  7584  7584 I AndroidRuntime: Using default boot image
+11-17 14:04:54.994  7584  7584 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:04:55.054  7584  7584 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:04:56.085  7584  7584 D AndroidRuntime: Shutting down VM
+11-17 14:05:00.989  7607  7607 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:00.991  7607  7607 I AndroidRuntime: Using default boot image
+11-17 14:05:00.991  7607  7607 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:01.051  7607  7607 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:02.086  7607  7607 D AndroidRuntime: Shutting down VM
+11-17 14:05:06.992  7631  7631 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:06.995  7631  7631 I AndroidRuntime: Using default boot image
+11-17 14:05:06.995  7631  7631 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:07.053  7631  7631 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:08.080  7631  7631 D AndroidRuntime: Shutting down VM
+11-17 14:05:12.987  7654  7654 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:12.990  7654  7654 I AndroidRuntime: Using default boot image
+11-17 14:05:12.990  7654  7654 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:13.063  7654  7654 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:14.100  7654  7654 D AndroidRuntime: Shutting down VM
+11-17 14:05:19.017  7679  7679 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:19.020  7679  7679 I AndroidRuntime: Using default boot image
+11-17 14:05:19.020  7679  7679 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:19.076  7679  7679 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:20.117  7679  7679 D AndroidRuntime: Shutting down VM
+11-17 14:05:25.023  7702  7702 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:25.025  7702  7702 I AndroidRuntime: Using default boot image
+11-17 14:05:25.025  7702  7702 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:25.085  7702  7702 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:26.122  7702  7702 D AndroidRuntime: Shutting down VM
+11-17 14:05:31.023  7725  7725 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:31.025  7725  7725 I AndroidRuntime: Using default boot image
+11-17 14:05:31.025  7725  7725 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:31.081  7725  7725 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:32.108  7725  7725 D AndroidRuntime: Shutting down VM
+11-17 14:05:37.046  7748  7748 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:37.048  7748  7748 I AndroidRuntime: Using default boot image
+11-17 14:05:37.048  7748  7748 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:37.105  7748  7748 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:38.140  7748  7748 D AndroidRuntime: Shutting down VM
+11-17 14:05:43.044  7772  7772 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:43.046  7772  7772 I AndroidRuntime: Using default boot image
+11-17 14:05:43.046  7772  7772 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:43.105  7772  7772 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:44.162  7772  7772 D AndroidRuntime: Shutting down VM
+11-17 14:05:49.102  7798  7798 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:49.104  7798  7798 I AndroidRuntime: Using default boot image
+11-17 14:05:49.104  7798  7798 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:49.161  7798  7798 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:50.196  7798  7798 D AndroidRuntime: Shutting down VM
+11-17 14:05:55.102  7821  7821 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:05:55.104  7821  7821 I AndroidRuntime: Using default boot image
+11-17 14:05:55.104  7821  7821 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:05:55.160  7821  7821 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:05:56.196  7821  7821 D AndroidRuntime: Shutting down VM
+11-17 14:06:01.105  7844  7844 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:01.107  7844  7844 I AndroidRuntime: Using default boot image
+11-17 14:06:01.107  7844  7844 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:01.162  7844  7844 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:02.197  7844  7844 D AndroidRuntime: Shutting down VM
+11-17 14:06:07.134  7867  7867 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:07.136  7867  7867 I AndroidRuntime: Using default boot image
+11-17 14:06:07.136  7867  7867 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:07.194  7867  7867 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:08.234  7867  7867 D AndroidRuntime: Shutting down VM
+11-17 14:06:13.136  7892  7892 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:13.139  7892  7892 I AndroidRuntime: Using default boot image
+11-17 14:06:13.139  7892  7892 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:13.198  7892  7892 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:14.230  7892  7892 D AndroidRuntime: Shutting down VM
+11-17 14:06:19.158  7917  7917 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:19.161  7917  7917 I AndroidRuntime: Using default boot image
+11-17 14:06:19.161  7917  7917 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:19.219  7917  7917 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:20.253  7917  7917 D AndroidRuntime: Shutting down VM
+11-17 14:06:25.164  7940  7940 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:25.167  7940  7940 I AndroidRuntime: Using default boot image
+11-17 14:06:25.167  7940  7940 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:25.224  7940  7940 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:26.259  7940  7940 D AndroidRuntime: Shutting down VM
+11-17 14:06:31.176  7973  7973 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:31.178  7973  7973 I AndroidRuntime: Using default boot image
+11-17 14:06:31.178  7973  7973 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:31.238  7973  7973 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:32.272  7973  7973 D AndroidRuntime: Shutting down VM
+11-17 14:06:37.178  7997  7997 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:37.180  7997  7997 I AndroidRuntime: Using default boot image
+11-17 14:06:37.180  7997  7997 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:37.237  7997  7997 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:38.272  7997  7997 D AndroidRuntime: Shutting down VM
+11-17 14:06:43.180  8020  8020 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:43.183  8020  8020 I AndroidRuntime: Using default boot image
+11-17 14:06:43.183  8020  8020 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:43.244  8020  8020 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:44.280  8020  8020 D AndroidRuntime: Shutting down VM
+11-17 14:06:49.211  8045  8045 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:49.213  8045  8045 I AndroidRuntime: Using default boot image
+11-17 14:06:49.213  8045  8045 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:49.274  8045  8045 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:50.315  8045  8045 D AndroidRuntime: Shutting down VM
+11-17 14:06:55.224  8068  8068 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:06:55.227  8068  8068 I AndroidRuntime: Using default boot image
+11-17 14:06:55.227  8068  8068 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:06:55.288  8068  8068 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:06:56.326  8068  8068 D AndroidRuntime: Shutting down VM
+11-17 14:07:01.234  8094  8094 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:01.237  8094  8094 I AndroidRuntime: Using default boot image
+11-17 14:07:01.237  8094  8094 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:01.295  8094  8094 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:02.327  8094  8094 D AndroidRuntime: Shutting down VM
+11-17 14:07:07.245  8117  8117 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:07.248  8117  8117 I AndroidRuntime: Using default boot image
+11-17 14:07:07.248  8117  8117 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:07.307  8117  8117 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:08.342  8117  8117 D AndroidRuntime: Shutting down VM
+11-17 14:07:13.263  8140  8140 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:13.265  8140  8140 I AndroidRuntime: Using default boot image
+11-17 14:07:13.265  8140  8140 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:13.324  8140  8140 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:14.362  8140  8140 D AndroidRuntime: Shutting down VM
+11-17 14:07:19.283  8172  8172 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:19.286  8172  8172 I AndroidRuntime: Using default boot image
+11-17 14:07:19.286  8172  8172 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:19.346  8172  8172 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:20.381  8172  8172 D AndroidRuntime: Shutting down VM
+11-17 14:07:25.326  8209  8209 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:25.329  8209  8209 I AndroidRuntime: Using default boot image
+11-17 14:07:25.329  8209  8209 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:25.392  8209  8209 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:26.433  8209  8209 D AndroidRuntime: Shutting down VM
+11-17 14:07:31.337  8233  8233 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:31.340  8233  8233 I AndroidRuntime: Using default boot image
+11-17 14:07:31.340  8233  8233 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:31.401  8233  8233 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:32.432  8233  8233 D AndroidRuntime: Shutting down VM
+11-17 14:07:37.343  8256  8256 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:37.346  8256  8256 I AndroidRuntime: Using default boot image
+11-17 14:07:37.346  8256  8256 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:37.401  8256  8256 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:38.435  8256  8256 D AndroidRuntime: Shutting down VM
+11-17 14:07:43.340  8279  8279 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-17 14:07:43.342  8279  8279 I AndroidRuntime: Using default boot image
+11-17 14:07:43.342  8279  8279 I AndroidRuntime: Leaving lock profiling enabled
+11-17 14:07:43.402  8279  8279 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+11-17 14:07:44.440  8279  8279 D AndroidRuntime: Shutting down VM
 
-### e2e-xray-err.log (Xray core)
 
-### e2e-vpn.log (GhVpnTunnel)
