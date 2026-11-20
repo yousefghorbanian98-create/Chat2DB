@@ -1,681 +1,731 @@
 # بریف اجرای کامل ممیزی و ارتقای نهایی — MuscleParadise (MP)
 
-**نسخه:** ۱.۱ · **تاریخ:** ۲۰۲۶‑۱۱‑۱۸
-**مبنای ممیزی:** کلون فقط‌خواندنی از `yousefghorbanian98-create/MP` شاخه‌ی `arena/4f336f66-mp` در کامیت `e6fa0a9`
-**مخزن هدف:** `MP` · **زبان سند و خروجی‌ها:** فارسی (مطابق `AGENTS.md` و `docs/` فعلی)
+**نسخه:** ۲.۰ · **تاریخ:** ۲۰۲۶‑۱۱‑۲۰
+**مبنای ممیزی جاری:** کلون فقط‌خواندنی از `yousefghorbanian98-create/MP` شاخه‌ی `main` در کامیت `662ff88` (Merge PR #22)
+**مبنای قبلی (نسخه‌ی ۱٫۱):** شاخه‌ی `arena/4f336f66-mp` در کامیت `e6fa0a9`
+**اختلاف دو مبنا:** ۱۵۰۹ فایل تغییر کرده، ‎+44,440‎ / ‎−174,375‎ خط؛ فایل‌های ترک‌شده از ۱۶۷۸ به **۱۱۴۷** کاهش یافته
+**مخزن هدف:** `MP` · **زبان سند و خروجی‌ها:** فارسی
 
-> ⚠️ **دو هشدار قبل از هر کاری بخوان:**
-> ۱. **پروژه هنوز تمام نشده است.** بخش قابل‌توجهی از کار به‌دلیل محدودیت نشست/توکن ناتمام مانده. این سند **فقط** مسیر سخت‌سازی و ممیزی است؛ جای صف ساختِ خودِ پروژه (`BUILD-QUEUE.md`، `TODO` جاری، `LOOP-PLAN-M100-M106.md`) را نمی‌گیرد. اول تمام‌کردن، بعد سخت‌سازی — طبق قاعده‌ی ۳‑۱۳ و WP‑00.
-> ۲. **همه‌ی «شاهدها» یک عکس فوری از کامیت `e6fa0a9` هستند و ممکن است کهنه شده باشند.** قبل از اجرای هر WP، شاهدِ همان WP را روی checkout جاری **دوباره اندازه بگیر** (قاعده‌ی ۳‑۱۳). اگر حفره بسته شده بود، WP را «انجام‌شده توسط کار قبلی» ثبت کن و به بعدی برو — کار تکراری نکن.
+> ✅ **وضعیت از طرف مالک:** پروژه تمام‌شده اعلام شده است. پس این سند یک **پاس سخت‌سازی و آمادگی انتشار نهایی** است، نه برنامه‌ی ساخت.
+>
+> ⚠️ **سه هشدار قبل از شروع:**
+> ۱. **بخش ۴‑ب را اول بخوان.** بسیاری از توصیه‌های نسخه‌ی ۱ در این مدت انجام شده‌اند (امضای Android، گیت پین SDK، بیلد وب، DAST با schemathesis، حذف `.claude`، صفر شدن stubها، `strict` و صفر `any` در استودیو). **کار انجام‌شده را دوباره انجام نده.**
+> ۲. **همه‌ی شاهدها از کامیت `662ff88` هستند.** قبل از هر WP، شاهد همان WP را دوباره اندازه بگیر (قاعده‌ی ۳‑۱۳).
+> ۳. **یک خطر بازِ جدی وجود دارد:** گزارش QA خودتان (`qa-report/FINAL-REPORT.md` بخش ۵) یک قفل‌شدگی کامل سرور بر اثر پر شدن استخر اتصال SQLite را ثبت کرده که **«علت ریشه‌ای ثابت نشده است»**. این WP‑01 است و بر هر کار دیگری مقدم است.
 
 ---
 
 ## ۰) چگونه این سند را بخوانی
 
 این سند جای حرف‌زدن با مالک را می‌گیرد. **هیچ سؤالی نپرس؛ همه‌ی تصمیم‌ها در بخش ۳ گرفته شده‌اند.**
-ترتیب اجرا: بخش ۱ (مأموریت) → ۲ (خواسته‌ها) → ۳ (قواعد) → ۴ (وضعیت موجود، تا چیزی را دوباره نسازی) → ۵ (بسته‌های کاری WP‑00 تا WP‑16، به‌ترتیب بخش ۶) → ۷ (خط قرمزها) → ۸ (گیت نهایی).
-هر بسته‌ی کاری (WP) چهار بخش دارد: **چرا / شاهد / کار / معیار پذیرش**. معیار پذیرش یعنی «وقتی تمام است که …»؛ بدون برآورده‌شدن آن، WP را بسته اعلام نکن.
+ترتیب: ۱ (مأموریت) → ۲ (خواسته‌ها) → ۳ (قواعد) → ۴ (توانمندی‌های تأییدشده + موارد بسته‌شده) → ۵ (اعداد پایه) → ۶ (بسته‌های کاری WP‑00…WP‑21 به ترتیب بخش ۷) → ۸ (خط قرمزها) → ۹ (گیت انتشار).
+هر WP پنج بخش دارد: **چرا / شاهد / کار / معیار پذیرش / ابزار**. بدون برآورده‌شدن معیار پذیرش، WP را بسته اعلام نکن.
 
 ---
 
 ## ۱) مأموریت
 
-پروژه **هنوز به پایان نرسیده**؛ بخشی از قابلیت‌ها به‌دلیل محدودیت نشست/توکن نیمه‌کاره مانده‌اند. پس مأموریت تو دو مسیر موازی است:
+پروژه تمام شده است. مأموریت تو **رساندن آن به سطح کلاس جهانی و آماده‌ی انتشار واقعی** است، با دو اولویت هم‌زمان:
 
-**مسیر الف — تمام‌کردن (اولویت اول).** آنچه در صف ساخت خودِ پروژه ناتمام است را از روی `docs/MuscleParadise/BUILD-QUEUE.md`، TODO جاری، `SESSION_HANDOFF.md` و `LOOP-PLAN-M100-M106.md` و **شاهد کد** شناسایی و تمام کن. هیچ milestone جاری را به بهانه‌ی کارهای این سند رها یا پاک نکن.
+**الف) بستن خطرهای بازِ عملیاتی و انتشاری** — قفل‌شدگی استخر DB، زنجیره‌ی تأمین آرتیفکت، نبودِ گزارش خطای زمان اجرا، ۲۱ آیتم بازِ `RELEASE-CHECKLIST.md`، کلید امضای افشاشده، و فایل دیتابیس ترک‌شده در مخزن.
 
-**مسیر ب — ممیزی و سخت‌سازی نهایی در سطح کلاس جهانی.** هر خط کد بک‌اند، کلاینت و استودیو؛ همه‌ی سیم‌کشی‌ها، موتورها و ورک‌فلوها؛ خروجی هر تابع و پارامترها؛ همبستگی کلی و جزئی؛ انیمیشن‌ها، اینترکشن‌ها، سرچ‌بارها و تک‌تک دکمه‌ها؛ کد تکراری؛ ساده‌سازی توابع؛ حذف کد مرده؛ و تست و «اورلود» (بار، آشوب، جهش) هر چیزی که باید خروجی داشته باشد.
+**ب) عمق‌بخشیدن به تضمین کیفیت** — پوشش ۹۴٫۲۸٪ یک عددِ خطوطِ اجراشده است، نه اثبات گیرنده‌ی باگ. تست جهش، تست ویژگی‌محور، رگرسیون بصری کلاینت، دسترس‌پذیری کلاینت، یکپارچگی پول و اعداد بزرگ، پلتفرم وب/PWA، و گیت‌های ضد‌رگرسیون.
 
-**قاعده‌ی تداخل دو مسیر:**
-- WPهای **P0** که مانع انتشار امن هستند (WP‑01 تا WP‑04) حتی در میانه‌ی ساخت باید انجام شوند — این‌ها ارزان‌اند و بعداً گران می‌شوند.
-- بقیه‌ی WPها (P1/P2) را **روی مسیری که تازه تمام شده** اعمال کن، نه روی کد نیمه‌کاره: سخت‌سازی کد ناتمام، دوباره‌کاری تولید می‌کند.
-- هر ماژول/مسیری که تمام شد، همان لحظه WPهای مرتبطش (تست property، golden، a11y، i18n، مجوز، بار) را رویش اجرا کن. این یعنی «تعریف انجام» هر قابلیت، شامل گیت‌های این سند هم می‌شود — نه بعداً.
-- اگر وقتی برای همه نماند: اول P0، بعد گیت‌های مربوط به قابلیت‌های تازه‌تمام‌شده، بعد بقیه؛ و دقیقاً در `SESSION_HANDOFF.md` بنویس چه ماند.
-
-خروجی نهایی تو **فقط گزارش نیست**: کد اصلاح‌شده، تست اضافه‌شده، گیت CI نصب‌شده و سند به‌روزشده است. گزارش، محصول جانبی است.
+خروجی تو **فقط گزارش نیست**: کد اصلاح‌شده، تست اضافه‌شده، گیت CI نصب‌شده، و سند به‌روزشده است.
 
 ---
 
-## ۲) خواسته‌های صریح مالک (بدون تغییر، بدون حذف)
+## ۲) خواسته‌های صریح مالک (بدون تغییر)
 
 ۱. تمام خط‌به‌خط کدهای بک‌اند و فرانت‌اند بررسی شود.
-۲. تمام سیم‌کشی‌های برنامه (اتصال کلاینت/استودیو ↔ API ↔ DB ↔ سرویس‌های بیرونی) بررسی شود.
+۲. تمام سیم‌کشی‌های برنامه بررسی شود.
 ۳. تمام موتورها و ورک‌فلوها بررسی شود.
 ۴. تک‌تک چیزهایی که باید خروجی داشته باشند، مشخص و تست شود.
 ۵. توابع و پارامترها بررسی شود.
 ۶. همبستگی کلی و جزئی برنامه بررسی شود.
 ۷. انیمیشن‌ها و اینترکشن‌ها بررسی و تست شود.
 ۸. همه‌چیز، از جمله سرچ‌بارها و **تک‌تک دکمه‌ها**، بررسی شود.
-۹. چک شود **کدی روی کد دیگری نیفتاده باشد** (منطق تکراری/موازی).
+۹. چک شود **کدی روی کد دیگری نیفتاده باشد**.
 ۱۰. **توابع ساده‌سازی شوند.**
 ۱۱. **کد مرده نداشته باشیم.**
 ۱۲. هر چیزی که برنامه را در **کلاس جهانی** نگه می‌دارد، یک بار **تست و اورلود** شود.
 
-هر WP در بخش ۵ به یک یا چند مورد از این فهرست نگاشت شده است. در پایان، در گزارش نهایی یک جدول بگذار: مورد ۱ تا ۱۲ ← کدام WP ← چه شاهد اجرایی (تست/CI/عدد).
+در پایان، جدول «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد اجرایی» را در `docs/MuscleParadise/AUDIT-FINAL-2026-11-20.md` بگذار. توجه: خواسته‌ی ۸ تا حد زیادی با `qa-report/buttons.json` (۱۰۱ دکمه در ۱۱ صفحه) و `qa-report/FINAL-REPORT.md` پوشش شده؛ کار تو **تکمیل و پایدارکردن** آن است (WP‑09، WP‑21).
 
 ---
 
 ## ۳) قواعد کار — تصمیم‌های از پیش گرفته‌شده (سؤال نپرس)
 
-**۳‑۱. منبع حقیقت.** اول `AGENTS.md` مخزن، بعد نزدیک‌ترین `AGENTS.md` scoped، بعد این سند، بعد `docs/README.md` و `docs/MuscleParadise/SESSION_HANDOFF.md` و TODO جاری. ادعای «کار می‌کند» فقط با **کد، تست یا CI** اثبات می‌شود؛ مستند و نقشه راهنما هستند، نه شاهد.
+**۳‑۱. منبع حقیقت.** `AGENTS.md` مخزن → نزدیک‌ترین `AGENTS.md` scoped → این سند → `docs/README.md` و `SESSION_HANDOFF.md` و TODO جاری. ادعای «کار می‌کند» فقط با **کد، تست، یا CI** اثبات می‌شود. `qa-report/FINAL-REPORT.md` و `evidence/m60/STATUS.md` الگوی درستِ «شاهد یا برچسب بازبینی دستی» هستند — همان سبک را حفظ کن.
 
-**۳‑۲. وقتی مردد بودی.** کم‌خطرترین گزینه را انتخاب کن، در گزارش همان WP زیر عنوان «تصمیم خودکار» یک‌خطی بنویس (چه کردی و چرا)، و **ادامه بده**. هرگز برای رفع ابهام کار را متوقف نکن. تنها استثنائوها در بخش ۷ (خط قرمزها) هستند.
+**۳‑۲. وقتی مردد بودی.** کم‌خطرترین گزینه را انتخاب کن، زیر «تصمیم خودکار» در گزارش یک خط بنویس، و **ادامه بده**. تنها استثنا: بخش ۸.
 
-**۳‑۳. وقتی چیزی را نمی‌دانی.** با شاهد بررسی کن (فایل، تست، لاگ CI). اگر اثبات نشد، در گزارش بنویس «نامعلوم — نیاز به شاهد اجرایی» و حدس نزن. هرگز وضعیت را بی‌صدا بازنویسی نکن.
+**۳‑۳. وقتی چیزی را نمی‌دانی.** با شاهد بررسی کن. اگر اثبات نشد بنویس «نامعلوم — نیاز به شاهد اجرایی». حدس نزن؛ وضعیت را بی‌صدا بازنویسی نکن.
 
-**۳‑۴. اندازه‌ی تغییر.** هر WP = یک شاخه = یک PR. کامیت‌ها کوچک و با پیام معنادار (الگوی موجود: `M98: …`). هیچ کامیت چند‌هزار خطی نزن. اگر WP بزرگ شد، به WP-فرعی (مثلاً `WP-06a`) تقسیم کن.
+**۳‑۴. اندازه‌ی تغییر.** هر WP = یک شاخه = یک PR. الگوی پیام کامیت موجود (`fix(client): …`, `ci(web): …`, `docs(todo): …`). مطابق `docs/MuscleParadise/BRANCH-CONSOLIDATION-2026-11-20.md`: **`main` تنها شاخه‌ی دائمی است؛ merge سپس حذف فوری شاخه.**
 
-**۳‑۵. CI هرگز نباید قرمز بماند و هرگز نباید شل شود.**
-- پایین‌آوردن `--cov-fail-under=70`، حذف گیت، یا `|| true` گذاشتن روی گیت موجود = **ممنوع**.
-- هر WP باید CI را سبز تحویل بدهد؛ اگر گیتی به‌دلیل تغییر درست قرمز شد، همان WP باید گیت را اصلاح کند (نه غیرفعال).
-- job‌های فعلی که باید سبز بمانند: `secret-scan`, `docs`, `backend`, `studio`, `client-flutter`, `live-contract`, `e2e-api` (فایل `.github/workflows/ci.yml`)، به‌علاوه `apk.yml`, `container.yml`, `deploy.yml`.
+**۳‑۵. CI هرگز قرمز نماند و هرگز شل نشود.** `--cov-fail-under=70` (که امروز واقعاً ۹۴٫۲۸٪ است)، گیت‌های `flutter analyze`، `dart format` (M109)، پین SDK، گیت WCAG استودیو و Gitleaks را **حذف یا ضعیف نکن**. آستانه‌ها فقط upward.
+jobهای فعلی که باید سبز بمانند — `ci.yml`: `secret-scan`, `docs`, `backend`, `studio`, `client-flutter`, `live-contract`, `e2e-api`, `client-pinned`؛ به‌علاوه `apk.yml`, `web.yml`, `container.yml`, `deploy.yml`, `client-format-fix.yml`, `gitleaks-fingerprints.yml`.
 
-**۳‑۶. سیاست ابزار جدید.** فقط ابزاری اضافه کن که همه‌ی این شرایط را داشته باشد: اوپن‌سورس + کاملاً رایگان + بدون نیاز به سرویس ابری پولی + قابل اجرا در CI یا محلی.
-- **لایسنس مجاز برای وابستگیِ توزیع‌شده** (چیزی که در ایمیج/APK/استودیو ship می‌شود): MIT، Apache‑2.0، BSD، ISC، MPL‑2.0. **GPL/AGPL ممنوع** — چون `LICENSE` پروژه Proprietary است.
-- **لایسنس مجاز برای ابزار dev/CI** (اجرا می‌شود ولی ship نمی‌شود): GPL/AGPL هم مجاز است. پس `repowise` (AGPL)، `hadolint` (GPL)، `k6` (AGPL) به‌عنوان **ابزار** مشکلی ندارند؛ به‌عنوان **کتابخانه‌ی داخل محصول** ممنوع‌اند.
-- قبل از افزودن هر وابستگی، یک خط در گزارش WP بنویس: نام، لایسنس، چرا، و اینکه «وابستگی توزیعی» است یا «ابزار dev».
+**۳‑۶. سیاست ابزار جدید.** اوپن‌سورس + کاملاً رایگان + بدون سرویس ابری پولی + قابل اجرا در CI یا محلی.
+- **وابستگی توزیعی** (داخل ایمیج/APK/استودیو): فقط MIT، Apache‑2.0، BSD، ISC، MPL‑2.0. **GPL/AGPL ممنوع** (لایسنس پروژه Proprietary است).
+- **ابزار dev/CI** (اجرا می‌شود، ship نمی‌شود): GPL/AGPL مجاز است (مثل `k6`، `hadolint`، `repowise`).
+- برای هر وابستگی جدید یک خط در گزارش: نام، لایسنس، چرا، «توزیعی» یا «dev».
 
 **۳‑۷. حریم خصوصی و داده.** محصول داده‌ی سلامتی و **زیست‌سنجشی (چهره)** پردازش می‌کند.
-- هیچ داده‌ی واقعی عضو، چهره، رسید پرداخت یا شماره‌ی واقعی در مخزن، تست، فیکسچر، آرتیفکت CI یا گزارش نگذار. فقط synthetic (`faker` در بک‌اند؛ داده‌ی ساختگی در کلاینت/استودیو).
-- هیچ مقدار محرمانه‌ای را در لاگ چاپ نکن. الگوی موجود Gitleaks (`--redact` + «value withheld») را در همه‌ی گیت‌های جدید حفظ کن.
-- قبل از هر تغییر در مسیر چهره/پرداخت، `docs/MuscleParadise/security/biometric-policy.md`، `FACEID-PRIVACY-TEXT.md` و `DATA-RETENTION.md` را بخوان و ناسازگاری را ثبت کن.
+- هیچ داده‌ی واقعی عضو/چهره/رسید/شماره در مخزن، تست، فیکسچر، آرتیفکت CI، اسکرین‌شات یا گزارش نگذار. الگوی درستِ موجود: داده‌ی seed مصنوعی (`qa-report/tools/seed_live.py`، «عضو فیک …» در `buttons.json`).
+- الگوی redaction موجود Gitleaks (`--redact`، «value withheld») را در همه‌ی گیت‌های جدید حفظ کن.
+- قبل از دست‌زدن به مسیر چهره/پرداخت: `security/biometric-policy.md`, `FACEID-PRIVACY-TEXT.md`, `DATA-RETENTION.md`, `modules/privacy/`.
 
-**۳‑۸. مستندسازی هم‌زمان.** هر WP باید در پایان:
-- `docs/MuscleParadise/SESSION_HANDOFF.md` را به‌روز کند (وضعیت، قدم بعدی).
-- یک گزارش در `finn/reports/<slug>.md` بنویسد (الگوی موجود: `m97-migration-drift.md`, `m98-haptics-motion.md`).
-- اگر معماری/قرارداد عوض شد، ADR یا `docs/MuscleParadise/architecture/c4.md` و `module-map.md` را به‌روز کند.
-- `python3 scripts/docs_gate.py` باید سبز بماند.
+**۳‑۸. مستندسازی هم‌زمان.** هر WP: به‌روزرسانی `SESSION_HANDOFF.md` + گزارش در `finn/reports/<slug>.md` + (در صورت تغییر معماری) ADR یا `architecture/c4.md`/`module-map.md`. `python3 scripts/docs_gate.py` و `tools/mermaid-check` باید سبز بمانند.
 
-**۳‑۹. زبان.** مستندات، کامنت‌های توضیحی و گزارش‌ها فارسی؛ شناسه‌های کد، نام فایل، پیام کامیت و کد انگلیسی (مطابق وضعیت فعلی مخزن).
+**۳‑۹. زبان.** مستند/کامنت/گزارش فارسی؛ شناسه‌ها، نام فایل، پیام کامیت و کد انگلیسی.
 
-**۳‑۱۰. هزینه.** هیچ سرویس پولی، کلید API پولی یا اشتراکی اضافه نکن. اگر مسیری فقط با سرویس پولی ممکن بود، آن مسیر را در گزارش «مسدود — نیاز به تصمیم انسانی» بنویس و از مسیر رایگان/محلی جایگزین استفاده کن.
+**۳‑۱۰. هزینه.** هیچ سرویس یا کلید پولی اضافه نکن. مسیر مسدود را «مسدود — نیاز به تصمیم انسانی» ثبت کن و از جایگزین رایگان/محلی استفاده کن (الگوی درست: `scripts/dast.py` که به‌جای ZAP/nucleiِ غیرقابل‌نصب، از schemathesis استفاده کرد و دلیلش را صادقانه نوشت).
 
-**۳‑۱۱. ترتیب ایمنی.** هیچ‌گاه ریفکتور را قبل از سبز شدن گیت‌های جهش (WP‑05) روی همان مسیر شروع نکن. اول اثبات کن تست‌ها باگ می‌گیرند، بعد ساده‌سازی کن.
+**۳‑۱۱. ترتیب ایمنی.** ریفکتور (WP‑14، WP‑21) فقط **بعد** از سبز شدن گیت جهش (WP‑07) روی همان مسیر.
 
-**۳‑۱۲. دامنه.** فقط داخل مخزن `MP` کار کن. هیچ تغییری در مخزن‌های دیگر، در حساب کاربری، در تنظیمات GitHub (branch protection، environments، secrets) یا در زیرساخت بیرونی ایجاد نکن؛ این‌ها در بخش ۷ فهرست شده‌اند.
+**۳‑۱۲. دامنه.** فقط داخل مخزن `MP`. هیچ تغییری در تنظیمات GitHub (branch protection، environments، secrets، «automatically delete head branches»)، حساب کاربری، یا زیرساخت بیرونی نده — این‌ها در بخش ۸ آمده‌اند.
 
-**۳‑۱۳. راستی‌آزمایی شاهد قبل از عمل (اجباری).** هر «شاهد» در این سند از کامیت `e6fa0a9` است. قبل از شروع هر WP:
-1. دستورِ اندازه‌گیریِ همان شاهد را روی checkout جاری اجرا کن (دستورات در پیوست C و در خود WP آمده).
-2. عدد امروز را در گزارش WP بنویس (ستون «عدد پایه» در پیوست ۹).
-3. اگر حفره **بسته شده** بود: WP را با وضعیت «قبلاً انجام شده — شاهد: <…>» ببند و فقط گیتِ ضد‌رگرسیونش را اضافه کن (مثلاً اگر golden تست وجود دارد، گیت CI‌اش را بساز).
-4. اگر حفره **بدتر شده** بود (مثلاً `dynamic` از ۱۹۷ بیشتر شده): همان عدد جدید را پایه بگذار و در گزارش علامت بزن.
-5. اگر WP **با کار نیمه‌تمام تداخل دارد** (مسیر الف): آن را تا تمام‌شدن آن مسیر به تعویق بینداز و در صف بنویس «وابسته به تمام‌شدن <milestone>».
+**۳‑۱۳. راستی‌آزمایی شاهد قبل از عمل (اجباری).** قبل از هر WP: دستور اندازه‌گیریِ شاهدش را روی checkout جاری اجرا کن، عدد امروز را در ستون «عدد پایه» گزارش بنویس. اگر حفره بسته شده بود → WP را «قبلاً انجام‌شده — شاهد: …» ببند و فقط **گیت ضد‌رگرسیونش** را اضافه کن. اگر بدتر شده بود → عدد جدید را پایه بگذار و علامت بزن.
 
-**۳‑۱۴. تمام‌کردن قبل از سخت‌سازی.** روی کدی که هنوز نوشته نشده یا نیمه‌کاره است، گیت سخت‌گیرانه نگذار؛ اول قابلیت را کامل کن (مسیر الف)، بعد گیت‌های همان مسیر را از این سند اعمال کن. استثنا: WP‑01 تا WP‑04 که همیشه مجاز و لازم‌اند.
+**۳‑۱۴. کار تکراری نکن.** بخش ۴‑ب فهرست کارهای بسته‌شده است. اگر شاهی در آن فهرست بود، آن را دوباره اجرا نکن؛ فقط گیت پایدارساز اضافه کن.
+
+**۳‑۱۵. صداقتِ شاهد.** اگر کاری نیاز به دسترسی بیرونی، secret، دستگاه واقعی یا محیط production دارد و در این محیط ممکن نیست، آن را **صریحاً `BLOCKED`** ثبت کن (الگوی `qa-report/FINAL-REPORT.md` و `evidence/m60/STATUS.md`) و سراغ بعدی برو. «انجام شد»ِ بدون شاهد، ممنوع است.
 
 ---
 
-## ۴) وضعیت موجود — این‌ها هست؛ دوباره نساز
+## ۴) وضعیت موجود
 
-ممیزی تأیید کرد که موارد زیر **پیاده‌سازی شده‌اند**. کار تو گسترش/تعمیق این‌هاست، نه بازسازی.
+### ۴‑الف) توانمندی‌های تأییدشده (این‌ها قوی‌اند؛ خرابشان نکن)
 
-**CI و گیت‌ها (`.github/workflows/ci.yml`)**
-- `secret-scan`: نصب Gitleaks با **راستی‌آزمایی checksum نسخه‌ی 8.30.1**، اسکن **کل تاریخچه** با `--redact`، خلاصه‌ی بدون مقدار در `GITHUB_STEP_SUMMARY` و annotation روی خط.
-- `docs`: `python3 scripts/docs_gate.py` (پیوندهای محلی، دیاگرام‌ها، handoff).
-- `backend`: `ruff check` + `ruff format --check` + `pytest --cov=. --cov-report=xml --cov-fail-under=70` + **bandit + pip-audit** + **Semgrep با قواعد اختصاصی `.semgrep/`** + جمع‌آوری و آپلود دیاگنوستیک در صورت شکست.
-- `studio`: `npm test` (Vitest، **شامل گیت‌های WCAG و sync توکن‌ها**) + `npm run build` (`tsc -b && vite build`) + `npm audit` با گیت «بدون بحرانی».
-- `client-flutter`: `flutter analyze` با گیت روی error/warning (نه info) + fallback پارس machine-format + annotation و sidecar JSON برای نام تست‌های شکست‌خورده (`tools/ci_test_failures.py`) + `flutter test`.
-- `live-contract`: seed دیتابیس → اجرای واقعی API با uvicorn → تست **کلاینت TS استودیو در برابر API زنده** (`tests/liveContract.test.ts`) با توکن JWT واقعی.
-- `e2e-api`: `pytest tests/integration` روی مسیرهای حیاتی (ثبت‌نام ← پرداخت ← چک‌این + تأیید برنامه).
+**تست و پوشش**
+- بک‌اند: `qa-report/FINAL-REPORT.md` → **۱۰۹۵ تست پاس، ۲ skip، پوشش ۹۴٫۲۸٪** (گیت `--cov-fail-under=70` در `ci.yml:131`)؛ **۱۴۴ فایل تست** شامل `integration/`, `unit/`, `regression/`, `evaluation/`, `e2e/`.
+- استودیو: **۲۸۲ تست vitest پاس، ۹ skip**، `tsc --noEmit` بدون خطا، `tsconfig` → `"strict": true`، **صفر `: any` در `src/`**، گیت‌های WCAG و sync توکن‌ها، `tests/a11y.test.tsx`, `tests/apiCoverage.test.ts`, `tests/liveContract.test.ts`, `tests/topbarTitles.test.tsx`.
+- کلاینت: ۲۹ فایل تست؛ job `client-pinned` با **پین Flutter 3.50.0 + بررسی drift در برابر `.devcontainer/Dockerfile`**، `flutter analyze` (خط/هشدار = شکست)، `flutter test --coverage`، **کامپایل Android debug** به‌عنوان شاهد Kotlin/Gradle، و **گیت `dart format` (M109)**.
+- **صفر stub**: `NotImplementedError`/`UnsupportedOperationException`/«not implemented» = **۰** (در ممیزی قبلی ۳۶ بود).
 
-**انتشار و عملیات**
-- `apk.yml`: بیلد `flutter build apk --release --split-per-abi` با build-number/name + SHA256 + **ممیزی عمیق APK با apktool** + آرتیفکت دیاگنوستیک.
-- `container.yml`: بیلد و push ایمیج backend و studio به GHCR با تگ full‑SHA.
-- `deploy.yml`: `preflight` (الزام dispatch از شاخه‌ی محافظت‌شده) → `build-and-push` → `deploy` روی Dokploy با **readiness gate** → `rollback` با **تگ صریح + readiness gate**.
-- `mp-app/infra/`: `Caddyfile`, `Dockerfile.backend`, `docker-compose.yml`, `ansible/{inventory.ini,playbook.yml}`, `monitoring/{prometheus.yml,alerts.yml}`, `scripts/{healthcheck.sh,rollback.sh,compress-media.sh}`.
-- گیت بار: `mp-app/tests/load/k6-gate.js` با SLO `p(95)<2000ms` و `errors<0.05`.
+**امنیت**
+- `ci.yml` → `secret-scan`: Gitleaks با **راستی‌آزمایی checksum نسخه**، اسکن **کل تاریخچه**، `--redact`، خلاصه‌ی بدون مقدار. به‌علاوه `gitleaks-fingerprints.yml` و اثرانگشت‌گذاری در `client-format-fix.yml`.
+- `bandit` + `pip-audit` + **Semgrep با `.semgrep/project-rules.yml`** در job بک‌اند.
+- `mp-app/backend/app/security/headers.py`: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy: camera=(self), microphone=(), geolocation=()`.
+- `mp-app/infra/Caddyfile`: همان هدرها در لبه + `Strict-Transport-Security: max-age=63072000; includeSubDomains` + حذف `-Server` + TLS خودکار + `encode gzip zstd` + لاگ JSON.
+- **امضای Android اصلاح شده**: `build.gradle.kts` از `MP_ANDROID_KEYSTORE_PATH/STORE_PASSWORD/KEY_ALIAS/KEY_PASSWORD` (PKCS12) می‌خواند و **fallback به debug حذف شده** — با کامنت صریح «A release must never silently use the public Android debug signing key».
+- `security/crypto.py` → `FaceEmbeddingCipher`؛ ماژول `modules/privacy/`؛ RBAC با **تست parity** (۱۳ تست استودیو + ۱۴ تست بک‌اند) و اثبات زنده‌ی ۴۰۳ (`evidence/m60/STATUS.md` R3).
+- `deploy_gate.py`: ۹ بررسی ایستا (که یک باگ واقعی پیدا کرد: `MP_JWT_SECRET` → `MP_SECRET_KEY`).
+- Electron: `contextIsolation: true`, `nodeIntegration: false` در `mp-app/studio/electron/main.cjs`.
 
-**دیتابیس و تست**
-- Alembic با چندین migration + تست‌های drift و بکاپ: `tests/integration/test_migrations.py`, `test_m47_migration_drift.py`, `test_m97_migrations_and_backup.py`, `test_backup_drill.py`, `tests/unit/test_backup.py`.
-- سخت‌سازی SQLite در `mp-app/backend/db/base.py:118-121`: `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=15000`, `foreign_keys=ON`.
-- RBAC: `tests/regression/test_rbac.py`, `tests/unit/test_rbac_policies.py`, `tests/integration/test_m67_studio_auth.py`.
-- رمزینه‌نگاری زیست‌سنجشی: `security/crypto.py` شامل `FaceEmbeddingCipher`.
-- موتور ارزیابی AI: `mp-app/backend/eval/` + `tests/evaluation/test_eval_harness.py`, `test_prescription_eval.py`, `test_scoring_eval.py`.
-- ۱۱۸ فایل تست بک‌اند، ۲۸ فایل تست کلاینت، تست‌های استودیو شامل `a11y.test.tsx`, `apiCoverage.test.ts`, `authFlow.test.tsx`, `liveContract.test.ts`.
-- آفلاین: `mp-app/client/test/offline_feedback_outbox_test.dart` + `docs/MuscleParadise/ANDROID-OFFLINE-PLAN.md` + `finn/reports/m86-offline-contract.md`, `m87-android-feedback-outbox.md`.
+**DAST و انتشار**
+- `mp-app/backend/scripts/dast.py` با **schemathesis** روی OpenAPI خودِ اپ؛ شاهد: `evidence/m60/dast.json` → **۱۲۸ عملیات، ۱۰۲۴ کیس، ۰ یافته، ۰ پاسخ 2xx بدون احراز هویت**. (عمداً خارج از pytest تا CI غیرقطعی نشود.)
+- `apk.yml`: بیلد `--split-per-abi` + SHA256 + **ممیزی عمیق با apktool** (شاهد: `evidence/m60/res-*.json` برای ۳ ABI، ۴۷۳ فایل، `coverage: complete`).
+- `web.yml`: بیلد وب Flutter با analyze/test/build + آرتیفکت `muscleparadise-web` + دیاگنوستیک شکست.
+- `container.yml` + `deploy.yml`: push به GHCR با تگ full‑SHA → Dokploy با **readiness gate** → `rollback` با تگ صریح و readiness gate.
+- `client-format-fix.yml`: اصلاح خودکار فرمت + PR، با `concurrency` و `cancel-in-progress`.
 
-**مستندات و فرایند**
-- `AGENTS.md` فارسی با پروتکل شروع نشست و اولویت منبع حقیقت؛ `docs/MuscleParadise/` با ۱۱۷ سند شامل `SESSION_HANDOFF.md`, `TODO-2026-11-16.md`, `MASTER_MAP.md`, `BUILD-QUEUE.md`, `RELEASE-CHECKLIST.md`, `OPS-RUNBOOK.md`, `TOOLING-RUNBOOK.md`, `DEPLOYMENT.md`, `PRD.md`, `CHANGELOG.md`, `architecture/c4.md`, `architecture/module-map.md`, `adr/001-modular-monolith.md`, `adr/002-sqlite-with-postgres-migration.md`.
-- امنیت و حریم خصوصی مستند: `SECURITY-AUDIT-2026-11-15.md`, `SECURITY-REVIEW-2026-11-15.md`, `security/owasp-checklist.md`, `security/biometric-policy.md`, `DATA-RETENTION.md`, `FACEID-PRIVACY-TEXT.md`.
-- ممیزی‌های قبلی: `AUDIT-2026-11-15.md`, `ACCESS-AUDIT-2026-11-15.md`, `OUTPUT-AUDIT-2026-11-14.md`, `COMPETITIVE-UX-AUDIT-2026-11-16.md`, `LOAD-TEST-2026-11-15.md`.
-- `NOTICE-THIRD-PARTY.md` و حلقه‌ی `F.I.N.N` با گزارش‌های `finn/reports/`.
-- سیستم ایجنتی `.claude/` با ۶۳۰ skill، ۱۲۲ rule، ۹۸ command، ۷۱ agent، ۹ hook.
+**کیفیت UI و بار**
+- `qa-report/FINAL-REPORT.md`: مرور ۱۱ صفحه با Chromium بی‌سر (`@sparticuz/chromium`) → **۰ خطای کنسول، ۰ پاسخ 4xx/5xx، ۰ استثنای صفحه، ۰ سرریز افقی**؛ **۱۰۱ دکمه‌ی یکتا شناسایی و ۴۵ مورد کلیک شد** (`qa-report/buttons.json`) با ۰ خطا.
+- انیمیشن با framer-motion و **احترام به `prefers-reduced-motion`**.
+- Locust با ۲۰۰ کاربر همزمان: ۱۰٬۸۴۷ درخواست، **۰٪ خطا**، p50=38ms، **p95=210ms**، p99=330ms (`qa-report/load/locust_stats*.csv`، نمودار `qa-report/graphs/load-latency-200users.png`).
+- `mp-app/tests/load/k6-gate.js` با SLO `p(95)<2000ms` و `errors<0.05`.
 
-**موتورها (هدف اصلی تست عمیق)** — `mp-app/backend/engine/` شامل ۱۹ ماژول:
-`adaptive_nutrition`, `autoreg`, `axis_map`, `axis_prescription`, `axis_rules`, `catalog_sync`, `churn_risk`, `feedback_apply`, `gender_plans`, `nutrition`, `readiness`, `reminders`, `safety`, `scoring`, `segmental`, `set_feedback`, `sync_lww`, `volume`, `workout`.
+**داده و معماری**
+- پول به‌درستی **عدد صحیح ریال** است: `amount_rial`, `price_rial`, `unit_price_rial`, `total_rial`, `discount_rial`, `payments_total_rial`, `expenses_total_rial` همگی `Mapped[int] = mapped_column(Integer)`؛ `Numeric: 0`, `BigInteger: 0`, و `Float: 11` فقط برای اندازه‌گیری‌ها (`grams`, `weight_kg`, `score`, `percentile`, `raw_value`, `sdc`). **هیچ پول شناوری وجود ندارد.**
+- زمان: **صفر `datetime.now()` naive**؛ ۱۵ ارجاع به `zoneinfo`/`Asia/Tehran`/`timezone.utc`؛ ۲۵ فایل با منطق جلالی.
+- SQLite سخت‌شده در `db/base.py`: `journal_mode=WAL`, `synchronous=NORMAL`, `busy_timeout=15000`, `foreign_keys=ON`.
+- Alembic + تست‌های drift/بکاپ: `test_migrations.py`, `test_m47_migration_drift.py`, `test_m97_migrations_and_backup.py`, `test_backup_drill.py`, `tests/unit/test_backup.py`.
+- ۲۴ ماژول بک‌اند شامل `payments`, `expenses`, `shop`, `membership`, `face_id`, `privacy`, `outbox`, `notification`, `reporting`, `population`, `updates` و ۱۹ موتور در `engine/`.
+- تست‌های مالی: `test_payments_deep.py`, `test_m83_wallet_ledger.py`, `test_g2_coupons.py`, `test_classes_finance.py`, `test_m59_shop.py`, `test_phase6c_expenses.py`, `test_qf06_expense_receipt.py`.
+- `NOTICE-THIRD-PARTY.md` **دقیق و با شاهد**: `yuhonas/free-exercise-db` با **The Unlicense** + commit `f00c92c` + sha256 + `SOURCE.md`؛ و `REA skill` با MIT + commit `bb5278c`.
+- `docs/MuscleParadise/` با ۱۶۷ سند شامل ADRها، `architecture/c4.md`, `module-map.md`, خروجی‌های **RepoWise**، `OWNER-DECISIONS.md`, `OPS-RUNBOOK.md`, `PLAN-CLOUD-PRODUCTION.md`, `DATA-RETENTION.md`.
+
+### ۴‑ب) موارد بسته‌شده از زمان ممیزی قبلی (`e6fa0a9`) — دوباره انجام نده
+
+| مورد در نسخه‌ی ۱ | وضعیت امروز | شاهد |
+|---|---|---|
+| fallback امضای release به کلید debug | **بسته شد** | `build.gradle.kts:34-49` — env var + PKCS12، بدون fallback |
+| نبودِ پین نسخه‌ی SDK و drift | **بسته شد** | job `client-pinned` با `flutter-version: "3.50.0"` + بررسی انطباق با devcontainer + گیت `dart format` |
+| نبودِ بیلد وب | **بسته شد** | `web.yml` (analyze/test/build/artifact/diagnostics) |
+| `strict` نبودن TypeScript استودیو | **بسته شد** | `tsconfig.json:14` → `"strict": true`؛ **`: any` = ۰** در `src/` |
+| ۳۶ کد stub/نیمه‌تمام | **بسته شد** | شمارش امروز = **۰** |
+| نبودِ DAST | **بسته شد** | `scripts/dast.py` + `evidence/m60/dast.json` (۱۰۲۴ کیس، ۰ یافته) |
+| نبودِ ممیزی عمیق APK | **بسته شد** | `apk.yml` → apktool؛ `evidence/m60/res-*.json` (۳ ABI، ۴۷۳ فایل) |
+| نبودِ provenance برای دارایی ثالث | **بسته شد** | `NOTICE-THIRD-PARTY.md` + `data/external/free_exercise_db/SOURCE.md` |
+| سنگینی مخزن (`.claude/` با ۹۳۱ فایل) | **بسته شد** | فایل‌های ترک‌شده ۱۶۷۸ → **۱۱۴۷** |
+| نبودِ سرچشمه‌ی معماری/بهداشت کد | **بسته شد** | RepoWise در `docs/MuscleParadise/architecture/` و `BUILDER-START-AND-REPOWISE.md` |
+| نبودِ اتوماسیون فرمت/اثرانگشت | **بسته شد** | `client-format-fix.yml`, `gitleaks-fingerprints.yml`, `tools/mermaid-check` |
+
+### ۴‑پ) نقص‌های بازِ ثبت‌شده توسط QA خودتان (باید بسته شوند)
+
+از `qa-report/FINAL-REPORT.md`:
+1. **قفل‌شدگی استخر اتصال SQLite** (`QueuePool` ظرفیت ۴۰+۲۰، `pool_timeout=5s`) → همه‌ی درخواست‌ها timeout و سرور تا ریستارت قفل؛ **غیرقابل بازتولید، علت ریشه‌ای ثابت نشده**؛ تعداد fd ثابت (۱۱۸). ← **WP‑01**
+2. بنر به‌روزرسانی روی محتوای صفحه می‌افتد (نمایشی). ← **WP‑09**
+3. ایموجی ❤️/💚 در فوتر به‌صورت جعبه رندر می‌شود (فونت). ← **WP‑15**
+4. `nutrition/food-logs/member/-1/daily` با شناسه‌ی `−1` → پاسخ **200 با مقدار placeholder** (باید 404/422 باشد). ← **WP‑10**
+5. دکمه‌های مالی/مخرب در مرورگر کلیک نشدند (`BLOCKED` — نیاز به محیط و داده‌ی جدا). ← **WP‑12/WP‑11** با محیط ایزوله
+6. `JADX` مسدود (هیچ JDK در محیط نیست؛ `jdk4py` فقط JRE است). ← **BLOCKED** بماند و ثبت شود
 
 ---
 
-## ۵) بسته‌های کاری
+## ۵) اعداد پایه‌ی امروز (کامیت `662ff88`) — مبنای گیت ضد‌رگرسیون
 
-> اولویت: **P0** = قبل از هر انتشار؛ **P1** = عمق تست و نوع؛ **P2** = کلاس جهانی.
-> شماره‌ی WP را در پیام کامیت و نام شاخه بیاور (مثلاً `wp02: trivy + sbom + hadolint + cosign gates`).
+این جدول را در `.ci-baseline.json` (یا معادل) commit کن. هر گیت ضد‌رگرسیون باید **فقط کاهش** را بپذیرد.
 
-### WP‑00 · آماده‌سازی، شناسایی کار ناتمام، و صف یکپارچه — P0
-**چرا:** پروژه ناتمام است و شاهدِ این سند یک عکس فوری. بدون شناسایی دقیق «چه چیزی تمام نشده»، هم ترتیب غلط می‌شود هم دوباره‌کاری.
-**شاهد:** `AGENTS.md` می‌گوید وضعیت را از TODO جاری بگیر؛ `docs/MuscleParadise/TODO-2026-11-16.md`، `BUILD-QUEUE.md`، `LOOP-PLAN-M100-M106.md` و `SESSION_HANDOFF.md` وجود دارند. ۴۲ `TODO/FIXME/HACK` در `mp-app` اندازه‌گیری شد.
+| سنجه | مقدار امروز | روند نسبت به `e6fa0a9` |
+|---|---|---|
+| فایل‌های ترک‌شده | ۱۱۴۷ | ↓ (از ۱۶۷۸) ✅ |
+| تست‌های بک‌اند (فایل) | ۱۴۴ | ↑ (از ۱۱۸) ✅ |
+| پوشش بک‌اند | ۹۴٫۲۸٪ (گیت ۷۰٪) | ✅ |
+| تست‌های استودیو | ۲۸۲ پاس / ۹ skip | — |
+| تست‌های کلاینت (فایل) | ۲۹ | ↑ (از ۲۸) |
+| golden تست کلاینت (`matchesGoldenFile`) | **۰** | بدون تغییر ❌ |
+| `integration_test` / patrol کلاینت | **۰ / ۰** | بدون تغییر ❌ |
+| فایل‌های دارای `Semantics` در `client/lib` | **۳** | بدون تغییر ❌ |
+| `dynamic` در `client/lib` | **۱۹۷** | بدون تغییر ❌ |
+| کست `as` در `client/lib` | **۱۹۲** | ↑ جزئی (از ۱۹۱) ❌ |
+| `// ignore` در `client/lib` | ۰ | ✅ |
+| `: any` در `studio/src` | **۰** | ✅ |
+| `strict` در tsconfig استودیو | true | ✅ |
+| فایل‌های l10n/ARB/intl | **۰** | بدون تغییر ❌ |
+| آستانه‌ی پوشش کلاینت | **ندارد** (فقط جمع‌آوری) | ❌ |
+| `print()` در کد غیرتست بک‌اند | **۴۱** | بدون تغییر ❌ |
+| `except Exception` در بک‌اند | **۲۲** | ↑ (از ۱۱) ⚠️ |
+| `TODO/FIXME/HACK` در `mp-app` | **۴۸** | ↑ (از ۴۲) ⚠️ |
+| تست‌های skip/disabled | **۶** | ↑ (از ۲) ⚠️ |
+| stub / `NotImplementedError` | **۰** | ↓ (از ۳۶) ✅ |
+| ابزار mutation | **۰** | بدون تغییر ❌ |
+| تست property (دایرکتوری/فایل) | **۰** (فقط `dast.py` از hypothesis استفاده می‌کند) | ❌ |
+| `hypothesis` در dev deps | **اعلام نشده** ⚠️ | — |
+| گیت‌های زنجیره‌ی تأمین آرتیفکت (sbom/trivy/grype/hadolint/cosign/codeql/dependency-review) | **۰** | بدون تغییر ❌ |
+| گزارش خطا/crash (sentry/glitchtip/rollbar/bugsnag) | **۰** | بدون تغییر ❌ |
+| `Content-Security-Policy` (Caddyfile و `security/headers.py`) | **۰** | ❌ |
+| `openapi.json` ترک‌شده / گیت oasdiff | **۰ / ۰** | بدون تغییر ❌ |
+| ابزار آشوب (toxiproxy/respx/vcrpy) | **۰** | بدون تغییر ❌ |
+| سناریوهای k6 (اندپوینت) | **۲** | بدون تغییر ❌ |
+| `isMinifyEnabled` / `isShrinkResources` / `.aab` | **۰ / ۰ / ۰** | بدون تغییر ❌ |
+| `npm ci \|\| npm install` | **۲ مورد** (`ci.yml:178`, `ci.yml:392`) | بدون تغییر ❌ |
+| ESLint در devDeps استودیو / فایل کانفیگ | **۰ / ۰** (اسکریپت `lint` مرده است) | ❌ |
+| `mp.db` ترک‌شده در ریشه | **۱ فایل ۸۶۴KB، ۵۲ جدول، همه خالی (۰ سطر)** | جدید ⚠️ |
+| آیتم‌های باز `RELEASE-CHECKLIST.md` | **۲۱ باز / ۱۹ انجام** | ⚠️ |
+| قوانین Semgrep | ۱ فایل (`project-rules.yml`) | — |
+
+---
+
+## ۶) بسته‌های کاری
+
+> **P0** = مانع انتشار · **P1** = عمق کیفیت · **P2** = کلاس جهانی. شماره‌ی WP را در پیام کامیت بیاور.
+
+### WP‑00 · صف و راستی‌آزمایی — P0
+**چرا:** بدون صفِ راستی‌آزمایی‌شده، کار تکراری و ترتیب غلط می‌شود.
+**شاهد:** بخش ۵ این سند (اعداد `662ff88`).
 **کار:**
-1. `git status --short --branch` و آخرین کامیت را ثبت کن؛ اختلاف آن با `e6fa0a9` را فهرست کن (چه چیزهایی از زمان ممیزی عوض شده).
-2. **کار ناتمام را با شاهد پیدا کن** — فقط از مستند حدس نزن، این‌ها را هم اجرا کن:
-   - `TODO/FIXME/HACK/XXX` در `mp-app/**` (کد، نه docs) با مسیر و خط.
-   - stubها: `NotImplementedError`، `UnsupportedOperationException`، `raise NotImplemented`، `pass` در بدنه‌ی تابع، `throw new Error('not implemented')`، توابع خالی، `// TODO: implement`.
-   - endpointهای ثبت‌شده در `api/v1/**` که هیچ مصرف‌کننده‌ای در کلاینت/استودیو ندارند یا برعکس (UI که API‌اش نیست).
-   - تست‌های skip/disabled (`@pytest.mark.skip`, `it.skip`, `test.skip`, `@Disabled`) و تست‌هایی که هیچ assert ندارند.
-   - صفحات/کامپوننت‌های کلاینت و استودیو که stateهای `empty/error/loading` ندارند.
-   - موارد بازِ `RELEASE-CHECKLIST.md` (چک‌باکس‌های `[ ]`) — مثلاً همان کلید signing افشاشده و دریل restore.
-   - هر `docs/MuscleParadise/*-PLAN*.md` که در آن کار «برنامه‌ریزی‌شده» ولی در کد اثری نیست (مثلاً `ANDROID-OFFLINE-PLAN.md` در برابر `offline_feedback_outbox_test.dart`).
-3. `SESSION_HANDOFF.md`، TODO جاری، `BUILD-QUEUE.md` و `LOOP-PLAN-M100-M106.md` را بخوان و خروجی قدم ۲ را با آن‌ها آشتی بده: اگر چیزی در مستند «تمام» است ولی در کد ناتمام، **کد برنده است** و تناقض را صریح ثبت کن (مطابق `AGENTS.md`: حدس نزن، بی‌صدا بازنویسی نکن).
-4. یک صف یکپارچه بساز: `docs/MuscleParadise/AUDIT-FINAL-QUEUE-2026-11-18.md` با **دو ستون مسیر**:
-   - **مسیر الف (اتمام ساخت):** هر مورد ناتمام با شناسه، مسیر فایل، witness، milestone مربوطه، و تخمین اندازه.
-   - **مسیر ب (سخت‌سازی):** جدول WP‑01…WP‑16 با اولویت، وابستگی، و ستون «عدد پایه‌ی راستی‌آزمایی‌شده‌ی امروز».
-   - یک ستون **وابستگی متقابل**: کدام WP منتظر تمام‌شدن کدام قابلیت است.
-5. برای هر WP، شاهد را طبق قاعده‌ی ۳‑۱۳ دوباره اندازه بگیر و عدد امروز را در صف بنویس (اگر حفره بسته شده، WP را «قبلاً انجام‌شده» علامت بزن).
-6. `python3 scripts/docs_gate.py` را اجرا و سبز کن.
-**معیار پذیرش:** صف یکپارچه با هر دو مسیر commit شده؛ هیچ `TODO`/stub/تست skip بی‌تکلیف نمانده (یا انجام شده، یا ردیف‌دار در صف با مسئول و وابستگی)؛ عدد پایه‌ی هر WP راستی‌آزمایی و ثبت شده؛ `docs_gate.py` سبز؛ `SESSION_HANDOFF.md` به این سند و صف ارجاع می‌دهد.
+1. `git status --short --branch` و HEAD را ثبت کن؛ اختلاف با `662ff88` را فهرست کن.
+2. هر ۲۱ آیتم بازِ `docs/MuscleParadise/RELEASE-CHECKLIST.md` را به سه دسته تقسیم کن: **(a)** ایجنت می‌تواند انجام دهد، **(b)** نیاز به secret/دستگاه واقعی/production دارد → `BLOCKED` با دلیل دقیق، **(c)** فقط مالک می‌تواند (تنظیمات GitHub، چرخش کلید).
+3. همه‌ی اعداد بخش ۵ را دوباره اندازه بگیر و در `docs/MuscleParadise/AUDIT-FINAL-2026-11-20.md` به‌عنوان «عدد پایه‌ی راستی‌آزمایی‌شده» ثبت کن.
+4. صف اجرایی بساز: WP‑01…WP‑21 با اولویت، وابستگی، و ستون وضعیت.
+5. `python3 scripts/docs_gate.py` و `tools/mermaid-check` را سبز کن.
+**معیار پذیرش:** سند صف commit شده؛ هر ۲۱ آیتم چک‌لیست دسته‌بندی شده؛ اعداد پایه راستی‌آزمایی شده؛ docs_gate سبز.
 
 ---
 
-### WP‑01 · یکپارچگی امضا و بیلد Android — P0
-**چرا:** یک بیلد «release» می‌تواند **بی‌صدا با کلید debug** امضا شود و هیچ shrinking/obfuscation یا AAB وجود ندارد.
-**شاهد:**
-- `mp-app/client/android/app/build.gradle.kts:52-55` → `signingConfig = if (…storeFile != null) release else debug`.
-- در `buildTypes.release` هیچ `isMinifyEnabled` / `isShrinkResources` / `proguardFiles` نیست.
-- در هیچ workflow ای `.aab`/`appbundle` ساخته نمی‌شود (فقط `flutter build apk`).
-- `defaultConfig` هنوز کامنت قالب Flutter («TODO: Specify your own unique Application ID») دارد.
-- `docs/MuscleParadise/RELEASE-CHECKLIST.md:12` → «کلید signing افشاشده rotate/revoke … **حذف فایل از HEAD کافی نیست**» (باز).
+### WP‑01 · ریشه‌یابی و رفع قفل‌شدگی استخر اتصال — P0 · بحرانی‌ترین مورد
+**چرا:** یک حادثه‌ی **قفل‌شدگی کامل سرور** در تست بار ثبت شده که تا ریستارت ادامه داشته و علتش ثابت نشده. در production یعنی باشگاه خاموش می‌شود. این تنها موردی است که می‌تواند همه‌ی بقیه را بی‌ارزش کند.
+**شاهد:** `qa-report/FINAL-REPORT.md` بخش ۵ — «استخر اتصال SQLite (`QueuePool` با ظرفیت ۴۰+۲۰) پر شد و تمام درخواست‌ها timeout گرفتند (`pool_timeout=5s`). سرور تا ریستارت قفل ماند… **علت ریشه‌ای ثابت نشده است**»؛ اجرای ۲ = ۰ درخواست؛ fd ثابت ۱۱۸. `db/base.py` → WAL + `busy_timeout=15000`. ADR‑002 = SQLite با مسیر مهاجرت به Postgres.
 **کار:**
-1. fallback به debug را **به شکست صریح** تبدیل کن: اگر `keystore.properties` یا فیلدهایش نبود، بیلد release با پیام خوانا **fail** شود. هیچ مسیر بی‌صدایی باقی نماند.
-2. `release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(…) }` + قواعد ProGuard/R8 سازگار با Flutter و هر پلاگین استفاده‌شده؛ سپس APK را با `apkanalyzer`/apktool بررسی کن که چیزی لازم حذف نشده.
-3. ساخت **`.aab`** را به `apk.yml` اضافه کن (`flutter build appbundle --release`) با SHA256 و آرتیفکت، در کنار APK موجود.
-4. گیت اندازه‌ی بیلد: آستانه‌ی صریح برای حجم APK/AAB (عدد پایه را از بیلد فعلی بگیر و ۵٪ سقف بگذار) تا رشد ناخواسته‌ی باندل قرمز شود.
-5. کامنت قالب TODO در `defaultConfig` را پاک کن.
-6. **چرخش کلید و بازنویسی تاریخچه را انجام نده** — فقط یک سند اجرایی دقیق آماده کن (بخش ۷).
-**معیار پذیرش:** بیلد release بدون keystore معتبر **شکست می‌خورد** (نه امضای debug)؛ `isMinifyEnabled`/`isShrinkResources` فعال و APK ممیزی‌شده؛ `.aab` در CI ساخته و SHA256 ثبت می‌شود؛ گیت اندازه سبز؛ `apk.yml` کامل سبز.
-**ابزار:** `bundletool`، `apksigner verify`، `apkanalyzer` (همه رایگان/Android SDK)، `git-filter-repo` (MIT) فقط برای سند.
+1. **مشاهده‌پذیری استخر (اول از همه، چون بدون آن ریشه‌یابی ممکن نیست):** متریک‌های `pool_size`, `checked_out`, `overflow`, `wait_time`, `timeout_count` را با event listenerهای SQLAlchemy (`checkout`/`checkin`/`connect`) به Prometheus موجود (`mp-app/infra/monitoring/prometheus.yml`) اضافه کن + alert در `alerts.yml` روی «اشباع استخر» و «افزایش checkout بدون checkin».
+2. **نشت نشست را پیدا کن:** یک تست/اسکریپت تشخیصی بنویس که پس از هر درخواست تعداد sessionهای باز را بشمارد؛ middleware یا dependency ای که session را در مسیر استثنا/پاسخ جریان‌دار (streaming/SSE)/پس‌زمینه (`jobs/`, `outbox/`) باز نگه می‌دارد، شناسایی کن. مظنون‌های اول: مسیرهای AI/چت، `outbox`، `jobs`، هر ژنراتور/`BackgroundTask` که بعد از پاسخ DB نگه می‌دارد.
+3. **هارنس بازتولید:** یک اسکریپت بار موازی بنویس (Locust موجود یا k6) با ترکیب: نوشتن‌های همزمان + تراکنش‌های طولانی + مسیر AI + قطع ناگهانی کلاینت (connection reset وسط درخواست) + checkpoint WAL. هدف: **بازتولید قطعی** حادثه، نه تصادفی.
+4. **سخت‌سازی:** `pool_timeout` را از ۵s به مقدار منطقی + **fail fast با پاسخ ۵۰۳ قابل بازیابی** عوض کن (نه hang)؛ `pool_recycle`؛ سقف `max_overflow`؛ statement/lock timeout؛ و یک **watchdog** که اشباع پایدار را گزارش و در صورت نیاز worker را بازیابی کند.
+5. **تصمیم معماری را با شاهد ببند:** ADR‑002 را با نتیجه‌ی بارِ Postgres به‌روز کن — یک job CI (یا دستور مستند) که همان سناریوی بار را روی **Postgres** اجرا کند و اعداد را کنار SQLite بگذارد. اگر production روی SQLite می‌ماند، شرایط و سقف‌هایش را صریح در `PLAN-CLOUD-PRODUCTION.md` بنویس.
+6. **رفتار زیر فشار را تست کن:** وقتی DB قفل/پر است، `/api/v1/health/ready` باید **غیرسبز** شود تا Caddy/Dokploy ترافیک را قطع کند و `rollback` عمل کند؛ این را با تست اثبات کن.
+**معیار پذیرش:** متریک‌های استخر در Prometheus + alert فعال؛ نشتی جلسه **پیدا و رفع** شده با تست بازتولید (قبل/بعد)؛ هارس بازتولید commit شده؛ پاسخ ۵۰۳ fail-fast به‌جای hang؛ `health/ready` زیر فشار قرمز می‌شود (تست)؛ ADR‑002 با اعداد Postgres به‌روز؛ یک گزارش `finn/reports/…` با عدد p95/p99 قبل و بعد. اگر ریشه پیدا نشد: `BLOCKED` صریح با فهرست مظنون‌های رد‌شده و شاهد هرکدام — **بدون ادعای رفع**.
 
 ---
 
-### WP‑02 · زنجیره‌ی تأمین آرتیفکت (ایمیج، SBOM، امضا) — P0
-**چرا:** گیت‌های موجود **سطح کد** را پوشش داده‌اند (Gitleaks/bandit/pip-audit/npm audit/Semgrep)، ولی **آرتیفکت** پوشش ندارد؛ در حالی که ایمیج‌ها به GHCR push و روی Dokploy deploy می‌شوند.
-**شاهد:** grep روی کل `.github/workflows/` برای `sbom|trivy|grype|hadolint|cosign|syft|dependency-review|codeql` → **صفر نتیجه**. `container.yml` بیلد و push می‌کند؛ `deploy.yml` همان تگ SHA را deploy می‌کند.
+### WP‑02 · زنجیره‌ی تأمین آرتیفکت — P0
+**چرا:** گیت‌های سطح کد عالی‌اند (Gitleaks/bandit/pip-audit/Semgrep/npm audit) ولی **آرتیفکت** بی‌دروازه است، در حالی که ایمیج‌ها به GHCR می‌روند و با Dokploy deploy می‌شوند.
+**شاهد:** grep روی کل `.github/workflows/` برای `sbom|trivy|grype|hadolint|cosign|syft|dependency-review|codeql|zap|oasdiff` → **۰ نتیجه**. `container.yml` بیلد و push می‌کند؛ `deploy.yml` همان تگ SHA را deploy می‌کند.
 **کار:**
-1. در `container.yml` (یا یک job جدید `artifact-scan`) اضافه کن:
-   - **hadolint** روی `mp-app/backend/Dockerfile` و `mp-app/infra/Dockerfile.backend`.
-   - **Trivy** یا **Grype** روی هر ایمیج ساخته‌شده، با گیت صریح روی `CRITICAL`/`HIGH` (بدون `|| true`) و آپلود گزارش به‌عنوان آرتیفکت.
-   - **SBOM** CycloneDX برای هر ایمیج + آرتیفکت نسخه‌دار (مانند الگوی `chat2db-community-sbom` در پروژه‌های مشابه: `anchore/sbom-action`).
-   - **cosign** برای امضا و attestation (SLSA provenance) با `GITHUB_TOKEN` موجود؛ `deploy.yml` باید **فقط ایمیج امضاشده/معتبر** را deploy کند (verify قبل از Dokploy).
-2. یک job `dependency-review` روی `pull_request` اضافه کن.
-3. اسکن SBOM با Grype را به‌عنوان job زمان‌بند (هفتگی) اضافه کن تا CVEهای جدید بعد از انتشار هم دیده شوند.
-**معیار پذیرش:** هر PR که ایمیج می‌سازد، گزارش lint + CVE + SBOM + امضا دارد؛ یک CVE بحرانی بیلد را قرمز می‌کند؛ `deploy.yml` بدون attestation معتبر، deploy نمی‌کند.
-**ابزار:** `aquasecurity/trivy` (Apache‑2.0، ⭐39.5k) · `anchore/grype` (Apache‑2.0، ⭐13.3k) · `anchore/sbom-action` (Apache‑2.0) · `hadolint/hadolint` (GPL‑3.0 — ابزار dev، مجاز) · `sigstore/cosign` (Apache‑2.0، ⭐6.4k) · `actions/dependency-review-action`.
+1. job `artifact-scan` اضافه کن: **hadolint** روی `mp-app/backend/Dockerfile` و `mp-app/infra/Dockerfile.backend` و `mp-app/studio/Dockerfile`.
+2. **Trivy** (یا Grype) روی هر ایمیج ساخته‌شده با گیت صریح `CRITICAL,HIGH --exit-code 1` (بدون `|| true`) و آپلود گزارش.
+3. **SBOM** CycloneDX برای هر ایمیج + آرتیفکت نسخه‌دار؛ و یک job **زمان‌بند هفتگی** که SBOM را دوباره اسکن کند تا CVEهای پس از انتشار هم دیده شوند.
+4. **cosign**: امضا + SLSA provenance با `GITHUB_TOKEN`؛ و در `deploy.yml` یک مرحله‌ی **verify قبل از Dokploy** تا فقط ایمیج امضاشده deploy شود.
+5. `actions/dependency-review-action` روی `pull_request`.
+**معیار پذیرش:** هر بیلد ایمیج: lint + CVE + SBOM + امضا دارد؛ یک CVE بحرانی بیلد را قرمز می‌کند؛ `deploy.yml` بدون attestation معتبر deploy نمی‌کند؛ job هفتگی فعال.
+**ابزار:** `aquasecurity/trivy` (Apache‑2.0، ⭐39.5k) · `anchore/grype` (Apache‑2.0، ⭐13.3k) · `anchore/sbom-action` (Apache‑2.0) · `hadolint/hadolint` (GPL‑3.0، dev) · `sigstore/cosign` (Apache‑2.0، ⭐6.4k).
 
 ---
 
-### WP‑03 · قطعیت و کامل‌بودن CI — P0
-**چرا:** دو حفره‌ی تکرارپذیری: نصب غیرقطعی npm، و نبودِ گیت lint برای استودیو.
-**شاهد:**
-- `ci.yml` job `studio`: `run: npm ci || npm install` (و همین الگو در job `live-contract`) در حالی که `mp-app/studio/package-lock.json` ترک‌شده وجود دارد → اگر lockfile ناسازگار باشد CI **بی‌صدا نسخه‌ی دیگری نصب می‌کند و سبز می‌شود**.
-- job `studio` مراحل `Install → npm test → npm run build → npm audit` را دارد ولی **`npm run lint` (ESLint) را اجرا نمی‌کند**، در حالی که اسکریپت `lint` در `package.json` تعریف شده است.
-- `package.json` → `"lint": "eslint src --ext .ts,.tsx"` (سینتکس ESLint 8؛ با ESLint 9/flat config سازگار نیست).
+### WP‑03 · گزارش خطای زمان اجرا + CSP — P0
+**چرا:** هیچ crash/error tracking نیست؛ با وجود یک حادثه‌ی قفل‌شدگیِ **غیرقابل بازتولید**، این بزرگ‌ترین کوری عملیاتی است. ضمناً تنها هدر امنیتیِ غایب، CSP است.
+**شاهد:** grep برای `sentry|glitchtip|rollbar|bugsnag` در `mp-app` → **۰**. هدرهای موجود در `app/security/headers.py` و `Caddyfile` کامل‌اند **به‌جز `Content-Security-Policy`**. استودیو PWA است (`public/sw.js`, `manifest.webmanifest`) و کیوسک/وب هم دارد.
 **کار:**
-1. هر دو `npm ci || npm install` را به `npm ci` خالص تغییر بده؛ اگر lockfile ناسازگار بود، بیلد باید **قرمز** شود.
-2. `npm run lint` را به job `studio` اضافه کن (قبل از test). اگر اسکریپت lint با نسخه‌ی نصب‌شده‌ی ESLint کار نمی‌کند، همان WP باید آن را درست کند (مهاجرت به flat config یا پین کردن نسخه‌ی سازگار) — نه اینکه گیت را حذف کند.
-3. نسخه‌ی Node را در همه‌ی jobها یکسان و صریح پین کن (الان `"22"` است؛ `22.x.y` مشخص یا `node-version-file` از یک فایل `.nvmrc`/`package.json#engines`).
-4. یک فایل پین ابزار اضافه کن: `.tool-versions` یا `engines` در `package.json` + `requires-python` (که هست: py311) + نسخه‌ی Flutter (از `flutter-action`؛ صریح با `flutter-version`/`cache`).
-5. `concurrency` با `cancel-in-progress` برای push/PR اضافه کن (اگر نیست) تا اجراهای موازی روی یک شاخه همدیگر را مخدوش نکنند.
-**معیار پذیرش:** `npm ci` بدون fallback؛ lint استودیو به‌عنوان گیت در CI؛ نسخه‌های Node/Python/Flutter صریح و یکسان؛ CI سبز.
+1. **GlitchTip** self‑host را به `mp-app/infra/docker-compose.yml` و `ansible/playbook.yml` اضافه کن (کنار Prometheus موجود).
+2. بک‌اند: SDK + `release=git SHA` + `environment` + اتصال به `request_id` موجود + `before_send` برای **redaction** (موبایل، نام، embedding چهره، داده‌ی کارت).
+3. کلاینت Flutter و استودیو (وب + Electron): گزارش خطا با همان DSN؛ در کلاینت **رضایت و سیاست حریم خصوصی** مطابق `FACEID-PRIVACY-TEXT.md` و `biometric-policy.md`.
+4. **تست redaction**: payload ارسالی نباید هیچ PII واقعی داشته باشد (تست واحد روی تابع redact + یک نمونه‌ی anonymized در `evidence/`).
+5. **CSP** را به `app/security/headers.py` و `Caddyfile` اضافه کن (سیاست سخت‌گیرانه برای SPA/PWA: `default-src 'self'`، `img-src` شامل `data:`/`blob:` برای GIF حرکات، `connect-src` برای API، و `script-src` بدون `unsafe-inline` در صورت امکان) + **تست** که صفحه با CSP واقعی کار می‌کند (نه فقط هدر وجود دارد).
+6. `alerts.yml` را با «رشد نرخ خطای جدید» گسترش بده و در `OPS-RUNBOOK.md` یک بخش triage اضافه کن.
+**معیار پذیرش:** خطای عمدی در staging به GlitchTip می‌رسد با SHA و محیط؛ تست redaction سبز؛ CSP در لبه و در اپ فعال و **با تست مرورگری تأیید شده**؛ runbook به‌روز.
+**ابزار:** `burke-software/GlitchTip` (MIT، self‑host).
 
 ---
 
-### WP‑04 · گزارش خطا و crash در زمان اجرا — P0
-**چرا:** محصول روی کیوسک و موبایل در باشگاه اجرا می‌شود؛ امروز **هیچ سیگنال خطای زمان اجرایی** جز Prometheus وجود ندارد.
-**شاهد:** grep برای `sentry|glitchtip|rollbar|bugsnag` در کل `mp-app` → **صفر**. `mp-app/backend/app/logging.py` و `tests/integration/test_monitoring.py` و `mp-app/infra/monitoring/{prometheus,alerts}.yml` وجود دارند (پس لایه‌ی متریک هست، لایه‌ی خطا نیست).
+### WP‑04 · بستن ۲۱ آیتم بازِ `RELEASE-CHECKLIST.md` — P0
+**چرا:** خودِ پروژه فهرست آماده‌سازی انتشار دارد و **۲۱ مورد باز** است؛ این‌ها تعریف «آماده‌ی انتشار» هستند.
+**شاهد:** `docs/MuscleParadise/RELEASE-CHECKLIST.md` → ۲۱ `[ ]` در برابر ۱۹ `[x]`. نمونه‌های باز: خط ۱۲ (چرخش کلید signing افشاشده)، ۱۳ (Gitleaks روی کل history بدون baseline/allowlist پنهان)، ۱۴ (`.env` production با کلید JWT و کلید بیومتریک **مجزای ۳۲ بایتی**، CORS/TLS، secret manager)، ۱۵ (SMS واقعی/HTTPS و سیاست merchant/sandbox پرداخت؛ **`dev_code` و gateway mock در production ممنوع**)، ۱۶ (Valkey سالم، `health/ready` سبز، **rate-limit storage مشترک بین workerها**)، ۱۷ (`alembic upgrade head` روی scratch و روی clone امن backup + بررسی duplicate gateway authority)، ۱۸ (backup از `/data/mp.db` + **restore drill** + نسخه‌ی رمزنگاری‌شده‌ی خارج از میزبان)، ۱۹ (Prometheus/exporter/alerts دیده شوند + **Alertmanager با test notification**)، ۲۰ (تمرین واقعی push/deploy/rollback روی staging)، ۲۵‑۳۲ (تأییدیه‌های REA روی APK: شناسایی بیلد، امضای v1/v2/v3، عدم افشای source map/debug symbol/credential، هم‌خوانی `versionName` با تگ، `INTERNET` و `networkSecurityConfig` در مانیفست **release**، `android:debuggable="false"`، `ApiClient` فقط loopback/RFC1918 با HTTP، گزارش `rea/<date>-REA-GAP-CLOSURE.md`)، ۳۵‑۳۸ (بهداشت شاخه‌ها).
 **کار:**
-1. یک نمونه‌ی self‑host **GlitchTip** (سازگار با SDKهای Sentry، MIT) به `mp-app/infra/docker-compose.yml` و ansible اضافه کن (کنار Prometheus موجود).
-2. بک‌اند: یکپارچه‌سازی با SDK (ASGI middleware) + `before_send` برای **redaction** (شماره موبایل، نام، `face embedding`، هر فیلد حساس) + `environment` و `release=git SHA` + اتصال `request_id` موجود در لاگ.
-3. کلاینت Flutter: افزودن crash reporting با همان DSN و **رضایت/سیاست حریم خصوصی** مطابق `FACEID-PRIVACY-TEXT.md` و `biometric-policy.md`؛ هیچ داده‌ی زیست‌سنجشی در payload نباشد.
-4. استودیو: `window.onerror` + `unhandledrejection` + خطای Electron main/process.
-5. **تست redaction** بنویس: payload ارسالی باید شامل هیچ شماره/نام/embedding واقعی نباشد (تست واحد روی تابع redact).
-6. `alerts.yml` را با قاعده‌ی «رشد نرخ خطای جدید» گسترش بده و در `OPS-RUNBOOK.md` یک بخش «تریage خطای زمان اجرا» اضافه کن.
-**معیار پذیرش:** یک خطای عمدی در staging به GlitchTip می‌رسد با SHA و محیط درست؛ تست redaction سبز؛ هیچ PII در نمونه‌ی payload (شاهد: خروجی تست)؛ runbook به‌روز.
-**ابزار:** `burke-software/GlitchTip` (MIT) · `sentry_python`/`sentry_flutter` (SDKها) · OpenTelemetry اگر tracing خواستی (Apache‑2.0).
+1. هر ۲۱ مورد را طبق WP‑00 دسته‌بندی کن: (a) انجام‌دادنی، (b) `BLOCKED` با دلیل دقیق، (c) فقط مالک.
+2. موارد (a) را **با شاهد** ببند: مثلاً گیت CI که `dev_code`/gateway mock را در پیکربندی production رد کند؛ تست اینکه `networkSecurityConfig` و `INTERNET` در مانیفست release حاضرند؛ تست `ApiClient` برای loopback/RFC1918؛ اسکریپت restore drill که **برابری داده‌ها** را assert کند (نه فقط وجود فایل)؛ بررسی Alertmanager با ارسال test notification و ثبت رسید.
+3. موارد (b) را در یک فایل `docs/MuscleParadise/RELEASE-BLOCKED-2026-11-20.md` با دلیل، پیش‌نیاز دقیق، و دستور آماده‌ی اجرا برای مالک بنویس.
+4. موارد (c) را در همان فایل به‌عنوان «اقدام مالک» با دستور دقیق بیاور (بخش ۸ را ببین).
+**معیار پذیرش:** صفر آیتم بازِ «انجام‌دادنی»؛ هر `BLOCKED` با دلیل و پیش‌نیاز دقیق؛ چک‌لیست به‌روز با شاهد (لینک CI run یا مسیر `evidence/`) برای هر بسته.
 
 ---
 
-### WP‑05 · تست جهش (mutation) روی موتورهای حیاتی — P1
-**چرا:** گیت `--cov-fail-under=70` فقط **اجرای خطوط** را اثبات می‌کند، نه **گیرنده‌ی باگ بودن** تست‌ها. خواسته‌ی ۱۲ («تست و اورلود شود») بدون این، ناقص است. و طبق قاعده‌ی ۳‑۱۱، تا این گیت سبز نشده ریفکتور (WP‑16) شروع نمی‌شود.
-**شاهد:** `[project.optional-dependencies] dev` شامل pytest/pytest-cov/pytest-asyncio/ruff/bandit/pip-audit/faker/pyyaml/Pillow است — **هیچ ابزار mutation نیست**. هیچ `stryker` در استودیو نیست.
+### WP‑05 · بهداشت مخزن: `mp.db` و فایل‌های ناخواسته — P0
+**چرا:** یک فایل دیتابیس ۸۶۴KB در ریشه‌ی مخزن ترک‌شده است. امروز **خالی است** (۵۲ جدول، همه ۰ سطر) پس نشتی داده نیست — ولی یک تصادف تا commit شدن داده‌ی واقعی عضو/چهره/پرداخت فاصله دارد.
+**شاهد:** `mp.db` در ریشه (۸۶۴KB)؛ `.gitignore:63-65` فقط `mp-app/backend/*.db`, `*.db-shm`, `*.db-wal` را می‌پوشد، **نه ریشه را**. بزرگ‌ترین فایل‌های ترک‌شده: `docs/MuscleParadise/ui-previews/07-client-home-grid.png` (۲٫۱MB) و ۷ تصویر دیگر، `data/external/free_exercise_db/exercises.json` (۹۸۴KB).
 **کار:**
-1. بک‌اند: **mutmut** یا **cosmic-ray** را به dev deps اضافه کن و ابتدا روی دو مسیر بحرانی اجرا کن: `mp-app/backend/engine/` (به‌ویژه `safety.py`, `scoring.py`, `volume.py`, `axis_prescription.py`, `autoreg.py`, `readiness.py`) و `mp-app/backend/security/`.
-2. یک اسکریپت قابل تکرار بساز (`mp-app/backend/scripts/mutation_gate.py` یا Makefile) که **mutation score** را برای آن مسیرها گزارش کند و یک **آستانه‌ی پایه** ثبت کند (عدد واقعی امروز را اندازه بگیر، سپس آستانه را روی همان عدد یا ۲٪ بالاتر بگذار تا فقط رشد ممکن باشد).
-3. استودیو: **stryker-js** را با محدود کردن مسیر (`src/**` حیاتی، مثلاً محاسبه‌ها/فرم‌ها/auth) نصب کن؛ آستانه‌ی پایه ثبت شود.
-4. جهش‌های بازمانده (survived mutants) را فهرست کن و برای هرکدام یا تست بنویس یا در گزارش دلیل بیاور («این جهش معنایی ندارد»).
-5. یک job زمان‌بند هفتگی در CI (نه روی هر PR — کند است) اضافه کن و نتیجه را در `finn/reports/` بنویس.
-**معیار پذیرش:** mutation score اندازه‌گیری و ثبت شده برای `engine/` و `security/` و مسیرهای حیاتی استودیو؛ آستانه در CI/اسکریپت قفل شده؛ فهرست mutantهای بازمانده با تعیین تکلیف؛ گزارش در `finn/reports/`.
-**ابزار:** `boxed/mutmut` (BSD‑3، ⭐1.5k) یا `sixty-north/cosmic-ray` (MIT) · `stryker-mutator/stryker-js` (Apache‑2.0، ⭐3.4k). برای Dart ابزار بالغِ mutation نیست → در WP‑07 با **fault injection** دستی روی مسیرهای حیاتی جایگزین کن و در گزارش توضیح بده.
+1. `git rm --cached mp.db` + افزودن `/mp.db`, `*.db`, `*.db-shm`, `*.db-wal` (بدون محدودسازی به یک پوشه) به `.gitignore`.
+2. **گیت CI** اضافه کن: هیچ فایل با پسوند `.db/.sqlite/.db-wal/.p12/.keystore/.jks/.env` نباید ترک‌شده باشد؛ و اگر `mp.db` دید شد، **تعداد سطرهای جداول حساس** (`users`, `members`, `face_templates`, `payments`, `otp_codes`, `biometric_consents`, `audit_logs`) شمرده و در صورت غیرصفر بودن، بیلد قرمز شود (بدون چاپ محتوای داده).
+3. تصاویر بزرگ را با `mp-app/infra/scripts/compress-media.sh` موجود بهینه کن یا به Git LFS ببر؛ اندازه‌ی مخزن را ثبت کن.
+4. `.gitignore` را برای خروجی ابزارهای ممیزی (`.audit/`, `build/`, `reports/`) و آرتیفکت‌های محلی کامل کن.
+**معیار پذیرش:** `mp.db` از ایندکس خارج و ignore شده؛ گیت CI فعال و سبز؛ اندازه‌ی مخزن کاهش یافته و ثبت شده.
 
 ---
 
-### WP‑06 · تست property‑based روی ۱۹ موتور — P1
-**چرا:** دامنه‌ی محصول عددی/فیزیولوژیک است؛ باگ‌های واقعی در **نقض نامتغیرها** و حالات لبه‌اند، نه در مثال‌های دستی. خواسته‌های ۴ و ۵ (خروجی توابع و پارامترها) دقیقاً اینجا بسته می‌شوند.
-**شاهد:** در dev deps فقط `faker` هست؛ **`hypothesis` نیست**. موتورهای `engine/` (۱۹ فایل) و `engine/sync_lww.py` (حل تعارض آفلاین) و `engine/safety.py` (ایمنی سلامتی) بدون تست نامتغیرند.
+### WP‑06 · انتشار Android: R8، AAB، بودجه‌ی اندازه — P0
+**چرا:** امضا اصلاح شده ولی بیلد release هنوز **بدون shrinking/obfuscation** است و **`.aab` ساخته نمی‌شود** (برای Google Play لازم است).
+**شاهد:** در `build.gradle.kts` هیچ `isMinifyEnabled`/`isShrinkResources`/`proguardFiles` نیست؛ grep برای `appbundle|.aab` در workflows → **۰**؛ `apk.yml` فقط `flutter build apk --release --split-per-abi`.
 **کار:**
-1. `hypothesis` را به dev deps اضافه کن و یک دایرکتوری `mp-app/backend/tests/property/` بساز.
-2. برای **هر ۱۹ موتور** حداقل یک property بنویس. فهرست نامتغیرهای پیشنهادی (اگر با کد واقعی ناسازگار بود، نامتغیر درست را از کد استخراج کن و در گزارش بنویس):
-   - `volume.py`: حجم = Σ(ست × تکرار × وزنه)؛ همواره ≥ ۰؛ با افزایش ست/تکرار/وزنه **یکنوا نزولی نیست** (یکنوا صعودی است).
-   - `scoring.py`: امتیاز کران‌دار است؛ ورودی یکسان → خروجی یکسان (قطعی بودن)؛ ترتیب‌ناپذیری نسبت به فیلدهای بی‌ربط.
-   - `safety.py`: هیچ خروجی‌ای پرچم ایمنی را **پایین نمی‌آورد**؛ اگر ورودی در فهرست ممنوعه است، خروجی حتماً رد/محدود است (این مهم‌ترین تست پروژه است).
-   - `autoreg.py`/`readiness.py`/`set_feedback.py`/`feedback_apply.py`: تنظیم خودکار هرگز از سقف/کف مطلق خارج نمی‌شود؛ دو بار اعمال‌کردن فیدبک یکسان (idempotency) نتیجه را خراب نمی‌کند.
-   - `axis_prescription.py`/`axis_rules.py`/`axis_map.py`/`segmental.py`/`gender_plans.py`: پوشش کامل نگاشت (هر ورودی معتبر یک خروجی معتبر دارد)؛ هیچ `KeyError`/`None` غیرمنتظره.
-   - `adaptive_nutrition.py`/`nutrition.py`: کالری/ماکرو منفی یا NaN یا بی‌نهایت نمی‌شود؛ جمع ماکروها با کالری کل سازگار است (± تلورانس صریح).
+1. `release { isMinifyEnabled = true; isShrinkResources = true; proguardFiles(...) }` با قواعد سازگار با Flutter و پلاگین‌ها؛ سپس APK را با همان **apktool audit موجود** در `apk.yml` مقایسه کن که چیزی لازم حذف نشده (شاهد قبل/بعد در `evidence/`).
+2. افزودن `flutter build appbundle --release` به `apk.yml` با SHA256 و آرتیفکت.
+3. **گیت اندازه‌ی بیلد**: آستانه‌ی صریح برای APK (به تفکیک ABI) و AAB؛ عدد پایه از بیلد امروز + سقف ۵٪.
+4. `flutter build apk --analyze-size` را به‌عنوان آرتیفکت ثبت کن.
+5. `defaultConfig` را از کامنت قالب Flutter پاک کن و `versionName`/`versionCode` را با تگ ریلیز هم‌خوان کن (آیتم ۲۸ چک‌لیست).
+**معیار پذیرش:** release با R8 و shrink سبز و apktool-audit شده؛ `.aab` در CI؛ گیت اندازه فعال؛ `analyze-size` به‌عنوان آرتیفکت.
+**ابزار:** `bundletool`، `apksigner verify`، `apkanalyzer`، `git-filter-repo` (فقط برای WP‑04/بخش ۸).
+
+---
+
+### WP‑07 · تست جهش (mutation) — P1
+**چرا:** پوشش ۹۴٫۲۸٪ عالی است ولی فقط «خطوط اجرا شده» را می‌سنجد. برای ۱۹ موتور عددی + مسیرهای پول و ایمنی، باید اثبات شود تست‌ها **باگ می‌گیرند**. طبق قاعده‌ی ۳‑۱۱، ریفکتور (WP‑14/WP‑21) تا سبز شدن این گیت شروع نمی‌شود.
+**شاهد:** هیچ ابزار/کانفیگ mutation در مخزن نیست (`mutmut|cosmic.ray|stryker|mutation` → ۰ فایل).
+**کار:**
+1. بک‌اند: **mutmut** یا **cosmic-ray** را به `[project.optional-dependencies] dev` اضافه کن؛ ابتدا روی `engine/` (به‌ویژه `safety.py`, `scoring.py`, `volume.py`, `axis_prescription.py`, `autoreg.py`, `readiness.py`, `sync_lww.py`) و `modules/payments/`, `modules/expenses/`, `modules/shop/`, `security/`.
+2. اسکریپت قابل تکرار (`scripts/mutation_gate.py`) که **mutation score** را گزارش کند و **آستانه‌ی پایه** را در `.ci-baseline.json` قفل کند (فقط رشد مجاز).
+3. استودیو: **stryker-js** روی `src/` حیاتی (مالی، auth، فرم‌ها) با آستانه‌ی پایه.
+4. جهش‌های بازمانده را فهرست کن: یا تست بنویس، یا دلیل بیاور («این جهش معنایی ندارد»).
+5. job **زمان‌بند هفتگی** (نه هر PR — کند است) + گزارش در `finn/reports/`.
+6. برای Dart ابزار بالغ mutation نیست → در WP‑09 **fault injection** هدفمند روی `ApiClient`، `outbox` و `engine`-مصرف‌کننده‌ها جایگزین کن و دلیل را در گزارش بنویس.
+**معیار پذیرش:** mutation score اندازه‌گیری و قفل‌شده برای `engine/`، ماژول‌های مالی و `security/`؛ آستانه در اسکریپت/CI؛ فهرست بازمانده‌ها تعیین تکلیف شده؛ job هفتگی فعال.
+**ابزار:** `boxed/mutmut` (BSD‑3، ⭐1.5k) · `sixty-north/cosmic-ray` (MIT) · `stryker-mutator/stryker-js` (Apache‑2.0، ⭐3.4k).
+
+---
+
+### WP‑08 · تست ویژگی‌محور (property‑based) + اعلام `hypothesis` — P1
+**چرا:** دامنه‌ی محصول عددی/فیزیولوژیک/مالی است؛ باگ‌های واقعی در **نقض نامتغیر** و حالات لبه‌اند. ضمناً یک وابستگی **اعلام‌نشده** وجود دارد.
+**شاهد:** هیچ دایرکتوری/فایل تست property نیست. `mp-app/backend/scripts/dast.py:89` → `import hypothesis.strategies as st`، ولی `hypothesis` در `[project.optional-dependencies] dev` **نیست** → روی محیط تازه، DAST می‌شکند. dev deps فعلی: setuptools, pytest, pytest-cov, pytest-asyncio, ruff, bandit, pip-audit, faker, pyyaml, Pillow.
+**کار:**
+1. `hypothesis` را به dev deps اضافه کن (و در مستند `dast.py` بنویس که از همین extra می‌آید) — این **باگ واقعی** است، پس اول انجامش بده.
+2. `mp-app/backend/tests/property/` بساز و برای **هر ۱۹ موتور** حداقل یک property بنویس. نامتغیرهای پیشنهادی (اگر با کد ناسازگار بود، نامتغیر درست را از کد استخراج و در گزارش ثبت کن):
+   - `safety.py`: هیچ خروجی‌ای پرچم ایمنی را **پایین نمی‌آورد**؛ ورودی در فهرست ممنوعه ⇒ خروجی حتماً رد/محدود. (مهم‌ترین تست پروژه.)
+   - `volume.py`: حجم = Σ(ست×تکرار×وزنه)؛ ≥ ۰؛ یکنوا صعودی نسبت به هر سه عامل.
+   - `scoring.py`: کران‌دار؛ قطعی (ورودی یکسان ⇒ خروجی یکسان)؛ بی‌حساسیت به فیلدهای بی‌ربط.
+   - `autoreg.py`/`readiness.py`/`set_feedback.py`/`feedback_apply.py`: خروج از سقف/کف مطلق ممنوع؛ **idempotency** اعمال دوباره‌ی همان فیدبک.
+   - `sync_lww.py`: **همگرایی** — هر ترتیبی از همان رویدادها ⇒ وضعیت یکسان (commutativity + idempotency)؛ هیچ نوشتن گم‌شده‌ای.
+   - `catalog_sync.py`: همگام‌سازی دوطرفه داده گم نمی‌کند؛ اجرای مجدد بدون اثر جانبی.
+   - `axis_prescription.py`/`axis_rules.py`/`axis_map.py`/`segmental.py`/`gender_plans.py`: پوشش کامل نگاشت؛ بدون `KeyError`/`None` غیرمنتظره.
+   - `adaptive_nutrition.py`/`nutrition.py`: کالری/ماکرو منفی، NaN یا بی‌نهایت نمی‌شود؛ جمع ماکروها با کالری کل سازگار (± تلورانس صریح).
    - `churn_risk.py`: خروجی در `[0,1]`؛ یکنواختی نسبت به سیگنال‌های قطعی.
-   - `sync_lww.py`: **همگرایی** — اعمال همان مجموعه‌ی رویداد با هر ترتیبی به وضعیت یکسان می‌رسد (commutativity/idempotency)؛ هیچ نوشتن گم‌شده‌ای.
-   - `catalog_sync.py`: همگام‌سازی دوطرفه داده را گم نمی‌کند؛ اجرای مجدد بدون اثر جانبی.
-   - `reminders.py`: زمان‌ها همیشه در آینده/بازه‌ی معتبر؛ منطقه‌ی زمانی و DST نتیجه را نمی‌شکند.
-   - `workout.py`: وضعیت‌های نامعتبر (ست منفی، تکرار صفر، وزنه‌ی NaN) رد می‌شوند.
-3. برای همه‌ی propertyها `deadline=None` و `derandomize` (یا seed ثبت‌شده) تنظیم کن تا CI **قطعی** بماند و flaky نشود.
-4. استودیو: `fast-check` را اضافه کن و برای محاسبه‌های عددی/فرم‌ها/منطق auth property بنویس.
-5. یک property هم برای **سریال‌سازی API** بنویس: هر پاسخ مدل، با schema تعریف‌شده سازگار است و round‑trip (serialize→deserialize) داده را عوض نمی‌کند.
-**معیار پذیرش:** حداقل یک property برای هر ۱۹ موتور + مسیرهای حیاتی استودیو؛ همه سبز و قطعی (۳ اجرای پیاپی بدون flake)؛ هر property یک کامنت فارسی دارد که «چرا این نامتغیر» را می‌گوید.
+   - `reminders.py`: زمان‌ها در آینده/بازه‌ی معتبر؛ **منطقه‌ی زمانی و DST** نتیجه را نمی‌شکند (با زمان منجمد — WP‑19).
+   - `workout.py`: حالت‌های نامعتبر (ست منفی، تکرار صفر، وزنه‌ی NaN) رد می‌شوند.
+3. **propertyهای پولی** (مرتبط با WP‑11): جمع اجزا = کل؛ تخفیف هرگز کل را منفی یا بیشتر از ۱۰۰٪ نمی‌کند؛ گردکردن `discount_pct` **جهت ثابت و مستند** دارد؛ refund هرگز از مبلغ پرداختی بیشتر نمی‌شود؛ مانده‌ی کیف‌پول = Σ دفتر کل (با `amount_rial` مثبت/منفی مطابق کامنت `db/models` «مثبت: شارژ، منفی: برداشت»).
+4. همه‌ی propertyها با `deadline=None` و `derandomize=True` (یا seed ثبت‌شده) → **قطعی**؛ سه اجرای پیاپی بدون flake.
+5. استودیو: `fast-check` برای محاسبه‌های مالی/فرم‌ها/auth.
+6. یک property برای **سریال‌سازی API**: هر پاسخ با schema سازگار است و round‑trip داده را عوض نمی‌کند (از همان spec که در WP‑10 commit می‌شود).
+**معیار پذیرش:** ≥۱ property برای هر ۱۹ موتور + propertyهای پولی + مسیرهای حیاتی استودیو؛ همه سبز و قطعی؛ `hypothesis` در dev deps و `dast.py` روی محیط تازه اجرا می‌شود؛ هر property یک کامنت فارسی «چرا این نامتغیر» دارد.
 **ابزار:** `HypothesisWorks/hypothesis` (MPL‑2.0، ⭐9.2k) · `dubzzz/fast-check` (MIT، ⭐5.3k).
 
 ---
 
-### WP‑07 · رگرسیون بصری و تست روی دستگاه برای کلاینت — P1
-**چرا:** خواسته‌های ۷ و ۸ (انیمیشن، اینترکشن، تک‌تک دکمه‌ها، سرچ‌بار) در کلاینت **بدون شاهد اجرایی** است.
-**شاهد:** `matchesGoldenFile` در **۰ فایل**؛ دایرکتوری `integration_test` وجود ندارد؛ ۲۸ فایل widget test موجود است.
+### WP‑09 · عمق تست کلاینت Flutter: بصری، روی‌دستگاه، a11y، نوع — P1
+**چرا:** استودیو عمیق تست شده (۲۸۲ تست + a11y + WCAG + QA مرورگری)، ولی **کلاینت عضو/کیوسک** نازک‌ترین لایه است؛ خواسته‌های ۷ و ۸ (انیمیشن، اینترکشن، تک‌تک دکمه‌ها) آنجا بی‌شاهدِ پایدارند.
+**شاهد:** `matchesGoldenFile` = **۰ فایل**؛ `integration_test` = **۰**؛ patrol در `pubspec.yaml` = **۰**؛ `Semantics` فقط در **۳ فایل** از `lib/`؛ `analysis_options.yaml` = فقط `flutter_lints` + `prefer_const_constructors` + `prefer_final_locals` (بدون `strict-casts`/`strict-raw-types`/`strict-inference`)؛ `dynamic` = **۱۹۷**، `as` = **۱۹۲**؛ `flutter test --coverage` اجرا می‌شود ولی **هیچ آستانه‌ای ندارد** (بک‌اند ۷۰٪ دارد)؛ دو نقص بازِ QA: افتادن بنر به‌روزرسانی روی محتوا و رندر جعبه‌ای ایموجی ❤️/💚.
 **کار:**
-1. **Golden tests:** برای هر صفحه و هر کامپوننت پرکاربرد، با `matchesGoldenFile` داخلی `flutter_test` (بدون وابستگی جدید) وضعیت‌ها را پوشش بده: `default / loading / empty / error / disabled / pressed / focus / RTL / فونت ۲۰۰٪ / dark`. فایل‌های طلایی را در `mp-app/client/test/goldens/` commit کن و در CI یک گیت بگذار که تفاوت golden → قرمز (با `--update-goldens` فقط به‌صورت صریح و با کامیت جدا).
-2. **سرشماری UI:** یک فایل `docs/MuscleParadise/UI-INVENTORY.md` بساز با یک ردیف برای **هر دکمه، هر فیلد، هر سرچ‌بار، هر انیمیشن** در کلاینت و استودیو؛ ستون‌ها: شناسه، مسیر فایل، stateها، تست widget، golden، تست on-device، a11y، i18n، وضعیت. این فایل همان «تک تک دکمه‌ها» را قابل حسابرسی می‌کند و ستون «وضعیت» نباید خالی بماند.
-3. **تست روی دستگاه:** `integration_test` را با **patrol** راه بینداز و حداقل این جریان‌ها را end‑to‑end پوشش بده: ورود با OTP → چک‌این (کیوسک/چهره) → دیدن برنامه‌ی تمرین → ثبت ست → فیدبک/آفلاین→سینک. تعامل با dialogهای permission واقعی (دوربین/بیومتریک) فقط با patrol ممکن است.
-4. **انیمیشن‌ها:** هر انیمیشن را با golden در چند فریم (یا `flutter test` با کنترل `WidgetTester.pump(duration)`) قفل کن؛ رفتار haptics را مطابق `finn/reports/m98-haptics-motion.md` حفظ کن.
-5. **fault injection (جایگزین mutation در Dart):** در تست‌ها یک‌بار API را timeout/500، یک‌بار DB محلی را پر، و یک‌بار شبکه را قطع کن و رفتار offlinе outbox را اثبات کن (`offline_feedback_outbox_test.dart` را گسترش بده).
-**معیار پذیرش:** golden برای همه‌ی صفحات اصلی + stateهای فهرست‌شده؛ `UI-INVENTORY.md` کامل بدون ستون خالی؛ حداقل یک تست patrol که روی امولاتور در CI اجرا و سبز می‌شود؛ گیت golden در `ci.yml`.
+1. **Golden tests** با `matchesGoldenFile` داخلی (بدون وابستگی جدید) برای هر صفحه و هر وضعیت: `default / loading / empty / error / disabled / pressed / focus / RTL / فونت ۲۰۰٪ / dark`؛ فایل‌ها در `mp-app/client/test/goldens/` commit شوند؛ گیت CI که تفاوت golden ⇒ قرمز (`--update-goldens` فقط با کامیت جدا و صریح).
+2. **آستانه‌ی پوشش کلاینت**: عدد امروز را از `flutter test --coverage` بگیر و `--cov-fail-under`-معادل (اسکریپت پارس `lcov.info`) را در `client-pinned` بگذار؛ فقط رشد مجاز.
+3. **تست روی دستگاه** با **patrol**: ورود با OTP → چک‌این (کیوسک/چهره) → دیدن برنامه‌ی تمرین → ثبت ست → آفلاین/سینک (`offline_feedback_outbox_test.dart` را به جریان واقعی روی دستگاه گسترش بده). تعامل با dialogهای permission واقعی فقط با patrol ممکن است.
+4. **سرشماری UI پایدار**: `qa-report/buttons.json` (۱۰۱ دکمه در ۱۱ صفحه‌ی **استودیو**) را به یک `docs/MuscleParadise/UI-INVENTORY.md` دو‌بخشی تبدیل کن: استودیو + **کلاینت**؛ ستون‌ها: شناسه، صفحه، نوع، مسیر فایل، stateها، تست widget، golden، on-device، a11y، l10n، رفتار خطا، وضعیت. هیچ ستونی خالی نماند.
+5. **دسترس‌پذیری کلاینت**: `Semantics`/`semanticLabel` روی همه‌ی کنترل‌های تعاملی؛ تست با guidelineهای داخلی `flutter_test` (`androidTapTargets`, `iOSTapTargets`, `labeledTapTargets`, `textContrastGuideline`) روی **همه‌ی صفحات**؛ تست `textScaler: 2.0` بدون سرریز؛ تست صریح RTL.
+6. **سخت‌گیری نوع**: فعال‌کردن `strict-casts`/`strict-raw-types`/`strict-inference` + قواعد ایمنی (`avoid_dynamic_calls`, `always_declare_return_types`, `use_build_context_synchronously`, `cancel_subscriptions`, `close_sinks`)؛ رفع **واقعی** خطاها (نه `// ignore:`)؛ گیت ضد‌رگرسیون روی تعداد `dynamic`/`as` (پایه: ۱۹۷/۱۹۲، فقط کاهش). `dart fix --apply` در کامیت جدا.
+7. **دو نقص بازِ QA** را رفع کن: تداخل بنر به‌روزرسانی با محتوا (با golden قفلش کن) و جعبه‌شدن ایموجی (با WP‑15: فونت/فالبک ایموجی).
+**معیار پذیرش:** golden برای همه‌ی صفحات اصلی + stateها؛ آستانه‌ی پوشش کلاینت در CI؛ ≥۱ تست patrol سبز روی امولاتور در CI؛ تست‌های a11y guideline روی همه‌ی صفحات سبز؛ strict modes فعال و عدد پایه قفل‌شده؛ `UI-INVENTORY.md` کامل بدون ستون خالی؛ دو نقص QA بسته با golden شاهد.
 **ابزار:** `flutter_test` (داخلی) · `leancodepl/patrol` (Apache‑2.0، ⭐1.5k، فعال).
 
 ---
 
-### WP‑08 · سخت‌گیری نوع در Dart و TypeScript — P1
-**چرا:** «همبستگی جزئی» (خواسته‌ی ۶) باید در **کامپایل** کشف شود نه زمان اجرا.
-**شاهد:**
-- `mp-app/client/analysis_options.yaml` فقط `include: package:flutter_lints/flutter.yaml` + دو قاعده (`prefer_const_constructors`, `prefer_final_locals`)؛ `strict-casts`/`strict-raw-types`/`strict-inference` **خاموش**؛ CI با `--no-fatal-infos`.
-- در `mp-app/client/lib/`: **۱۹۱ کست `as`**، **۱۹۷ `dynamic`**، ۴ `!.`.
-- استودیو: `npm run lint` در CI اجرا نمی‌شود (WP‑03).
+### WP‑10 · قرارداد API: spec، گیت تغییر شکننده، و ماتریس مجوز — P1
+**چرا:** DAST با schemathesis عالی کار می‌کند (۱۲۸ عملیات/۱۰۲۴ کیس/۰ یافته) ولی **spec در مخزن commit نشده**، پس **تغییر شکننده** پیش از انتشار دیده نمی‌شود؛ و `live-contract` فقط **استودیو** را پوشش می‌دهد، نه کلاینت Flutter را. ضمناً یک نقص قراردادِ واقعی باز است.
+**شاهد:** `git ls-files | grep -i openapi|swagger` → **۰**؛ `ci.yml` job `live-contract` فقط `mp-app/studio/tests/liveContract.test.ts` را اجرا می‌کند؛ `qa-report/FINAL-REPORT.md` → `nutrition/food-logs/member/-1/daily` با شناسه‌ی `−1` پاسخ **200 با placeholder** می‌دهد؛ `scripts/dast.py` به CI/زمان‌بند وصل نیست.
 **کار:**
-1. در `analysis_options.yaml` فعال کن: `language: { strict-casts: true, strict-raw-types: true, strict-inference: true }` + مجموعه‌ی قواعد `flutter_lints` و قواعد ایمنی (`avoid_dynamic_calls`, `always_declare_return_types`, `unnecessary_await_in_return`, `use_build_context_synchronously`, `cancel_subscriptions`, `close_sinks`).
-2. خطاهای ناشی را **واقعاً رفع کن** (نه `// ignore:`). اگر حجم زیاد است، به‌ترتیب پوشه پیش برو و در گزارش درصد پیشرفت بنویس؛ در پایان هیچ `dynamic`/کست بدون دلیل نماند.
-3. یک **گیت ضد‌رگرسیون** بگذار: اسکریپتی در CI که تعداد `dynamic` و `as` و `// ignore:` را می‌شمارد و اگر از عدد پایه **بیشتر** شد، قرمز می‌کند (عدد پایه = وضعیت پس از پاکسازی؛ در یک فایل `.ci-baseline.json` commit شود).
-4. استودیو: `tsconfig.json` را بررسی کن و `strict`، `noUncheckedIndexedAccess`، `noImplicitOverride`، `exactOptionalPropertyTypes` را فعال کن (هرکدام که بدون شکستن بیلد ممکن است؛ بقیه را با گیت ضد‌رگرسیون برای `any` کنترل کن). تعداد `any` را بشمار، کاهش بده و عدد پایه را قفل کن.
-5. `dart fix --apply` و `eslint --fix` را اجرا کن (کامیت جدا: «fixes مکانیکی»).
-**معیار پذیرش:** strict modes فعال؛ صفر `dynamic`/`as` بدون کامنت دلیل؛ گیت ضد‌رگرسیون در CI؛ `flutter analyze` و `tsc -b` و `npm run lint` سبز.
+1. `openapi.json` را از FastAPI با اسکریپت قابل تکرار استخراج و **commit** کن؛ گیت CI: «spec commit‌شده == spec تولیدشده از کد» (ضد drift).
+2. **oasdiff** به‌عنوان گیت PR: هر تغییر **breaking** بدون نسخه‌ی جدید ⇒ قرمز؛ خلاصه در step summary.
+3. `live-contract` را به **کلاینت Dart** گسترش بده (یک لایه‌ی کلاینت API یا تست Dart در برابر همان API زنده با seed موجود).
+4. `dast.py` را به یک job **زمان‌بند شبانه** وصل کن (خودِ اسکریپت صریحاً گفته دستی/شبانه است — همان را رسمی کن) و گزارش را در `evidence/` بگذار.
+5. **ماتریس مجوز و ورودی نامعتبر**: یک تست پارامتری‌شده که برای endpointهای حساس، ترکیب {نقش × مالکیت منبع × شناسه‌ی نامعتبر} را بزند و کد وضعیت درست را assert کند — شامل **شناسه‌ی منفی/صفر/بسیار بزرگ/رشته‌ای** که باید `404`/`422` بدهد نه `200 placeholder`. این هم نقص `-1` را می‌بندد هم گیت R2 (`unauthenticated_2xx`) را پویا نگه می‌دارد.
+6. سیاست نسخه‌بندی + **حداقل نسخه‌ی کلاینت پشتیبانی‌شده** + تست سازگاری کلاینت قدیمی؛ و **کلید idempotency** برای POSTهای حساس (پرداخت، چک‌این، ثبت ست، refund) — `_settle_shop_order` سه تست idempotency دارد، همان الگو را به بقیه تعمیم بده.
+**معیار پذیرش:** `openapi.json` commit‌شده + گیت drift + گیت oasdiff؛ تست قرارداد زنده برای کلاینت Dart؛ `dast.py` زمان‌بند با گزارش در `evidence/`؛ ماتریس مجوز/ورودی نامعتبر سبز و نقص `-1` بسته؛ تست idempotency برای ≥۴ مسیر حساس.
+**ابزار:** `oasdiff/oasdiff` (Apache‑2.0، ⭐1.5k) + `oasdiff-action` · `schemathesis` (MIT، موجود) · `Orange-OpenSource/hurl` (Apache‑2.0) · `stoplightio/prism` (Apache‑2.0).
 
 ---
 
-### WP‑09 · دسترس‌پذیری کلاینت — P1
-**چرا:** استودیو گیت WCAG دارد ولی کلاینت ندارد؛ عضو با TalkBack/VoiceOver عملاً نمی‌تواند کار کند.
-**شاهد:** فقط **۳ فایل** در `mp-app/client/lib/` از `Semantics` استفاده می‌کنند؛ **۴ فایل** به `textScaler`/`Directionality`/`rtl` اشاره دارند؛ هیچ تست a11y در `mp-app/client/test/` نیست. در مقابل، `mp-app/studio/tests/a11y.test.tsx` و گیت WCAG در Vitest وجود دارد.
+### WP‑11 · یکپارچگی پول و اعداد بزرگ — P1
+**چرا:** طراحی پول **درست** است (همه‌ی مبالغ `Integer` ریال، صفر `Numeric`/`Float` پولی) — پس ریسک باقی‌مانده در **مرزهای انتقال** و **قواعد گردکردن** است، و یک نمونه‌ی واقعی هم رخ داده.
+**شاهد:** `db/models/*` → `amount_rial`, `price_rial`, `unit_price_rial`, `total_rial`, `discount_rial`, `payments_total_rial`, `expenses_total_rial` همه `Mapped[int]`؛ `Float` فقط برای `grams`, `weight_kg`, `score`, `percentile`, `raw_value`, `sdc`. کامیت `e56db60` → «fix(client): بیلد وب — **سقف شناسهٔ دفتر کیف‌پول 2^53-1**». تست‌های مالی موجود: `test_payments_deep`, `test_m83_wallet_ledger`, `test_g2_coupons`, `test_classes_finance`, `test_m59_shop`, `test_phase6c_expenses`, `test_qf06_expense_receipt`. منطق جلالی در ۲۵ فایل و `Asia/Tehran` در ۱۵ مورد؛ صفر `datetime.now()` naive.
 **کار:**
-1. به همه‌ی کنترل‌های تعاملی `Semantics`/`semanticLabel` بده (طبق `UI-INVENTORY.md` از WP‑07 — همان فهرست، چک‌لیست a11y است).
-2. تست خودکار با guidelineهای داخلی `flutter_test` بنویس: `androidTapTargets`, `iOSTapTargets`, `labeledTapTargets`, `textContrastGuideline` و اجرای آن روی **همه‌ی صفحات**.
-3. تست scale فونت: همه‌ی صفحات با `textScaler: 2.0` بدون سرریز/بریدگی رندر شوند (golden در WP‑07 این را قفل می‌کند).
-4. RTL را صریح تست کن (چیدمان، آیکون‌های جهت‌دار، انیمیشن‌های ورود/خروج).
-5. یک پاس دستی با TalkBack انجام بده و نتیجه را در `docs/MuscleParadise/ACCESS-AUDIT-…` (الگوی موجود: `ACCESS-AUDIT-2026-11-15.md`) به‌عنوان نسخه‌ی جدید ثبت کن.
-6. استودیو: گیت WCAG موجود را به همه‌ی صفحات/مودال‌ها گسترش بده و `axe-core` را در تست Playwright (WP‑14) هم اجرا کن.
-**معیار پذیرش:** تست‌های guideline روی همه‌ی صفحات سبز؛ همه‌ی ردیف‌های `UI-INVENTORY.md` ستون a11y پر دارند؛ سند access-audit جدید با تاریخ امروز.
-**ابزار:** `flutter_test` (داخلی) · `dequelabs/axe-core` (MPL‑2.0، ⭐7.8k) · `pa11y/pa11y` (LGPL‑3.0 — ابزار dev) · `GoogleChrome/lighthouse-ci` (Apache‑2.0، ⭐7.2k).
+1. **مرز ۲^۵۳−۱ را سیستماتیک ببند** (نه موردی): یک تست مرزی که برای هر فیلد پولی/شناسه‌ای که از JSON عبور می‌کند، مقادیر `2^53−2`, `2^53−1`, `2^53`, `2^63−1` را در هر سه لایه (Python → JSON → Dart و TypeScript) round‑trip کند و **برابری دقیق** را assert کند. اگر مسیری از `Number` JS عبور می‌کند، یا سریال‌سازی رشته‌ای کن یا سقف صریح + خطای خوانا بگذار (الگوی همان کامیت `e56db60` را به یک قاعده‌ی عمومی تبدیل کن).
+2. یک قاعده‌ی **Semgrep** (در `.semgrep/project-rules.yml` موجود) اضافه کن: هر `float(...)`/`Float` روی فیلد پولی، یا هر محاسبه‌ی پولی با `float` در Python/Dart/TS ⇒ قرمز.
+3. **قواعد گردکردن** را مستند و تست کن: `discount_pct` (درصد صحیح) چگونه روی `total_rial` اعمال می‌شود (جهت گردکردن، ترتیب اعمال چند تخفیف، سقف استفاده از کد تخفیف)؛ مالیات/کارمزد؛ و **تقسیم** مبلغ بین آیتم‌ها (اختلاف باقی‌مانده به کدام آیتم می‌رسد).
+4. گزارش سود/زیان دوره‌ای (QF‑10) با **تست‌های زمانی منجمد** روی مرزهای جلالی/تهران: ابتدای دوره، پایان دوره، سال کبیسه‌ی جلالی، تغییر روز/ماه، و refund跨 دوره.
+5. propertyهای پولی WP‑08 را اجرا کن و نتایج را اینجا ارجاع بده.
+6. **ممیزی حسابرسی**: هر تغییر پولی باید ردیف `audit_logs` و (برای کیف‌پول) ردیف دفتر کل داشته باشد؛ یک تست که پس از هر عملیات مالی، `مانده = Σ دفتر کل` و `audit log موجود` را assert کند.
+**معیار پذیرش:** تست مرزی ۲^۵۳−۱ سبز در هر سه لایه؛ قاعده‌ی Semgrep پولی فعال و سبز؛ قواعد گردکردن مستند + تست‌شده؛ تست‌های زمانی جلالی/تهران سبز؛ تست همسانی مانده/دفترکل/audit log برای همه‌ی عملیات مالی.
 
 ---
 
-### WP‑10 · قرارداد API: نسخه‌بندی، دیف، و گسترش به کلاینت — P1
-**چرا:** خواسته‌ی ۲ (سیم‌کشی‌ها). `live-contract` عالی است ولی **فقط استودیو** را پوشش می‌دهد و **هیچ گیت تغییر شکننده** وجود ندارد.
-**شاهد:** هیچ فایل OpenAPI ترک‌شده‌ای در مخزن نیست (grep `openapi|swagger` → صفر)؛ `live-contract` فقط `mp-app/studio/tests/liveContract.test.ts` را اجرا می‌کند؛ کلاینت Flutter پوشش قرارداد زنده ندارد.
+### WP‑12 · پلتفرم وب، PWA و Electron — P1
+**چرا:** دو سطح جدید اضافه شده (بیلد وب Flutter و PWA استودیو) که گیت اختصاصی ندارند؛ و دکمه‌های مالی/مخرب در QA مرورگری `BLOCKED` ماندند.
+**شاهد:** `web.yml` فقط analyze/test/build/artifact دارد (بدون تست مرورگری، بدون بودجه‌ی باندل، بدون Lighthouse). `mp-app/studio/public/sw.js` → cache-first برای assets هش‌دار، network-first برای HTML/مانیفست، `skipWaiting` + reload. `mp-app/studio/electron/main.cjs` → `contextIsolation: true`, `nodeIntegration: false` ولی **بدون `sandbox`، بدون `setWindowOpenHandler`، بدون guard برای `will-navigate`**. `qa-report/FINAL-REPORT.md` → دکمه‌های مالی/مخرب کلیک نشدند (`BLOCKED`).
 **کار:**
-1. spec OpenAPI را از FastAPI **به‌صورت فایل commit‌شده** استخراج کن (`openapi.json` در مسیر مشخص، تولید با اسکریپت قابل تکرار) و یک گیت CI بگذار که «spec commit‌شده == spec تولیدشده از کد» باشد (جلوگیری از drift).
-2. **oasdiff** را به‌عنوان گیت PR اضافه کن: هر تغییر **breaking** بدون برچسب/نسخه‌ی جدید → قرمز. خروجی را در خلاصه‌ی step بگذار.
-3. `live-contract` را به **کلاینت Flutter** گسترش بده: یک لایه‌ی کلاینت API (یا یک تست Dart) که در برابر API زنده همان seed اجرا می‌شود و contract را اثبات می‌کند.
-4. سیاست نسخه‌بندی و **حداقل نسخه‌ی کلاینت پشتیبانی‌شده** را تعریف کن و یک فیلد/هدر نسخه در API اضافه کن + تست اینکه کلاینت قدیمی پاسخ سازگار می‌گیرد.
-5. تست idempotency برای POSTهای حساس (پرداخت، چک‌این، ثبت ست) با کلید idempotency.
-**معیار پذیرش:** `openapi.json` commit‌شده + گیت drift + گیت oasdiff؛ یک تست قرارداد زنده برای کلاینت Dart؛ تست idempotency برای سه مسیر حساس؛ سند سیاست نسخه در `docs/`.
-**ابزار:** `oasdiff/oasdiff` (Apache‑2.0، ⭐1.5k) + `oasdiff/oasdiff-action` · `schemathesis/schemathesis` (MIT، ⭐3.8k) برای فازی‌کردن endpointها از روی همان spec · `Orange-OpenSource/hurl` (Apache‑2.0، ⭐19.3k) برای سناریوهای HTTP خوانا · `stoplightio/prism` (Apache‑2.0) برای mock/validate.
+1. **Playwright** را برای استودیو اضافه کن: E2E روی بیلد واقعی (Vite build) شامل **جریان‌های مالی و مخرب** در یک محیط ایزوله با داده‌ی seed مصنوعی (همان `qa-report/tools/seed_live.py`) — این `BLOCKED` را می‌بندد. شامل: ثبت پرداخت، تأیید رسید، ارسال، حذف، تأیید نهایی، کد تخفیف، گزارش سود/زیان.
+2. در همان Playwright: `axe-core` برای a11y، **رگرسیون بصری** (`toHaveScreenshot`)، ماتریس viewport، و رفتار **آفلاین/بازیابی** (قطع شبکه وسط فرم مالی).
+3. **بودجه‌ی وب**: `rollup-plugin-visualizer` (یا معادل Vite) برای نقشه‌ی باندل + گیت اندازه؛ **Lighthouse CI** روی بیلد استودیو و (اگر وب کلاینت منتشر می‌شود) روی بیلد `web.yml` با بودجه‌ی صریح perf/a11y/best-practices/SEO.
+4. **Service Worker را امن کن**: هیچ پاسخ API/داده‌ی حساس cache نشود (فقط assets هش‌دار)؛ یک تست که پس از logout هیچ داده‌ی حساس در `caches` نماند؛ و رفتار نسخه‌ی قدیمی SW در برابر API جدید (ناسازگاری نسخه) تست شود.
+5. **Electron hardening**: `sandbox: true`، `setWindowOpenHandler` → deny، guard برای `will-navigate`/`will-attach-webview`، مرور سطح `preload.cjs` (کمترین سطح ممکن). چون `doyensec/electronegativity` **آرشیو شده**، این‌ها را به‌صورت **تست vitest** روی کانفیگ main process قفل کن.
+6. **وبِ کلاینت**: یک گیت که `dart:io` در کد وب‌سازگار وارد نشود (کامیت `ae3e260` همین را رفع کرد — پس گیت ضد‌رگرسیون لازم است) + تست اینکه وب کلاینت در حداقل یک مرورگر واقعی بالا می‌آید و جریان اصلی کار می‌کند.
+**معیار پذیرش:** Playwright E2E با پوشش جریان‌های مالی/مخرب سبز در CI (با داده‌ی مصنوعی)؛ axe + رگرسیون بصری فعال؛ بودجه‌ی باندل و Lighthouse در CI؛ تست‌های SW و Electron hardening سبز؛ گیت ضد‌رگرسیون `dart:io` در وب.
+**ابزار:** `microsoft/playwright` (Apache‑2.0، ⭐100.5k) · `dequelabs/axe-core` (MPL‑2.0) · `GoogleChrome/lighthouse-ci` (Apache‑2.0، ⭐7.2k) · `GoogleChrome/web-vitals` (Apache‑2.0).
 
 ---
 
-### WP‑11 · i18n/l10n — P2
-**چرا:** هیچ زیرساخت ترجمه‌ای وجود ندارد؛ رشته‌ها hardcode‌اند. این هم بدهی فنی است هم منبع باگ سرریز متن.
-**شاهد:** grep برای `\.arb$|l10n|intl|translations` در `git ls-files` → **صفر**. `RELEASE-CHECKLIST.md:45` می‌گوید «RTL/فارسی + جزئیات میکرو» انجام شده، یعنی RTL هست ولی l10n ساخت‌یافته نیست.
+### WP‑13 · قطعیت CI و لینتر استودیو — P1
+**چرا:** دو حفره‌ی تکرارپذیری: نصب غیرقطعی npm، و اسکریپت lint استودیو که **قابل اجرا نیست**.
+**شاهد:** `ci.yml:178` و `ci.yml:392` → `npm ci || npm install` در حالی که `mp-app/studio/package-lock.json` ترک‌شده است. `package.json` → `"lint": "eslint src --ext .ts,.tsx"` ولی **`eslint` در `devDependencies` نیست** (devDeps: @testing-library/react, @testing-library/user-event, @types/react, @types/react-dom, @vitejs/plugin-react, autoprefixer, jsdom, postcss, tailwindcss, typescript, vite, vitest) و **هیچ فایل کانفیگ eslint** ترک‌شده نیست ⇒ اسکریپت مرده است و job `studio` هم lint را اجرا نمی‌کند (فقط test/build/audit).
 **کار:**
-1. کلاینت: `flutter_localizations` + `flutter gen-l10n` با فایل‌های `lib/l10n/app_fa.arb` و `app_en.arb`؛ همه‌ی رشته‌های hardcode را استخراج کن (با اسکریپت و سپس بررسی دستی)؛ `pubspec.yaml` → `generate: true`.
-2. استودیو: `i18next` + `react-i18next` با **ICU** برای جمع‌بندی و قالب عدد/تاریخ/ارز (`Intl`)؛ کلیدها در `locales/fa.json` و `en.json`.
-3. قالب‌های locale-aware: تاریخ شمسی/میلادی، عدد فارسی، ارز (ریال/تومان) — یک ماژول مشترک و **تست property** برای آن (مرتبط با WP‑06).
-4. **pseudo-localization:** یک اسکریپت/تست که رشته‌ها را با نسخه‌ی کشیده (مثلاً ۳۰٪ بلندتر + کاراکترهای تشخیصی) جایگزین کند و goldenها را بگیرد → رشته‌های hardcode و سرریز متن را لو می‌دهد.
-5. گیت CI: هیچ رشته‌ی کاربر‌نمای hardcode جدید (قاعده‌ی lint/semgrep) و هیچ کلید ترجمه‌ی گم‌شده (`fa` بدون `en` یا برعکس) پذیرفته نشود.
-**معیار پذیرش:** همه‌ی رشته‌های کاربر‌نما از منبع l10n می‌آیند؛ تست کلیدهای گم‌شده سبز؛ golden با pseudo-locale تولید و بازبینی شده؛ سند کوتاه در `docs/`.
+1. هر دو `npm ci || npm install` → `npm ci` خالص؛ ناسازگاری lockfile باید بیلد را **قرمز** کند.
+2. تصمیم صریح (و ثبت در گزارش) درباره‌ی lint استودیو:
+   - **راه الف (ترجیحی):** ESLint 9 + flat config + `typescript-eslint` + `eslint-plugin-react-hooks` + قواعد a11y را نصب کن، `npm run lint` را درست کن و به job `studio` **قبل از test** اضافه کن. خطاهای موجود را رفع کن یا عدد پایه بگذار و گیت ضد‌رگرسیون بزن.
+   - **راه ب:** اگر lint نخواسته‌ایم، اسکریپت مرده را از `package.json` حذف کن و در گزارش دلیل بیاور (اسکریپت مرده = گمراه‌کننده).
+3. سینتکس `--ext` مربوط به ESLint 8 است؛ با مهاجرت به flat config باید اصلاح شود.
+4. نسخه‌ی Node را در همه‌ی jobها صریح و یکسان کن (امروز `"22"`؛ `22.x.y` مشخص یا `engines`/`.nvmrc`) — الگوی درستِ موجود: `client-pinned` که Flutter را پین و drift را بررسی می‌کند. همان انضباط را برای Node/Python اعمال کن.
+5. `concurrency` + `cancel-in-progress` برای بقیه‌ی workflowها (الگوی موجود در `client-format-fix.yml`).
+**معیار پذیرش:** صفر `npm ci || npm install`؛ lint استودیو یا واقعاً اجرا و گیت شده، یا اسکریپت مرده حذف شده؛ پین نسخه‌های Node/Python/Flutter یکدست و بدون drift؛ CI سبز.
 
 ---
 
-### WP‑12 · گیت لایسنس و دارایی‌های ثالث — P2
-**چرا:** `LICENSE` پروژه **Proprietary** است؛ `NOTICE-THIRD-PARTY.md` دستی است و گیت خودکار ندارد. دارایی‌های ثالث commercial‑sensitive در مخزن‌اند.
-**شاهد:** `pip-audit`/`npm audit` فقط آسیب‌پذیری می‌بینند، نه لایسنس. `mp-app/backend/data/external/free_exercise_db/exercises.json` (۹۸۴KB) + **۳۴ jpg و ۱۷ gif** در `mp-app/backend/static/exercises/` + فونت‌ها/تصاویر برند در `assets/` و `docs/ui-previews/`.
-**کار:**
-1. یک job `license-gate` اضافه کن:
-   - بک‌اند: `pip-licenses` (خروجی JSON) + فهرست ممنوعه (`GPL*`, `AGPL*`, `SSPL*`, `CPAL*`) → در صورت وجود در **وابستگی توزیعی**، قرمز.
-   - استودیو: `license-checker-rseidelsohn --production --summary` + همان فهرست ممنوعه (الگوی موجود `license-checker` در پروژه‌های مشابه را با گیت **شکننده** جایگزین کن، نه `--summary` تنها).
-   - کلاینت: `flutter pub deps` → استخراج لایسنس پکیج‌ها و همان گیت.
-2. **ORT** یا **ScanCode** را به‌صورت job زمان‌بند اجرا کن تا لایسنس/کپی‌رایت **دارایی‌ها** (تصاویر، GIF، فونت، دیتاست) هم اسکن شود؛ نتیجه در آرتیفکت.
-3. برای هر دارایی ثالث یک ردیف در `NOTICE-THIRD-PARTY.md` اضافه/تکمیل کن: نام، منبع، لایسنس، **آیا استفاده‌ی تجاری مجاز است**، آیا attribution لازم است، و اینکه attribution کجا نمایش داده می‌شود.
-4. اگر دارایی‌ای لایسنس نامشخص یا غیرتجاری داشت: در گزارش علامت بزن «مسدود — نیاز به تصمیم انسانی» و یک جایگزین آزاد پیشنهاد بده (ولی خودسرانه حذف نکن).
-5. بررسی کن هیچ پکیج GPL/AGPL **داخل محصول** link نشده باشد (ابزارهای AGPL در CI/dev مجازند — قاعده‌ی ۳‑۶).
-**معیار پذیرش:** job لایسنس با گیت شکننده سبز؛ `NOTICE-THIRD-PARTY.md` برای همه‌ی دارایی‌های ثالث کامل؛ گزارش ORT/ScanCode به‌عنوان آرتیفکت؛ فهرست موارد مسدود (احتمالاً خالی).
-**ابزار:** `oss-review-toolkit/ort` (Apache‑2.0، ⭐2.1k) · `aboutcode-org/scancode-toolkit` (⭐2.7k) · `pip-licenses` (PyPI) · `RSeidelsohn/license-checker-rseidelsohn` (BSD‑3).
+### WP‑14 · کد تکراری، کد مرده، پیچیدگی — P2
+**چرا:** خواسته‌های ۹، ۱۰ و ۱۱. امروز هیچ ابزار سنجش تکرار/مرده/پیچیدگی در مخزن نیست.
+**شاهد:** هیچ `jscpd`/`knip`/`vulture`/`lizard`/`radon`/`import-linter`/`dependency-cruiser` در مخزن یا CI نیست. RepoWise برای معماری و بهداشت کد استفاده شده (`docs/MuscleParadise/architecture/repowise-*`, `BUILDER-START-AND-REPOWISE.md`) — پس بستر آماده است. ۲۴ ماژول بک‌اند و ۱۹ موتور ⇒ خطر **منطق موازی** بین `engine/` و `modules/*` واقعی است.
+**کار (فقط بعد از سبز شدن WP‑07 — قاعده‌ی ۳‑۱۱):**
+1. **تکرار:** `jscpd` با آستانه‌ی صریح روی **هر سه زیرپروژه همزمان** (py + dart + ts/tsx) تا منطق موازیِ بین‌لایه‌ای دیده شود. علاوه بر تکرار متنی، **تکرار معنایی** را دستی بررسی کن: دو ماژول که یک قاعده‌ی کسب‌وکاری را جدا پیاده کرده‌اند (به‌ویژه مالی/تخفیف/کیف‌پول در `modules/` در برابر `engine/`). هر یافته ⇒ ادغام با تست، یا ثبت دلیلِ جدا بودن.
+2. **کد مرده:** پایتون → `ruff` (F401/F811/F841) + **vulture** + endpointهای ثبت‌شده بدون مصرف‌کننده؛ استودیو → **knip** + `depcheck`؛ کلاینت → `dart analyze` (`unused_element`, `unused_import`, `unused_field`, `dead_code`) + دارایی‌های بی‌مصرف در `pubspec.yaml`/`assets/`؛ گراف → **import-linter** برای ممنوعیت لایه‌شکنی (`api → modules → engine/db`، ممنوعیت import معکوس).
+3. **پیچیدگی:** `lizard` (چندزبانه) و `radon` (پایتون) برای فهرست توابع پیچیده؛ گیت CI با آستانه (مثلاً cyclomatic ≤ ۱۰) که برای **کد جدید** سخت‌گیر و برای موجود، عدد پایه را قفل کند.
+4. **ساده‌سازی:** برای هر مورد بالای آستانه → استخراج تابع، حذف پارامتر بی‌استفاده، یکسان‌سازی امضاها، **بدون تغییر رفتار** و با گیت جهش/property سبز.
+5. خروجی RepoWise را برای dead code و برنامه‌ی ریفکتور بخوان و در گزارش ارجاع بده (ابزار dev، AGPL — مجاز طبق ۳‑۶).
+**معیار پذیرش:** گزارش jscpd با تعیین تکلیف **همه‌ی** یافته‌های بالای آستانه؛ صفر کد مرده‌ی قطعی (یا دلیل مستند)؛ صرخ چرخه‌ی وابستگی/لایه‌شکنی با گیت CI؛ گیت پیچیدگی فعال؛ ریفکتورها با تست جهش سبز.
+**ابزار:** `kucherenko/jscpd` (MIT، ⭐6.6k، ۲۲۰+ زبان) · `webpro-nl/knip` (ISC، ⭐12.7k) · `terryyin/lizard` (MIT) · `rubik/radon` (MIT) · `vulture` (PyPI) · `import-linter/import-linter` (BSD‑2) · `pahen/madge` (MIT) · `repowise-dev/repowise` (AGPL، dev).
 
 ---
 
-### WP‑13 · آشوب و حالت تنزل — P2
-**چرا:** خواسته‌ی ۱۲ («اورلود»). زیرساخت سخت‌سازی SQLite و rollback و backup drill داری، ولی **رفتار برنامه زیر خرابی** تست نشده.
-**شاهد:** `db/base.py:118-121` (WAL/busy_timeout=15000/foreign_keys) · `infra/scripts/rollback.sh` · `tests/integration/test_backup_drill.py` · `tests/integration/test_m97_migrations_and_backup.py` — ولی هیچ تستی برای «DB قفل/دیسک پر/سرویس AI timeout/SMS down/face-match down/Caddy TLS fail» نیست.
+### WP‑15 · i18n/l10n و فونت — P2
+**چرا:** هیچ زیرساخت ترجمه‌ای نیست و یک نقص واقعیِ فونت/ایموجی باز است.
+**شاهد:** grep برای `\.arb$|l10n|intl|translations` → **۰**. نقص بازِ QA: «در فوتر، ایموجی ❤️/💚 به‌صورت جعبه نمایش داده می‌شود (فونت)». رشته‌ها hardcode‌اند.
 **کار:**
-1. **Toxiproxy** را به `docker-compose.yml` (پروفایل `chaos`) اضافه کن و سناریوهای تأخیر/قطعی برای: DB، سرویس AI، SMS/OTP، سرویس چهره، و upstreamهای خارجی.
-2. برای هر سناریو یک تست بنویس که **رفتار انتظار‌رفته** را اثبات کند: پیام کاربری درست، صف آفلاین کار کند، retry با backoff، circuit breaker، و اینکه هیچ داده‌ای گم/دوبار نوشته نشود (مرتبط با propertyهای `sync_lww` در WP‑06).
-3. **دیسک پر / DB قفل / فایل خراب:** تست‌های واحد با mock/monkeypatch؛ اثبات کن `busy_timeout` و fallback درست عمل می‌کند و خطا به کاربر به شکل قابل فهم می‌رسد.
-4. **دریل بازیابی واقعی:** `test_backup_drill.py` را طوری گسترش بده که **restore** روی یک DB جدید انجام شود و **برابری داده‌ها** (نه فقط وجود فایل) assert شود؛ و `alembic upgrade head` روی آن DB بازیابی‌شده (مطابق `RELEASE-CHECKLIST.md:17-18`) اجرا و سبز شود.
-5. مسیر **SQLite → Postgres** (ADR‑002) را حداقل در یک job CI با Postgres واقعی اجرا کن (خدمات `postgres` در GitHub Actions رایگان است) تا انحصار SQLite تست‌ها شکسته شود.
+1. کلاینت: `flutter_localizations` + `flutter gen-l10n` با `lib/l10n/app_fa.arb` و `app_en.arb`؛ استخراج همه‌ی رشته‌های hardcode (اسکریپت + بازبینی دستی)؛ `pubspec.yaml` → `generate: true`.
+2. استودیو: `i18next` + `react-i18next` با **ICU** برای جمع‌بندی و قالب عدد/تاریخ/ارز (`Intl`)؛ کلیدها در `locales/fa.json` و `en.json`. اعداد پولی (ریال) با قالب locale-aware و **بدون اعشار**.
+3. **فونت/ایموجی**: یک فونت فارسی کامل + فالبک ایموجی (مثلاً Noto Color Emoji) را به باندل اضافه کن و نقص ❤️/💚 را ببند؛ تست golden (WP‑09) که رندر ایموجی را قفل کند. لایسنس فونت را در `NOTICE-THIRD-PARTY.md` ثبت کن (الگوی موجود: Unlicense/MIT با commit و sha256).
+4. **pseudo-localization**: اسکریپت/تستی که رشته‌ها را ۳۰٪ کشیده‌تر کند و golden بگیرد ⇒ رشته‌های hardcode و سرریز متن لو می‌روند (همان نقص «بنر روی محتوا» را هم می‌گیرد).
+5. گیت CI: هیچ رشته‌ی کاربر‌نمای hardcode جدید (قاعده‌ی lint/Semgrep) و هیچ کلید ترجمه‌ی گم‌شده (`fa` بدون `en` یا برعکس).
+6. قالب تاریخ جلالی و منطقه‌ی زمانی تهران را در یک ماژول مشترک و با **تست property زمانی** (WP‑08/WP‑19) بگذار.
+**معیار پذیرش:** همه‌ی رشته‌های کاربر‌نما از منبع l10n؛ تست کلید گم‌شده سبز؛ نقص ایموجی بسته با golden شاهد؛ pseudo-locale اجرا و بازبینی شده؛ لایسنس فونت در NOTICE.
+
+---
+
+### WP‑16 · آشوب و حالت تنزل — P2
+**چرا:** خواسته‌ی ۱۲ («اورلود») و پشتیبانِ WP‑01. امروز هیچ تست خرابیِ عمدی نیست.
+**شاهد:** grep برای `toxiproxy|chaos|respx|vcrpy` → **۰**. سخت‌سازی SQLite و `rollback.sh` و `test_backup_drill.py` موجودند؛ حادثه‌ی استخر در `qa-report/FINAL-REPORT.md` ثبت شده.
+**کار:**
+1. **Toxiproxy** در پروفایل `chaos` در `docker-compose.yml`: تأخیر/قطعی برای DB، سرویس AI، SMS/OTP، درگاه پرداخت، سرویس چهره، Valkey.
+2. برای هر سناریو یک تست که **رفتار انتظار‌رفته** را اثبات کند: پیام کاربری درست، صف `outbox` کار کند، retry با backoff، circuit breaker، **بدون گم‌شدن یا دوباره‌نوشتن داده** (با propertyهای `sync_lww` در WP‑08).
+3. سناریوهای محلی: دیسک پر، DB قفل‌شده (`database is locked`)، فایل WAL خراب، Valkey پایین (⇒ rate-limit storage مشترک چه می‌شود؟ آیتم ۱۶ چک‌لیست)، `pool` اشباع‌شده (مستقیماً به WP‑01 وصل است).
+4. upstreamهای خارجی را با `respx`/`vcrpy` شبیه‌سازی کن تا تست‌ها قطعی بمانند.
+5. **دریل بازیابی واقعی**: `test_backup_drill.py` را طوری گسترش بده که **restore** روی DB جدید انجام شود و **برابری داده‌ها** assert شود، و سپس `alembic upgrade head` روی DB بازیابی‌شده (آیتم ۱۷‑۱۸ چک‌لیست).
 6. نتایج را در `OPS-RUNBOOK.md` به‌عنوان «سناریوهای خرابی و پاسخ» ثبت کن.
-**معیار پذیرش:** پروفایل chaos قابل اجرا با یک دستور؛ حداقل ۶ سناریوی خرابی با تست سبز؛ دریل restore با assert برابری داده؛ یک job CI با Postgres سبز.
-**ابزار:** `Shopify/toxiproxy` (MIT، ⭐12.5k) · `respx`/`vcrpy` (شبیه‌سازی upstream در پایتون) · `pytest-xdist`/`pytest-rerunfailures` برای قطعیت.
+**معیار پذیرش:** پروفایل chaos با یک دستور اجرا می‌شود؛ ≥۶ سناریوی خرابی با تست سبز؛ دریل restore با assert برابری داده؛ سناریوی Valkey/pool با رفتار مستند.
+**ابزار:** `Shopify/toxiproxy` (MIT، ⭐12.5k) · `respx`/`vcrpy` · `pytest-rerunfailures`.
 
 ---
 
-### WP‑14 · گسترش گیت بار و بودجه‌های عملکرد — P2
-**چرا:** گیت بار فعلی فقط دو اندپوینت سبک را می‌کوبد؛ مسیرهای سنگین و بودجه‌های سمت کلاینت پوشش ندارند.
-**شاهد:** `mp-app/tests/load/k6-gate.js` فقط `GET /api/v1/health/ready` و `POST /api/v1/auth/otp/request`؛ آستانه‌ها `p(95)<2000ms` و `errors<0.05`؛ مراحل ۲۰→۲۰→۶۰ VU. هیچ گیتی برای اندازه‌ی APK، زمان استارت‌اپ، jank یا باندل استودیو نیست.
+### WP‑17 · گسترش گیت بار — P2
+**چرا:** گیت k6 فقط دو اندپوینت سبک را می‌کوبد؛ Locust ۲۰۰ کاربر اجرا شده ولی صریحاً نوشته «تأیید production نیست» و روی SQLite/یک worker بوده.
+**شاهد:** `mp-app/tests/load/k6-gate.js` → فقط `GET /api/v1/health/ready` و `POST /api/v1/auth/otp/request`. `qa-report/FINAL-REPORT.md` بخش ۵ (چهار اجرا، p95=210ms، اجرای ۲ = ۰ درخواست). `finn/reports/load/M22-smoke_*`, `M36c2-smoke_*`.
 **کار:**
-1. سناریوهای k6 اضافه کن (هرکدام با آستانه‌ی صریح): تطبیق چهره/چک‌این، تولید یا بازخوانی تجویز AI، ثبت ست/تمرین، تجمیع داشبورد استودیو، سرو مدیا (`/static/exercises/*.gif` ~۴۰۰KB) با بررسی **هدرهای cache** و فشرده‌سازی، و سناریوی ترکیبی «ساعت شلوغ باشگاه» مطابق ظرفیت واقعی.
-2. هدرهای cache/CDN برای `static/` را بررسی و در صورت نبود اصلاح کن (`Caddyfile` + FastAPI static) و با k6 اثبات کن hit rate.
-3. **پروفایل بک‌اند:** `py-spy` روی مسیرهای سنگین در یک job زمان‌بند؛ یک گیت **تعداد کوئری** برای endpointهای فهرست/داشبورد (با event listener روی SQLAlchemy) تا N+1 قرمز شود.
-4. **بودجه‌های کلاینت:** اندازه‌ی APK/AAB (در WP‑01)، زمان استارت‌اپ و frame-drop با patrol/DevTools در حالت profile، و یک آستانه‌ی صریح برای هرکدام. `flutter build apk --analyze-size` را به‌عنوان آرتیفکت ثبت کن.
-5. **بودجه‌های استودیو:** `rollup-plugin-visualizer` یا معادل Vite برای نقشه‌ی باندل + گیت اندازه؛ اجرای Lighthouse CI روی بیلد استودیو با بودجه‌ی صریح (perf/a11y/best-practices/SEO)؛ `web-vitals` در زمان اجرا.
-6. گزارش عددی را در الگوی موجود `docs/MuscleParadise/LOAD-TEST-…` به‌عنوان نسخه‌ی جدید بنویس.
-**معیار پذیرش:** k6 با ≥۵ سناریوی جدید و آستانه‌های صریح سبز؛ گیت N+1 و گیت اندازه‌ی باندل/APK در CI؛ گزارش بار جدید با اعداد واقعی.
-**ابزار:** `grafana/k6` (AGPL — ابزار dev، مجاز) · `locustio/locust` (MIT) جایگزین · `hatoo/oha` (MIT) · `py-spy` · `GoogleChrome/lighthouse-ci` (Apache‑2.0) · `GoogleChrome/web-vitals` (Apache‑2.0).
+1. سناریوهای k6 با آستانه‌ی صریح برای مسیرهای سنگین: چک‌این/تطبیق چهره، تولید یا بازخوانی تجویز AI، ثبت ست/تمرین، تجمیع داشبورد و گزارش سود/زیان، سرو مدیا (`/media/*` در Caddyfile و `static/exercises/*.gif`) با بررسی **hit rate کش**.
+2. همان سناریوها را یک بار روی **Postgres** اجرا کن و اعداد را کنار SQLite بگذار (ورودی ADR‑002 و WP‑01).
+3. **گیت N+1**: شمارش کوئری برای endpointهای فهرست/تجمیع با event listener روی SQLAlchemy؛ آستانه‌ی صریح.
+4. پروفایل بک‌اند با **py-spy** در job زمان‌بند؛ گزارش در `finn/reports/load/`.
+5. یک گزارش بار جدید با الگوی `docs/MuscleParadise/LOAD-TEST-…` و **صراحت درباره‌ی اعتبار** (همان سبک صادقانه‌ی موجود: چه چیزی تأیید production است و چه چیزی نیست).
+**معیار پذیرش:** ≥۵ سناریوی جدید با آستانه سبز؛ مقایسه‌ی SQLite/Postgres مستند؛ گیت N+1 در CI؛ گزارش بار جدید با اعداد واقعی و بیان صریح دامنه‌ی اعتبار.
+**ابزار:** `grafana/k6` (AGPL، dev) · `locustio/locust` (MIT، موجود) · `py-spy` · `hatoo/oha` (MIT).
 
 ---
 
-### WP‑15 · حریم خصوصی، نشتی و بهداشت مخزن — P2
-**چرا:** داده‌ی سلامتی/زیست‌سنجشی داری؛ چند نشانه‌ی نشتی احتمالی در خود مخزن هست.
-**شاهد (اعداد اندازه‌گیری‌شده):**
-- **۴۱ `print()`** در کد غیرتست بک‌اند → احتمال نشت PII به stdout/لاگ.
-- **۱۱ `except Exception:`** واسع → بلعیدن خطا.
-- **۴۲ `TODO/FIXME/HACK`** در `mp-app`.
-- `docs/MuscleParadise/ui-previews/`: `03-kiosk-face-gate.png` (۱.۷MB)، `05-member-profile.png` (۶۱۶KB)، `04-payment-receipt.png` (۱.۷MB)، `07-client-home-grid.png` (۲.۱MB) و ۴ تصویر دیگر — commit‌شده در گیت.
-- `.claude/` با ۹۳۱ فایل (۶۳۰ skill، ۱۲۲ rule، ۹۸ command، ۷۱ agent، ۹ hook).
+### WP‑18 · گیت خودکار لایسنس وابستگی‌ها — P2
+**چرا:** دارایی‌های ثالث **عالی** مستند شده‌اند (`NOTICE-THIRD-PARTY.md` با Unlicense/MIT + commit + sha256)، ولی **وابستگی‌های نرم‌افزاری** گیت خودکار ندارند و لایسنس محصول Proprietary است.
+**شاهد:** grep برای `license-checker|pip-licenses|license` در workflows → فقط `::notice` های بی‌ربط؛ هیچ گیت لایسنسی نیست. `pip-audit`/`npm audit` فقط آسیب‌پذیری می‌بینند.
 **کار:**
-1. همه‌ی `print()`ها را به logger ساخت‌یافته تبدیل کن؛ یک قاعده‌ی **Semgrep** (در `.semgrep/` موجود) اضافه کن که `print(`/`debugPrint(`/`console.log` در کد غیرتست را قرمز کند.
-2. یک قاعده‌ی Semgrep و یک تست **redaction** اضافه کن: لاگ‌ها و payloadهای خطا نباید شامل موبایل، کد ملی، نام کامل، embedding چهره، یا داده‌ی کارت باشند (با الگوی regex + تست روی logger).
-3. هر ۱۱ `except Exception:` را تعیین تکلیف کن: یا استثنا را دقیق کن، یا لاگ+بازفرستادن، یا با کامنت دلیلِ صریح. هیچ بلعیدن بی‌صدایی نماند.
-4. ۴۲ `TODO/FIXME` را به صف قابل ردیابی تبدیل کن: یا انجام بده، یا یک issue/ردیف در `BUILD-QUEUE.md` با مسئول و دلیل بساز. TODO بی‌تکلیف نماند.
-5. **اثبات synthetic بودن** تصاویر `ui-previews`: برای هر تصویر یک خط در `docs/MuscleParadise/ui-previews/PROVENANCE.md` بنویس (چگونه تولید شده، چه داده‌ای دارد، آیا چهره/رسید واقعی است). اگر داده‌ی واقعی دارد → در گزارش «مسدود — نیاز به تصمیم انسانی» (حذف از تاریخچه destructive است و در بخش ۷ است).
-6. `.claude/` را مرور کن: هیچ transcript نشست، توکن، یا داده‌ی واقعی عضو در آن نباشد؛ اگر هست، گزارش بده (حذف نکن).
-7. بهداشت مخزن: تصاویر بزرگ را با `infra/scripts/compress-media.sh` موجود بهینه کن یا به Git LFS منتقل کن؛ `.gitignore` را برای `*.keystore`, `keystore.properties`, `.env`, آرتیفکت‌های بیلد و خروجی ابزارهای ممیزی (`.audit/`, `reports/`) کامل کن.
-**معیار پذیرش:** صفر `print` در کد غیرتست (با گیت Semgrep)؛ تست redaction سبز؛ همه‌ی `except Exception:` تعیین تکلیف؛ صفر TODO بی‌تکلیف؛ `ui-previews/PROVENANCE.md` کامل؛ `.gitignore` به‌روز.
+1. job `license-gate`: بک‌اند → `pip-licenses` (خروجی JSON) + فهرست ممنوعه (`GPL*`, `AGPL*`, `SSPL*`, `CPAL*`) برای **وابستگی توزیعی**؛ استودیو → `license-checker-rseidelsohn --production` + همان فهرست (با گیت **شکننده**، نه فقط `--summary`)؛ کلاینت → `flutter pub deps` + استخراج لایسنس پکیج‌ها.
+2. تفکیک صریح «وابستگی توزیعی» در برابر «ابزار dev/CI» (قاعده‌ی ۳‑۶) در یک فایل کانفیگ، تا ابزارهای AGPL مثل k6/repowise به‌اشتباه قرمز نشوند.
+3. **ORT** یا **ScanCode** به‌عنوان job زمان‌بند برای کل زنجیره (شامل دارایی‌ها) و آرتیفکت گزارش.
+4. `NOTICE-THIRD-PARTY.md` را با خروجی خودکار تکمیل کن و هر مورد بدون لایسنس مشخص را علامت بزن.
+**معیار پذیرش:** job لایسنس با گیت شکننده سبز؛ تفکیک توزیعی/dev در کانفیگ؛ گزارش ORT/ScanCode به‌عنوان آرتیفکت؛ NOTICE کامل و همگام با خروجی خودکار.
+**ابزار:** `oss-review-toolkit/ort` (Apache‑2.0، ⭐2.1k) · `aboutcode-org/scancode-toolkit` (⭐2.7k) · `pip-licenses` · `RSeidelsohn/license-checker-rseidelsohn` (BSD‑3).
 
 ---
 
-### WP‑16 · ممیزی جامع خط‌به‌خط و ساده‌سازی (خواسته‌های ۱، ۵، ۶, ۹, ۱۰, ۱۱) — P1/P2
-**چرا:** این هسته‌ی خواسته‌ی مالک است و باید **آخر** و با گیت‌های WP‑05/06/07 فعال انجام شود (قاعده‌ی ۳‑۱۱).
-**کار (به‌ترتیب، هر مرحله با کامیت جدا):**
-1. **نقشه‌ی کامل:** یک ایندکس محلی از کدبیس بساز تا همبستگی کلی و جزئی قابل پرسش شود — `repowise init --yes --no-prose` (AGPL، فقط به‌عنوان ابزار dev، هیچ API key لازم نیست) و سپس `repowise export --format markdown`؛ خروجی را در `.audit/` (gitignore‌شده) نگه دار و **خلاصه‌اش** را در `docs/MuscleParadise/architecture/` به‌روز کن. از `AGENTS.md`/`CLAUDE.md` تولیدی آن فقط اگر با `AGENTS.md` موجود تداخل نداشت استفاده کن؛ در غیر این صورت تولیدش را خاموش کن.
-2. **کد تکراری (خواسته‌ی ۹):** `jscpd` را با آستانه‌ی صریح روی **هر سه زیرپروژه همزمان** اجرا کن (py + dart + ts/tsx) تا منطق موازی بین بک‌اند/کلاینت/استودیو هم دیده شود. علاوه بر تکرار متنی، **تکرار معنایی** را دستی بررسی کن: دو ماژول که یک قاعده‌ی biznesی را جداگانه پیاده کرده‌اند (به‌ویژه بین `engine/` و ماژول‌های `modules/*`). هر یافته → یا ادغام با تست، یا ثبت دلیل جدا بودن.
-3. **کد مرده (خواسته‌ی ۱۱):**
-   - پایتون: `ruff` (F401/F811/F841) + **vulture** + `pip check` برای وابستگی‌های نصب‌شده ولی استفاده‌نشده + endpointهای ثبت‌شده ولی بدون مصرف‌کننده.
-   - استودیو: **knip** (فایل/export/وابستگی استفاده‌نشده) + `depcheck`.
-   - Dart: `dart analyze` (`unused_element`, `unused_import`, `unused_field`, `dead_code`) + دارایی‌های بی‌مصرف در `pubspec.yaml` و `assets/`.
-   - وابستگی‌های گراف: **import-linter** (پایتون) برای ممنوعیت لایه‌شکنی، **dependency-cruiser** یا **madge** برای استودیو (چرخه‌ها)، و یک تست معماری پایتون معادل ArchUnit (قرارداد لایه‌ها: `api → modules → engine/db`، ممنوعیت import معکوس).
-   - خروجی: فهرست قطعی «حذف شد / نگه داشته شد چون …».
-4. **همبستگی (خواسته‌ی ۶):** گراف وابستگی ماژول‌ها را تولید و در `docs/MuscleParadise/architecture/module-map.md` به‌روز کن؛ چرخه‌های وابستگی را بشکن (با گیت CI که چرخه‌ی جدید = قرمز)؛ fan‑in/fan‑out هر ماژول را گزارش کن و ۵ نقطه‌ی پرتراکم را با دلیل مستند کن.
-5. **ساده‌سازی توابع (خواسته‌ی ۱۰):** با **lizard** (چندزبانه) و **radon** (پایتون) فهرست توابع با پیچیدگی بالا یا طول زیاد تولید کن؛ برای هر مورد بالای آستانه: استخراج تابع، حذف پارامترهای بی‌استفاده، یکسان‌سازی امضاها. **بدون تغییر رفتار** و با گیت جهش/property سبز. یک آستانه‌ی پیچیدگی (مثلاً cyclomatic ≤ 10) به‌عنوان گیت CI اضافه کن که فقط برای **کد جدید** سخت‌گیر باشد و برای موجود، عدد پایه را قفل کند (ضد‌رگرسیون).
-6. **خروجی‌ها (خواسته‌ی ۴):** برای هر چیزی که خروجی تولید می‌کند (رسید، گزارش مربی، خروجی ارزیابی، export فایل، پیامک/اعلان، پاسخ API) یک **تست تصویب/طلایی (approval/golden)** بنویس: خروجی واقعی را در فایل مرجع قفل کن تا تغییر ناخواسته قرمز شود. این همان «OUTPUT-AUDIT» را اجرایی می‌کند.
-7. **خط‌به‌خط (خواسته‌ی ۱):** یک پاس بازبینی ساخت‌یافته روی هر ماژول با چک‌لیست پیوست B؛ نتیجه را در یک جدول در `docs/MuscleParadise/AUDIT-FINAL-2026-11-18.md` ثبت کن (ماژول / تعداد فایل / یافته‌ها / اقدام / شاهد).
-**معیار پذیرش:** گزارش jscpd با تعیین تکلیف همه‌ی یافته‌های بالای آستانه؛ صفر کد مرده قطعی (یا دلیل مستند)؛ صفر چرخه‌ی وابستگی؛ گیت پیچیدگی و ضد‌رگرسیون در CI؛ تست طلایی برای همه‌ی خروجی‌های فهرست‌شده؛ جدول ممیزی خط‌به‌خط کامل.
-**ابزار:** `repowise-dev/repowise` (AGPL — ابزار dev) · `kucherenko/jscpd` (MIT، ⭐6.6k، ۲۲۰+ زبان) · `webpro-nl/knip` (ISC، ⭐12.7k) · `terryyin/lizard` (⭐2.6k) · `rubik/radon` (MIT) · vulture (PyPI) · `import-linter/import-linter` (BSD‑2، ⭐1.3k) · `sverweij/dependency-cruiser` (MIT، ⭐7.4k) · `pahen/madge` (MIT، ⭐10.2k).
+### WP‑19 · بهداشت کد، قطعیت تست و ضد‌رگرسیون — P2
+**چرا:** چند سنجه از زمان ممیزی قبلی **بدتر** شده‌اند و هیچ گیتی جلویشان را نمی‌گیرد.
+**شاهد:** `except Exception` **۱۱ → ۲۲**؛ `TODO/FIXME/HACK` **۴۲ → ۴۸**؛ تست‌های skip **۲ → ۶** (به‌علاوه ۹ skip در استودیو و ۲ skip در بک‌اند طبق گزارش QA)؛ `print()` غیرتست **۴۱** (بدون تغییر). هیچ `freezegun`/`time-machine` در dev deps نیست در حالی که منطق جلالی/تهران در ۲۵ فایل وجود دارد. `.semgrep/project-rules.yml` موجود است (پس بستر قاعده‌گذاری آماده است).
+**کار:**
+1. هر ۴۱ `print()` → logger ساخت‌یافته؛ قاعده‌ی Semgrep که `print(`/`debugPrint(`/`console.log` در کد غیرتست را قرمز کند.
+2. هر ۲۲ `except Exception:` تعیین تکلیف: استثنای دقیق، یا لاگ+بازفرستادن، یا کامنت دلیلِ صریح. **صفر بلعیدن بی‌صدا.**
+3. هر ۴۸ `TODO/FIXME/HACK` → یا انجام، یا ردیف در `BUILD-QUEUE.md` با مسئول و دلیل. صفر TODO بی‌تکلیف.
+4. هر ۶ تست skip + ۹ skip استودیو → تعیین تکلیف: یا فعال کن، یا دلیل `BLOCKED` دقیق بنویس (الگوی `qa-report/FINAL-REPORT.md`).
+5. **قطعیت زمانی:** `freezegun` یا `time-machine` به dev deps؛ تست‌های زمانی برای جلالی/تهران، DST، انقضای OTP، پنجره‌های `DATA-RETENTION.md`، و دوره‌های گزارش مالی.
+6. **ضد flake:** اجرای سه‌باره‌ی یک زیرمجموعه‌ی حساس در CI (یا `pytest-rerunfailures` با گزارش) تا flaky بودن دیده شود؛ و یک قاعده: تست flaky = باگ.
+7. **گیت‌های ضد‌رگرسیون**: فایل `.ci-baseline.json` با همه‌ی سنجه‌های بخش ۵ و یک step در CI که هر **افزایش** در سنجه‌های بد (print/except/TODO/skip/dynamic/as) و هر **کاهش** در سنجه‌های خوب (پوشش، تعداد تست) را قرمز کند.
+**معیار پذیرش:** صفر `print` غیرتست با گیت Semgrep؛ صفر `except Exception` بی‌تکلیف؛ صفر TODO بی‌تکلیف؛ همه‌ی skipها تعیین تکلیف؛ تست‌های زمانی منجمد سبز؛ `.ci-baseline.json` + گیت ضد‌رگرسیون فعال.
 
 ---
 
-## ۶) ترتیب اجرا
+### WP‑20 · حریم خصوصی، PII و provenance تصاویر — P2
+**چرا:** داده‌ی سلامتی/زیست‌سنجشی داری و تصاویر زیادی در مخزن commit شده؛ باید **قابل اثبات** باشد که مصنوعی‌اند.
+**شاهد:** `docs/MuscleParadise/ui-previews/*.png` → ۸ تصویر بزرگ شامل `03-kiosk-face-gate.png` (۱٫۷MB)، `04-payment-receipt.png` (۱٫۷MB)، `05-member-profile.png` (۶۱۶KB)، `07-client-home-grid.png` (۲٫۱MB). `qa-report/screenshots/*.png` → ۱۱ تصویر از محیط اجرا با داده‌ی seed. `qa-report/buttons.json` شامل شماره‌های seed مثل `09120000001` و نام‌های «عضو فیک …» ⇒ **مصنوعی بودن محتمل و مطلوب است ولی مستند نشده**. `mp.db` ترک‌شده (WP‑05).
+**کار:**
+1. `docs/MuscleParadise/ui-previews/PROVENANCE.md` و `qa-report/PROVENANCE.md`: برای **هر تصویر** یک ردیف — چگونه تولید شده، از چه محیطی، چه داده‌ای دارد، آیا چهره/رسید/شماره‌ی **واقعی** دارد، و چگونه مصنوعی بودنش اثبات می‌شود.
+2. اگر داده‌ی واقعی پیدا شد: **حذف نکن** (بازنویسی تاریخچه destructive است)؛ در گزارش «مسدود — نیاز به تأیید انسانی» با گزینه‌ها و پیشنهاد بنویس (بخش ۸).
+3. یک **قاعده‌ی CI** اضافه کن: seed داده‌ی QA فقط از `qa-report/tools/seed_live.py` با الگوی شماره‌های مصنوعی (`0912…`) و نام «عضو فیک»؛ هر اسکرین‌شات/آرتیفکت جدید باید از همان seed باشد.
+4. بررسی کن هیچ PII در `evidence/*.json`، `qa-report/load/*.csv`، لاگ‌های CI یا `finn/reports/` نباشد (یک اسکریپت پویش با regex موبایل/کد ملی/ایمیل + خروجی بدون مقدار، مطابق الگوی redaction موجود).
+5. `modules/privacy/` و `DATA-RETENTION.md` را در برابر کد **راستی‌آزمایی** کن: آیا حذف/انقضای داده واقعاً پیاده و تست شده؟ (یک تست که چرخه‌ی عمر داده را اثبات کند: ثبت → انقضا → حذف/ناشناس‌سازی.)
+6. `.claude/` حذف شده (خوب) — بررسی کن transcript یا توکنی در `finn/` یا `.finn/` باقی نمانده باشد.
+**معیار پذیرش:** هر دو فایل PROVENANCE کامل؛ اسکریپت پویش PII سبز و به‌عنوان گیت در CI؛ تست چرخه‌ی عمر retention سبز؛ فهرست موارد مسدود (احتمالاً خالی).
+
+---
+
+### WP‑21 · ممیزی خط‌به‌خط نهایی و بستن خواسته‌های ۱ تا ۱۲ — P1/P2
+**چرا:** این جمع‌بندیِ خواسته‌ی اصلی مالک است و باید **آخر** انجام شود (بعد از WP‑07/08/09).
+**کار:**
+1. **نقشه‌ی کامل و همبستگی:** خروجی RepoWise را به‌روز بگیر (گراف فراخوانی، health score، dead code، blast radius، C4) و `docs/MuscleParadise/architecture/c4.md` و `module-map.md` را با آن همگام کن؛ fan‑in/fan‑out هر ماژول و ۵ نقطه‌ی پرتراکم را با دلیل مستند کن.
+2. **جدول ممیزی هر ماژول** (پیوست ب) را برای همه‌ی ۲۴ ماژول بک‌اند، ۱۹ موتور، و هر بخش کلاینت/استودیو پر کن.
+3. **خروجی‌ها (خواسته‌ی ۴):** برای هر چیزی که خروجی تولید می‌کند — رسید سفارش/عضو، گزارش مربی، گزارش سود/زیان دوره‌ای، خروجی ارزیابی، export فایل، پیامک/اعلان، QR/کد تخفیف، پاسخ API — یک **تست طلایی/تصویب (approval)** بنویس که خروجی واقعی را در فایل مرجع قفل کند. این `OUTPUT-AUDIT-2026-11-14.md` را اجرایی و پایدار می‌کند.
+4. **سیم‌کشی‌ها (خواسته‌ی ۲):** یک دیاگرام sequence برای هر ورک‌فلوی اصلی (ثبت‌نام→OTP→چک‌این→تمرین→پرداخت→رسید؛ کد تخفیف؛ هزینه/رسید هزینه؛ کیف‌پول؛ سینک آفلاین؛ به‌روزرسانی PWA) تولید کن و با `tools/mermaid-check` اعتبارسنجی کن.
+5. **تک‌تک دکمه‌ها (خواسته‌ی ۸):** `UI-INVENTORY.md` (WP‑09) را کامل کن و وضعیت هر ردیف را با شاهد (تست/golden/E2E) پر کن؛ ۴۵ دکمه‌ی کلیک‌شده در QA را به پوشش خودکار دائمی تبدیل کن تا رگرسیون دیده شود.
+6. **جدول نهایی:** «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد اجرایی (تست/CI run/عدد)» در `docs/MuscleParadise/AUDIT-FINAL-2026-11-20.md`.
+**معیار پذیرش:** جدول ممیزی همه‌ی ماژول‌ها پر؛ تست طلایی برای هر خروجی؛ دیاگرام‌های sequence اعتبارسنجی‌شده؛ `UI-INVENTORY.md` کامل با شاهد؛ جدول نهایی خواسته‌ها بدون خانه‌ی خالی.
+
+---
+
+## ۷) ترتیب اجرا
 
 ```
-WP-00 (صف)
-  ├─ P0: WP-01 (امضا/بیلد) → WP-02 (آرتیفکت) → WP-03 (قطعیت CI) → WP-04 (خطای زمان اجرا)
-  ├─ P1: WP-05 (جهش) → WP-06 (property) → WP-07 (golden/on-device) → WP-08 (نوع) → WP-09 (a11y) → WP-10 (قرارداد API)
-  └─ P2: WP-11 (i18n) · WP-12 (لایسنس) · WP-13 (آشوب) · WP-14 (بار/عملکرد) · WP-15 (حریم خصوصی)
-WP-16 (ممیزی خط‌به‌خط و ساده‌سازی) — همیشه آخر، بعد از سبز شدن WP-05/06/07
+WP-00 (صف و راستی‌آزمایی)
+  └─ P0: WP-01 (قفل‌شدگی استخر — بحرانی) → WP-02 (زنجیرهٔ تأمین) → WP-03 (خطا + CSP)
+        → WP-04 (چک‌لیست انتشار) → WP-05 (mp.db/بهداشت) → WP-06 (R8/AAB)
+  └─ P1: WP-07 (جهش) → WP-08 (property) → WP-09 (کلاینت: golden/patrol/a11y/نوع)
+        → WP-10 (قرارداد API + ماتریس مجوز) → WP-11 (پول و ۲^۵۳−۱) → WP-12 (وب/PWA/Electron)
+        → WP-13 (قطعیت CI + lint)
+  └─ P2: WP-14 (تکرار/مرده/پیچیدگی) · WP-15 (l10n/فونت) · WP-16 (آشوب) · WP-17 (بار)
+        · WP-18 (لایسنس) · WP-19 (بهداشت/ضدرگرسیون) · WP-20 (PII/provenance)
+WP-21 (ممیزی خط‌به‌خط و جمع‌بندی خواسته‌ها) — همیشه آخر، بعد از سبز شدن WP-07/08/09
 ```
-قواعد ترتیب:
-- **مسیر الف (تمام‌کردن قابلیت‌های ناتمام) بر همه‌ی WPهای P1/P2 مقدم است**؛ تنها WP‑01 تا WP‑04 (P0) با آن موازی و بی‌وقفه اجرا می‌شوند. هیچ milestone جاری را فدای این سند نکن.
-- هر گیت سخت‌سازی را **بلافاصله بعد از تمام‌شدن همان قابلیت** اعمال کن (حالت ۲ پیوست D)، نه در یک پاس انبوه پایانی.
-- هر P0 قبل از هر P1؛ هر P1 قبل از WP‑16.
-- WP‑11 می‌تواند بعد از WP‑07 انجام شود تا goldenها با کلیدهای ترجمه بازنویسی نشوند.
-- WP‑12 و WP‑15 مستقل‌اند و می‌توانند موازی بروند.
-- اگر زمانی برای انجام همه نبود، به‌ترتیب اولویت پیش برو و در `SESSION_HANDOFF.md` دقیقاً بنویس کدام WP ناتمام ماند و از کجا ادامه یابد.
+
+قواعد:
+- **WP‑01 بر همه مقدم است** (تنها خطر بازِ با سابقه‌ی حادثه‌ی واقعی).
+- هر P0 قبل از هر P1؛ WP‑14 و WP‑21 فقط بعد از WP‑07 (قاعده‌ی ۳‑۱۱).
+- WP‑08 قبل از WP‑11 (propertyهای پولی پیش‌نیاز یکپارچگی پول‌اند).
+- WP‑13 را زود انجام بده (ارزان است و قطعیت بقیه‌ی CI را تضمین می‌کند).
+- WP‑15 بعد از WP‑09 تا goldenها با کلیدهای ترجمه بازنویسی نشوند.
+- WP‑16/17/18/19/20 مستقل‌اند و می‌توانند موازی بروند.
+- اگر وقت نرسید: به ترتیب اولویت برو و در `SESSION_HANDOFF.md` دقیقاً بنویس چه ماند و از کجا ادامه یابد.
 
 ---
 
-## ۷) خط قرمزها — فقط با تأیید صریح انسان (هیچ‌وقت خودسرانه انجام نده)
+## ۸) خط قرمزها — فقط با تأیید صریح مالک
 
-این‌ها تنها مواردی هستند که **باید** متوقف شوی و بپرسی. در همه‌ی موارد دیگر، تصمیم بگیر و ادامه بده (قاعده‌ی ۳‑۲).
+در این موارد **متوقف شو و بپرس**؛ در بقیه‌ی موارد تصمیم بگیر و ادامه بده (۳‑۲).
 
-1. **بازنویسی تاریخچه‌ی git** (`git filter-repo`/BFG/force-push) — برای حذف کلید امضای افشاشده یا تصاویر حاوی داده‌ی واقعی. **آماده‌سازی کن، اجرا نکن.** یک سند اجرایی گام‌به‌گام با دستورهای دقیق، ریسک‌ها، و ترتیب «rotate/revoke → بازنویسی → ابطال توکن/کش» بنویس و منتظر تأیید بمان. (`RELEASE-CHECKLIST.md:12` صریحاً می‌گوید حذف از HEAD کافی نیست.)
-2. **چرخش/ابطال کلید امضا یا هر credential** و تغییر secrets در GitHub/Dokploy/GHCR.
-3. **هر deploy واقعی، انتشار عمومی، ساخت release، یا push به شاخه‌ی محافظت‌شده‌ی اصلی** (خودت را به شاخه‌های کاری و PR محدود کن).
-4. **حذف یا تغییر داده‌ی کاربر/عضو** در هر محیطی، و هر مهاجرت مخرب (drop column/table) بدون مهاجرت رفت‌وبرگشت تست‌شده.
-5. **تغییر `LICENSE`، `NOTICE-THIRD-PARTY.md` در بخش حقوقی، یا هر متن حقوقی/حریم خصوصی کاربر** (`FACEID-PRIVACY-TEXT.md`, `biometric-policy.md`, `DATA-RETENTION.md`) — می‌توانی **پیشنهاد** بنویسی، اعمال نکن.
-6. **شل‌کردن هر گیت CI** یا پایین‌آوردن آستانه‌ی پوشش/امنیت.
-7. **افزودن وابستگی با لایسنس GPL/AGPL به آرتیفکت توزیعی**، یا هر سرویس/کلید پولی.
-8. **ویرایش `AGENTS.md` یا `.claude/` به شکلی که قرارداد ایجنت‌ها را عوض کند** (افزودن skill جدید مجاز است؛ تغییر قواعد اولویت منبع حقیقت نه).
+1. **بازنویسی تاریخچه‌ی git** (`git filter-repo`/BFG/force‑push) — برای حذف کلید امضای افشاشده (`RELEASE-CHECKLIST.md:12`) یا هر تصویر/فایل حاوی داده‌ی واقعی. **آماده‌سازی کن، اجرا نکن**: یک سند اجرایی گام‌به‌گام با ترتیب «rotate/revoke → بازنویسی → ابطال توکن/کش → تأیید» بنویس.
+2. **چرخش/ابطال هر کلید یا credential** (امضا، JWT، بیومتریک، GHCR، Dokploy، SMS، درگاه پرداخت) و هر تغییر در secrets.
+3. **deploy واقعی، انتشار عمومی، ساخت release، یا push مستقیم به `main`** (فقط شاخه‌ی کاری + PR؛ `main` تنها شاخه‌ی دائمی است و merge باید با CI سبز باشد).
+4. **حذف/تغییر داده‌ی کاربر** در هر محیطی، و هر مهاجرت مخرب (drop column/table) بدون مسیر رفت‌وبرگشت تست‌شده.
+5. **تغییر `LICENSE`، متن‌های حقوقی/حریم خصوصی** (`FACEID-PRIVACY-TEXT.md`, `security/biometric-policy.md`, `DATA-RETENTION.md`) یا بخش حقوقی `NOTICE-THIRD-PARTY.md` — پیشنهاد بنویس، اعمال نکن.
+6. **شل‌کردن هر گیت CI** یا کاهش هر آستانه (پوشش، WCAG، امنیتی، اندازه، پیچیدگی).
+7. **افزودن وابستگی GPL/AGPL به آرتیفکت توزیعی**، یا هر سرویس/کلید پولی.
+8. **تغییر تنظیمات GitHub** (branch protection، environments، «automatically delete head branches» — آیتم ۳۸ چک‌لیست صریحاً می‌گوید فقط مالک می‌تواند).
+9. **دست‌زدن به داده‌ی واقعی پرداخت/کیف‌پول** در هر محیط غیرکاملاً ایزوله.
 
-اگر موردی از این فهرست سر راه یک WP بود: بقیه‌ی WP را تا جایی که ممکن است انجام بده، آن بخش را در گزارش «مسدود — نیاز به تأیید انسانی» با دلیل و گزینه‌های پیشنهادی بنویس، و به WP بعدی برو. **متوقف نمان.**
-
----
-
-## ۸) تعریف انجام‌شدن (گیت نهایی کل پروژه)
-
-کار وقتی تمام است که همه‌ی این‌ها با **شاهد اجرایی** برقرار باشند:
-
-- [ ] همه‌ی jobهای `ci.yml` (secret-scan, docs, backend, studio, client-flutter, live-contract, e2e-api) + `apk.yml` + `container.yml` سبز — بدون `|| true` روی گیت‌های معنادار.
-- [ ] پوشش بک‌اند ≥ ۷۰٪ **و** mutation score برای `engine/` و `security/` اندازه‌گیری و قفل شده (WP‑05).
-- [ ] برای هر ۱۹ موتور حداقل یک تست property سبز و قطعی (WP‑06).
-- [ ] golden برای همه‌ی صفحات کلاینت + حداقل یک جریان patrol روی امولاتور سبز (WP‑07).
-- [ ] `UI-INVENTORY.md` کامل: هر دکمه/فیلد/سرچ‌بار/انیمیشن یک ردیف، بدون ستون خالی (WP‑07/09/11).
-- [ ] strict-casts/raw-types/inference در Dart و `strict` در TS فعال؛ عدد پایه‌ی `dynamic`/`any` قفل شده و رو به کاهش (WP‑08).
-- [ ] تست‌های guideline دسترس‌پذیری روی همه‌ی صفحات سبز + سند ACCESS‑AUDIT جدید (WP‑09).
-- [ ] `openapi.json` commit‌شده + گیت drift + گیت oasdiff + قرارداد زنده برای کلاینت Dart (WP‑10).
-- [ ] صفر رشته‌ی کاربر‌نمای hardcode؛ تست pseudo-locale سبز (WP‑11).
-- [ ] گیت لایسنس سبز؛ `NOTICE-THIRD-PARTY.md` کامل شامل دارایی‌ها (WP‑12).
-- [ ] ≥۶ سناریوی آشوب سبز + دریل restore با assert برابری داده + یک job CI روی Postgres (WP‑13).
-- [ ] ≥۵ سناریوی بار جدید با آستانه + گیت N+1 + بودجه‌ی اندازه‌ی APK و باندل (WP‑14).
-- [ ] صفر `print` در کد غیرتست؛ تست redaction سبز؛ صفر `except Exception:` بی‌تکلیف؛ صفر TODO بی‌تکلیف؛ `ui-previews/PROVENANCE.md` کامل (WP‑15).
-- [ ] گزارش jscpd/knip/vulture/lizard با تعیین تکلیف **همه‌ی** یافته‌ها؛ صفر چرخه‌ی وابستگی؛ گیت پیچیدگی فعال؛ تست طلایی برای هر خروجی (WP‑16).
-- [ ] `python3 scripts/docs_gate.py` سبز؛ `SESSION_HANDOFF.md` به‌روز؛ یک گزارش `finn/reports/…` برای هر WP.
-- [ ] جدول نهایی «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد» در گزارش نهایی.
-- [ ] فهرست «مسدود — نیاز به تأیید انسانی» (احتمالاً شامل بازنویسی تاریخچه/چرخش کلید).
+اگر موردی از این فهرست سر راه یک WP بود: بقیه‌ی WP را تا جایی که ممکن است انجام بده، آن بخش را `BLOCKED` با دلیل و گزینه‌ها ثبت کن (قاعده‌ی ۳‑۱۵) و به WP بعدی برو. **هرگز بیکار نمان.**
 
 ---
 
-## ۹) قالب گزارش (برای هر WP)
+## ۹) گیت انتشار (تعریف انجام‌شدن کل پروژه)
+
+کار وقتی تمام است که همه‌ی این‌ها **با شاهد اجرایی** برقرار باشند:
+
+**خطرهای باز**
+- [ ] ریشه‌ی قفل‌شدگی استخر SQLite پیدا و رفع شده، با تست بازتولید قبل/بعد و متریک+alert (WP‑01). اگر نیافت شد: `BLOCKED` با فهرست مظنون‌های رد‌شده.
+- [ ] هر ۲۱ آیتم بازِ `RELEASE-CHECKLIST.md` بسته یا `BLOCKED` مستند (WP‑04).
+- [ ] `mp.db` از مخزن خارج + گیت CI علیه commit شدن DB/keystore/.env (WP‑05).
+
+**زنجیره‌ی تأمین و زمان اجرا**
+- [ ] هر ایمیج: hadolint + Trivy/Grype + SBOM + cosign؛ `deploy.yml` فقط ایمیج امضاشده (WP‑02).
+- [ ] GlitchTip فعال در بک‌اند/کلاینت/استودیو با تست redaction؛ CSP فعال و تست‌شده (WP‑03).
+- [ ] release با R8/shrink + `.aab` + گیت اندازه + `analyze-size` (WP‑06).
+
+**عمق تست**
+- [ ] mutation score برای `engine/`، ماژول‌های مالی و `security/` اندازه‌گیری و قفل‌شده (WP‑07).
+- [ ] ≥۱ property برای هر ۱۹ موتور + propertyهای پولی؛ `hypothesis` در dev deps و `dast.py` قابل اجرا روی محیط تازه (WP‑08).
+- [ ] golden برای همه‌ی صفحات کلاینت + آستانه‌ی پوشش کلاینت + ≥۱ تست patrol در CI (WP‑09).
+- [ ] `openapi.json` commit‌شده + گیت drift + oasdiff + قرارداد زنده‌ی کلاینت Dart + `dast.py` زمان‌بند + ماتریس مجوز/ورودی نامعتبر (نقص `-1` بسته) (WP‑10).
+- [ ] تست مرزی ۲^۵۳−۱ در سه لایه + قاعده‌ی Semgrep پولی + قواعد گردکردن مستند/تست‌شده + همسانی مانده/دفترکل/audit log (WP‑11).
+- [ ] Playwright E2E با جریان‌های مالی/مخرب روی داده‌ی مصنوعی (بستن `BLOCKED` گزارش QA) + axe + رگرسیون بصری + Lighthouse/بودجه‌ی باندل + تست‌های SW و Electron (WP‑12).
+- [ ] صفر `npm ci || npm install`؛ lint استودیو فعال یا اسکریپت مرده حذف‌شده (WP‑13).
+
+**کلاس جهانی**
+- [ ] گزارش jscpd/knip/vulture/lizard با تعیین تکلیف همه‌ی یافته‌ها؛ گیت پیچیدگی و لایه‌بندی (WP‑14).
+- [ ] l10n کامل + نقص ایموجی/فونت بسته + pseudo-locale (WP‑15).
+- [ ] ≥۶ سناریوی آشوب + دریل restore با assert برابری داده (WP‑16).
+- [ ] ≥۵ سناریوی بار جدید + مقایسه‌ی SQLite/Postgres + گیت N+1 (WP‑17).
+- [ ] گیت خودکار لایسنس وابستگی‌ها + NOTICE همگام (WP‑18).
+- [ ] صفر print/except/TODO/skip بی‌تکلیف + `.ci-baseline.json` + گیت ضد‌رگرسیون (WP‑19).
+- [ ] PROVENANCE برای همه‌ی تصاویر + پویش PII به‌عنوان گیت + تست چرخه‌ی عمر retention (WP‑20).
+- [ ] جدول ممیزی همه‌ی ماژول‌ها + تست طلایی هر خروجی + دیاگرام‌های sequence + `UI-INVENTORY.md` کامل + جدول «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد» (WP‑21).
+
+**فرایند**
+- [ ] `scripts/docs_gate.py` و `tools/mermaid-check` سبز؛ `SESSION_HANDOFF.md` به‌روز؛ یک گزارش `finn/reports/…` برای هر WP؛ `main` با CI سبز روی همان SHA (آیتم ۳۷ چک‌لیست).
+
+---
+
+## ۱۰) قالب گزارش هر WP
 
 فایل: `finn/reports/wp<NN>-<slug>.md`
 
 ```markdown
 # WP-<NN> — <عنوان>
-تاریخ: <ISO> · شاخه/PR: <…> · اولویت: P0/P1/P2 · وضعیت: انجام‌شد / بخشی / مسدود
+تاریخ: <ISO> · شاخه/PR: <…> · اولویت: P0/P1/P2 · وضعیت: انجام‌شد / بخشی / BLOCKED
 
 ## چه شد
 <۳ تا ۸ خط، فعل‌محور>
 
 ## شاهد اجرایی
 - دستور: `<دقیق>` → خروجی/عدد: `<…>`
-- CI run: <شناسه/لینک> · تست‌های جدید: <نام‌ها> · گیت‌های اضافه: <job/step>
+- CI run: <id/لینک> · تست‌های جدید: <نام‌ها> · گیت‌های اضافه: <job/step>
+- مسیر evidence: <…>   (الگوی موجود: evidence/m60/*.json)
 
 ## پوشش خواسته‌های مالک
 <کدام یک از موارد ۱ تا ۱۲>
 
+## عدد پایه (قبل → بعد)
+<coverage / mutation score / dynamic / as / print / except / TODO / skip / duplication / complexity / p95 / APK size / bundle size>
+
 ## تصمیم‌های خودکار
 - <تصمیم> — چرا: <یک خط>
 
-## اعداد پایه (برای گیت ضد‌رگرسیون)
-<coverage / mutation score / dynamic count / any count / duplication % / complexity / APK size / bundle size / p95>
-
-## مسدود — نیاز به تأیید انسانی
-- <مورد> — گزینه‌ها: <…> — پیشنهاد: <…>
+## BLOCKED — نیاز به تأیید انسانی
+- <مورد> — دلیل دقیق: <…> — گزینه‌ها: <…> — پیشنهاد: <…>
 
 ## قدم بعدی برای نشست بعد
 - <دقیق و قابل اجرا>
 ```
 
-در پایان هر نشست: `docs/MuscleParadise/SESSION_HANDOFF.md` را به‌روز کن (وضعیت WPها، قدم بعدی، اعداد پایه) تا نشست بعدی بدون حرف‌زدن با مالک ادامه دهد.
+سبک شاهد را مطابق `evidence/m60/STATUS.md` نگه دار: «هر ادعا یا شاهد دارد (تست/CI/curl) یا برچسب **بازبینی دستی** می‌خورد.»
 
 ---
 
-## پیوست A — کاتالوگ ابزار اوپن‌سورس رایگان (راستی‌آزمایی‌شده در ۲۰۲۶‑۱۱‑۱۸)
+## پیوست A — ابزار اوپن‌سورس رایگان (راستی‌آزمایی‌شده، ۲۰۲۶‑۱۱‑۲۰)
 
-> ستاره/لایسنس از GitHub API. «dev» = فقط ابزار توسعه/CI (GPL/AGPL مجاز)؛ «dist» = داخل آرتیفکت توزیعی (فقط MIT/Apache/BSD/ISC/MPL).
+> «dev» = ابزار توسعه/CI (GPL/AGPL مجاز) · «dist» = داخل آرتیفکت توزیعی (فقط MIT/Apache/BSD/ISC/MPL)
+> موجود در پروژه: Gitleaks، Semgrep، bandit، pip-audit، schemathesis، Locust، k6، apktool، RepoWise، mermaid-check، Vitest، pytest، ruff.
 
-**مستندسازی، دیاگرام، انتقال context**
-| ابزار | لایسنس | ستاره | نقش |
+| ابزار | لایسنس | ستاره | برای چه |
 |---|---|---|---|
-| `repowise-dev/repowise` | AGPL‑3.0 (dev) | 8.2k | گراف فراخوانی ۲۸ زبان، ویکی هر فایل/سمبل، کد مرده، health score، blast radius، C4/Structurizr، برنامه‌ی ریفکتور، نوشتن AGENTS.md، ۱۰ ابزار MCP، بدون API key |
-| `AsyncFuncAI/deepwiki-open` | MIT (dev) | 18.5k | ویکی + دیاگرام Mermaid خودکار + Ask با RAG + خروجی Markdown |
-| `langchain-ai/openwiki` | MIT (dev) | 18.0k | نوشتن و **نگهداری** مستندات ایجنت + ارجاع در AGENTS.md |
-| `ahmedkhaleel2004/gitdiagram` | MIT (dev) | 19.0k | دیاگرام تعاملی معماری از مخزن |
-| `oraios/serena` | GPL‑3.0 (dev) | 31.5k | دسترسی سطح سمبل از طریق MCP؛ کاهش مصرف توکن |
-| `yamadashy/repomix` | MIT (dev) | 29.3k | کل مخزن در یک فایل AI‑ready |
-| `coderamp-labs/gitingest` | MIT (dev) | 16.2k | `hub`→`ingest` برای prompt مخزن |
-| `The-Pocket/PocketFlow-Tutorial-Codebase-Knowledge` | MIT (dev) | 12.8k | مخزن → آموزش گام‌به‌گام |
-
-**ارکستراتور و کیفیت**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `oxsecurity/megalinter` | AGPL‑3.0 (dev) | 2.7k | ۶۸ زبان، ۱۲۴ لینتر، شامل COPYPASTE(jscpd)؛ یک `docker run` |
-| `SonarSource/sonarqube` | LGPL‑3.0 (dev) | 11.2k | Quality Gate دائمی (اختیاری؛ خود-hosted) |
-| `reviewdog/reviewdog` | MIT (dev) | 9.8k | تبدیل خروجی لینترها به کامنت روی خط PR |
-| `pre-commit/pre-commit` | MIT (dev) | 15.7k | گیت قبل از کامیت |
-| `The-PR-Agent/pr-agent` | Apache‑2.0 (dev) | 16.4k | بازبین خودکار PR |
-
-**معماری و همبستگی**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `import-linter/import-linter` | BSD‑2 | 1.3k | قوانین لایه‌بندی پایتون به‌صورت تست |
-| `sverweij/dependency-cruiser` | MIT | 7.4k | قواعد وابستگی + گراف برای TS/JS |
-| `pahen/madge` | MIT | 10.2k | چرخه‌های وابستگی JS/TS |
-| `TNG/ArchUnit` | Apache‑2.0 | 3.9k | تست معماری (اگر مسیر JVM اضافه شد) |
-| `jQAssistant/jqassistant` | GPL‑3.0 (dev) | 0.3k | کدبیس JVM → Neo4j + Cypher |
-
-**کد مرده، تکراری، پیچیدگی**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `webpro-nl/knip` | ISC | 12.7k | کد مرده‌ی TS/React |
-| `kucherenko/jscpd` | MIT | 6.6k | کپی/پیست در ۲۲۰+ زبان (py+dart+ts همزمان) |
-| `terryyin/lizard` | MIT | 2.6k | پیچیدگی cyclomatic چندزبانه |
-| `rubik/radon` | MIT | 2.0k | متریک پیچیدگی پایتون |
-| `vulture` (PyPI) | MIT | — | کد مرده‌ی پایتون |
-| `semgrep/semgrep` | LGPL‑2.1 (dev) | 17.8k | قواعد سفارشی (PII در لاگ، print ممنوع) |
-| `openrewrite/rewrite` | Apache‑2.0 | 4.0k | ریفکتور مکانیکی انبوه (مسیر JVM) |
-
-**تست عمیق**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `boxed/mutmut` | BSD‑3 | 1.5k | mutation پایتون |
-| `sixty-north/cosmic-ray` | MIT | 0.7k | mutation موازی پایتون |
-| `stryker-mutator/stryker-js` | Apache‑2.0 | 3.4k | mutation TS/JS |
-| `HypothesisWorks/hypothesis` | MPL‑2.0 | 9.2k | property‑based پایتون |
-| `dubzzz/fast-check` | MIT | 5.3k | property‑based TS |
-| `leancodepl/patrol` | Apache‑2.0 | 1.5k | تست on‑device فلاتر (dialogهای permission) |
-| `schemathesis/schemathesis` | MIT | 3.8k | فازی‌کردن API از روی OpenAPI |
-| `oasdiff/oasdiff` (+`oasdiff-action`) | Apache‑2.0 | 1.5k | گیت تغییر شکننده‌ی API |
-| `keploy/keploy` | Apache‑2.0 | 19.9k | ضبط ترافیک واقعی → تست + mock |
-| `Orange-OpenSource/hurl` | Apache‑2.0 | 19.3k | تست HTTP متنی با assert |
-| `stoplightio/prism` | Apache‑2.0 | 5.1k | mock + اعتبارسنجی OpenAPI |
-| `vitest-dev/vitest` | MIT | 17.4k | موجود در پروژه |
-| `jacoco/jacoco` | EPL | 4.6k | پوشش JVM (در صورت نیاز) |
-
-**UI، a11y، پرفورمنس**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `microsoft/playwright` | Apache‑2.0 | 100.5k | E2E مرورگری برای استودیو + رگرسیون بصری + axe |
-| `storybookjs/storybook` | MIT | 91.6k | ایزوله‌سازی هر کامپوننت و state |
-| `garris/BackstopJS` | MIT | 7.2k | رگرسیون بصری سناریومحور |
-| `dequelabs/axe-core` | MPL‑2.0 | 7.8k | موتور a11y |
-| `pa11y/pa11y` | LGPL‑3.0 (dev) | 4.6k | a11y خودکار صفحات |
-| `GoogleChrome/lighthouse-ci` | Apache‑2.0 | 7.2k | بودجه‌ی perf/a11y/SEO در CI |
-| `GoogleChrome/web-vitals` | Apache‑2.0 | 8.7k | متریک واقعی کاربر |
-| `webpack/webpack-bundle-analyzer` | MIT | 12.7k | تحلیل باندل (برای Vite: `rollup-plugin-visualizer`) |
-
-**بار، آشوب**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `grafana/k6` | AGPL‑3.0 (dev) | 32.3k | موجود در پروژه |
-| `locustio/locust` | MIT | 28.3k | جایگزین/تکمیل k6 |
-| `hatoo/oha` | MIT | 10.7k | بار سریع یک endpoint |
-| `mcollina/autocannon` | MIT | 8.5k | بنچمارک Node |
-| `Shopify/toxiproxy` | MIT | 12.5k | تزریق latency/قطعی |
-| `apache/jmeter` · `gatling/gatling` | Apache‑2.0 | 9.6k / 7.0k | سناریوهای سنگین |
-
-**امنیت و زنجیره‌ی تأمین**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `aquasecurity/trivy` | Apache‑2.0 | 39.5k | CVE ایمیج/وابستگی/IaC + SBOM + رازها |
-| `anchore/grype` | Apache‑2.0 | 13.3k | اسکن CVE ایمیج/فایل‌سیستم |
-| `anchore/sbom-action` | Apache‑2.0 | 0.3k | SBOM در GitHub Actions |
+| `aquasecurity/trivy` | Apache‑2.0 (dev) | 39.5k | CVE ایمیج/وابستگی/IaC + SBOM + رازها |
+| `anchore/grype` | Apache‑2.0 (dev) | 13.3k | اسکن CVE ایمیج/فایل‌سیستم |
+| `anchore/sbom-action` | Apache‑2.0 (dev) | 0.3k | SBOM در Actions |
 | `hadolint/hadolint` | GPL‑3.0 (dev) | 12.5k | لینت Dockerfile |
-| `sigstore/cosign` | Apache‑2.0 | 6.4k | امضا و attestation ایمیج |
-| `gitleaks/gitleaks` | MIT | 31.2k | موجود در پروژه |
-| `zaproxy/zaproxy` | Apache‑2.0 | 16.2k | DAST روی اپ deploy‌شده |
-| `PyCQA/bandit` | Apache‑2.0 | 8.4k | موجود در پروژه |
-| `burke-software/GlitchTip` | MIT | 0.2k | error/crash tracking خود‌میزبان |
+| `sigstore/cosign` | Apache‑2.0 (dev) | 6.4k | امضا + provenance ایمیج |
+| `burke-software/GlitchTip` | MIT (dev) | 0.2k | error/crash tracking خودمیزبان |
+| `boxed/mutmut` | BSD‑3 (dev) | 1.5k | mutation پایتون |
+| `sixty-north/cosmic-ray` | MIT (dev) | 0.7k | mutation موازی پایتون |
+| `stryker-mutator/stryker-js` | Apache‑2.0 (dev) | 3.4k | mutation TS |
+| `HypothesisWorks/hypothesis` | MPL‑2.0 (dev) | 9.2k | property پایتون (+ رفع وابستگی اعلام‌نشده‌ی `dast.py`) |
+| `dubzzz/fast-check` | MIT (dev) | 5.3k | property TS |
+| `leancodepl/patrol` | Apache‑2.0 (dev) | 1.5k | تست on‑device فلاتر با dialogهای permission |
+| `microsoft/playwright` | Apache‑2.0 (dev) | 100.5k | E2E استودیو/وب + رگرسیون بصری + axe |
+| `dequelabs/axe-core` | MPL‑2.0 (dev) | 7.8k | a11y |
+| `GoogleChrome/lighthouse-ci` | Apache‑2.0 (dev) | 7.2k | بودجه‌ی perf/a11y/SEO |
+| `GoogleChrome/web-vitals` | Apache‑2.0 | 8.7k | متریک واقعی کاربر |
+| `oasdiff/oasdiff` (+action) | Apache‑2.0 (dev) | 1.5k | گیت تغییر شکننده‌ی API |
+| `Orange-OpenSource/hurl` | Apache‑2.0 (dev) | 19.3k | تست HTTP متنی با assert |
+| `stoplightio/prism` | Apache‑2.0 (dev) | 5.1k | mock + اعتبارسنجی OpenAPI |
+| `keploy/keploy` | Apache‑2.0 (dev) | 19.9k | ضبط ترافیک واقعی → تست + mock |
+| `Shopify/toxiproxy` | MIT (dev) | 12.5k | تزریق latency/قطعی (آشوب) |
+| `kucherenko/jscpd` | MIT (dev) | 6.6k | کد تکراری در ۲۲۰+ زبان (py+dart+ts همزمان) |
+| `webpro-nl/knip` | ISC (dev) | 12.7k | کد مرده‌ی TS/React |
+| `terryyin/lizard` | MIT (dev) | 2.6k | پیچیدگی cyclomatic چندزبانه |
+| `rubik/radon` | MIT (dev) | 2.0k | متریک پیچیدگی پایتون |
+| `vulture` (PyPI) | MIT (dev) | — | کد مرده‌ی پایتون |
+| `import-linter/import-linter` | BSD‑2 (dev) | 1.3k | قوانین لایه‌بندی پایتون به‌صورت تست |
+| `pahen/madge` | MIT (dev) | 10.2k | چرخه‌های وابستگی JS/TS |
+| `repowise-dev/repowise` | AGPL‑3.0 (dev) | 8.2k | گراف/health/dead code/blast radius/C4 (در پروژه استفاده شده) |
+| `oss-review-toolkit/ort` | Apache‑2.0 (dev) | 2.1k | انطباق لایسنس زنجیره |
+| `aboutcode-org/scancode-toolkit` | Apache‑2.0 (dev) | 2.7k | لایسنس/کپی‌رایت دارایی‌ها |
+| `pip-licenses` (PyPI) | MIT (dev) | — | لایسنس وابستگی‌های پایتون |
+| `RSeidelsohn/license-checker-rseidelsohn` | BSD‑3 (dev) | 0.2k | لایسنس وابستگی‌های npm |
+| `newren/git-filter-repo` | MIT (dev) | — | بازنویسی تاریخچه (**فقط با تأیید مالک**) |
+| `zaproxy/zaproxy` | Apache‑2.0 (dev) | 16.2k | DAST کلاسیک (اگر در محیط نصب شد؛ جایگزین فعلی: `dast.py`) |
+| `OpenHands/OpenHands` | MIT (dev) | 93.7k | ایجنت خودران برای پاس‌های حجیم |
+| `Qwen/Qwen3-Coder-30B-A3B-Instruct` (HF) | Apache‑2.0 | — | مدل کد محلی رایگان برای پاس‌های حجیم ریفکتور |
 
-**لایسنس و انطباق**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `oss-review-toolkit/ort` | Apache‑2.0 | 2.1k | انطباق لایسنس کل زنجیره |
-| `aboutcode-org/scancode-toolkit` | Apache‑2.0/NOASSERTION | 2.7k | لایسنس/کپی‌رایت **دارایی‌ها** |
-| `pip-licenses` (PyPI) | MIT | — | لایسنس وابستگی‌های پایتون |
-| `RSeidelsohn/license-checker-rseidelsohn` | BSD‑3 | 0.2k | لایسنس وابستگی‌های npm |
-| `newren/git-filter-repo` | MIT | — | بازنویسی تاریخچه (**فقط با تأیید انسان**) |
-
-**ایجنت و مدل رایگان (برای پاس‌های حجیم ریفکتور)**
-| ابزار | لایسنس | ستاره | نقش |
-|---|---|---|---|
-| `OpenHands/OpenHands` | MIT | 93.7k | ایجنت خودران برای کارهای حجیم |
-| `Aider-AI/aider` | Apache‑2.0 | 50.2k | ریفکتور چندفایلی git‑native |
-| `Qwen/Qwen3-Coder-30B-A3B-Instruct` (HF) | Apache‑2.0 | — | مدل کد محلی، رایگان، با GGUF روی سخت‌افزار معمولی |
-
-**استفاده نکن (آرشیو/رکود):** `lost-pixel/lost-pixel` · `apiaryio/dredd` · `CoatiSoftware/Sourcetrail` · `doyensec/electronegativity` · `qodo-ai/qodo-cover` (unmaintained از ۲۰۲۵‑۰۶‑۱۵) · `EvoSuite/evosuite` · `danvk/source-map-explorer` · `jeremylong/DependencyCheck`.
+**استفاده نکن (آرشیو/رکود):** `lost-pixel/lost-pixel` · `apiaryio/dredd` · `doyensec/electronegativity` · `CoatiSoftware/Sourcetrail` · `qodo-ai/qodo-cover` (unmaintained از ۲۰۲۵‑۰۶‑۱۵) · `EvoSuite/evosuite` · `danvk/source-map-explorer` · `jeremylong/DependencyCheck`.
 
 ---
 
-## پیوست B — چک‌لیست ممیزی خط‌به‌خط (خواسته‌ی ۱ و ۸)
+## پیوست B — چک‌لیست ممیزی خط‌به‌خط
 
-برای **هر ماژول** این جدول را در `docs/MuscleParadise/AUDIT-FINAL-2026-11-18.md` پر کن:
+**برای هر ماژول/موتور** (۲۴ ماژول + ۱۹ موتور + بخش‌های کلاینت/استودیو) این جدول را در `docs/MuscleParadise/AUDIT-FINAL-2026-11-20.md` پر کن:
 
 | ستون | محتوا |
 |---|---|
 | ماژول/مسیر | مثلاً `mp-app/backend/engine/safety.py` |
-| اندازه | تعداد فایل/خط/تابع |
-| ورودی‌ها و خروجی‌ها | فهرست توابع عمومی + امضا + نوع خروجی (خواسته‌های ۴ و ۵) |
-| مصرف‌کننده‌ها | چه ماژول/endpoint/صفحه‌ای صدایش می‌زند (خواسته‌ی ۲ و ۶) |
-| وابستگی‌ها | چه چیزی import می‌کند؛ آیا چرخه دارد؟ |
-| پوشش تست | واحد / یکپارچه / property / mutation / golden |
-| تکرار | آیا منطقش جای دیگری هم پیاده شده؟ (خواسته‌ی ۹) |
+| اندازه | فایل/خط/تابع |
+| ورودی‌ها و خروجی‌ها | توابع عمومی + امضا + نوع خروجی (خواسته‌های ۴ و ۵) |
+| مصرف‌کننده‌ها | کدام endpoint/صفحه/موتور صدایش می‌زند (خواسته‌ی ۲ و ۶) |
+| وابستگی‌ها | چه import می‌کند؛ چرخه دارد؟ |
+| پوشش تست | واحد / یکپارچه / property / mutation / golden / E2E |
+| تکرار | منطقش جای دیگری هم پیاده شده؟ (خواسته‌ی ۹) |
 | کد مرده | تابع/پارامتر/شاخه‌ی بی‌استفاده (خواسته‌ی ۱۱) |
-| پیچیدگی | عدد cyclomatic و اقدام ساده‌سازی (خواسته‌ی ۱۰) |
-| خطاها | همه‌ی مسیرهای شکست چه رفتاری دارند؟ آیا بلعیده می‌شوند؟ |
-| ایمنی/حریم خصوصی | داده‌ی حساس لمس می‌شود؟ لاگ/redaction درست است؟ |
-| عملکرد | کوئری/حلقه/همزمانی مشکوک؟ N+1؟ |
-| a11y و i18n | (برای UI) semantic label، کنتراست، اندازه‌ی هدف، ترجمه، RTL |
+| پیچیدگی | عدد cyclomatic + اقدام ساده‌سازی (خواسته‌ی ۱۰) |
+| پول/عدد بزرگ | فیلد ریالی؟ عبور از ۲^۵۳−۱؟ گردکردن؟ (WP‑11) |
+| خطاها | همه‌ی مسیرهای شکست چه می‌کنند؟ بلعیده می‌شوند؟ |
+| ایمنی/حریم خصوصی | داده‌ی حساس لمس می‌شود؟ redaction درست است؟ |
+| عملکرد | کوئری/حلقه/همزمانی مشکوک؟ N+1؟ session باز؟ (WP‑01) |
+| a11y و l10n | semantic label، کنتراست، اندازه‌ی هدف، ترجمه، RTL |
 | اقدام | چه شد / چه باید بشود |
-| شاهد | تست، CI run، عدد |
+| شاهد | تست، CI run، عدد، مسیر evidence |
 
-و برای **هر عنصر رابط کاربری** (خواسته‌ی ۸) یک ردیف در `docs/MuscleParadise/UI-INVENTORY.md`:
-شناسه · صفحه · نوع (دکمه/ورودی/سرچ‌بار/سوئیچ/لینک/انیمیشن) · مسیر فایل · stateها · تست widget · golden · on-device · a11y · i18n · رفتار خطا · وضعیت.
+**برای هر عنصر UI** (خواسته‌ی ۸): یک ردیف در `docs/MuscleParadise/UI-INVENTORY.md` — شناسه · صفحه · نوع (دکمه/ورودی/سرچ‌بار/سوئیچ/لینک/انیمیشن) · مسیر فایل · stateها · تست widget · golden · on-device · E2E · a11y · l10n · رفتار خطا · وضعیت. پایه‌ی این جدول: `qa-report/buttons.json` (۱۰۱ دکمه در ۱۱ صفحه‌ی استودیو).
 
 ---
 
@@ -683,69 +733,74 @@ WP-16 (ممیزی خط‌به‌خط و ساده‌سازی) — همیشه آخ
 
 ```bash
 # --- آماده‌سازی ---
-git status --short --branch
+git status --short --branch && git log --oneline -1
 python3 scripts/docs_gate.py
+(cd tools/mermaid-check && npm ci --no-audit --no-fund && node check.mjs)
 pip install -e "mp-app/backend[dev]"
-cd mp-app/studio && npm ci && cd -
-cd mp-app/client && flutter pub get && cd -
+(cd mp-app/studio && npm ci)
+(cd mp-app/client && flutter pub get)
 
 # --- گیت‌های موجود (باید سبز بمانند) ---
 cd mp-app/backend && ruff check . && ruff format --check . \
-  && pytest --cov=. --cov-report=xml --cov-fail-under=70 \
-  && bandit -r . -q && pip-audit
-cd mp-app/studio && npm run lint && npm test && npm run build
-cd mp-app/client && flutter analyze --no-fatal-infos && flutter test
+  && pytest --cov=. --cov-report=xml --cov-fail-under=70 && bandit -r . -q && pip-audit
+(cd mp-app/studio && npm test && npm run build)
+(cd mp-app/client && flutter analyze --no-fatal-infos && dart format --output=none --set-exit-if-changed . && flutter test --coverage)
+
+# --- اندازه‌گیری اعداد پایه (بخش ۵) ---
+git ls-files | wc -l
+grep -rl 'matchesGoldenFile' mp-app/client | wc -l
+grep -rl 'Semantics' mp-app/client/lib | wc -l
+grep -rIn '\bdynamic\b' mp-app/client/lib | wc -l
+grep -rInE ':\s*any\b' mp-app/studio/src | wc -l
+grep -rIn 'print(' mp-app/backend --include=*.py | grep -v tests | wc -l
+grep -rInE 'except Exception' mp-app/backend --include=*.py | wc -l
+grep -rInE '(TODO|FIXME|HACK)' mp-app --include=*.py --include=*.dart --include=*.ts --include=*.tsx | wc -l
+grep -rInE '(sbom|trivy|grype|hadolint|cosign|codeql|dependency-review|oasdiff)' .github/workflows/ | wc -l
+grep -c '\- \[ \]' docs/MuscleParadise/RELEASE-CHECKLIST.md
 
 # --- ابزارهای جدید (پس از نصب) ---
-pip install mutmut hypothesis vulture radon import-linter pip-licenses
+pip install mutmut hypothesis vulture radon import-linter pip-licenses freezegun
 npx --yes jscpd --threshold 3 --reporters consoleFull,html --output .audit/jscpd \
   mp-app/backend mp-app/client/lib mp-app/studio/src
-npx --yes knip --reporter json > .audit/knip.json          # در mp-app/studio
+(cd mp-app/studio && npx --yes knip --reporter json > ../../.audit/knip.json)
 lizard mp-app/backend mp-app/client/lib -C 15 -T cyclomatic_complexity=15 > .audit/lizard.txt
 radon cc mp-app/backend -s -n C > .audit/radon.txt
-import-linter --config .importlinter                        # قوانین لایه‌بندی
-mutmut run --paths-to-mutate mp-app/backend/engine          # سپس mutmut results
-hypothesis: در تست‌ها (profile=ci, derandomize=True, deadline=None)
-repowise init --yes --no-prose && repowise export --format markdown   # در .audit/
+mutmut run --paths-to-mutate mp-app/backend/engine && mutmut results
+python3 mp-app/backend/scripts/dast.py --max-examples 20 --report evidence/dast-$(date +%F).json
 trivy image <ghcr/.../backend:sha-…> --severity CRITICAL,HIGH --exit-code 1
 oasdiff breaking docs/api/openapi.json docs/api/openapi.json --fail-on ERR
 k6 run mp-app/tests/load/k6-gate.js --env BASE_URL=<staging>
+repowise init --yes --no-prose && repowise export --format markdown   # در .audit/
 ```
 
-## پیوست D — چرخه‌ی عمر این سند (وقتی پروژه جلوتر رفت)
+## پیوست D — چرخه‌ی عمر این سند
 
-این سند یک **عکس فوری** است، نه حقیقت دائمی. سه حالت:
-
-**حالت ۱ — پروژه هنوز ناتمام است (الان).**
-فقط مسیر الف (WP‑00) و WP‑01 تا WP‑04 را اجرا کن + هر گیت سخت‌سازی که به یک قابلیت **تازه تمام‌شده** می‌چسبد. بقیه‌ی WPها را در صف نگه دار.
-
-**حالت ۲ — یک milestone تمام شده.**
-همان لحظه این WPها را روی مسیرِ تازه‌تمام‌شده اجرا کن: WP‑06 (property روی موتورهای تغییریافته) · WP‑07 (golden + patrol برای صفحات جدید) · WP‑09 (a11y) · WP‑11 (l10n رشته‌های جدید) · WP‑10 (اگر API عوض شد، `openapi.json` + oasdiff) · و ردیف‌های جدید در `UI-INVENTORY.md`.
-این کار را **به تعویق نینداز**: بدهی تست، گران‌ترین بدهی است.
-
-**حالت ۳ — پروژه نهایی شد.**
-همه‌ی WPها را با راستی‌آزمایی شاهد (۳‑۱۳) از ابتدا اجرا کن و گیت نهایی بخش ۸ را کامل ببند. در این حالت مالک یک بازبینی تازه درخواست می‌کند و نسخه‌ی جدید این سند با شاهدِ به‌روز تولید می‌شود.
+**حالت ۱ — همه‌ی WPها باز:** از WP‑00 شروع کن و طبق بخش ۷ پیش برو.
+**حالت ۲ — یک WP قبلاً انجام شده:** با راستی‌آزمایی شاهد (۳‑۱۳) «قبلاً انجام‌شده» ثبت کن و فقط گیت ضد‌رگرسیونش را اضافه کن.
+**حالت ۳ — مخزن جلوتر از `662ff88` رفته:** اول `git diff --stat 662ff88..HEAD` را بخوان، سپس اعداد بخش ۵ را دوباره اندازه بگیر و سند را با اعداد تازه به‌روز کن.
 
 **دستور بازتولید (برای مالک/ایجنت بیرونی):**
 ```
-یک کلون فقط‌خواندنی از yousefghorbanian98-create/MP شاخه <branch> در کامیت <sha> بگیر و
-این اندازه‌گیری‌ها را دوباره انجام بده، سپس نسخه‌ی جدید سند را با اعداد تازه بنویس:
-۱) فهرست jobهای .github/workflows/*.yml و گیت‌های هرکدام
-۲) grep برای sbom|trivy|grype|hadolint|cosign|codeql|dependency-review در workflows
-۳) تعداد matchesGoldenFile، وجود integration_test، تعداد Semantics در client/lib
-۴) شمارش dynamic / as / ignore در client/lib و any در studio/src
-۵) محتوای analysis_options.yaml و tsconfig.json و strict بودنشان
-۶) dev deps در mp-app/backend/pyproject.toml (hypothesis؟ mutmut؟)
-۷) grep برای sentry|glitchtip|rollbar|bugsnag در کل mp-app
-۸) signingConfig و isMinifyEnabled در client/android/app/build.gradle.kts و وجود .aab در CI
-۹) شمارش print() غیرتست، except Exception:، TODO/FIXME، skip/disabled تست‌ها
-۱۰) وجود فایل‌های l10n/ARB/intl
-۱۱) سناریوهای k6-gate.js و آستانه‌هایش
+یک کلون فقط‌خواندنی از yousefghorbanian98-create/MP شاخه main در کامیت <sha> بگیر و این
+اندازه‌گیری‌ها را دوباره انجام بده، سپس نسخه‌ی جدید سند را با اعداد تازه بنویس:
+۱) فهرست workflowها و jobهای هرکدام
+۲) grep برای sbom|trivy|grype|hadolint|cosign|codeql|dependency-review|oasdiff در workflows
+۳) matchesGoldenFile، integration_test، patrol، شمارش Semantics در client/lib
+۴) شمارش dynamic / as / ignore در client/lib و : any در studio/src
+۵) analysis_options.yaml و tsconfig.json و strict بودنشان
+۶) dev deps بک‌اند (hypothesis؟ mutmut؟ freezegun؟) و مقدار cov-fail-under
+۷) grep برای sentry|glitchtip|rollbar|bugsnag و Content-Security-Policy
+۸) isMinifyEnabled/isShrinkResources در build.gradle.kts و وجود .aab در CI
+۹) print() غیرتست، except Exception، TODO/FIXME، تست‌های skip، stub
+۱۰) فایل‌های l10n/ARB/intl
+۱۱) سناریوهای k6 و آستانه‌ها + گزارش‌های load در qa-report/finn
 ۱۲) چک‌باکس‌های باز در RELEASE-CHECKLIST.md
-۱۳) بزرگ‌ترین فایل‌های ترک‌شده و تصاویر ui-previews
+۱۳) بزرگ‌ترین فایل‌های ترک‌شده، mp.db، تصاویر ui-previews و qa-report/screenshots
+۱۴) ستون‌های پول در db/models (Integer/Numeric/Float)
+۱۵) وضعیت «قفل‌شدگی استخر» در qa-report/FINAL-REPORT.md (بسته شد یا نه)
 هر حفره‌ای که بسته شده بود، WP مربوطه را «انجام‌شده» علامت بزن؛ هر حفره‌ی تازه، یک WP جدید بساز.
 ```
 
 ---
 
-**پایان سند.** کار را از WP‑00 شروع کن. اگر پروژه هنوز ناتمام است، طبق حالت ۱ پیوست D پیش برو؛ اگر نهایی شده، همه‌ی ۱۷ بسته را انجام بده و گزارش هرکدام را بنویس، و در پایان جدول «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد» را در `docs/MuscleParadise/AUDIT-FINAL-2026-11-18.md` بگذار. هیچ سؤالی از مالک نپرس مگر در موارد بخش ۷.
+**پایان سند.** از WP‑00 شروع کن و **WP‑01 (قفل‌شدگی استخر اتصال) را بر هر کار دیگری مقدم بدان**. همه‌ی ۲۲ بسته را انجام بده، گزارش هرکدام را در `finn/reports/` بنویس، و در پایان جدول «خواسته‌ی ۱ تا ۱۲ ← WP ← شاهد» را در `docs/MuscleParadise/AUDIT-FINAL-2026-11-20.md` بگذار. هیچ سؤالی از مالک نپرس مگر در موارد بخش ۸.
