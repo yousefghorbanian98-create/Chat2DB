@@ -1,0 +1,185 @@
+# قواعد Semgrep اختصاصی MP — همه آفلاین (بدون registry)، برای گیت CI.
+# هر قاعده بر پایهٔ یک نقص **مشاهده‌شده** در همین ممیزی نوشته شده است.
+rules:
+  - id: mp-money-float-cast
+    languages: [python]
+    severity: ERROR
+    message: "پول ریالی با `float()` ⇒ از دست‌رفتن دقت؛ ریال باید int بماند."
+    patterns:
+      - pattern-either:
+          - pattern: float($RIAL)
+          - pattern: float($AMOUNT)
+          - pattern: float($PRICE)
+          - pattern: float($BALANCE)
+          - pattern: float($TOTAL)
+      - metavariable-regex:
+          metavariable: $RIAL
+          regex: (?i).*(rial|amount|price|balance|fee|total|discount).*
+    paths:
+      exclude: ["*/tests/*", "*test_*", "scripts/*", "eval/*", "devtools/*"]
+
+  - id: mp-money-division
+    languages: [python]
+    severity: WARNING
+    message: "تقسیم روی مبلغ ریالی ⇒ با round()/قاعدهٔ گرد‌کردنِ مستند همراه باشد."
+    patterns:
+      - pattern: $A / $B
+      - metavariable-regex:
+          metavariable: $A
+          regex: (?i).*(rial|amount|price|balance|fee|total|discount).*
+    paths:
+      exclude: ["*/tests/*", "*test_*", "scripts/*", "eval/*", "devtools/*"]
+
+  - id: mp-print-instead-of-logger
+    languages: [python]
+    severity: WARNING
+    message: "`print()` در کد سرویس‌دهنده؛ باید structlog باشد (لاگ ساختاریافته + request_id)."
+    pattern: print(...)
+    paths:
+      include: ["app/*", "modules/*", "engine/*", "db/*", "security/*", "cache/*", "jobs/*", "api/*"]
+      exclude: ["*/tests/*", "*test_*"]
+
+  - id: mp-silent-except-pass
+    languages: [python]
+    severity: ERROR
+    message: "خطا بی‌صدا خورده شده (`except …: pass`) — هیچ ردی در لاگ/متریک نمی‌ماند."
+    patterns:
+      - pattern-either:
+          - pattern: |
+              try:
+                ...
+              except $E:
+                pass
+          - pattern: |
+              try:
+                ...
+              except $E as $X:
+                pass
+          - pattern: |
+              try:
+                ...
+              except $E:
+                continue
+    paths:
+      exclude: ["*/tests/*", "*test_*"]
+
+  - id: mp-jwt-without-session-binding
+    languages: [python]
+    severity: ERROR
+    message: >-
+      `create_access_token` بدون `session_id=` ⇒ توکنِ بی‌نشست که
+      `POST /auth/logout-all` و `DELETE /auth/sessions/{id}` باطلش نمی‌کنند
+      (فقط bump شدن auth_version). در این ممیزی زنده اثبات شد.
+    patterns:
+      - pattern: create_access_token($UID, $ROLE)
+      - pattern-not: create_access_token(..., session_id=..., ...)
+    paths:
+      exclude: ["*/tests/*", "*test_*"]
+
+  - id: mp-dev-otp-code-gated-only-by-provider
+    languages: [python]
+    severity: ERROR
+    message: >-
+      نشت کد OTP در پاسخ فقط به `provider.name == "dev"` شرط شده، نه به
+      `environment`. چون پیش‌فرض هر دو متغیر محیطی dev است، استقرارِ بدون env
+      یعنی دورزدن کامل احراز هویت.
+    pattern: |
+      if provider.name == "dev":
+        ...
+        $D["dev_code"] = $CODE
+
+  - id: mp-session-without-context-manager
+    languages: [python]
+    severity: WARNING
+    message: "session بدون `with`/`try-finally` ⇒ خطر نشت اتصال از استخر."
+    patterns:
+      - pattern: $S = get_session_factory()()
+      - pattern-not-inside: |
+          with get_session_factory()() as $S:
+            ...
+    paths:
+      exclude: ["*/tests/*", "*test_*"]
+
+  - id: mp-raw-sql-fstring
+    languages: [python]
+    severity: ERROR
+    message: "SQL با f-string/الحاق ⇒ تزریق. از پارامتر بایند (`?`/`:name`) استفاده کن."
+    pattern-either:
+      - pattern: $DB.execute(f"...")
+      - pattern: $DB.execute("..." + $X)
+      - pattern: $DB.execute(text(f"..."))
+
+  - id: mp-naive-datetime-now
+    languages: [python]
+    severity: WARNING
+    message: "`datetime.now()` بدون منطقهٔ زمانی؛ همهٔ زمان‌ها باید UTC یا Asia/Tehran صریح باشند."
+    patterns:
+      - pattern: datetime.now()
+      - pattern-not: datetime.now(UTC)
+      - pattern-not: datetime.now(timezone.utc)
+      - pattern-not: datetime.now($TZ)
+
+  - id: mp-ts-negative-sentinel-member-id
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      sentinel منفی برای شناسه (`?? -1` / `|| -1`) ⇒ درخواست با member_id=-1
+      می‌رود و پاسخ placeholder می‌گیرد. باید «درخواست نفرست» باشد.
+    pattern-either:
+      - pattern: $X ?? -1
+      - pattern: $X || -1
+      - pattern: "$X ? $X : -1"
+
+  - id: mp-ts-console-log-in-src
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: "`console.log` در کد محصول؛ باید حذف یا به logger سطح‌دار تبدیل شود."
+    pattern: console.log(...)
+    paths:
+      exclude: ["*.test.ts", "*.test.tsx", "*.spec.ts", "*/tests/*", "*/__tests__/*"]
+
+  - id: mp-ts-dangerous-html
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: "`dangerouslySetInnerHTML` ⇒ خطر XSS؛ اگر لازم است sanitizer بگذار."
+    pattern-regex: "dangerouslySetInnerHTML"
+
+  - id: mp-ts-float-money
+    languages: [typescript]
+    severity: ERROR
+    message: "پارس پول ریالی با parseFloat/Number ⇒ از دست‌رفتن دقت؛ از BigInt یا int استفاده کن."
+    patterns:
+      - pattern-either:
+          - pattern: parseFloat($X)
+          - pattern: Number($X)
+      - metavariable-regex:
+          metavariable: $X
+          regex: (?i).*(rial|amount|price|balance|total|fee).*
+
+  - id: mp-dart-print-in-lib
+    languages: [dart]
+    severity: WARNING
+    message: "`print()` در کد محصول فلاتر؛ باید logger سطح‌دار باشد (۴۱ مورد در ممیزی ایستا)."
+    pattern: print($X);
+    paths:
+      include: ["lib/*"]
+
+  - id: mp-dart-negative-sentinel-id
+    languages: [dart]
+    severity: ERROR
+    message: "sentinel منفی برای شناسه (`?? -1`) ⇒ درخواست بی‌معنا به سرور می‌رود."
+    pattern-either:
+      - pattern: $X ?? -1
+      - pattern: $X ?? (-1)
+
+  - id: mp-dart-dynamic-cast
+    languages: [dart]
+    severity: WARNING
+    message: "کاربرد `dynamic` ⇒ از دست‌رفتن بررسی نوع در زمان کامپایل."
+    pattern-regex: "(as dynamic\\b)|(\\bdynamic\\s+[a-zA-Z_][a-zA-Z0-9_]*\\s*=)"
+
+  - id: mp-dart-plaintext-http
+    languages: [dart]
+    severity: ERROR
+    message: "URL با http:// (بدون TLS) در کد کلاینت."
+    pattern-regex: "http://(?!localhost|127\\.0\\.0\\.1|10\\.)[a-zA-Z0-9.-]+"

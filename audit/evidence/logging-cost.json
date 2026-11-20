@@ -1,0 +1,85 @@
+{
+ "note": "زمان‌ها روی نخ event loop صرف می‌شوند؛ یعنی در همان مدت هیچ درخواست دیگری (حتی /health) سرو نمی‌شود.",
+ "rows": [
+  {
+   "renderer": "ConsoleRenderer+rich (development)",
+   "traceback_depth": 10,
+   "repeats": 5,
+   "mean_ms": 93.56,
+   "median_ms": 96.85,
+   "max_ms": 109.21,
+   "bytes_per_error": 35961,
+   "lines_per_error": 253
+  },
+  {
+   "renderer": "JSONRenderer (production)",
+   "traceback_depth": 10,
+   "repeats": 5,
+   "mean_ms": 0.03,
+   "median_ms": 0.02,
+   "max_ms": 0.09,
+   "bytes_per_error": 202,
+   "lines_per_error": 1
+  },
+  {
+   "renderer": "ConsoleRenderer+rich (development)",
+   "traceback_depth": 25,
+   "repeats": 5,
+   "mean_ms": 148.59,
+   "median_ms": 157.4,
+   "max_ms": 168.43,
+   "bytes_per_error": 63321,
+   "lines_per_error": 463
+  },
+  {
+   "renderer": "JSONRenderer (production)",
+   "traceback_depth": 25,
+   "repeats": 5,
+   "mean_ms": 0.03,
+   "median_ms": 0.02,
+   "max_ms": 0.09,
+   "bytes_per_error": 202,
+   "lines_per_error": 1
+  },
+  {
+   "renderer": "ConsoleRenderer+rich (development)",
+   "traceback_depth": 40,
+   "repeats": 5,
+   "mean_ms": 211.31,
+   "median_ms": 209.58,
+   "max_ms": 227.04,
+   "bytes_per_error": 90681,
+   "lines_per_error": 673
+  },
+  {
+   "renderer": "JSONRenderer (production)",
+   "traceback_depth": 40,
+   "repeats": 5,
+   "mean_ms": 0.04,
+   "median_ms": 0.02,
+   "max_ms": 0.08,
+   "bytes_per_error": 202,
+   "lines_per_error": 1
+  },
+  {
+   "renderer": "ConsoleRenderer+rich (development)",
+   "traceback_depth": 60,
+   "repeats": 5,
+   "mean_ms": 287.33,
+   "median_ms": 293.6,
+   "max_ms": 306.33,
+   "bytes_per_error": 127161,
+   "lines_per_error": 953
+  },
+  {
+   "renderer": "JSONRenderer (production)",
+   "traceback_depth": 60,
+   "repeats": 5,
+   "mean_ms": 0.03,
+   "median_ms": 0.01,
+   "max_ms": 0.09,
+   "bytes_per_error": 202,
+   "lines_per_error": 1
+  }
+ ]
+}

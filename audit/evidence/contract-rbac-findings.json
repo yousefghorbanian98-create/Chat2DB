@@ -1,0 +1,3694 @@
+{
+ "ids": {
+  "product_id": 1,
+  "user_id": 1,
+  "category_id": 1,
+  "member_id": 3,
+  "member_id2": 4,
+  "membership_id": 2,
+  "coupon_id": 7,
+  "payment_id": 2,
+  "payment_id2": 3,
+  "expense_id": 5,
+  "notification_id": 2,
+  "conversation_id": 2,
+  "class_id": 3,
+  "member_id3": 5
+ },
+ "summary": {
+  "denied": 989,
+  "allowed_2xx": 95,
+  "reached_4xx": 57
+ },
+ "findings": {
+  "unauth_allowed": [
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/logout",
+    "status": 200
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/otp/request",
+    "status": 200
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/health/ready",
+    "status": 200
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/metrics",
+    "status": 200
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/gateway-return",
+    "status": 200
+   },
+   {
+    "method": "GET",
+    "path": "/health",
+    "status": 200
+   }
+  ],
+  "over_permissive": [
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/logout-all",
+    "role": "coach",
+    "status": 200,
+    "contract_roles": [
+     "admin",
+     "manager",
+     "member",
+     "super_admin"
+    ]
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/logout-all",
+    "role": "reception",
+    "status": 200,
+    "contract_roles": [
+     "admin",
+     "manager",
+     "member",
+     "super_admin"
+    ]
+   }
+  ],
+  "contract_drift_denied": [
+   {
+    "method": "GET",
+    "path": "/api/v1/admin/retention",
+    "role": "manager",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/admin/retention",
+    "role": "admin",
+    "status": 403
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/admin/retention/run",
+    "role": "manager",
+    "status": 403
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/admin/retention/run",
+    "role": "admin",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/admin/users",
+    "role": "manager",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/admin/users",
+    "role": "admin",
+    "status": 403
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/admin/users/{user_id}/role",
+    "role": "manager",
+    "status": 403
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/admin/users/{user_id}/role",
+    "role": "admin",
+    "status": 403
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/admin/users/{user_id}/role",
+    "role": "manager",
+    "status": 403
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/admin/users/{user_id}/role",
+    "role": "admin",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/assessments/jp7/member/{member_id}/trend",
+    "role": "member",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/assessments/limb/member/{member_id}/report",
+    "role": "member",
+    "status": 403
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/assessments/member/{member_id}",
+    "role": "member",
+    "status": 403
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/confirm",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/confirm",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/confirm",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/request",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/request",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/request",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/verify-old",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/verify-old",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/auth/phone-change/verify-old",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/auth/sessions",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/auth/sessions",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/auth/sessions",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/auth/sessions",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/auth/sessions/{session_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/auth/sessions/{session_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/auth/sessions/{session_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/auth/sessions/{session_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/member/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/member/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/member/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/member/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/member/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments/{assessment_id}/review",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments/{assessment_id}/review",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/axis-assessments/{assessment_id}/review",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/read",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/read",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/read",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/read",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/chat/conversations/{conversation_id}/read",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/classes",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/book",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/book",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/book",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/book",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/book",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/cancel",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/cancel",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/cancel",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/cancel",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/classes/cancel",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/expenses/{expense_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/expenses/{expense_id}/receipt",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkin-qr",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkins/{checkin_id}/exit",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkins/{checkin_id}/exit",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkins/{checkin_id}/exit",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkins/{checkin_id}/exit",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/checkins/{checkin_id}/exit",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/consent/revoke",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/deep-status",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/enroll",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/enroll",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/enroll",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/enroll",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/face/enroll",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/face/enroll/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/face/enroll/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/face/enroll/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/face/enroll/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/face/enroll/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/privacy-notice",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/qr-token",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/qr-token",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/qr-token",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/qr-token",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/face/qr-token",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/daily/{run_date}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/daily/{run_date}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/daily/{run_date}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/period",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/period",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/period",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/schedule",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/schedule",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/finance/reports/schedule",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/finance/reports/schedule/{job_key}/run",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/finance/reports/schedule/{job_key}/run",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/finance/reports/schedule/{job_key}/run",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises/{exercise_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises/{exercise_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises/{exercise_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises/{exercise_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/library/exercises/{exercise_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/members/me",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/checkins",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/me/face-consent",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships/from-plan",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships/from-plan",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships/from-plan",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships/from-plan",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/members/memberships/from-plan",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/plans",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/memberships/{membership_id}/invoice",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/members/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/members/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/members/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/members/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/members/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/members/{member_id}/memberships",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/member/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/notifications/reminders/member/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/notifications/{notification_id}/read",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/food-logs",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/food-logs",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/food-logs",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/food-logs",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/food-logs",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/foods",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/foods",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/foods",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/foods",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/foods",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/plans/member/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/plans/member/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/plans/member/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/plans/member/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/nutrition/plans/member/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans/{plan_id}/approve",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans/{plan_id}/approve",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans/{plan_id}/approve",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/plans/{plan_id}/approve",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/weight-logs",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/weight-logs",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/weight-logs",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/weight-logs",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/nutrition/weight-logs",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/coupons",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/coupons",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/coupons",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/coupons",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/coupons",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/coupons",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/coupons",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/coupons",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/coupons",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/finance/commission",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/finance/commission",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/finance/commission",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/export.csv",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/export.csv",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/export.csv",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/summary",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/summary",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/finance/summary",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/invoice/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/invoice/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/invoice/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/invoice/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/invoice/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/ledger/{entry_id}/reverse",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/ledger/{entry_id}/reverse",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/ledger/{entry_id}/reverse",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/ledger/{entry_id}/reverse",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/ledger/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/ledger/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/ledger/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/ledger/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/ledger/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/charge",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/charge",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/charge",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/charge",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/pay",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/pay",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/pay",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/pay",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/wallet/pay",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}/transactions",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}/transactions",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}/transactions",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}/transactions",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/wallet/{member_id}/transactions",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/approve",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/approve",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/approve",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/approve",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/callback",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/callback",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/callback",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/callback",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/callback",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/fail",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/fail",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/fail",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/fail",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/receipt",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/refund",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/refund",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/refund",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/refund",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/reject",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/reject",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/reject",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/reject",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/start",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/start",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/start",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/start",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/start",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/verify",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/verify",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/verify",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/payments/{payment_id}/verify",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/gate-check",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/population/intake/next",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/population/paths",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/from-engine",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/from-engine",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/from-engine",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/from-engine",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/readiness",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/readiness",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/readiness",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/readiness",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/readiness",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/volume",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/volume",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/volume",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/volume",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/member/{member_id}/volume",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/set-feedback",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/set-feedback",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/set-feedback",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/set-feedback",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/set-feedback",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/sync/set-feedback",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/sync/set-feedback",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/sync/set-feedback",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/sync/set-feedback",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/sync/set-feedback",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/{program_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/{program_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/{program_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/{program_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/programs/{program_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/approve",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/approve",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/approve",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/approve",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/reject",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/reject",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/reject",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/programs/{program_id}/reject",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/reports/confidential/{member_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/reports/confidential/{member_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/reports/confidential/{member_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/cart",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/cart",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/cart",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/cart",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/cart",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/cart",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "DELETE",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/cart/{item_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/categories",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/change-requests",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests/{request_id}/review",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests/{request_id}/review",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests/{request_id}/review",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/change-requests/{request_id}/review",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/checkout",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/checkout",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/checkout",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/checkout",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/checkout",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/gateways",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/gateways",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/gateways",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/gateways",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/gateways",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/shop/gateways/{gateway_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/shop/gateways/{gateway_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/shop/gateways/{gateway_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PUT",
+    "path": "/api/v1/shop/gateways/{gateway_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/orders/{order_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/orders/{order_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/orders/{order_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/orders/{order_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/orders/{order_id}/receipt",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/prices",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/prices",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/prices",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/prices",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/prices",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/products",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/products",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/products",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "POST",
+    "path": "/api/v1/shop/products",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "PATCH",
+    "path": "/api/v1/shop/products/{product_id}",
+    "role": "super_admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "member",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "coach",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "reception",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "manager",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "admin",
+    "status": 401
+   },
+   {
+    "method": "GET",
+    "path": "/api/v1/shop/status",
+    "role": "super_admin",
+    "status": 401
+   }
+  ],
+  "server_errors": [],
+  "leaked_stacktrace": [],
+  "slow_ops": []
+ }
+}

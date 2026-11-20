@@ -1,0 +1,53 @@
+== backend: 19 findings, 2 rule errors
+   mp-session-without-context-manager           5
+   mp-silent-except-pass                        4
+   mp-raw-sql-fstring                           4
+   mp-money-division                            2
+   mp-dev-otp-code-gated-only-by-provider       2
+   mp-jwt-without-session-binding               2
+   ── mp-silent-except-pass:
+        api/v1/monitoring.py:18
+        scripts/dast.py:79
+        scripts/dast.py:174
+        scripts/dast.py:180
+   ── mp-raw-sql-fstring:
+        db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:67
+        db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:165
+        db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:169
+        db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:171
+   ── mp-money-division:
+        modules/admin/analytics.py:157
+        modules/admin/analytics.py:325
+   ── mp-dev-otp-code-gated-only-by-provider:
+        modules/auth/service.py:52
+        modules/auth/service.py:260
+   ── mp-session-without-context-manager:
+        scripts/build_progressions.py:241
+        scripts/import_exercise_catalog.py:145
+        scripts/seed_criteria.py:107
+        scripts/seed_norms.py:276
+        scripts/tag_axis_coverage.py:675
+   ── mp-jwt-without-session-binding:
+        scripts/dast.py:66
+        scripts/seed_s3c_m39.py:28
+   ERR: {'code': 2, 'level': 'error', 'type': 'Rule parse error', 'rule_id': 'home.user.Chat2DB.audit.mp-ts-dangerous-html', 'message': 'Rule parse error in rule home.user.Chat2DB.audit.mp-ts-dangerous-html:\
+   ERR: {'code': 2, 'level': 'error', 'type': 'Rule parse error', 'rule_id': 'home.user.Chat2DB.audit.mp-dart-dynamic-cast', 'message': 'Rule parse error in rule home.user.Chat2DB.audit.mp-dart-dynamic-cast:\
+== studio: 8 findings, 2 rule errors
+   mp-ts-float-money                            7
+   mp-ts-negative-sentinel-member-id            1
+   ── mp-ts-float-money:
+        components/PaymentPanel.tsx:69
+        pages/Analytics.tsx:101
+        pages/Analytics.tsx:105
+        pages/Shop.tsx:624
+        pages/Shop.tsx:671
+        pages/Shop.tsx:785
+        pages/Shop.tsx:786
+   ── mp-ts-negative-sentinel-member-id:
+        pages/Nutrition.tsx:50
+   ERR: {'code': 2, 'level': 'error', 'type': 'Rule parse error', 'rule_id': 'home.user.Chat2DB.audit.mp-ts-dangerous-html', 'message': 'Rule parse error in rule home.user.Chat2DB.audit.mp-ts-dangerous-html:\
+   ERR: {'code': 2, 'level': 'error', 'type': 'Rule parse error', 'rule_id': 'home.user.Chat2DB.audit.mp-dart-dynamic-cast', 'message': 'Rule parse error in rule home.user.Chat2DB.audit.mp-dart-dynamic-cast:\
+== client: 1 findings, 0 rule errors
+   mp-dart-dynamic-cast                         1
+   ── mp-dart-dynamic-cast:
+        core/api_client.dart:191

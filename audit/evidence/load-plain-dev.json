@@ -1,0 +1,113 @@
+{
+ "tag": "plain-dev",
+ "rows": [
+  {
+   "tag": "plain-dev",
+   "workers": 40,
+   "step_seconds": 60.2,
+   "requests": 12564,
+   "rps": 208.8,
+   "status_counts": {
+    "200": 6646,
+    "404": 5918
+   },
+   "error_kinds": {},
+   "p50_ms": 207.2,
+   "p95_ms": 351.3,
+   "p99_ms": 418.9,
+   "max_ms": 816.0,
+   "client_timeouts": 0,
+   "server_errors_5xx": 0,
+   "max_pool_checkedout_observed": null,
+   "pool_samples": 0,
+   "health_during_load": {
+    "probes": 89,
+    "failed_probes": 0,
+    "max_health_ms": 356.6
+   },
+   "recovery_seconds": 0.03
+  },
+  {
+   "tag": "plain-dev",
+   "workers": 60,
+   "step_seconds": 60.2,
+   "requests": 12191,
+   "rps": 202.4,
+   "status_counts": {
+    "200": 6628,
+    "404": 5563
+   },
+   "error_kinds": {},
+   "p50_ms": 316.6,
+   "p95_ms": 515.9,
+   "p99_ms": 577.7,
+   "max_ms": 726.5,
+   "client_timeouts": 0,
+   "server_errors_5xx": 0,
+   "max_pool_checkedout_observed": null,
+   "pool_samples": 0,
+   "health_during_load": {
+    "probes": 80,
+    "failed_probes": 0,
+    "max_health_ms": 515.3
+   },
+   "recovery_seconds": 0.03
+  },
+  {
+   "tag": "plain-dev",
+   "workers": 80,
+   "step_seconds": 63.9,
+   "requests": 6049,
+   "rps": 94.7,
+   "status_counts": {
+    "200": 3275,
+    "404": 2694,
+    "None": 80
+   },
+   "error_kinds": {
+    "timeout": 80
+   },
+   "p50_ms": 466.9,
+   "p95_ms": 802.0,
+   "p99_ms": 30027.5,
+   "max_ms": 30486.6,
+   "client_timeouts": 80,
+   "server_errors_5xx": 0,
+   "max_pool_checkedout_observed": null,
+   "pool_samples": 0,
+   "health_during_load": {
+    "probes": 47,
+    "failed_probes": 11,
+    "max_health_ms": 5054.7
+   },
+   "recovery_seconds": 43.63
+  },
+  {
+   "tag": "plain-dev",
+   "workers": 10,
+   "step_seconds": 60.0,
+   "requests": 11770,
+   "rps": 196.0,
+   "status_counts": {
+    "200": 5962,
+    "404": 5808
+   },
+   "error_kinds": {},
+   "p50_ms": 52.2,
+   "p95_ms": 103.2,
+   "p99_ms": 183.7,
+   "max_ms": 409.6,
+   "client_timeouts": 0,
+   "server_errors_5xx": 0,
+   "max_pool_checkedout_observed": null,
+   "pool_samples": 0,
+   "health_during_load": {
+    "probes": 107,
+    "failed_probes": 0,
+    "max_health_ms": 180.6
+   },
+   "recovery_seconds": 0.03
+  }
+ ],
+ "updated_at": "22:48:29"
+}

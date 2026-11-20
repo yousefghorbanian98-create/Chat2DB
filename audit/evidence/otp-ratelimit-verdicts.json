@@ -1,0 +1,85 @@
+[
+ {
+  "test": "A",
+  "phone": "09138589669",
+  "wrong_guesses": [
+   401,
+   401,
+   401,
+   429
+  ],
+  "real_code_after_4_wrong": 429,
+  "real_code_replay": 429,
+  "replay_body": "{\"error\":{\"code\":\"rate_limited\",\"message\":\"تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید\",\"details\":[]}}",
+  "verdict_one_time": "PASS",
+  "verdict_under_limit": "NOTE"
+ },
+ {
+  "test": "B",
+  "wrong_guess_statuses": [
+   401,
+   401,
+   401,
+   429
+  ],
+  "real_code_after": 429,
+  "real_body": "{\"error\":{\"code\":\"rate_limited\",\"message\":\"تعداد درخواست‌ها زیاد است؛ کمی بعد تلاش کنید\",\"details\":[]}}",
+  "verdict": "PASS",
+  "note": "429 یعنی سبد rate-limit؛ 4xx دیگر یعنی قفلِ شمارندهٔ تلاش"
+ },
+ {
+  "test": "C",
+  "label": "سرور جاری",
+  "requests": 30,
+  "accepted": 30,
+  "limited": 0,
+  "statuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ],
+  "verdict": "FAIL",
+  "note": "اگر تقریباً همه پذیرفته شوند ⇒ کلید سبد از هدرِ کنترل‌شدهٔ کلاینت می‌آید"
+ },
+ {
+  "test": "D",
+  "requests": 14,
+  "accepted": 3,
+  "statuses": [
+   200,
+   200,
+   200,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429,
+   429
+  ],
+  "note": "سقف انتظار: ۱۰ در دقیقه (otp_rate_limit) + ۳ در ثانیه (burst)"
+ },
+ {
+  "test": "E",
+  "metrics_lines": 24,
+  "sample": [
+   "mp_http_requests_total{method=\"GET\",route=\"unmatched\",status=\"404\"} 20764.0",
+   "mp_http_requests_total{method=\"POST\",route=\"/auth/otp/request\",status=\"200\"} 71.0",
+   "mp_http_requests_total{method=\"POST\",route=\"/auth/otp/verify\",status=\"200\"} 14.0"
+  ],
+  "note": "متریک برچسب IP ندارد ⇒ نمی‌توان کلاینت متخلف را از متریک پیدا کرد"
+ }
+]

@@ -1,0 +1,38 @@
+{
+ "server": "exact Dockerfile CMD (2 workers, --proxy-headers --forwarded-allow-ips='*')",
+ "xff_spoof_accepted": 30,
+ "xff_spoof_total": 30,
+ "baseline_accepted": 3,
+ "baseline_total": 14,
+ "baseline_statuses": [
+  200,
+  200,
+  200,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429,
+  429
+ ],
+ "xff_statuses": [
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200,
+  200
+ ],
+ "per_worker_bucket_multiplication": 3
+}

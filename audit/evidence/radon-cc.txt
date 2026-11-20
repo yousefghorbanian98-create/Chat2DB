@@ -1,0 +1,72 @@
+app/config.py
+    M 128:4 Settings.validate_production_configuration - F (47)
+    C 19:0 Settings - C (11)
+app/deps.py
+    F 42:0 get_current_user - C (17)
+app/security/proxy.py
+    F 42:0 client_ip - C (12)
+modules/expenses/service.py
+    F 72:0 update - C (12)
+modules/admin/analytics.py
+    F 342:0 members_summary - C (17)
+    F 199:0 collect_member_facts - C (12)
+modules/assessment/service.py
+    F 146:0 jp7_trend - D (21)
+modules/auth/service.py
+    F 338:0 confirm_phone_change - C (13)
+modules/nutrition/service.py
+    F 103:0 log_food - C (15)
+    F 170:0 daily_summary - C (15)
+    F 372:0 adaptive_nutrition_report - C (14)
+modules/payments/manual_transfer_policy.py
+    F 45:0 next_transfer_state - E (34)
+modules/payments/service.py
+    F 249:0 verify_with_gateway - C (12)
+modules/population/intake.py
+    F 102:0 next_questions - C (11)
+modules/programs/service.py
+    F 267:0 weekly_volume_report - C (15)
+    F 517:0 sync_set_feedback - C (15)
+    F 211:0 list_programs_summary - C (13)
+    F 369:0 readiness_report - C (13)
+    F 474:0 _safety_gate - C (13)
+modules/reporting/service.py
+    F 30:0 build_confidential_report - D (25)
+modules/shop/service.py
+    F 558:0 upsert_gateway - C (17)
+    F 207:0 create_product - C (15)
+    F 301:0 add_to_cart - C (15)
+    F 391:0 checkout - C (14)
+    F 132:0 list_products - C (12)
+engine/adaptive_nutrition.py
+    F 132:0 weight_trend - C (15)
+    F 286:0 suggest_calorie_adjustment - C (13)
+engine/autoreg.py
+    F 19:0 suggest_next_weight - C (12)
+engine/axis_map.py
+    F 31:0 aggregate_axis_scores - C (13)
+engine/axis_prescription.py
+    F 43:0 prescribe_axis_work - F (46)
+engine/churn_risk.py
+    F 22:0 assess_member_risk - D (22)
+engine/feedback_apply.py
+    F 54:0 apply_suggestions - D (21)
+engine/readiness.py
+    F 206:0 assess_readiness - C (11)
+engine/reminders.py
+    F 37:0 plan - C (14)
+engine/safety.py
+    F 94:0 screen - D (22)
+engine/scoring.py
+    F 33:0 estimate_percentile - D (28)
+engine/segmental.py
+    F 66:0 analyze - D (26)
+engine/set_feedback.py
+    F 24:0 process_set_feedback - C (16)
+engine/sync_lww.py
+    F 45:0 resolve - C (11)
+engine/workout.py
+    F 223:0 generate_program - C (11)
+
+956 blocks (classes, functions, methods) analyzed.
+Average complexity: A (2.9822175732217575)

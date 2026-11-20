@@ -1,0 +1,86 @@
+# HELP mp_http_requests_total Muscle Paradise counter: mp_http_requests_total
+# TYPE mp_http_requests_total counter
+mp_http_requests_total{method="GET",route="unmatched",status="404"} 1.0
+mp_http_requests_total{method="GET",route="/health",status="200"} 1.0
+mp_http_requests_total{method="GET",route="/health/ready",status="200"} 1.0
+# HELP mp_http_requests_created Muscle Paradise counter: mp_http_requests_total
+# TYPE mp_http_requests_created gauge
+mp_http_requests_created{method="GET",route="unmatched",status="404"} 1.795212942100794e+09
+mp_http_requests_created{method="GET",route="/health",status="200"} 1.7952129983680413e+09
+mp_http_requests_created{method="GET",route="/health/ready",status="200"} 1.7952129984342463e+09
+# HELP mp_http_request_duration_seconds Muscle Paradise observation: mp_http_request_duration_seconds
+# TYPE mp_http_request_duration_seconds histogram
+mp_http_request_duration_seconds_bucket{le="0.005",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.01",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.025",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.05",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.075",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.1",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.25",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.5",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.75",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="1.0",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.0",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.5",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="5.0",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="10.0",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_bucket{le="+Inf",method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_count{method="GET",route="unmatched"} 1.0
+mp_http_request_duration_seconds_sum{method="GET",route="unmatched"} 0.001404323000315344
+mp_http_request_duration_seconds_bucket{le="0.005",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.01",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.025",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.05",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.075",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.1",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.25",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.5",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.75",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="1.0",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.0",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.5",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="5.0",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="10.0",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_count{method="GET",route="/health"} 1.0
+mp_http_request_duration_seconds_sum{method="GET",route="/health"} 0.0035343160002412333
+mp_http_request_duration_seconds_bucket{le="0.005",method="GET",route="/health/ready"} 0.0
+mp_http_request_duration_seconds_bucket{le="0.01",method="GET",route="/health/ready"} 0.0
+mp_http_request_duration_seconds_bucket{le="0.025",method="GET",route="/health/ready"} 0.0
+mp_http_request_duration_seconds_bucket{le="0.05",method="GET",route="/health/ready"} 0.0
+mp_http_request_duration_seconds_bucket{le="0.075",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.1",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.25",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.5",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="0.75",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="1.0",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.0",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="2.5",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="5.0",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="10.0",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_bucket{le="+Inf",method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_count{method="GET",route="/health/ready"} 1.0
+mp_http_request_duration_seconds_sum{method="GET",route="/health/ready"} 0.05840762799971344
+# HELP mp_http_request_duration_seconds_created Muscle Paradise observation: mp_http_request_duration_seconds
+# TYPE mp_http_request_duration_seconds_created gauge
+mp_http_request_duration_seconds_created{method="GET",route="unmatched"} 1.7952129421008465e+09
+mp_http_request_duration_seconds_created{method="GET",route="/health"} 1.7952129983681033e+09
+mp_http_request_duration_seconds_created{method="GET",route="/health/ready"} 1.795212998434284e+09
+# HELP mp_outbox_pending Muscle Paradise gauge: mp_outbox_pending
+# TYPE mp_outbox_pending gauge
+mp_outbox_pending 0.0
+# HELP mp_outbox_sending Muscle Paradise gauge: mp_outbox_sending
+# TYPE mp_outbox_sending gauge
+mp_outbox_sending 0.0
+# HELP mp_outbox_dead Muscle Paradise gauge: mp_outbox_dead
+# TYPE mp_outbox_dead gauge
+mp_outbox_dead 0.0
+# HELP mp_outbox_dead_letters Muscle Paradise gauge: mp_outbox_dead_letters
+# TYPE mp_outbox_dead_letters gauge
+mp_outbox_dead_letters 0.0
+# HELP mp_outbox_oldest_pending_seconds Muscle Paradise gauge: mp_outbox_oldest_pending_seconds
+# TYPE mp_outbox_oldest_pending_seconds gauge
+mp_outbox_oldest_pending_seconds 0.0
+# HELP mp_outbox_worker_stale Muscle Paradise gauge: mp_outbox_worker_stale
+# TYPE mp_outbox_worker_stale gauge
+mp_outbox_worker_stale 1.0

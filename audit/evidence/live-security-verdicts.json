@@ -1,0 +1,93 @@
+[
+ {
+  "id": "T1",
+  "hypothesis": "هر IP یک سبد مستقل ۱۰/دقیقه دارد",
+  "observed": "3 درخواست از ۱۴ پذیرفته شد، نخستین ۴۲۹ در درخواست شمارهٔ 4",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T2",
+  "hypothesis": "با MP_TRUSTED_PROXIES='' هدرهای پراکسی نادیده گرفته می‌شوند (پس همهٔ کاربران پشت یک پراکسی **یک سبد مشترک** دارند)",
+  "observed": "X-Forwarded-For تصادفی نتیجه را عوض کرد ⇒ accepted=14 (در برابر 3 بدون هدر)",
+  "status": "PASS",
+  "fix": "MP_TRUSTED_PROXIES را در production الزامی و اعتبارسنجی کن؛ در OPS-RUNBOOK مقدار واقعی پراکسی (Caddy) را مستند کن و آزمون بگذار که بدون آن ۴۲۹ نادرست ندهد."
+ },
+ {
+  "id": "T3",
+  "hypothesis": "کد اشتباه نباید هرگز پذیرفته شود و پس از سقف تلاش، کد باطل شود",
+  "observed": "12 حدس اشتباه ⇒ هیچ‌کدام ۲۰۰ نشد",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T3b",
+  "hypothesis": "پس از N حدس ناموفق، کد واقعی باید قفل شده باشد (otp_max_attempts=5)",
+  "observed": "کد واقعی پس از 12 حدس ناموفق ⇒ HTTP 429",
+  "status": "PASS",
+  "fix": "اگر ۲۰۰ است: قفل حدس (attempt counter) روی کد اعمال نمی‌شود؛ شمارنده را در جدول otp_codes نگه دار و پس از ۵ تلاش کد را باطل کن."
+ },
+ {
+  "id": "T4",
+  "hypothesis": "مقادیر بزرگ‌تر از 2^53−1 باید رد شوند (422) چون JSON/دارت/TS آن‌ها را دقیق نگه نمی‌دارند",
+  "observed": "3 مورد ناامن با موفقیت پذیرفته شد: ['2^53', '2^53+1 (ناامن)', '10^18']",
+  "status": "FAIL",
+  "fix": "سقف amount_rial را در schema با le=2**53-1 ببند و آزمون مرزی بگذار."
+ },
+ {
+  "id": "T4b",
+  "hypothesis": "مبلغ منفی/صفر باید رد شود",
+  "observed": "منفی ⇒ HTTP 422, صفر ⇒ HTTP 422",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T5",
+  "hypothesis": "دو درخواست با کلید idempotency یکسان باید یک رکورد بسازند",
+  "observed": "HTTP 200/200 با id=9 و id=9 ⇒ یکسان",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T6",
+  "hypothesis": "توکن یک عضو نباید دادهٔ عضو دیگر را بخواند (۴۰۳/۴۰۴ انتظار می‌رود)",
+  "observed": "0 پاسخ ۲۰۰ از 16 درخواست بین‌عضوی",
+  "status": "PASS",
+  "fix": "روی هر مسیر عضو‌محور `ensure_member_scope` بگذار و ماتریس permission×ownership را در تست بیاور."
+ },
+ {
+  "id": "T7",
+  "hypothesis": "Origin غیرمجاز نباید بازتاب داده شود (fail-closed)",
+  "observed": "[{\"origin\": \"https://evil.example.com\", \"status\": 400, \"allow_origin\": null, \"allow_creds\": \"true\"}, {\"origin\": \"http://127.0.0.1:5173\", \"status\": 200, \"allow_origin\": \"http://127.0.0.1:5173\", \"allow_creds\": \"true\"}, {\"o",
+  "status": "FAIL",
+  "fix": ""
+ },
+ {
+  "id": "T8",
+  "hypothesis": "پاسخ خطا نباید جزئیات فنی/مسیر فایل نشت دهد",
+  "observed": "HTTP 404 markers=[] body={\"error\":{\"code\":\"not_found\",\"message\":\"عضو یافت نشد\",\"details\":[]}}",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T8b",
+  "hypothesis": "/api/v1/metrics باید پشت احراز هویت/شبکهٔ داخلی باشد",
+  "observed": "HTTP 200 بدون هیچ توکنی؛ 346 خط، 14 متریک از جمله نام مسیرها و وضعیت outbox",
+  "status": "FAIL",
+  "fix": "مسیر را با require_permission محافظت کن یا فقط روی پورت/اینترفیس داخلی ببند؛ در Caddy هم مسیر /metrics را از دسترس عمومی خارج کن."
+ },
+ {
+  "id": "T9",
+  "hypothesis": "کد OTP باید یک‌بارمصرف باشد",
+  "observed": "بار اول HTTP 429، بار دوم HTTP 429",
+  "status": "PASS",
+  "fix": ""
+ },
+ {
+  "id": "T10",
+  "hypothesis": "همهٔ هدرهای امنیتی روی پاسخ ۲۰۰ حاضر باشند",
+  "observed": "HTTP 200; حاضر: ['content-security-policy', 'x-frame-options', 'x-content-type-options', 'referrer-policy', 'permissions-policy', 'cross-origin-opener-policy']; غایب: ['strict-transport-security']",
+  "status": "NOTE",
+  "fix": "در production باید HSTS هم باشد (فقط وقتی environment=production)."
+ }
+]

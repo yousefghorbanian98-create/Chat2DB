@@ -1,0 +1,12 @@
+{
+ "phone": "09137777627",
+ "wrong_attempts": 60,
+ "status_distribution": {
+  "400": 55,
+  "401": 5
+ },
+ "real_code_after_60_wrong": 400,
+ "replay_status": 400,
+ "guess_rate_per_second": 228.4,
+ "elapsed_s": 0.3
+}

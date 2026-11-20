@@ -1,0 +1,371 @@
+{
+ "module": "modules/payments/manual_transfer_policy.py",
+ "test_file": "tests/regression/test_manual_transfer_policy.py",
+ "verified_mutation_score_pct": 57.8,
+ "killed": 26,
+ "survived": 19,
+ "total": 45,
+ "note": "mutmut 2.x خودش همهٔ ۴۵ را «زنده» گزارش کرد؛ هر جهش دستی اعمال و با pytest راستی‌آزمایی شد.",
+ "results": [
+  {
+   "id": 1,
+   "line": 12,
+   "original": "AWAITING_PROOF = \"awaiting_proof\"",
+   "mutant": "AWAITING_PROOF = \"XXawaiting_proofXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 2,
+   "line": 12,
+   "original": "AWAITING_PROOF = \"awaiting_proof\"",
+   "mutant": "AWAITING_PROOF = None",
+   "killed": true,
+   "pytest": "1 error in 0.19s"
+  },
+  {
+   "id": 3,
+   "line": 13,
+   "original": "PENDING_REVIEW = \"pending_review\"",
+   "mutant": "PENDING_REVIEW = \"XXpending_reviewXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.10s"
+  },
+  {
+   "id": 4,
+   "line": 13,
+   "original": "PENDING_REVIEW = \"pending_review\"",
+   "mutant": "PENDING_REVIEW = None",
+   "killed": true,
+   "pytest": "1 error in 0.21s"
+  },
+  {
+   "id": 5,
+   "line": 14,
+   "original": "REJECTED = \"rejected\"",
+   "mutant": "REJECTED = \"XXrejectedXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 6,
+   "line": 14,
+   "original": "REJECTED = \"rejected\"",
+   "mutant": "REJECTED = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 7,
+   "line": 15,
+   "original": "APPROVED = \"approved\"",
+   "mutant": "APPROVED = \"XXapprovedXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 8,
+   "line": 15,
+   "original": "APPROVED = \"approved\"",
+   "mutant": "APPROVED = None",
+   "killed": true,
+   "pytest": "1 error in 0.23s"
+  },
+  {
+   "id": 9,
+   "line": 16,
+   "original": "EXPIRED = \"expired\"",
+   "mutant": "EXPIRED = \"XXexpiredXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 10,
+   "line": 16,
+   "original": "EXPIRED = \"expired\"",
+   "mutant": "EXPIRED = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 11,
+   "line": 17,
+   "original": "CANCELLED = \"cancelled\"",
+   "mutant": "CANCELLED = \"XXcancelledXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 12,
+   "line": 17,
+   "original": "CANCELLED = \"cancelled\"",
+   "mutant": "CANCELLED = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 13,
+   "line": 21,
+   "original": "SUBMIT = \"submit\"",
+   "mutant": "SUBMIT = \"XXsubmitXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 14,
+   "line": 21,
+   "original": "SUBMIT = \"submit\"",
+   "mutant": "SUBMIT = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 15,
+   "line": 22,
+   "original": "APPROVE = \"approve\"",
+   "mutant": "APPROVE = \"XXapproveXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.10s"
+  },
+  {
+   "id": 16,
+   "line": 22,
+   "original": "APPROVE = \"approve\"",
+   "mutant": "APPROVE = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 17,
+   "line": 23,
+   "original": "REJECT = \"reject\"",
+   "mutant": "REJECT = \"XXrejectXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 18,
+   "line": 23,
+   "original": "REJECT = \"reject\"",
+   "mutant": "REJECT = None",
+   "killed": true,
+   "pytest": "1 error in 0.20s"
+  },
+  {
+   "id": 19,
+   "line": 24,
+   "original": "EXPIRE = \"expire\"",
+   "mutant": "EXPIRE = \"XXexpireXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.12s"
+  },
+  {
+   "id": 20,
+   "line": 24,
+   "original": "EXPIRE = \"expire\"",
+   "mutant": "EXPIRE = None",
+   "killed": true,
+   "pytest": "1 error in 0.19s"
+  },
+  {
+   "id": 21,
+   "line": 25,
+   "original": "CANCEL = \"cancel\"",
+   "mutant": "CANCEL = \"XXcancelXX\"",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 22,
+   "line": 25,
+   "original": "CANCEL = \"cancel\"",
+   "mutant": "CANCEL = None",
+   "killed": true,
+   "pytest": "1 error in 0.19s"
+  },
+  {
+   "id": 23,
+   "line": 34,
+   "original": "isinstance(value, datetime) and value.tzinfo is not None and value.utcoffset() is not None",
+   "mutant": "isinstance(value, datetime) and value.tzinfo is  None and value.utcoffset() is not None",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.17s"
+  },
+  {
+   "id": 24,
+   "line": 34,
+   "original": "isinstance(value, datetime) and value.tzinfo is not None and value.utcoffset() is not None",
+   "mutant": "isinstance(value, datetime) and value.tzinfo is not None and value.utcoffset() is  None",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.16s"
+  },
+  {
+   "id": 25,
+   "line": 34,
+   "original": "isinstance(value, datetime) and value.tzinfo is not None and value.utcoffset() is not None",
+   "mutant": "isinstance(value, datetime) or value.tzinfo is not None and value.utcoffset() is not None",
+   "killed": true,
+   "pytest": "3 failed, 51 passed in 0.13s"
+  },
+  {
+   "id": 26,
+   "line": 39,
+   "original": "return type(value) is int and value > 0",
+   "mutant": "return type(value) is not int and value > 0",
+   "killed": true,
+   "pytest": "2 failed, 52 passed in 0.15s"
+  },
+  {
+   "id": 27,
+   "line": 39,
+   "original": "return type(value) is int and value > 0",
+   "mutant": "return type(value) is int and value >= 0",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 28,
+   "line": 39,
+   "original": "return type(value) is int and value > 0",
+   "mutant": "return type(value) is int and value > 1",
+   "killed": true,
+   "pytest": "1 failed, 53 passed in 0.11s"
+  },
+  {
+   "id": 29,
+   "line": 39,
+   "original": "return type(value) is int and value > 0",
+   "mutant": "return type(value) is int or value > 0",
+   "killed": true,
+   "pytest": "1 failed, 53 passed in 0.11s"
+  },
+  {
+   "id": 30,
+   "line": 48,
+   "original": "order_open: bool = True,",
+   "mutant": "order_open: bool = False,",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.16s"
+  },
+  {
+   "id": 31,
+   "line": 49,
+   "original": "bank_verified: bool = False,",
+   "mutant": "bank_verified: bool = True,",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 32,
+   "line": 52,
+   "original": "bank_reference: str = \"\",",
+   "mutant": "bank_reference: str = \"XXXX\",",
+   "killed": false,
+   "pytest": "54 passed in 0.09s"
+  },
+  {
+   "id": 33,
+   "line": 53,
+   "original": "rejection_reason: str = \"\",",
+   "mutant": "rejection_reason: str = \"XXXX\",",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 34,
+   "line": 62,
+   "original": "if not isinstance(state, TransferState) or not isinstance(action, TransferAction):",
+   "mutant": "if  isinstance(state, TransferState) or not isinstance(action, TransferAction):",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.13s"
+  },
+  {
+   "id": 35,
+   "line": 62,
+   "original": "if not isinstance(state, TransferState) or not isinstance(action, TransferAction):",
+   "mutant": "if not isinstance(state, TransferState) or  isinstance(action, TransferAction):",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.14s"
+  },
+  {
+   "id": 36,
+   "line": 62,
+   "original": "if not isinstance(state, TransferState) or not isinstance(action, TransferAction):",
+   "mutant": "if not isinstance(state, TransferState) and not isinstance(action, TransferAction):",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 37,
+   "line": 63,
+   "original": "raise TransferPolicyError(\"invalid state or action\")",
+   "mutant": "raise TransferPolicyError(\"XXinvalid state or actionXX\")",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 38,
+   "line": 64,
+   "original": "if not _aware(now) or not _aware(deadline):",
+   "mutant": "if  _aware(now) or not _aware(deadline):",
+   "killed": true,
+   "pytest": "9 failed, 45 passed in 0.15s"
+  },
+  {
+   "id": 39,
+   "line": 64,
+   "original": "if not _aware(now) or not _aware(deadline):",
+   "mutant": "if not _aware(now) or  _aware(deadline):",
+   "killed": true,
+   "pytest": "9 failed, 45 passed in 0.20s"
+  },
+  {
+   "id": 40,
+   "line": 64,
+   "original": "if not _aware(now) or not _aware(deadline):",
+   "mutant": "if not _aware(now) and not _aware(deadline):",
+   "killed": true,
+   "pytest": "3 failed, 51 passed in 0.12s"
+  },
+  {
+   "id": 41,
+   "line": 65,
+   "original": "raise TransferPolicyError(\"timestamps must be timezone-aware\")",
+   "mutant": "raise TransferPolicyError(\"XXtimestamps must be timezone-awareXX\")",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  },
+  {
+   "id": 42,
+   "line": 66,
+   "original": "if type(order_open) is not bool or type(bank_verified) is not bool:",
+   "mutant": "if type(order_open) is  bool or type(bank_verified) is not bool:",
+   "killed": true,
+   "pytest": "6 failed, 48 passed in 0.13s"
+  },
+  {
+   "id": 43,
+   "line": 66,
+   "original": "if type(order_open) is not bool or type(bank_verified) is not bool:",
+   "mutant": "if type(order_open) is not bool or type(bank_verified) is  bool:",
+   "killed": true,
+   "pytest": "7 failed, 47 passed in 0.14s"
+  },
+  {
+   "id": 44,
+   "line": 66,
+   "original": "if type(order_open) is not bool or type(bank_verified) is not bool:",
+   "mutant": "if type(order_open) is not bool and type(bank_verified) is not bool:",
+   "killed": true,
+   "pytest": "1 failed, 53 passed in 0.12s"
+  },
+  {
+   "id": 45,
+   "line": 67,
+   "original": "raise TransferPolicyError(\"boolean inputs required\")",
+   "mutant": "raise TransferPolicyError(\"XXboolean inputs requiredXX\")",
+   "killed": false,
+   "pytest": "54 passed in 0.08s"
+  }
+ ]
+}

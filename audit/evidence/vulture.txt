@@ -1,0 +1,1 @@
+modules/face_id/deep.py:74: unused variable 'image_bgr' (100% confidence)

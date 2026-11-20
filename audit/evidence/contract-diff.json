@@ -1,0 +1,25 @@
+{
+ "only_in_routes_json": [],
+ "only_in_live": [],
+ "guard_distribution": {
+  "('permission',)": 129,
+  "('grant:finance.write', 'permission')": 12,
+  "()": 9,
+  "('authenticated',)": 6,
+  "('grant:finance.read', 'permission')": 5,
+  "('permission', 'permission')": 1,
+  "('grant:reports.confidential', 'permission')": 1
+ },
+ "no_guard": [
+  "POST /api/v1/auth/logout",
+  "POST /api/v1/auth/otp/request",
+  "POST /api/v1/auth/otp/verify",
+  "POST /api/v1/auth/refresh",
+  "GET /api/v1/health/ready",
+  "GET /api/v1/metrics",
+  "GET /api/v1/payments/{payment_id}/gateway-return",
+  "GET /api/v1/updates/manifest",
+  "GET /health"
+ ],
+ "guard_without_roles": []
+}

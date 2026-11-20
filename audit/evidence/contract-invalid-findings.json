@@ -1,0 +1,13 @@
+{
+ "server_errors": [],
+ "leaked_stacktrace": [],
+ "unexpected_2xx": [
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/{payment_id}/gateway-return",
+   "injected": "-1",
+   "status": 200
+  }
+ ],
+ "bad_error_envelope": []
+}

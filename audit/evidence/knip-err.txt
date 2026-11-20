@@ -1,0 +1,17 @@
+file:///tmp/run/npt/node_modules/oxc-parser/src-js/raw-transfer/common.js:294
+  const arrayBuffer = new ArrayBuffer(ARRAY_BUFFER_SIZE);
+                      ^
+
+RangeError: Array buffer allocation failed
+    at new ArrayBuffer (<anonymous>)
+    at createBuffer (file:///tmp/run/npt/node_modules/oxc-parser/src-js/raw-transfer/common.js:294:23)
+    at prepareRaw (file:///tmp/run/npt/node_modules/oxc-parser/src-js/raw-transfer/common.js:208:55)
+    at parseSyncRawImpl (file:///tmp/run/npt/node_modules/oxc-parser/src-js/raw-transfer/common.js:42:53)
+    at parseSyncRaw (file:///tmp/run/npt/node_modules/oxc-parser/src-js/raw-transfer/eager.js:16:10)
+    at parseSync (file:///tmp/run/npt/node_modules/oxc-parser/src-js/index.js:60:12)
+    at parseFile (file:///tmp/run/npt/node_modules/knip/dist/typescript/ast-nodes.js:13:12)
+    at runPlugin (file:///tmp/run/npt/node_modules/knip/dist/WorkspaceWorker.js:374:47)
+    at async WorkspaceWorker.runPlugins (file:///tmp/run/npt/node_modules/knip/dist/WorkspaceWorker.js:464:33)
+    at async build (file:///tmp/run/npt/node_modules/knip/dist/graph/build.js:200:35)
+
+Node.js v22.22.3
