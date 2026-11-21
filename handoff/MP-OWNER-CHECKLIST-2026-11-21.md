@@ -9,7 +9,7 @@
 | # | کار | چرا فقط تو | وضعیت |
 |---|---|---|---|
 | ۱٫۱ | پاک‌کردنِ چهار secretِ امضای اندروید (`MP_ANDROID_KEYSTORE_BASE64`, `MP_ANDROID_STORE_PASSWORD`, `MP_ANDROID_KEY_ALIAS`, `MP_ANDROID_KEY_PASSWORD`) + variableِ `MP_ANDROID_CERT_SHA256` از تنظیماتِ مخزنِ MP | عاملِ ممیزی `403 Resource not accessible by integration` می‌گیرد و حتی **نامِ** secretها را نمی‌بیند | باز |
-| ۱٫۲ | تأییدِ نهاییِ حذفِ `.github/workflows/apk.yml` (۴ `uses:`) | حذفِ workflow یک تغییرِ دامنهٔ محصولی است | باز — بیلدر اجرا می‌کند |
+| ۱٫۲ | تأییدِ نهاییِ حذفِ `.github/workflows/apk.yml` (۴ `uses:`) **و اختیارِ `AD‑11`** (حذفِ یک تست در همان commit) | حذفِ workflow یک تغییرِ دامنهٔ محصولی است؛ سنجه شد که حذفش `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` را با `FileNotFoundError` می‌شکند و فهرستِ ممنوعه «حذفِ تست» را منع کرده ⇒ بدونِ اختیارِ تو بیلدر در بن‌بست می‌ماند | باز — بیلدر اجرا می‌کند |
 | ۱٫۳ | جوابِ یک سؤالِ factual: **آیا MP همین امروز با عضوِ واقعی زنده است؟** | از مخزن قابلِ سنجه نیست | **تعیین‌کنندهٔ فوریتِ merge دستهٔ ۱** — اگر زنده است، `F‑01` (۳۰/۳۰ OTP پذیرفته، ۲۲۸٫۴ حدس/ثانیه) و `F‑06` (`/api/v1/metrics` بدونِ احراز، ۳۴۶ خط و ۱۲ خانوادهٔ متریک) در معرضِ زنده‌اند |
 | ۱٫۴ | تصمیمِ `card_number` در `C1`: رمزنگاریِ کامل یا فقط mask ذخیره‌شدن | تصمیمِ محصولی؛ بیلدر به‌شکلِ `AD-n` ثبت می‌کند | باز |
 | ۱٫۵ | روشن‌کردنِ تصمیمِ بازِ کیوسک/گیتِ ورود (تصمیمِ ۲ = «نامعلوم») | فقط تو می‌دانی؛ با یک آزمونِ دستگاه بسته می‌شود | باز — تا بسته نشود، PWA باید کیوسک‌پذیر بماند |
@@ -62,7 +62,7 @@
 | `B0` | مقصدِ استقرار برای artifactِ **موجودِ** `muscleparadise-web` | یک URL واقعی + smoke test در CI — بدونِ نوشتنِ یک خط کلاینتِ تازه |
 | `B1` | اسکلتِ PWA (فقط npm ⇒ **در همین چت قابلِ توسعه و تست**) + کلاینتِ تولیدشده از OpenAPI (۱۶۳ عملیات) + manifestِ نصب‌پذیر و کیوسک‌پذیر | ‏`tsc` ۰ خطا + تستِ واحد + Lighthouse/PWA معیارِ مشخص |
 | `B2..Bn` | ۱۷ حوزه به ترتیبِ اولویت | هر حوزه فقط وقتی مهاجرت‌شده است که آزمونِ برابریِ قراردادش سبز باشد |
-| پایانِ B | حذفِ `mp-app/client` + حذفِ `client-format-fix.yml` (۵ `uses:`) + حذفِ چهار قاعدهٔ `mp-dart-*` از `semgrep-mp.yml` | گیتِ `WP 0.8` از **۳۸/۳۸** به **۳۳/۳۳** |
+| پایانِ B | حذفِ `mp-app/client` + `client-format-fix.yml` (۵ `uses:`) + چهار قاعدهٔ `mp-dart-*` از `semgrep-mp.yml` + **سه فایلِ تست در همان commit** | ‏`pytest --collect-only -q` ⇒ **۰ خطایِ جمع‌آوری** و `N_after == N_before − 59` · گیتِ `WP 0.8` از **۳۸/۳۸** به **۳۳/۳۳** — سنجه شد که حذفِ `client` سه خطایِ جمع‌آوری می‌دهد و pytest پیش‌فرض **کلِ سوئیت را `Interrupted` می‌کند** |
 
 **اولویتِ ۱۷ حوزه:** ‏`auth` ← `home`/`today`/`checkin` ← `progress`/`nutrition`/`assessment14`/`bodycomp` ← `classes`/`intake`/`feedback` ← `notifications`/`chat`/`profile`/`shell` ← **`wallet` و `shop` آخر از همه**. دلیلِ سنجه‌شده: سه جهشِ *زندهٔ* ممیزی دقیقاً در ماژولِ پول بود (`#27` مرزِ مبلغِ صفر، `#31` پیش‌فرضِ `bank_verified`، `#36` ‏`or`→`and`).
 
