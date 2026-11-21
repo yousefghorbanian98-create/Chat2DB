@@ -178,3 +178,79 @@
 | **این هفته** | بسته‌شدنِ دو `PARTIAL` + `WP 3.1` + `WP 0.1`/`0.2` + فازِ ۱ ⟵ نقطهٔ بررسیِ ۱ ⟵ merge دستهٔ ۱ |
 | **پس از آن** | ‏`D1` + `C0` + فازهای ۲–۴ + `C1` + `B0` ⟵ نقطهٔ بررسیِ ۲ ⟵ merge دستهٔ ۲ |
 | **کارزارها** | `C2` → `C3` → `C4` (با تمرینِ بازیابی) · سپس `B1` → `B2..Bn` → پایانِ B |
+---
+
+## پیوستِ لینک‌ها — `2026-11-21T23:50Z`
+
+**راهنمای صداقت:** گیت‌هاب به درخواستِ **بی‌هویت** برای همهٔ صفحه‌های `settings/*` کدِ `404` می‌دهد، پس `404`ِ من دلیلِ خرابیِ لینک نیست. ستونِ «سنجهٔ من» فقط آن‌هایی را `200` نشان می‌دهد که **بدونِ نشست** هم دیده می‌شوند؛ بقیه در مرورگرِ واردشدهٔ تو کار می‌کنند.
+
+### الف) محافظتِ `main` — اقدامِ ۲، مهم‌ترینِ مانده
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/settings/branches` (branch protection کلاسیک) | `404` بی‌هویت ⇒ در مرورگرِ تو باز می‌شود |
+| `https://github.com/yousefghorbanian98-create/MP/settings/rules` (Rulesets — مسیرِ جدیدتر و پیشنهادی) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/rules` (**صفحهٔ وارسی**: پس از ذخیره اینجا فهرست می‌شود) | ✅ `200` |
+
+تنظیماتِ لازم در فرم: الگو `main` · «Require a pull request before merging» **اختیاری** (اگر بزنی، بیلدر دیگر نمی‌تواند مستقیم به `main` push کند که خوب است، ولی خودت هم باید از PR بروی) · «Require status checks to pass before merging» **الزامی** · «Require branches to be up to date before merging» **الزامی** · «Do not allow force pushes» **الزامی** (سیاستِ ما هم force-push را ممنوع کرده).
+
+**هشت check با نامِ دقیق** (از jobهای اجرای `44961471336` استخراج شد؛ همین‌ها را در کادرِ جست‌وجو تایپ کن):
+
+1. `backend`
+2. `live-contract`
+3. `secret-scan`
+4. `studio`
+5. `client-flutter`
+6. `e2e-api`
+7. `Documentation links and handoff`
+8. `Client — pinned SDK · format gate · Android debug compile`
+
+### ب) امنیت و Dependabot
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/security` (هابِ امنیت — از اینجا به همهٔ بخش‌ها می‌روی) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/security/dependabot` (شمارِ هشدارها — همان عددی که از تو خواستم) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/secrets` (secret scanning) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/code-scanning` (CodeQL — انتظار دارم «پیکربندی نشده» ببینی) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/policy` | ✅ `200` |
+| ~~`https://github.com/yousefghorbanian98-create/MP/settings/security`~~ | **این را استفاده نکن** — مالک گزارش کرد که حتی واردشده هم `404` داد؛ برای مخزنِ publicِ حسابِ شخصی، این کنترل‌ها زیرِ تبِ **Security** هستند نه Settings |
+
+### ج) PR و CI
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/pull/23` (دکمهٔ **Reopen** برای نقطهٔ بررسیِ ۱؛ `merged=false` پس بازگشایی ممکن است) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions` | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions/runs/44961471336` (اجرای قرمزِ چهارگانه روی tip بیلدر) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions/runs/44962138925` (**«Graph Update: pip in /mp-app/backend»** — سندِ زندهٔ روشن‌شدنِ Dependabot) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/settings/actions` (مجوزهای workflow) | `404` بی‌هویت |
+
+### د) شاخهٔ بیلدر و فایل‌هایی که در `AD‑12`/`AD‑13` به آن‌ها ارجاع دادم
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/tree/arena/da474b65-mp` | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/commits/arena/da474b65-mp` | `429` (rate-limitِ موقتِ من) — در مرورگر کار می‌کند |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/.gitleaksignore` (سیاستِ انگشت‌نگاری، ۲۰ خط) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/scripts/test_retired_signing_scan.py` (تستِ سلامتِ گیت) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/docs/MuscleParadise/audit/evidence/detect-secrets.json` (منبعِ مثبتِ کاذب) | در مرورگر |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/mp-app/backend/pyproject.toml` (۱۹ وابستگیِ بازه‌ای) | ✅ `200` |
+
+### ه) اسنادِ ممیزی (مخزنِ Chat2DB، شاخهٔ `arena/2cde32d6-chat2db`)
+
+| لینک | محتوا |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/2cde32d6-chat2db/handoff` | فهرستِ همهٔ ۸ سند |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-OWNER-CHECKLIST-2026-11-21.md` | **همین سند** — شش دستهٔ کاری + دروازهٔ اولین عضو + پیوستِ لینک‌ها |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-SCENARIO-A1.4-2026-11-21.md` | سناریوی کامل؛ ‏§B‑۴٫۵ اصلاحات و §B‑۴٫۶ متنِ `AD‑11`/`AD‑12`/`AD‑13` |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-RESPONSE-2026-11-21.md` | داوریِ دو commit و فهرستِ PARTIALها در §۴ |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-KIT-2026-11-21.zip` | کیتِ منجمدِ بیلدر (`486,358` بایت / `9a192500…`) |
+
+**بازیابیِ بدونِ توکنِ هر سند** (برای بیلدر یا هر محیطِ دیگری):
+`curl -fsS -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/<نامِ فایل>?ref=arena/2cde32d6-chat2db"`
+
+### یک نکتهٔ مجوز که باید بدانی
+
+توکنِ ممیزیِ من روی مخزنِ MP ‏`permissions.admin = true` گزارش می‌شود، ولی `branches/main/protection` را با `403 Resource not accessible by integration` رد می‌کند ⇒ آن installation مجوزِ ریزدانهٔ «Administration» را ندارد. پس **من نمی‌توانم** branch protection یا ruleset بسازم؛ این کار فقط با نشستِ مرورگریِ تو انجام می‌شود. اگر خواستی، می‌توانم یک‌بار `POST /repos/.../rulesets` را **با اجازهٔ صریحِ تو** امتحان کنم و نتیجه را دقیق گزارش دهم — ولی بدونِ اجازه دست نمی‌زنم، چون یک rulesetِ بدپیکربندی می‌تواند بیلدر را از push کردن قفل کند.
+
