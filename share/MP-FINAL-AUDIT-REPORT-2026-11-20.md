@@ -97,7 +97,7 @@
 | **F‑26** | **Medium** | دو شکلِ متفاوت برای پاکت خطا: `{"error":…}` در برابر `{"detail":…}` | ۷۰ × ۴۰۴ و ۱ × ۴۰۵ با پاکت پیش‌فرض FastAPI | **اثبات شد** |
 | **F‑27** | **Medium** | پیش‌نیازِ «پروندهٔ عضو» در سبد خرید با `404 not_found` بیان می‌شود؛ سفارش به‌نیابت ممکن نیست | `shop.cart_add`/`shop.checkout` ⇒ ۴۰۴ در پاس seed | **اثبات شد** |
 | **F‑28** | **Medium** | «امروز» در دو ماژول با `date.today()` (UTC کانتینر) حساب می‌شود در حالی که shop از `Asia/Tehran` استفاده می‌کند ⇒ مرزِ روز ناهمگون | `DTZ011` در ۳ محل؛ هیچ `TZ` در Dockerfileها نیست | **اثبات شد** |
-| **F‑29** | **Low‑Med** | `app/sms.py`: شش `logging.error` داخل `except` (بدون traceback) + سه `urlopen` با schemes باز + ۳۹ `# noqa` بلااثر | `TRY400`×۶، `S310`×۳، `RUF100`×۳۹ | **اثبات شد** |
+| **F‑29** | **Low‑Med** | `app/sms.py`: شش `log.error` داخل `except` (بدون traceback) + سه `urlopen` با schemes باز + ۳۹ `# noqa` بلااثر | `TRY400`×۶، `S310`×۳، `RUF100`×۳۹ | **اثبات شد** |
 
 **محدود/بی‌اثر (Low/Info):** `journal_mode=delete` پس از alembic (WAL فقط در رویداد `connect` موتور اعمال
 می‌شود) · هشدارهای `StarletteDeprecationWarning` برای `HTTP_422_UNPROCESSABLE_ENTITY` ·
@@ -1090,7 +1090,7 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | ۲۴ | هندلر `StarletteHTTPException` برای نگاشت ۴۰۴/۴۰۵ مسیریابی به پاکت پروژه | F‑26 | ۱ ساعت | `fastapi_default_detail == 0` در همان پراب |
 | ۲۵ | تبدیل `NotFoundError` در `_own_member` به خطای اختصاصی `409 member_profile_required` + تصمیم دربارهٔ سفارش به‌نیابت | F‑27 | ۲ ساعت (+تصمیم محصول) | `POST /shop/cart` بدون پروندهٔ عضو ⇒ ۴۰۹ با کد اختصاصی |
 | ۲۶ | جایگزینی `date.today()` با `datetime.now(UTC).astimezone(ZoneInfo(settings.shop_timezone)).date()` در ۳ محل + تستِ مرزیِ نیمه‌شب؛ و ست‌کردن `ENV TZ=Asia/Tehran` در Dockerfileها (ترجیحاً هر دو) | F‑28 | ۱–۲ ساعت | `grep -rn "date.today()" modules app engine jobs` ⇒ **۰** مورد؛ تست با ساعت ۲۲:۰۰ UTC ⇒ روزِ ثبت غذایی `2026-11-22` |
-| ۲۷ | `logging.error` → `logging.exception` در ۶ بلاک `except` ‏`app/sms.py`؛ allowlist از schemes برای `urlopen`؛ پاک‌سازی ۳۹ `# noqa` بلااثر با `ruff check --select RUF100 --fix` | F‑29 | ۱ ساعت | `ruff check --select TRY400,RUF100` ⇒ **۰** مورد؛ یک خطای ساختگیِ SMS با traceback کامل در لاگ ثبت شود |
+| ۲۷ | `log.error` → `log.exception` در ۶ بلاک `except` ‏`app/sms.py` (نه `:58` و `:91` که بیرون از `except`‌اند)؛ allowlist از schemes برای `urlopen`؛ پاک‌سازی ۳۹ `# noqa` بلااثر با `ruff check --select RUF100 --fix` | F‑29 | ۱ ساعت | `ruff check --select TRY400,RUF100` ⇒ **۰** مورد؛ یک خطای ساختگیِ SMS با traceback کامل در لاگ ثبت شود |
 
 ---
 
@@ -1136,7 +1136,7 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | `audit/evidence/jscpd-out/jscpd-report.json` | گزارش تکرار کد |
 | `audit/evidence/studio-ui-wiring.json` | موجودی دکمه‌ها و سیم‌کشی |
 | `audit/evidence/studio-dead-exports.json` | اسکن exportهای بلااستفاده |
-| `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف) / `ruff-recommended-stats.txt` (۵۲ قاعده) / `ruff-all-rules.txt` (۱۰۸ قاعده) / `ruff-all-families.txt` | خروجی ruff با پیکربندی پیشنهادی و با `--select ALL` — شاهد F‑28/F‑29 |
+| `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف) / `ruff-recommended-stats.txt` (۵۲ قاعده) / `ruff-all-rules.txt` (۱۰۴ قاعدهٔ متمایز) / `ruff-all-families.txt` | خروجی ruff با پیکربندی پیشنهادی و با `--select ALL` — شاهد F‑28/F‑29 |
 | `audit/ruff-recommended.toml` | پیکربندی پیشنهادی ruff (۴۳۰ یافته در برابر ۱۱٬۷۷۸ با `ALL`) — آمادهٔ جایگزینی در `pyproject.toml` |
 | `audit/evidence/vulture.txt` / `radon-cc.txt` / `radon-mi.txt` / `lizard.txt` / `lizard-warnings.txt` / `bandit.json` / `detect-secrets.json` | خروجی خام ابزارها |
 
@@ -1329,9 +1329,13 @@ for id in 27 31 36; do /tmp/run/venv-audit/bin/mutmut apply $id; \
 * **داده‌ها:** کاملاً مصنوعی
 * **تعداد یافته:** ۲۹ (۳ Critical، ۶ High، **۱۰ Medium**، ۱۰ Low/Info) + ۱۲ یافتهٔ کاذبِ رد‌شده + ۱ نقص روش‌شناختیِ اصلاح‌شده
 * **ابزارِ کمکیِ کشف F‑28/F‑29:** ruff ‏۰٫۱۷٫۶ با پیکربندی پیشنهادی `audit/ruff-recommended.toml`
-  (۵۲ قاعده، **۴۳۰ یافته** در برابر ۱۱٬۷۷۸ مورد با `--select ALL`) — یعنی با روشن‌کردنِ قواعدِ درست،
+  (۵۲ قاعده، **۴۳۰ یافته** در برابر ۱۱٬۷۷۸ مورد و **۱۰۴ قاعدهٔ متمایز** با `--select ALL`) — یعنی با روشن‌کردنِ قواعدِ درست،
   ruff به‌تنهایی ۶ یافتهٔ این ممیزی را بازتولید می‌کند (F‑15, F‑17, F‑13, بخشی از F‑02, کد مرده، `limiter._storage`)
-  و **دو باگِ تازه** (F‑28, F‑29) را آشکار کرد. چیزی که ruff **نمی‌گیرد**: F‑04 (فراخوانی سنکرون در مسیر پرداخت،
+  و **دو باگِ تازه** (F‑28, F‑29) را آشکار کرد.
+  چهار تصحیحِ بعدیِ این سنجش — شمارِ قواعدِ متمایزِ `ALL` (۱۰۴ نه ۱۰۸)، نامِ واقعیِ فراخوانی
+  (`log.error` نه `logging.error`)، وابستگیِ `RUF100` به `--select` (۳۹ با پیکربندی در برابر ۷۲ با
+  `--select` تنها)، و تفکیکِ `S105` ×۳ از `S106` ×۱ — در §۵ پروندهٔ شواهد، ردیف‌های **۱۴ تا ۱۷**
+  ثبت شده‌اند؛ همه پس از یک راستی‌آزماییِ مستقل روی commit پایهٔ `662ff88`. چیزی که ruff **نمی‌گیرد**: F‑04 (فراخوانی سنکرون در مسیر پرداخت،
   چون هندلرها `def`‌اند نه `async def` ⇒ `ASYNC100/ASYNC230` = صفر) و F‑22 (ruff با `S608` حتی با `--ignore-noqa`
   روی `op.execute(f"DROP INDEX …")` fire نمی‌شود ⇒ فقط قاعدهٔ اختصاصیِ semgrep آن را می‌گیرد).
   + ۱۱ مورد BLOCKED

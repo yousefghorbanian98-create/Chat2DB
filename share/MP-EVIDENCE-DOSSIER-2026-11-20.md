@@ -203,7 +203,7 @@ $ curl -s http://127.0.0.1:8010/openapi.json | jq '.paths | length'
 | T‑47 | یکپارچگی DB و بازتاب خروجی پس از حمله | sqlite3 + curl | ۳ بررسی | **۶۵ جدول سالم، `users` = ۲۶۱ ردیف** (هیچ `DROP`ی اثر نکرد) · `note` با `max_length=1000` سقف دارد (`modules/expenses/schemas.py:27`) · رشته‌های خصمانه در هیچ خروجی HTML/CSV بازتاب نشدند · `dangerouslySetInnerHTML` = **۰** | §۳‑۲۴ |
 | T‑48 | رفتار وابسته به پیکربندی shop | curl روی S3 در برابر S1 | ۸ سلول | روی S3 (بدون override) ⇒ `409 shop_online_closed` · روی S1 (با `…ENABLED=true`) ⇒ `404 «پروندهٔ عضو یافت نشد»` برای هویت بدون پروندهٔ عضو | `evidence/contract-invalid-authed.json`, `contract-matrix-raw.json` |
 | T‑49 | canary زنده بودن توکن | `probe_invalid_authed.py` | ۴ درخواست | قبل و بعد از ۸۷۲ سلول ⇒ **۲۰۰** · `tokens_live_throughout = true` · **۰ ورود مجدد** | همان |
-| **T‑50** | **ruff با پیکربندی پیشنهادی** | `ruff 0.17.6 --config audit/ruff-recommended.toml` | **۳۷۶ فایل** | پیکربندی فعلی پروژه ⇒ **۰** یافته؛ `--select ALL` ⇒ ۱۱٬۷۷۸/۱۰۸ قاعده؛ پیشنهادی ⇒ **۴۳۰/۵۲ قاعده** (۴۷ قابل‌رفع خودکار، ۲۱۰ unsafe) | `ruff-recommended-{stats,findings}.txt`، `ruff-all-{rules,families}.txt` |
+| **T‑50** | **ruff با پیکربندی پیشنهادی** | `ruff 0.17.6 --config audit/ruff-recommended.toml` | **۳۷۶ فایل** | پیکربندی فعلی پروژه ⇒ **۰** یافته؛ `--select ALL` ⇒ ۱۱٬۷۷۸/**۱۰۴** قاعدهٔ متمایز؛ پیشنهادی ⇒ **۴۳۰/۵۲ قاعده** (۴۷ قابل‌رفع خودکار، ۲۱۰ unsafe) | `ruff-recommended-{stats,findings}.txt`، `ruff-all-{rules,families}.txt` |
 
 ---
 
@@ -1501,7 +1501,7 @@ modules/face_id/deep.py:74: unused variable 'image_bgr' (100% confidence)
 | --- | --- | --- | --- | --- |
 | `pyproject.toml` فعلی پروژه (`E,F,W,I,N,UP,B,SIM`) | **۰** — «All checks passed!» | ۸ خانواده | **۵۳٫۳ ms** | ۰ |
 | `audit/ruff-recommended.toml` (پیشنهادِ این ممیزی) | **۴۳۰** | **۵۲ قاعده** | **۱۰۱٫۳ ms** | ۱ |
-| `--select ALL` (همهٔ خانواده‌ها) | **۱۱٬۷۷۸** | **۱۰۸ قاعده** | **۳۴۳٫۱ ms** | ۱ |
+| `--select ALL` (همهٔ خانواده‌ها) | **۱۱٬۷۷۸** | **۱۰۴ قاعدهٔ متمایز** | **۳۴۳٫۱ ms** | ۱ |
 | `ruff format --check` | **۰** — «۳۷۸ فایل پیشاپیس قالب‌بندی‌شده» | — | **۵۹٫۹ ms** | ۰ |
 
 **سه نتیجهٔ مستقیم از این جدول:**
@@ -1539,7 +1539,7 @@ modules/face_id/deep.py:74: unused variable 'image_bgr' (100% confidence)
 | `TRY003` + `EM101/EM102` | **۷۲۰** (۳۶۰+۳۰۹+۵۱) | پیامِ خطای فارسیِ inline الگوی عمدیِ پروژه است |
 
 **شاهدِ خام:** `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف `file:line: RULE`)،
-`ruff-recommended-stats.txt` (۵۲ قاعده با شمارش)، `ruff-all-rules.txt` (۱۰۸ قاعده)،
+`ruff-recommended-stats.txt` (۵۲ قاعده با شمارش)، `ruff-all-rules.txt` (۱۰۴ قاعدهٔ متمایز در ۱۰۸ خط)،
 `ruff-all-families.txt` (تجمیع بر پایهٔ خانواده)، و پیکربندی `audit/ruff-recommended.toml`.
 
 
@@ -1776,7 +1776,7 @@ def _today_in_shop_zone() -> date:
 
 ---
 
-### ۴‑۵) F‑29 · `app/sms.py`: شش `logging.error` داخل `except` بدون traceback، سه `urlopen` با schemes باز، و ۳۹ `# noqa` بلااثر (Low‑Medium)
+### ۴‑۵) F‑29 · `app/sms.py`: شش `log.error` داخل `except` بدون traceback، سه `urlopen` با schemes باز، و ۳۹ `# noqa` بلااثر (Low‑Medium)
 
 **ابزار کاشف:** ruff، قواعد `TRY400`، `S310`، `RUF100` — هر سه در پیکربندی فعلی پروژه خاموش‌اند.
 
@@ -1787,8 +1787,15 @@ app/sms.py:66:13: TRY400 Use `logging.exception` instead of `logging.error`
 app/sms.py:69:13 / 72:13 / 99:13 / 102:13 / 105:13  — همان پیام
 ```
 
-`logging.error()` داخل بلاک `except` **فقط پیام** را ثبت می‌کند و زنجیرهٔ فراخوانی را دور می‌ریزد؛
-`logging.exception()` همان پیام را **به‌همراه traceback** می‌نویسد. نتیجه: هرگاه فراهم‌کنندهٔ SMS خطا دهد،
+`log.error()` داخل بلاک `except` **فقط پیام** را ثبت می‌کند و زنجیرهٔ فراخوانی را دور می‌ریزد؛
+`log.exception()` همان پیام را **به‌همراه traceback** می‌نویسد.
+
+**دقتِ نام‌گذاری (اصلاح‌شده پس از راستی‌آزماییِ مستقل):** نامِ واقعیِ فراخوانی در کد `log.error` است،
+نه `logging.error` — چون `app/sms.py:14` ‏`log = logging.getLogger("mp.sms")` را تعریف می‌کند.
+ruff در **پیامِ** قاعده عبارتِ کلیِ `logging.error`/`logging.exception` را چاپ می‌کند و متنِ اولیهٔ من
+همان عبارتِ ruff را به نامِ فراخوانیِ کد نسبت داد. ضمناً در این فایل **۸** فراخوانی `log.error` هست
+ولی فقط **۶** تا داخل `except`‌اند: `:58` و `:91` (`"[SMS] sms_api_url must be https"`) بیرون از
+`except`‌اند و `TRY400` آن‌ها را نمی‌گیرد ⇒ در رفع، آن دو را دست نزن. نتیجه: هرگاه فراهم‌کنندهٔ SMS خطا دهد،
 در لاگ‌ها «ارسال ناموفق» دیده می‌شود ولی **ریشه (کد خطای HTTP، timeout، DNS، بدنهٔ پاسخ)** نیست —
 دقیقاً همان چیزی که برای تفکیکِ «باگِ ما» از «قطعیِ فراهم‌کننده» لازم است. این مورد با **F‑03**
 (رندرِ `rich` روی حلقهٔ رویداد) ترکیب می‌شود: SMS پرخطاترین مسیرِ خروجیِ شبکه است و کم‌لاگ‌ترین.
@@ -1826,16 +1833,17 @@ SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `D
 | --- | --- |
 | `ruff check --select TRY400` | ۶ مورد، همه در `app/sms.py` |
 | `ruff check --select S310` | ۶ مورد (`app/sms.py` ×۳، `eval/llm_column.py` ×۳) |
-| `ruff check --select RUF100` | **۳۹** `# noqa` بلااثر (۴ موردش `S608` در migration) |
+| `ruff check --extend-select RUF100` با پیکربندی | **۳۹** `# noqa` بلااثر (۴ موردش `S608` در migration) |
+| ⚠ همان قاعده با `--select RUF100` **تنها** | **۷۲** — یعنی **همهٔ** `# noqa`های کدبیس. دلیل: `--select` روی خطِ فرمان **جای** `select` پیکربندی را می‌گیرد، پس هیچ قاعدهٔ دیگری روشن نیست و هر `noqa` «non-enabled» می‌شود. **عددِ ۷۲ ستونِ «قبل» نیست** |
 | `ruff check --select S608 --ignore-noqa` | **۰** مورد ⇒ F‑22 با ruff قابل‌کشف نیست |
 | `ruff check --select S110,S112` | `api/v1/monitoring.py:24` (S110) + `scripts/dast.py:81,176,187` (S112) — هم‌پوشانی با F‑17 |
-| `ruff check --select S105,S106` | `app/config.py:16:22` «رمز سخت‌کدشدهٔ `DEFAULT_DEV_SECRET`» — مؤیدِ ریشهٔ **F‑02** |
+| `ruff check --select S105,S106` | **`S105` ×۳**: `app/config.py:16:22` (`DEFAULT_DEV_SECRET` — مؤیدِ ریشهٔ **F‑02**)، `modules/auth/schemas.py:46:23` (`token_type`)، `tests/integration/test_m67_studio_auth.py:37:42` (`token_type`) · **`S106` ×۱**: `tests/regression/test_production_ops.py:44:13` (`sms_password`) |
 | `ruff check --select SLF001` | `modules/auth/router.py:55:30` دسترسی به `limiter._storage` — مؤیدِ **F‑13** |
 | `ruff check --select C901` | ۱۵ تابع >۱۰؛ بالاترین `app/config.py:128 validate_production_configuration` **(۲۸)** — همان **F‑15** با radon F(47) |
 | `ruff check --select PLW0603` | ۷ `global` در `app/logging.py`، `app/observability.py`، `app/profiling.py` — سطحِ تماس F‑03 |
 
 **شاهدِ خام:** `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف با مسیرهای نسبی)
-+ `ruff-recommended-stats.txt` (۵۲ قاعده) + `ruff-all-rules.txt` (۱۰۸ قاعده با `--select ALL` = ۱۱٬۷۷۸ مورد)
++ `ruff-recommended-stats.txt` (۵۲ قاعده) + `ruff-all-rules.txt` (۱۰۴ قاعدهٔ متمایز با `--select ALL` = ۱۱٬۷۷۸ مورد)
 + `ruff-all-families.txt` (تجمیع بر پایهٔ خانواده) + پیکربندی `audit/ruff-recommended.toml`.
 
 ---
@@ -1862,6 +1870,10 @@ SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `D
 | **۱۱** | **§۵ F‑22 و §۴‑۵** | **«۴ خط SQL با f-string که `# noqa: S608` دارند»** | **ruff `S608` روی این ۴ خط fire نمی‌شود — حتی با `--ignore-noqa` ⇒ «All checks passed!». آن `# noqa`ها امروز بلااثرند (`RUF100` ×۴). F‑22 را فقط قاعدهٔ اختصاصیِ semgrep می‌گیرد** | **اجرای مستقیم `ruff check --select S608 --ignore-noqa` در T‑50** |
 | **۱۲** | **§۱ جدول شدت‌ها** | **۲۷ یافته** | **۲۹ یافته** (F‑28 Medium: `date.today()` با UTC در برابر `Asia/Tehran`؛ F‑29 Low‑Med: `logging.error` بدون traceback در `app/sms.py`) | یافته‌های جدید از T‑50 |
 | **۱۳** | **§۱۲ پیوست الف** | **۵۵ فایل شاهد** | **۶۰ فایل شاهد** (۴ خروجی ruff + ۱ پیکربندی پیشنهادی) | اجرای جدید |
+| **۱۴** | **§۳‑۲۶ و §۴‑۵** | **«۱۰۸ قاعده» با `--select ALL`** | **۱۰۴ قاعدهٔ متمایز.** فایلِ `ruff-all-rules.txt` ‏۱۰۸ **خط** دارد که ۴ خطش قاعده نیست: دو هشدارِ تضادِ `D203/D211` و `D212/D213`، «Found 11778 errors.» و «[*] 1010 fixable…». من خطوط را شمرده بودم نه قواعد را | شمارشِ مستقل با `awk '$2 ~ /^[A-Z]+[0-9]+$/'` روی همان شاهد |
+| **۱۵** | **§۴‑۵** | **«شش `logging.error`»** | **`log.error`** — نامِ واقعیِ فراخوانی در کد؛ `app/sms.py:14` ‏`log = logging.getLogger("mp.sms")`. در آن فایل ۸ فراخوانی `log.error` هست ولی فقط ۶ تا داخل `except`‌اند (`:58` و `:91` بیرون‌اند) | `grep -n "log\.error\|except" app/sms.py` ⇒ ۰ مورد `logging.error` |
+| **۱۶** | **§۴‑۵ جدولِ شاهد** | **`ruff check --select RUF100` ⇒ ۳۹** | آن فرمان **۷۲** می‌دهد (= همهٔ `# noqa`های کدبیس)، چون `--select` جای `select` پیکربندی را می‌گیرد. فرمانِ درست `--extend-select RUF100` است ⇒ **۳۹** | اجرای هر دو فرمان پشتِ سر هم |
+| **۱۷** | **§۴‑۵ جدولِ شاهد** | **ردیفِ «`S105`» با چهار محل** | تفکیکِ درست: **`S105` ×۳** و **`S106` ×۱** | `ruff check --select S105` ⇒ ۳ · `--select S106` ⇒ ۱ |
 
 **چیزی که تغییر نکرد** (و دوباره تأیید شد): صفر drift قرارداد، صفر `5xx` در **هر دو** ماتریس
 (۱٬۱۴۱ + ۸۷۲ سلول)، صفر نشت stack trace، سالم بودن JWT/OTP/idempotency، نبودِ `dangerouslySetInnerHTML`،
@@ -1938,10 +1950,10 @@ SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `D
 | `audit/serve_backend.py` | 10,139 | `fc1f4e3644718f19…` |
 | `audit/serve_plain.py` | 2,073 | `fe6a735f3ce45fb5…` |
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
-| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 35,148 | `2c39be1be788b26b…` |
+| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 47,984 | `6cbfa37effc8e13f…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 154,826 | `5fe09a9005d18584…` |
-| `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,110 | `1f292decfd592051…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 157,817 | `a8a43c0898430eac…` |
+| `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,784 | `65cb5aaf07cfc503…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 
 **جمع: 55 فایلِ hash‌شده · 3,019,018 بایت** (به‌علاوهٔ خودِ این پرونده).
