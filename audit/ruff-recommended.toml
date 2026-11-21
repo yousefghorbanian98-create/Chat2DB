@@ -21,7 +21,11 @@ select = [
   "C90",    # پیچیدگی mccabe ← جایگزین radon/lizard در گیتِ CI
   "FAST",   # قوانین اختصاصی FastAPI (FAST002 = وابستگی بدون Annotated)
   "SLF",    # دسترسی به عضو خصوصی (limiter._storage)
-  "FBT",    # تلهٔ بولی در امضا (همان bank_verified: bool = False)
+  "FBT",    # تلهٔ بولی در امضا — ۲۱ مورد، سه‌تایش در مسیرِ پول/سبد خرید:
+           # modules/payments/router.py:329,362,364,366 · modules/payments/service.py:254
+           # · modules/shop/router.py:126. توجه: bank_verified در
+           # modules/payments/manual_transfer_policy.py:52 پشتِ * است (keyword-only)
+           # ⇒ FBT آن را نمی‌گیرد و آن هسته پیشاپیس درست طراحی شده است.
   "ERA",    # کد کامنت‌شده (مرده) — ولی ۱۱/۱۱ یافته‌اش روی این کدبیس کاذب است:
            # security/rbac.py:146,161 و modules/population/gates.py:11 کامنتِ فارسی‌اند،
            # db/models/content.py:73 و modules/assessment/equations.py:14-19 مستندِ شکلِ داده.

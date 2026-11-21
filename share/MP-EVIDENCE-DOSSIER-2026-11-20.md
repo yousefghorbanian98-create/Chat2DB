@@ -1959,15 +1959,15 @@ commit پایهٔ `662ff88` با ruff ‏۰٫۱۷٫۶: **۷۲** (فقط `RUF100`
 | `audit/probe_load.py` | 7,721 | `940089b867e6446e…` |
 | `audit/probe_otp_limits.py` | 6,356 | `662906b965d4801e…` |
 | `audit/repro_rbac_systemerror.py` | 4,829 | `4d0cfbe573652b38…` |
-| `audit/ruff-recommended.toml` | 4,564 | `fea43dd72bb10be8…` |
+| `audit/ruff-recommended.toml` | 4,973 | `6bafdba17d60db62…` |
 | `audit/scan_ui_wiring.py` | 7,088 | `64e64c20bfe2b1f5…` |
 | `audit/semgrep-mp.yml` | 7,002 | `d58146b4f372ca82…` |
 | `audit/serve_backend.py` | 10,139 | `fc1f4e3644718f19…` |
 | `audit/serve_plain.py` | 2,073 | `fe6a735f3ce45fb5…` |
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
-| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 51,180 | `64607ebbffd7c54e…` |
+| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 51,578 | `602db301085b491b…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 160,662 | `068593913c35e6c2…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 160,662 | `05d20bc85c53247c…` |
 | `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,784 | `65cb5aaf07cfc503…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 

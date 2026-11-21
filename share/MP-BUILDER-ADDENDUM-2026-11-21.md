@@ -118,7 +118,7 @@ ruff check --no-cache . # انتظار: "All checks passed!"  ← سبزِ تو�
 
 **اقدام:**
 
-1. محتوای فایل **`audit/ruff-recommended.toml`** (۴٬۵۶۴ بایت، در مخزنِ ممیزی commit شده)
+1. محتوای فایل **`audit/ruff-recommended.toml`** (4,973 بایت، در مخزنِ ممیزی commit شده)
    را جایگزینِ بلوکِ `[tool.ruff]` در `backend/pyproject.toml` کن. هر `ignore` در آن فایل
    **دلیلِ فارسیِ مستند** دارد؛ دلیل‌ها را به‌صورت کامنت نگه دار.
 2. بخش `[lint.isort] known-first-party` را **دقیقاً همان‌طور که هست** حفظ کن
@@ -144,7 +144,7 @@ ruff check --no-cache . # انتظار: "All checks passed!"  ← سبزِ تو�
 چون `audit/ruff-recommended.toml` در مخزنِ **ممیزی** است و نه در مخزنِ محصول، متنِ کاملش
 اینجا درج شده تا WP ‏0.9 هیچ وابستگیِ بیرونی نداشته باشد. این متن **بایت‌به‌بایت** همان فایلی است
 که ۴۳۰ یافته / ۵۲ قاعده را تولید کرد؛ پس اگر همین را بنویسی، همان عدد را خواهی دید.
-اندازهٔ فایلِ مرجع: ۴٬۵۶۴ بایت · sha256 (۱۶ رقم نخست) از manifest پروندهٔ شواهد.
+اندازهٔ فایلِ مرجع: 4,973 بایت · sha256: `6bafdba17d60db628197cf89aa4c65477025e0207bc3e1612612f2c2cdf72e5a`
 
 ```toml
 # پیکربندی پیشنهادی ruff برای mp-app/backend
@@ -170,7 +170,11 @@ select = [
   "C90",    # پیچیدگی mccabe ← جایگزین radon/lizard در گیتِ CI
   "FAST",   # قوانین اختصاصی FastAPI (FAST002 = وابستگی بدون Annotated)
   "SLF",    # دسترسی به عضو خصوصی (limiter._storage)
-  "FBT",    # تلهٔ بولی در امضا (همان bank_verified: bool = False)
+  "FBT",    # تلهٔ بولی در امضا — ۲۱ مورد، سه‌تایش در مسیرِ پول/سبد خرید:
+           # modules/payments/router.py:329,362,364,366 · modules/payments/service.py:254
+           # · modules/shop/router.py:126. توجه: bank_verified در
+           # modules/payments/manual_transfer_policy.py:52 پشتِ * است (keyword-only)
+           # ⇒ FBT آن را نمی‌گیرد و آن هسته پیشاپیس درست طراحی شده است.
   "ERA",    # کد کامنت‌شده (مرده) — ولی ۱۱/۱۱ یافته‌اش روی این کدبیس کاذب است:
            # security/rbac.py:146,161 و modules/population/gates.py:11 کامنتِ فارسی‌اند،
            # db/models/content.py:73 و modules/assessment/equations.py:14-19 مستندِ شکلِ داده.
@@ -586,7 +590,7 @@ ruff چیزی را می‌گیرد که در **متنِ کد** پیداست؛ F�
 
 | سند | کجا |
 |---|---|
-| پیکربندی آماده | `audit/ruff-recommended.toml` (۴٬۵۶۴ بایت) |
+| پیکربندی آماده | `audit/ruff-recommended.toml` (4,973 بایت) |
 | ۴۳۰ یافته با `file:line` | `audit/evidence/ruff-recommended-findings.txt` |
 | ۵۲ قاعده با شمارش | `audit/evidence/ruff-recommended-stats.txt` |
 | ۱۰۴ قاعدهٔ متمایزِ `--select ALL` (فایل ۱۰۸ خط دارد = ۱۰۴ قاعده + ۲ هشدارِ تضاد + ۲ خطِ خلاصه) | `audit/evidence/ruff-all-rules.txt` |
