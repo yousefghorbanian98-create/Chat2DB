@@ -1908,6 +1908,7 @@ commit پایهٔ `662ff88` با ruff ‏۰٫۱۷٫۶: **۷۲** (فقط `RUF100`
 |---|---|---|
 | `audit/.gitignore` | 19 | `862263fa1f46c20f…` |
 | `audit/bench_logging.py` | 3,951 | `3eaec1b8b785987a…` |
+| `audit/build_builder_kit.py` | 11,734 | `ee196008cd713c5f…` |
 | `audit/eslint-studio.flat.mjs` | 633 | `613bd388f35229e6…` |
 | `audit/evidence/backend-coverage.xml` | 426,890 | `4bee93f485ddd96c…` |
 | `audit/evidence/bandit.json` | 88,436 | `e8873e4e62be0a0f…` |
@@ -1970,11 +1971,19 @@ commit پایهٔ `662ff88` با ruff ‏۰٫۱۷٫۶: **۷۲** (فقط `RUF100`
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
 | `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 67,827 | `eb2a37d227703452…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 162,507 | `6febdd657807192d…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 162,565 | `bd87e05d2c0fc6ef…` |
 | `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,784 | `65cb5aaf07cfc503…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 | `handoff/MP-BUILDER-HANDOFF-A1.3.md` | 27,908 | `3a0f9582b179651c…` |
-| `handoff/README.md` | 3,097 | `b1cdafef7657488f…` |
+| `docs/AUDIT_TOOLCHAIN.md` | 31,161 | `9a8d52c21087f9b0…` |
+
+**چهار قلم عمداً در این فهرست نیستند**، چون هیچ‌کدام نمی‌توانند hashِ خودشان را درونِ
+خودشان داشته باشند (دورِ باطل): دو بستهٔ ZIP (`share/MP-AUDIT-BUNDLE-2026-11-20.zip` و
+`handoff/MP-BUILDER-KIT-2026-11-21.zip`، که هر دو **همین پرونده را درونِ خود دارند**)،
+و دو فهرستِ تولیدشدهٔ `handoff/README.md` و `handoff/MP-BUILDER-KIT-INDEX.md` که hashِ
+بسته‌ها را نگه می‌دارند. hashِ هر بسته در `handoff/README.md` و در پیامِ commitِ خودش
+ثبت می‌شود. کیتِ بیلدر با `audit/build_builder_kit.py` ساخته می‌شود و **بازتولیدپذیر**
+است: دو اجرای متوالی، بسته‌ای با sha256ِ یکسان می‌دهند (مهرِ زمانیِ ثابت، بدونِ ساعتِ دیوار).
 
 **جمع: 55 فایلِ hash‌شده · 3,019,018 بایت** (به‌علاوهٔ خودِ این پرونده).
 
