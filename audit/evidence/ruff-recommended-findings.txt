@@ -1,0 +1,432 @@
+api/v1/monitoring.py:24:5: S110 `try`-`except`-`pass` detected, consider logging the exception
+app/config.py:16:22: S105 Possible hardcoded password assigned to: "DEFAULT_DEV_SECRET"
+app/config.py:128:9: C901 `validate_production_configuration` is too complex (28 > 10)
+app/deps.py:5:29: TC003 Move standard library import `collections.abc.Generator` into a type-checking block
+app/deps.py:42:5: C901 `get_current_user` is too complex (11 > 10)
+app/deps.py:50:32: RSE102 Unnecessary parentheses on raised exception
+app/errors.py:6:32: TC002 Move third-party import `fastapi.exceptions.RequestValidationError` into a type-checking block
+app/errors.py:55:29: ARG001 Unused function argument: `request`
+app/errors.py:62:36: ARG001 Unused function argument: `request`
+app/id_guard.py:37:21: TC002 Move third-party import `fastapi.FastAPI` into a type-checking block
+app/id_guard.py:37:30: TC002 Move third-party import `fastapi.Request` into a type-checking block
+app/jalali.py:8:22: TC003 Move standard library import `datetime.date` into a type-checking block
+app/logging.py:20:23: FBT002 Boolean default positional argument in function definition
+app/logging.py:20:23: FBT001 Boolean-typed positional argument in function definition
+app/main.py:20:20: ARG001 Unused function argument: `app`
+app/main.py:29:41: RUF100 [*] Unused `noqa` directive (non-enabled: `ANN001`)
+app/main.py:91:57: RUF100 [*] Unused `noqa` directive (non-enabled: `ANN001`)
+app/metrics.py:15:29: TC003 Move standard library import `collections.abc.Mapping` into a type-checking block
+app/security/grants.py:23:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+app/security/grants.py:25:22: TC001 Move application import `app.deps.CurrentUser` into a type-checking block
+app/security/grants.py:25:35: TC001 Move application import `app.deps.DbSession` into a type-checking block
+app/security/headers.py:6:32: TC002 Move third-party import `starlette.requests.Request` into a type-checking block
+app/security/headers.py:7:33: TC002 Move third-party import `starlette.responses.Response` into a type-checking block
+app/security/headers.py:27:29: FBT002 Boolean default positional argument in function definition
+app/security/headers.py:27:29: FBT001 Boolean-typed positional argument in function definition
+app/security/ownership.py:12:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+app/security/proxy.py:25:32: TC002 Move third-party import `starlette.requests.Request` into a type-checking block
+app/sms.py:52:15: S310 Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
+app/sms.py:61:18: S310 Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
+app/sms.py:66:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:69:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:72:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:94:18: S310 Audit URL open for permitted schemes. Allowing use of `file:` or custom schemes is often unexpected.
+app/sms.py:99:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:102:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:105:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/unhandled.py:36:21: TC002 Move third-party import `fastapi.FastAPI` into a type-checking block
+app/unhandled.py:36:30: TC002 Move third-party import `fastapi.Request` into a type-checking block
+app/unhandled.py:91:9: LOG004 `.exception()` call outside exception handlers
+cache/store.py:111:12: PLW0603 Using the global statement to update `_cache` is discouraged
+cache/store.py:122:12: PLW0603 Using the global statement to update `_cache` is discouraged
+db/base.py:9:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/base.py:115:45: RUF100 [*] Unused `noqa` directive (non-enabled: `ANN001`)
+db/base.py:137:12: PLW0603 Using the global statement to update `_engine` is discouraged
+db/base.py:147:12: PLW0603 Using the global statement to update `_SessionLocal` is discouraged
+db/base.py:164:12: PLW0603 Using the global statement to update `_engine` is discouraged
+db/base.py:164:21: PLW0603 Using the global statement to update `_SessionLocal` is discouraged
+db/migrations/env.py:14:34: RUF100 [*] Unused `noqa` directive (non-enabled: `E402`)
+db/migrations/env.py:15:24: RUF100 [*] Unused `noqa` directive (non-enabled: `E402`)
+db/migrations/env.py:16:27: RUF100 [*] Unused `noqa` directive (non-enabled: `E402`)
+db/migrations/versions/632164e8c647_qf06_expense_receipts.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/8a1f2c3d4e5b_m58_drop_orphan_indexes.py:18:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/98e17b2e5f08_qf10_refunded_at.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/a5b6c7d8e9f0_qf05_ledger.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/a7c3d9e1f2b4_g2_coupons.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/b6c7d8e9f0a1_qf06_expenses.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/b7c9d1e2f3a4_m59_shop.py:19:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/c1d2e3f4a5b6_qf03_admin_permissions.py:12:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:67:68: RUF100 [*] Unused `noqa` directive (non-enabled: `S608`)
+db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:165:52: RUF100 [*] Unused `noqa` directive (non-enabled: `S608`)
+db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:169:67: RUF100 [*] Unused `noqa` directive (non-enabled: `S608`)
+db/migrations/versions/c3f01ab129e2_m47_c1_align_indexes_and_nullability_.py:171:71: RUF100 [*] Unused `noqa` directive (non-enabled: `S608`)
+db/migrations/versions/c7d8e9f0a1b2_qf23_report_runs.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/d2e3f4a5b6c7_qf09_card_to_card.py:13:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/d8e9f0a1b2c3_qf27_worker_heartbeats.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/e3f4a5b6c7d8_qf20_outbox.py:12:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/f4a5b6c7d8e9_qf21_inbox.py:9:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/migrations/versions/f9b0c1d2e3f4_merge_heads_unique_gateway_authority.py:14:29: TC003 Move standard library import `collections.abc.Sequence` into a type-checking block
+db/models/__init__.py:53:11: RUF022 [*] `__all__` is not sorted
+db/models/admin.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/ai.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/assessment.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/auth.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/chat.py:10:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/content.py:73:5: ERA001 Found commented-out code
+db/models/face_id.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/finance.py:15:22: TC003 Move standard library import `datetime.date` into a type-checking block
+db/models/finance.py:15:28: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/membership.py:5:22: TC003 Move standard library import `datetime.date` into a type-checking block
+db/models/membership.py:5:28: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/notification.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/outbox.py:10:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/payments.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/programs.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/segment.py:14:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/shop.py:20:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+db/models/worker.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+devtools/sandbox_bank.py:303:11: RUF022 [*] `__all__` is not sorted
+engine/adaptive_nutrition.py:218:5: ARG001 Unused function argument: `current_target_kcal`
+engine/axis_prescription.py:34:37: FBT001 Boolean-typed positional argument in function definition
+engine/axis_prescription.py:37:12: FURB192 Prefer `min` over `sorted()` to compute the minimum value in a sequence
+engine/axis_prescription.py:43:5: C901 `prescribe_axis_work` is too complex (21 > 10)
+engine/axis_prescription.py:66:43: ARG001 Unused function argument: `axis`
+engine/catalog_sync.py:20:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+engine/churn_risk.py:22:5: C901 `assess_member_risk` is too complex (18 > 10)
+engine/feedback_apply.py:18:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+engine/feedback_apply.py:54:5: C901 `apply_suggestions` is too complex (15 > 10)
+engine/gender_plans.py:79:13: PERF401 Use `list.extend` to create a transformed list
+engine/readiness.py:112:42: ARG001 Unused function argument: `rir`
+engine/readiness.py:119:16: FURB110 [*] Replace ternary `if` expression with `or` operator
+engine/reminders.py:147:28: ARG001 Unused function argument: `now`
+engine/safety.py:94:5: C901 `screen` is too complex (11 > 10)
+engine/scoring.py:30:12: RET504 Unnecessary assignment to `items` before `return` statement
+engine/scoring.py:33:5: C901 `estimate_percentile` is too complex (13 > 10)
+engine/scoring.py:83:17: PLW2901 `for` loop variable `pct` overwritten by assignment target
+eval/__init__.py:7:11: RUF022 [*] `__all__` is not sorted
+eval/harness.py:26:17: PERF401 Use `list.extend` to create a transformed list
+eval/harness.py:50:17: PERF401 Use `list.extend` to create a transformed list
+eval/prescription_eval.py:16:59: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+eval/prescription_eval.py:17:44: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+eval/prescription_eval.py:40:5: C901 `run_prescription_eval` is too complex (11 > 10)
+eval/prescription_eval.py:64:17: RUF015 Prefer `next(p for p in r["axis_plans"] if p["axis"] == 7)` over single element slice
+eval/scenarios.py:25:13: PERF401 Use `list.extend` to create a transformed list
+eval/scenarios.py:28:9: PERF401 Use `list.extend` to create a transformed list
+eval/scenarios.py:33:9: PERF401 Use `list.extend` to create a transformed list
+eval/scenarios.py:44:9: PERF401 Use `list.extend` to create a transformed list
+eval/scoring_eval.py:15:65: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+eval/scoring_eval.py:16:39: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+eval/scoring_eval.py:21:5: C901 `run_scoring_eval` is too complex (17 > 10)
+jobs/scheduler.py:11:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/analytics.py:13:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/kpis.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/permissions.py:13:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/roles.py:14:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/router.py:17:31: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:17:65: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:49:5: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:50:5: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:59:20: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:59:58: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:77:5: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:87:5: FAST002 FastAPI dependency without `Annotated`
+modules/admin/router.py:97:5: FAST002 FastAPI dependency without `Annotated`
+modules/admin/schemas.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/admin/service.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/admin/service.py:62:5: FBT001 Boolean-typed positional argument in function definition
+modules/admin/service.py:90:39: FBT002 Boolean default positional argument in function definition
+modules/admin/service.py:90:39: FBT001 Boolean-typed positional argument in function definition
+modules/ai_engine/router.py:9:39: TC001 Move application import `modules.ai_engine.schemas.NutritionGenerateIn` into a type-checking block
+modules/ai_engine/router.py:9:60: TC001 Move application import `modules.ai_engine.schemas.ProgramGenerateIn` into a type-checking block
+modules/ai_engine/schemas.py:7:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/ai_engine/service.py:9:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/assessment/equations.py:14:1: ERA001 Found commented-out code
+modules/assessment/equations.py:15:1: ERA001 Found commented-out code
+modules/assessment/equations.py:16:1: ERA001 Found commented-out code
+modules/assessment/equations.py:17:1: ERA001 Found commented-out code
+modules/assessment/equations.py:18:1: ERA001 Found commented-out code
+modules/assessment/equations.py:19:1: ERA001 Found commented-out code
+modules/assessment/equations.py:26:5: ARG001 Unused function argument: `skinfolds_mm`
+modules/assessment/equations.py:27:5: ARG001 Unused function argument: `age`
+modules/assessment/equations.py:28:5: ARG001 Unused function argument: `gender`
+modules/assessment/repository.py:6:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/assessment/schemas.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/assessment/schemas.py:9:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/assessment/service.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/auth/router.py:11:22: TC001 Move application import `app.deps.AuthenticatedUser` into a type-checking block
+modules/auth/router.py:11:41: TC001 Move application import `app.deps.DbSession` into a type-checking block
+modules/auth/router.py:28:39: RUF100 [*] Unused `noqa` directive (non-enabled: `ANN001`)
+modules/auth/router.py:55:21: SLF001 Private member accessed: `_storage`
+modules/auth/router.py:67:38: ARG001 Unused function argument: `request`
+modules/auth/router.py:74:36: ARG001 Unused function argument: `request`
+modules/auth/router.py:86:34: ARG001 Unused function argument: `request`
+modules/auth/router.py:99:31: ARG001 Unused function argument: `request`
+modules/auth/router.py:112:31: ARG001 Unused function argument: `request`
+modules/auth/router.py:119:38: ARG001 Unused function argument: `request`
+modules/auth/schemas.py:46:23: S105 Possible hardcoded password assigned to: "token_type"
+modules/auth/service.py:12:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/auth/service.py:252:12: BLE001 Do not catch blind exception: `Exception`
+modules/auth/service.py:338:5: C901 `confirm_phone_change` is too complex (11 > 10)
+modules/axis_assessment/router.py:10:28: TC001 Move application import `db.models.auth.User` into a type-checking block
+modules/axis_assessment/schemas.py:7:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/axis_assessment/service.py:15:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/axis_assessment/service.py:31:13: DTZ011 `datetime.date.today()` used
+modules/classes/router.py:9:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/classes/service.py:6:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/exercises/router.py:50:5: ARG001 Unused function argument: `user`
+modules/exercises/router.py:51:5: FAST002 FastAPI dependency without `Annotated`
+modules/exercises/router.py:52:5: FAST002 FastAPI dependency without `Annotated`
+modules/exercises/router.py:53:5: FAST002 FastAPI dependency without `Annotated`
+modules/exercises/router.py:109:51: ARG001 Unused function argument: `user`
+modules/expenses/receipts.py:14:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/expenses/router.py:48:5: ARG001 Unused function argument: `user`
+modules/expenses/router.py:49:5: FAST002 FastAPI dependency without `Annotated`
+modules/expenses/router.py:50:5: FAST002 FastAPI dependency without `Annotated`
+modules/expenses/router.py:51:5: FAST002 FastAPI dependency without `Annotated`
+modules/expenses/router.py:112:58: ARG001 Unused function argument: `user`
+modules/expenses/schemas.py:5:22: TC003 Move standard library import `datetime.date` into a type-checking block
+modules/expenses/service.py:16:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/expenses/service.py:22:38: TC001 Move application import `modules.expenses.schemas.ExpenseCreate` into a type-checking block
+modules/expenses/service.py:22:53: TC001 Move application import `modules.expenses.schemas.ExpenseUpdate` into a type-checking block
+modules/expenses/service.py:86:25: RUF034 Useless `if`-`else` condition
+modules/expenses/service.py:87:25: RUF034 Useless `if`-`else` condition
+modules/face_id/deep.py:81:33: PGH003 Use specific rule codes when ignoring type issues
+modules/face_id/schemas.py:6:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/face_id/schemas.py:10:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/face_id/schemas.py:37:35: RUF100 [*] Unused `noqa` directive (unused: `BLE001`)
+modules/face_id/service.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/membership/repository.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/membership/router.py:11:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/membership/router.py:46:5: FAST002 FastAPI dependency without `Annotated`
+modules/membership/router.py:47:5: FAST002 FastAPI dependency without `Annotated`
+modules/membership/router.py:48:5: FAST002 FastAPI dependency without `Annotated`
+modules/membership/router.py:99:5: FAST002 FastAPI dependency without `Annotated`
+modules/membership/router.py:100:5: FAST002 FastAPI dependency without `Annotated`
+modules/membership/router.py:159:16: ARG001 Unused function argument: `db`
+modules/membership/router.py:159:31: ARG001 Unused function argument: `user`
+modules/membership/schemas.py:5:22: TC003 Move standard library import `datetime.date` into a type-checking block
+modules/membership/schemas.py:5:28: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/membership/schemas.py:10:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/membership/service.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/notification/chat_service.py:18:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/notification/router.py:26:5: FBT001 Boolean-typed positional argument in function definition
+modules/notification/router.py:26:5: FAST002 FastAPI dependency without `Annotated`
+modules/notification/router.py:26:31: FBT003 Boolean positional value in function call
+modules/notification/schemas.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/notification/schemas.py:9:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/notification/service.py:8:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/notification/service.py:37:34: FBT002 Boolean default positional argument in function definition
+modules/notification/service.py:37:34: FBT001 Boolean-typed positional argument in function definition
+modules/nutrition/schemas.py:7:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/nutrition/schemas.py:56:30: TC003 Move standard library import `datetime.date` into a type-checking block
+modules/nutrition/service.py:6:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/nutrition/service.py:124:47: DTZ011 `datetime.date.today()` used
+modules/nutrition/service.py:182:18: DTZ011 `datetime.date.today()` used
+modules/outbox/health.py:21:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/outbox/inbox.py:10:29: TC003 Move standard library import `collections.abc.Callable` into a type-checking block
+modules/outbox/inbox.py:15:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/outbox/service.py:11:29: TC003 Move standard library import `collections.abc.Callable` into a type-checking block
+modules/outbox/service.py:15:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/finance.py:10:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/gateway.py:217:39: ARG002 Unused method argument: `description`
+modules/payments/gateway.py:217:57: ARG002 Unused method argument: `callback_url`
+modules/payments/invoice.py:7:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/ledger.py:26:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/manual_transfer_policy.py:45:5: C901 `next_transfer_state` is too complex (20 > 10)
+modules/payments/receipts.py:25:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/repository.py:6:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/payments/router.py:183:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:184:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:280:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:281:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:329:18: FBT001 Boolean-typed positional argument in function definition
+modules/payments/router.py:345:5: ARG001 Unused function argument: `request`
+modules/payments/router.py:348:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:349:5: FAST002 FastAPI dependency without `Annotated`
+modules/payments/router.py:362:17: FBT003 Boolean positional value in function call
+modules/payments/router.py:364:29: FBT003 Boolean positional value in function call
+modules/payments/router.py:366:9: FBT003 Boolean positional value in function call
+modules/payments/schemas.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/payments/schemas.py:10:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/payments/service.py:254:5: FBT002 Boolean default positional argument in function definition
+modules/payments/service.py:254:5: FBT001 Boolean-typed positional argument in function definition
+modules/population/gates.py:11:1: ERA001 Found commented-out code
+modules/population/intake.py:110:13: PERF401 Use `list.extend` to create a transformed list
+modules/population/intake.py:115:17: PERF401 Use `list.extend` to create a transformed list
+modules/privacy/retention.py:26:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/programs/router.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/programs/router.py:11:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/programs/router.py:11:25: TC001 Move application import `app.ids.OptId` into a type-checking block
+modules/programs/schemas.py:5:22: TC003 Move standard library import `datetime.datetime` into a type-checking block
+modules/programs/schemas.py:9:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/programs/schemas.py:9:25: TC001 Move application import `app.ids.OptId` into a type-checking block
+modules/programs/service.py:12:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/programs/service.py:577:35: FURB162 Unnecessary timezone replacement with zero offset
+modules/reporting/router.py:26:5: A002 Function argument `format` is shadowing a Python builtin
+modules/reporting/router.py:26:5: FAST002 FastAPI dependency without `Annotated`
+modules/reporting/service.py:15:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/reporting/service.py:62:22: FURB110 [*] Replace ternary `if` expression with `or` operator
+modules/reporting/service.py:117:13: PERF401 Use `list.extend` to create a transformed list
+modules/reports/period.py:24:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/reports/period.py:53:13: RUF059 Unpacked variable `jd` is never used
+modules/reports/router.py:31:36: ARG001 Unused function argument: `user`
+modules/reports/router.py:40:42: ARG001 Unused function argument: `user`
+modules/reports/router.py:49:41: ARG001 Unused function argument: `user`
+modules/reports/router.py:64:5: ARG001 Unused function argument: `user`
+modules/reports/schedule.py:29:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/shop/router.py:18:21: TC001 Move application import `app.ids.Id` into a type-checking block
+modules/shop/router.py:18:25: TC001 Move application import `app.ids.OptId` into a type-checking block
+modules/shop/router.py:120:12: ARG001 Unused function argument: `user`
+modules/shop/router.py:126:50: FBT002 Boolean default positional argument in function definition
+modules/shop/router.py:126:50: FBT001 Boolean-typed positional argument in function definition
+modules/shop/router.py:137:5: ARG001 Unused function argument: `user`
+modules/shop/router.py:138:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:139:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:140:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:141:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:147:52: ARG001 Unused function argument: `user`
+modules/shop/router.py:173:14: ARG001 Unused function argument: `request`
+modules/shop/router.py:191:5: ARG001 Unused function argument: `request`
+modules/shop/router.py:199:17: ARG001 Unused function argument: `request`
+modules/shop/router.py:206:14: ARG001 Unused function argument: `request`
+modules/shop/router.py:219:46: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:242:29: ARG001 Unused function argument: `user`
+modules/shop/router.py:262:5: ARG001 Unused function argument: `user`
+modules/shop/router.py:263:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/router.py:278:5: FAST002 FastAPI dependency without `Annotated`
+modules/shop/service.py:21:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+modules/shop/service.py:558:5: C901 `upsert_gateway` is too complex (11 > 10)
+modules/updates/router.py:14:5: FAST002 FastAPI dependency without `Annotated`
+modules/updates/router.py:15:5: FAST002 FastAPI dependency without `Annotated`
+scripts/attach_exercise_media.py:27:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/attach_exercise_media.py:28:41: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/backup.py:147:9: PTH105 `os.replace()` should be replaced by `Path.replace()`
+scripts/build_exercise_gifs.py:1:1: EXE001 Shebang is present but file is not executable
+scripts/build_exercise_gifs.py:108:5: S101 Use of `assert` detected
+scripts/build_exercise_gifs.py:109:5: S101 Use of `assert` detected
+scripts/build_progressions.py:21:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/build_progressions.py:22:84: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/build_progressions.py:23:59: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/dast.py:1:1: EXE001 Shebang is present but file is not executable
+scripts/dast.py:81:9: S112 `try`-`except`-`continue` detected, consider logging the exception
+scripts/dast.py:176:13: S112 `try`-`except`-`continue` detected, consider logging the exception
+scripts/dast.py:187:13: S112 `try`-`except`-`continue` detected, consider logging the exception
+scripts/deploy_gate.py:1:1: EXE001 Shebang is present but file is not executable
+scripts/deploy_gate.py:46:60: FURB167 [*] Use of regular expression alias `re.M`
+scripts/deploy_gate.py:80:59: FURB167 [*] Use of regular expression alias `re.M`
+scripts/import_exercise_catalog.py:19:28: TC002 Move third-party import `sqlalchemy.orm.Session` into a type-checking block
+scripts/import_exercise_catalog.py:23:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/import_exercise_catalog.py:24:63: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/import_food_catalog.py:53:9: PERF401 Use a list comprehension to create a transformed list
+scripts/import_food_catalog.py:58:25: RUF046 Value being cast to `int` is already an integer
+scripts/route_guard_gate.py:1:1: EXE001 Shebang is present but file is not executable
+scripts/route_guard_gate.py:93:13: PERF401 Use `list.extend` to create a transformed list
+scripts/seed_criteria.py:18:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_criteria.py:19:45: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_norms.py:24:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_norms.py:25:45: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_s3c_m39.py:10:51: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_s3c_m39.py:11:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_s3c_m39.py:12:37: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_shop.py:23:32: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_shop.py:25:51: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_shop.py:26:82: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/seed_shop.py:121:5: C901 `main` is too complex (14 > 10)
+scripts/tag_axis_coverage.py:21:42: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/tag_axis_coverage.py:22:48: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+scripts/tag_axis_coverage.py:55:5: C901 `_match` is too complex (14 > 10)
+scripts/tag_axis_coverage.py:183:8: FURB171 Membership test against single-item container
+security/crypto.py:40:39: RUF100 [*] Unused `noqa` directive (unused: `BLE001`)
+security/rbac.py:146:5: ERA001 Found commented-out code
+security/rbac.py:161:5: ERA001 Found commented-out code
+security/rbac.py:249:12: PLW0603 Using the global statement to update `_enforcer` is discouraged
+tests/conftest.py:14:24: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tests/conftest.py:15:27: RUF100 [*] Unused `noqa` directive (unused: `E402`)
+tests/integration/test_backup_drill.py:11:21: TC003 Move standard library import `pathlib.Path` into a type-checking block
+tests/integration/test_battle.py:6:29: TC003 Move standard library import `collections.abc.Generator` into a type-checking block
+tests/integration/test_ci_artifacts.py:56:26: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:57:21: S607 Starting a process with a partial executable path
+tests/integration/test_ci_artifacts.py:74:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:74:29: S607 Starting a process with a partial executable path
+tests/integration/test_ci_artifacts.py:94:18: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:94:18: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_ci_artifacts.py:95:13: S607 Starting a process with a partial executable path
+tests/integration/test_ci_artifacts.py:115:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:115:14: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_ci_artifacts.py:116:9: S607 Starting a process with a partial executable path
+tests/integration/test_ci_artifacts.py:150:18: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:150:18: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_ci_artifacts.py:151:13: S607 Starting a process with a partial executable path
+tests/integration/test_ci_artifacts.py:159:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_ci_artifacts.py:159:14: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_ci_artifacts.py:160:9: S607 Starting a process with a partial executable path
+tests/integration/test_g2_coupons.py:25:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_g9_library.py:139:5: C901 `_count_gif_frames` is too complex (11 > 10)
+tests/integration/test_infra.py:45:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_infra.py:45:14: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_infra.py:46:9: S607 Starting a process with a partial executable path
+tests/integration/test_m45_admin_attendance.py:181:16: RUF059 Unpacked variable `user_id` is never used
+tests/integration/test_m46_db_pool.py:33:50: RUF100 [*] Unused `noqa` directive (non-enabled: `SLF001`)
+tests/integration/test_m47_migration_drift.py:25:12: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_m47_migration_drift.py:25:12: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_m59_shop.py:752:12: RUF015 Prefer `next(o for o in after if o["id"] == order["order_id"])` over single element slice
+tests/integration/test_m59_shop.py:772:12: RUF015 Prefer `next(...)` over single element slice
+tests/integration/test_m59_shop.py:805:12: RUF015 Prefer `next(...)` over single element slice
+tests/integration/test_m65_qr_security.py:98:5: RUF059 Unpacked variable `member_b` is never used
+tests/integration/test_m65_qr_security.py:152:5: RUF059 Unpacked variable `member` is never used
+tests/integration/test_m67_studio_auth.py:37:42: S105 Possible hardcoded password assigned to: "token_type"
+tests/integration/test_m82_phone_change.py:8:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_m83_wallet_ledger.py:5:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_m97_migrations_and_backup.py:40:12: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_m97_migrations_and_backup.py:40:12: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_migrations.py:15:12: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_migrations.py:15:12: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_monitoring.py:102:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/integration/test_monitoring.py:102:14: S603 `subprocess` call: check for execution of untrusted input
+tests/integration/test_ownership.py:229:8: RUF059 Unpacked variable `mid` is never used
+tests/integration/test_phase5_admin_permissions.py:28:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase6_card_to_card.py:32:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase6_card_to_card.py:228:5: RUF059 Unpacked variable `creator_id` is never used
+tests/integration/test_phase6b_ledger.py:31:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase6c_expenses.py:29:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase7_member_scope_sweep.py:27:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase8_outbox.py:29:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase8_privacy.py:27:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase8_release_sweep.py:32:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase8_reports.py:28:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_phase8_worker.py:27:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_qf00_ownership_gaps.py:140:5: RUF059 Unpacked variable `owner_h` is never used
+tests/integration/test_qf06_expense_receipt.py:23:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_qf06_expense_receipt.py:87:12: PTH113 `os.path.isfile()` should be replaced by `Path.is_file()`
+tests/integration/test_qf06_expense_receipt.py:88:25: PTH116 `os.stat()` should be replaced by `Path.stat()`, `Path.owner()`, or `Path.group()`
+tests/integration/test_qf06_expense_receipt.py:89:22: PTH119 `os.path.basename()` should be replaced by `Path.name`
+tests/integration/test_qf06_expense_receipt.py:153:12: PTH113 `os.path.isfile()` should be replaced by `Path.is_file()`
+tests/integration/test_qf10_period_report.py:21:32: TC002 Move third-party import `fastapi.testclient.TestClient` into a type-checking block
+tests/integration/test_sandbox_bank.py:341:5: RUF059 Unpacked variable `pid` is never used
+tests/integration/test_sandbox_bank.py:476:53: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tests/integration/test_sandbox_bank.py:540:5: RUF059 Unpacked variable `pid` is never used
+tests/integration/test_sandbox_bank.py:551:5: RUF059 Unpacked variable `pid` is never used
+tests/integration/test_sms.py:78:17: ARG005 Unused lambda argument: `args`
+tests/integration/test_sms.py:78:25: ARG005 Unused lambda argument: `kwargs`
+tests/integration/test_sms.py:101:54: PLW0108 Lambda may be unnecessary; consider inlining inner function
+tests/regression/test_deploy_gate.py:13:14: PLW1510 `subprocess.run` without explicit `check` argument
+tests/regression/test_manual_transfer_policy.py:165:34: DTZ001 `datetime.datetime()` called without a `tzinfo` argument
+tests/regression/test_production_ops.py:44:13: S106 Possible hardcoded password assigned to argument: "sms_password"
+tests/regression/test_qr_format_workflow.py:82:13: S607 Starting a process with a partial executable path
+tests/regression/test_qr_format_workflow.py:102:18: PLW1510 `subprocess.run` without explicit `check` argument
+tests/regression/test_qr_format_workflow.py:102:18: S603 `subprocess` call: check for execution of untrusted input
+tests/regression/test_qr_format_workflow.py:103:13: S607 Starting a process with a partial executable path
+tests/regression/test_rbac.py:10:5: ERA001 Found commented-out code
+tests/unit/test_axis_assessment_models.py:56:15: RUF015 Prefer `next(s for s in got.scores if s.axis == 12)` over single element slice
+tests/unit/test_backup.py:8:21: TC003 Move standard library import `pathlib.Path` into a type-checking block
+tests/unit/test_catalog_import.py:6:21: TC003 Move standard library import `pathlib.Path` into a type-checking block
+tests/unit/test_deep_model_lock.py:5:21: TC003 Move standard library import `pathlib.Path` into a type-checking block
+tests/unit/test_food_catalog_import.py:87:5: RUF059 Unpacked variable `ok_fat` is never used
+tests/unit/test_food_catalog_import.py:90:5: RUF059 Unpacked variable `bad_fat` is never used
+tests/unit/test_jalali_backup.py:7:21: TC003 Move standard library import `pathlib.Path` into a type-checking block
+tests/unit/test_jalali_backup.py:25:12: RUF021 [*] Parenthesize `a and b` expressions when chaining `and` and `or` together, to make the precedence clear
+tests/unit/test_jobs.py:48:13: RUF059 Unpacked variable `ms` is never used
+tests/unit/test_llm_column.py:24:20: ARG005 Unused lambda argument: `base`
+tests/unit/test_llm_column.py:99:53: FBT003 Boolean positional value in function call
+Found 430 errors.
+[*] 47 fixable with `--fix` (210 unsafe fixes available with `--fix --unsafe-fixes`).

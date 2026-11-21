@@ -9,7 +9,7 @@
 > **داده‌ها تماماً مصنوعی‌اند** (شماره‌های الگوی seed خودِ پروژه، `0912…`/`0913…`). هیچ دادهٔ واقعیِ عضو/مالی استفاده نشد.
 > **زبان:** فارسی، شناسه‌های فنی انگلیسی.
 > **پروندهٔ همراه:** هر تست، هر عدد خام، hash هر فایل شاهد و فهرست کامل منابع در
-> `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` آمده است (۴۹ اجرای ثبت‌شده، ۲۷ یافته، ۵۶ فایل شاهد).
+> `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` آمده است (۵۰ اجرای ثبت‌شده، ۲۹ یافته، ۶۰ فایل شاهد).
 > اگر عددی در این گزارش با آن پرونده تفاوت داشت، **پروندهٔ شواهد معتبر است** و اختلاف در §۵ آن فهرست شده.
 
 ---
@@ -96,6 +96,8 @@
 | **F‑25** | **Medium** | گارد شناسه **کف** ندارد: ۱۲ endpoint با `-1`/`0`/`-0`/INT64_MIN پاسخ **۲۰۰** می‌دهند | ۴۸ سلول از ۸۷۲ سلولِ پاسِ با احراز هویت تأییدشده | **اثبات شد** |
 | **F‑26** | **Medium** | دو شکلِ متفاوت برای پاکت خطا: `{"error":…}` در برابر `{"detail":…}` | ۷۰ × ۴۰۴ و ۱ × ۴۰۵ با پاکت پیش‌فرض FastAPI | **اثبات شد** |
 | **F‑27** | **Medium** | پیش‌نیازِ «پروندهٔ عضو» در سبد خرید با `404 not_found` بیان می‌شود؛ سفارش به‌نیابت ممکن نیست | `shop.cart_add`/`shop.checkout` ⇒ ۴۰۴ در پاس seed | **اثبات شد** |
+| **F‑28** | **Medium** | «امروز» در دو ماژول با `date.today()` (UTC کانتینر) حساب می‌شود در حالی که shop از `Asia/Tehran` استفاده می‌کند ⇒ مرزِ روز ناهمگون | `DTZ011` در ۳ محل؛ هیچ `TZ` در Dockerfileها نیست | **اثبات شد** |
+| **F‑29** | **Low‑Med** | `app/sms.py`: شش `logging.error` داخل `except` (بدون traceback) + سه `urlopen` با schemes باز + ۳۹ `# noqa` بلااثر | `TRY400`×۶، `S310`×۳، `RUF100`×۳۹ | **اثبات شد** |
 
 **محدود/بی‌اثر (Low/Info):** `journal_mode=delete` پس از alembic (WAL فقط در رویداد `connect` موتور اعمال
 می‌شود) · هشدارهای `StarletteDeprecationWarning` برای `HTTP_422_UNPROCESSABLE_ENTITY` ·
@@ -1087,6 +1089,8 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | ۲۳ | افزودن **کف** به گارد شناسه (`v < 1` ⇒ ۴۲۲) در `app/id_guard.py` یا اعمال `PathId` در ۵۵ امضا | F‑25 | ۲ ساعت | `probe_invalid_authed.py` ⇒ `unexpected_2xx_on_bad_id == 0` |
 | ۲۴ | هندلر `StarletteHTTPException` برای نگاشت ۴۰۴/۴۰۵ مسیریابی به پاکت پروژه | F‑26 | ۱ ساعت | `fastapi_default_detail == 0` در همان پراب |
 | ۲۵ | تبدیل `NotFoundError` در `_own_member` به خطای اختصاصی `409 member_profile_required` + تصمیم دربارهٔ سفارش به‌نیابت | F‑27 | ۲ ساعت (+تصمیم محصول) | `POST /shop/cart` بدون پروندهٔ عضو ⇒ ۴۰۹ با کد اختصاصی |
+| ۲۶ | جایگزینی `date.today()` با `datetime.now(UTC).astimezone(ZoneInfo(settings.shop_timezone)).date()` در ۳ محل + تستِ مرزیِ نیمه‌شب؛ و ست‌کردن `ENV TZ=Asia/Tehran` در Dockerfileها (ترجیحاً هر دو) | F‑28 | ۱–۲ ساعت | `grep -rn "date.today()" modules app engine jobs` ⇒ **۰** مورد؛ تست با ساعت ۲۲:۰۰ UTC ⇒ روزِ ثبت غذایی `2026-11-22` |
+| ۲۷ | `logging.error` → `logging.exception` در ۶ بلاک `except` ‏`app/sms.py`؛ allowlist از schemes برای `urlopen`؛ پاک‌سازی ۳۹ `# noqa` بلااثر با `ruff check --select RUF100 --fix` | F‑29 | ۱ ساعت | `ruff check --select TRY400,RUF100` ⇒ **۰** مورد؛ یک خطای ساختگیِ SMS با traceback کامل در لاگ ثبت شود |
 
 ---
 
@@ -1132,6 +1136,8 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | `audit/evidence/jscpd-out/jscpd-report.json` | گزارش تکرار کد |
 | `audit/evidence/studio-ui-wiring.json` | موجودی دکمه‌ها و سیم‌کشی |
 | `audit/evidence/studio-dead-exports.json` | اسکن exportهای بلااستفاده |
+| `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف) / `ruff-recommended-stats.txt` (۵۲ قاعده) / `ruff-all-rules.txt` (۱۰۸ قاعده) / `ruff-all-families.txt` | خروجی ruff با پیکربندی پیشنهادی و با `--select ALL` — شاهد F‑28/F‑29 |
+| `audit/ruff-recommended.toml` | پیکربندی پیشنهادی ruff (۴۳۰ یافته در برابر ۱۱٬۷۷۸ با `ALL`) — آمادهٔ جایگزینی در `pyproject.toml` |
 | `audit/evidence/vulture.txt` / `radon-cc.txt` / `radon-mi.txt` / `lizard.txt` / `lizard-warnings.txt` / `bandit.json` / `detect-secrets.json` | خروجی خام ابزارها |
 
 ---
@@ -1321,5 +1327,11 @@ for id in 27 31 36; do /tmp/run/venv-audit/bin/mutmut apply $id; \
 * **محیط اجرا:** sandbox ‏Arena — ۲ vCPU، ~۳٫۶GB RAM، پایتون ۳٫۱۱٫۲، Node ‏۲۲٫۲۲٫۳
 * **اپ اجراشد:** `0.0.0.0:8010` در سه پیکربندی (ابزار‌دار / کنترل خام / CMD واقعی Dockerfile)
 * **داده‌ها:** کاملاً مصنوعی
-* **تعداد یافته:** ۲۷ (۳ Critical، ۶ High، **۹ Medium**، ۹ Low/Info) + ۱۲ یافتهٔ کاذبِ رد‌شده + ۱ نقص روش‌شناختیِ اصلاح‌شده
+* **تعداد یافته:** ۲۹ (۳ Critical، ۶ High، **۱۰ Medium**، ۱۰ Low/Info) + ۱۲ یافتهٔ کاذبِ رد‌شده + ۱ نقص روش‌شناختیِ اصلاح‌شده
+* **ابزارِ کمکیِ کشف F‑28/F‑29:** ruff ‏۰٫۱۷٫۶ با پیکربندی پیشنهادی `audit/ruff-recommended.toml`
+  (۵۲ قاعده، **۴۳۰ یافته** در برابر ۱۱٬۷۷۸ مورد با `--select ALL`) — یعنی با روشن‌کردنِ قواعدِ درست،
+  ruff به‌تنهایی ۶ یافتهٔ این ممیزی را بازتولید می‌کند (F‑15, F‑17, F‑13, بخشی از F‑02, کد مرده، `limiter._storage`)
+  و **دو باگِ تازه** (F‑28, F‑29) را آشکار کرد. چیزی که ruff **نمی‌گیرد**: F‑04 (فراخوانی سنکرون در مسیر پرداخت،
+  چون هندلرها `def`‌اند نه `async def` ⇒ `ASYNC100/ASYNC230` = صفر) و F‑22 (ruff با `S608` حتی با `--ignore-noqa`
+  روی `op.execute(f"DROP INDEX …")` fire نمی‌شود ⇒ فقط قاعدهٔ اختصاصیِ semgrep آن را می‌گیرد).
   + ۱۱ مورد BLOCKED

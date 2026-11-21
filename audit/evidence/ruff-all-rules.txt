@@ -1,0 +1,108 @@
+warning: `incorrect-blank-line-before-class` (D203) and `blank-line-before-class` (D211) are incompatible. Ignoring `incorrect-blank-line-before-class`.
+warning: `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line` (D213) are incompatible. Ignoring `multi-line-summary-second-line`.
+2736	S101   	[ ] assert
+1030	D103   	[ ] undocumented-public-function
+ 988	PLC0415	[ ] import-outside-top-level
+ 944	PLR2004	[ ] magic-value-comparison
+ 865	COM812 	[*] missing-trailing-comma
+ 744	RUF002 	[ ] ambiguous-unicode-character-docstring
+ 669	ANN001 	[ ] missing-type-function-argument
+ 521	RUF003 	[ ] ambiguous-unicode-character-comment
+ 491	ANN201 	[ ] missing-return-type-public-function
+ 376	CPY001 	[ ] missing-copyright-notice
+ 360	TRY003 	[ ] raise-vanilla-args
+ 309	EM101  	[ ] raw-string-in-exception
+ 230	RUF001 	[ ] ambiguous-unicode-character-string
+ 181	D102   	[ ] undocumented-public-method
+ 172	D101   	[ ] undocumented-public-class
+  83	INP001 	[ ] implicit-namespace-package
+  78	PT001  	[*] pytest-fixture-incorrect-parentheses-style
+  77	ARG001 	[ ] unused-function-argument
+  71	PT018  	[ ] pytest-composite-assertion
+  62	TC002  	[ ] typing-only-third-party-import
+  56	ANN202 	[ ] missing-return-type-private-function
+  54	TC003  	[ ] typing-only-standard-library-import
+  51	EM102  	[ ] f-string-in-exception
+  41	T201   	[ ] print
+  39	E501   	[ ] line-too-long
+  38	FAST002	[ ] fast-api-non-annotated-dependency
+  34	RUF100 	[*] unused-noqa
+  27	PLR0913	[ ] too-many-arguments
+  27	D104   	[ ] undocumented-public-package
+  25	SLF001 	[ ] private-member-access
+  25	TC001  	[ ] typing-only-first-party-import
+  20	D107   	[ ] undocumented-public-init
+  18	ANN003 	[ ] missing-type-kwargs
+  17	ANN204 	[ ] missing-return-type-special-method
+  16	PLR0917	[ ] too-many-positional-arguments
+  15	C901   	[ ] complex-structure
+  15	D415   	[ ] missing-terminal-punctuation
+  15	D400   	[ ] missing-trailing-period
+  13	PLW1510	[ ] subprocess-run-without-check
+  13	RUF059 	[ ] unused-unpacked-variable
+  12	PERF401	[ ] manual-list-comprehension
+  12	D205   	[ ] missing-blank-line-after-summary
+  11	FBT001 	[ ] boolean-type-hint-positional-argument
+  11	ERA001 	[ ] commented-out-code
+  11	D209   	[*] new-line-after-last-paragraph
+  10	S603   	[ ] subprocess-without-shell-equals-true
+   9	D403   	[*] first-word-uncapitalized
+   9	PT011  	[ ] pytest-raises-too-broad
+   9	S607   	[ ] start-process-with-partial-path
+   8	PLR0912	[ ] too-many-branches
+   7	PLW0603	[ ] global-statement
+   7	PLR0915	[ ] too-many-statements
+   6	ANN401 	[ ] any-type
+   6	FBT002 	[ ] boolean-default-value-positional-argument
+   6	TRY400 	[ ] error-instead-of-exception
+   6	PT006  	[ ] pytest-parametrize-names-wrong-type
+   6	S310   	[ ] suspicious-url-open-usage
+   5	FBT003 	[ ] boolean-positional-value-in-call
+   5	RUF015 	[ ] unnecessary-iterable-allocation-for-first-element
+   4	EXE001 	[ ] shebang-not-executable
+   4	ARG002 	[ ] unused-method-argument
+   3	DTZ011 	[ ] call-date-today
+   3	S105   	[ ] hardcoded-password-string
+   3	S311   	[ ] suspicious-non-cryptographic-random-usage
+   3	S112   	[ ] try-except-continue
+   3	RUF022 	[*] unsorted-dunder-all
+   3	ARG005 	[ ] unused-lambda-argument
+   2	D301   	[ ] escape-sequence-in-docstring
+   2	FURB110	[*] if-exp-instead-of-or-operator
+   2	ANN002 	[ ] missing-type-args
+   2	PTH113 	[ ] os-path-isfile
+   2	PT017  	[ ] pytest-assert-in-except
+   2	PT019  	[ ] pytest-fixture-param-without-value
+   2	FURB167	[*] regex-flag-alias
+   2	PLR1714	[ ] repeated-equality-comparison
+   2	D105   	[ ] undocumented-magic-method
+   2	D100   	[ ] undocumented-public-module
+   2	C420   	[*] unnecessary-dict-comprehension-for-iterable
+   2	PLW0108	[ ] unnecessary-lambda
+   2	RUF034 	[ ] useless-if-else
+   1	D202   	[*] blank-line-after-function
+   1	PGH003 	[ ] blanket-type-ignore
+   1	BLE001 	[ ] blind-except
+   1	A002   	[ ] builtin-argument-shadowing
+   1	DTZ001 	[ ] call-datetime-without-tzinfo
+   1	PLR5501	[*] collapsible-else-if
+   1	FURB162	[ ] fromisoformat-replace-z
+   1	S106   	[ ] hardcoded-password-func-arg
+   1	LOG004 	[ ] log-exception-outside-except-handler
+   1	PYI034 	[ ] non-self-return-type
+   1	PTH119 	[ ] os-path-basename
+   1	PTH105 	[ ] os-replace
+   1	PTH116 	[ ] os-stat
+   1	RUF021 	[*] parenthesize-chained-operators
+   1	PT012  	[ ] pytest-raises-with-multiple-statements
+   1	PLW2901	[ ] redefined-loop-name
+   1	PYI041 	[*] redundant-numeric-union
+   1	FURB171	[ ] single-item-membership-test
+   1	FURB192	[ ] sorted-min-max
+   1	FLY002 	[ ] static-join-to-f-string
+   1	S110   	[ ] try-except-pass
+   1	RET504 	[ ] unnecessary-assign
+   1	RUF046 	[ ] unnecessary-cast-to-int
+   1	RSE102 	[ ] unnecessary-paren-on-raise-exception
+Found 11778 errors.
+[*] 1010 fixable with `--fix` (996 unsafe fixes available with `--fix --unsafe-fixes`).

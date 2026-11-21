@@ -1,0 +1,63 @@
+# پیکربندی پیشنهادی ruff برای mp-app/backend
+# مبنا: پیکربندی فعلی پروژه (۸ خانواده) + خانواده‌های باگ‌یاب که امروز خاموش‌اند.
+# هر ignore دلیلِ مستند دارد. اندازه‌گیری‌شده با ruff 0.17.6 روی ۳۷۶ فایل.
+
+line-length = 100
+extend-exclude = [".venv"]
+target-version = "py311"
+
+[lint]
+select = [
+  # ── آنچه امروز روشن است و درست کار می‌کند ──────────────────────
+  "E", "W", "F", "I", "N", "UP", "B", "SIM",
+
+  # ── باگ‌یاب‌های واقعی که امروز خاموش‌اند ────────────────────────
+  "DTZ",    # datetime بدون timezone ← ۳ باگ واقعی (تهران در برابر UTC)
+  "ASYNC",  # فراخوانی مسدودکننده داخل تابع async
+  "S",      # flake8-bandit داخل ruff (S105/S110/S112/S310/S603/S607/S608/S311)
+  "BLE",    # except کور
+  "TRY",    # tryceratops (TRY400 = از دست رفتن traceback)
+  "LOG", "G",  # خطاهای لاگ‌کردن و قالب لاگ
+  "C90",    # پیچیدگی mccabe ← جایگزین radon/lizard در گیتِ CI
+  "FAST",   # قوانین اختصاصی FastAPI (FAST002 = وابستگی بدون Annotated)
+  "SLF",    # دسترسی به عضو خصوصی (limiter._storage)
+  "FBT",    # تلهٔ بولی در امضا (همان bank_verified: bool = False)
+  "ERA",    # کد کامنت‌شده (مرده)
+  "T20",    # print
+  "A",      # سایه‌زدن builtin
+  "PERF", "PIE", "RET", "RSE", "FURB", "PTH", "SLOT",
+  "PLC", "PLE", "PLW",   # pylint (عمداً بدون PLR2004 = magic-value)
+  "TC", "ARG", "Q", "ISC", "EXE", "PGH", "YTT", "T10", "FIX", "TD",
+  "RUF",    # شامل RUF100 = noqa‌های بلااثر
+
+  # ── عمداً روشن نشدند (فاز ۲، اگر خواستی) ──────────────────────
+  # "D"    → ۱٬۴۹۹ یافتهٔ docstring؛ ارزش دارد ولی یک پروژهٔ جداست
+  # "ANN"  → ۱٬۲۵۹ یافتهٔ type-hint؛ mypy/pyright بهتر این کار را می‌کند
+  # "PLR"  → ۹۴۴ مورد PLR2004 (magic value) بیشترش در تست‌ها
+  # "COM"  → با `ruff format` تضاد دارد
+  # "CPY"  → کپی‌رایت؛ بی‌ربط
+  # "D"/"DOC" → مستندسازی؛ اختیاری
+]
+ignore = [
+  "E501",                    # طول خط را formatter مدیریت می‌کند (همان تصمیم فعلی پروژه)
+  "COM812", "ISC001",        # با `ruff format` تضاد رسمی دارند — هرگز همزمان روشن نشوند
+  "RUF001", "RUF002", "RUF003",  # «ambiguous unicode»: ۱٬۴۹۵ یافتهٔ کاذب از متن فارسیِ پروژه
+  "TRY003", "EM101", "EM102",    # پیامِ خطای فارسیِ inline الگوی عمدی پروژه است (۶۶۹ یافتهٔ نویز)
+  "PLC0415",                     # import تنبل؛ ۹۸۸ مورد، الگوی رایج و بی‌ضرر در این کدبیس
+  "D203", "D213",                  # (اگر روزی "D" روشن شد) تضادهای شناخته‌شده
+]
+
+[lint.mccabe]
+max-complexity = 10     # امروز ۱۵ تابع بالای این سقف‌اند؛ بدترین ۲۸
+
+[lint.per-file-ignores]
+"tests/**"          = ["S101", "SLF001", "ARG001", "ARG002", "FBT001", "S311", "PLR2004", "TD", "FIX"]
+"scripts/**"        = ["T201", "S603", "S607", "S310", "FIX", "TD"]
+"db/migrations/**"  = ["ERA001", "E402", "S608"]   # S608 باید با تصمیمِ F‑22 حذف شود، نه ignore
+"eval/**"           = ["T201", "S310", "S603"]
+"devtools/**"       = ["T201", "S310", "FAST002"]
+"tests/load/**"     = ["S311", "T201", "PLR2004"]
+
+[lint.isort]
+# همان تصمیم درستِ فعلی پروژه (باگ CI ۲۰۲۶‑۱۱‑۱۵): صریح بماند تا نتیجه مستقل از محیط باشد
+known-first-party = ["app", "api", "db", "engine", "modules", "security", "cache", "jobs", "eval"]

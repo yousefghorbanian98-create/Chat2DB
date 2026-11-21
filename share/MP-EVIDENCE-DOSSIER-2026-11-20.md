@@ -21,7 +21,7 @@
 (`audit/evidence/*`) با اسکریپت استخراج شده، یا خروجی مستقیم همان فرمان است. اگر عددی با گزارش اصلی
 متفاوت است، **این پرونده معتبر است** و اختلاف در §۵ صریحاً فهرست شده است.
 
-**سه یافتهٔ جدید در همین دور اضافه شد** (F‑25، F‑26، F‑27 در §۴) که نتیجهٔ بازاجرای یک پاس تستِ
+**پنج یافتهٔ جدید در همین دور اضافه شد** (F‑25 … F‑29 در §۴) که نتیجهٔ بازاجرای یک پاس تستِ
 معیوب است؛ §۵ همهٔ تصحیحات وارد‌شده بر گزارش اصلی را فهرست می‌کند.
 
 ---
@@ -203,6 +203,7 @@ $ curl -s http://127.0.0.1:8010/openapi.json | jq '.paths | length'
 | T‑47 | یکپارچگی DB و بازتاب خروجی پس از حمله | sqlite3 + curl | ۳ بررسی | **۶۵ جدول سالم، `users` = ۲۶۱ ردیف** (هیچ `DROP`ی اثر نکرد) · `note` با `max_length=1000` سقف دارد (`modules/expenses/schemas.py:27`) · رشته‌های خصمانه در هیچ خروجی HTML/CSV بازتاب نشدند · `dangerouslySetInnerHTML` = **۰** | §۳‑۲۴ |
 | T‑48 | رفتار وابسته به پیکربندی shop | curl روی S3 در برابر S1 | ۸ سلول | روی S3 (بدون override) ⇒ `409 shop_online_closed` · روی S1 (با `…ENABLED=true`) ⇒ `404 «پروندهٔ عضو یافت نشد»` برای هویت بدون پروندهٔ عضو | `evidence/contract-invalid-authed.json`, `contract-matrix-raw.json` |
 | T‑49 | canary زنده بودن توکن | `probe_invalid_authed.py` | ۴ درخواست | قبل و بعد از ۸۷۲ سلول ⇒ **۲۰۰** · `tokens_live_throughout = true` · **۰ ورود مجدد** | همان |
+| **T‑50** | **ruff با پیکربندی پیشنهادی** | `ruff 0.17.6 --config audit/ruff-recommended.toml` | **۳۷۶ فایل** | پیکربندی فعلی پروژه ⇒ **۰** یافته؛ `--select ALL` ⇒ ۱۱٬۷۷۸/۱۰۸ قاعده؛ پیشنهادی ⇒ **۴۳۰/۵۲ قاعده** (۴۷ قابل‌رفع خودکار، ۲۱۰ unsafe) | `ruff-recommended-{stats,findings}.txt`، `ruff-all-{rules,families}.txt` |
 
 ---
 
@@ -1492,10 +1493,11 @@ modules/face_id/deep.py:74: unused variable 'image_bgr' (100% confidence)
 
 ---
 
-## ۴) سه یافتهٔ جدید این دور (F‑25، F‑26، F‑27)
+## ۴) پنج یافتهٔ جدید این دور (F‑25 … F‑29)
 
 این سه مورد در گزارش اصلی نبودند، چون پاس ورودی خصمانهٔ نخست (T‑33) با توکن باطل‌شده اجرا شده بود
-و عملاً چیزی نمی‌سنجید. بازاجرای معتبر (T‑34) آن‌ها را آشکار کرد.
+و عملاً چیزی نمی‌سنجید؛ بازاجرای معتبر (T‑34) آن‌ها را آشکار کرد.
+**F‑28 و F‑29** از راه دیگری پیدا شدند: روشن‌کردنِ قواعد ruff که پروژه امروز خاموش نگه داشته است (T‑50 در §۳).
 
 ### ۴‑۱) F‑25 · گارد شناسه **کف** ندارد: ۱۲ endpoint با شناسهٔ منفی/صفر/INT64_MIN پاسخ `200` می‌دهند (Medium)
 
@@ -1664,6 +1666,128 @@ def _own_member(db: Session, user: User) -> Member:
 **شاهد پذیرش:** `POST /shop/cart` با هویت بدون پروندهٔ عضو ⇒ **۴۰۹ با `code=member_profile_required`**
 (نه `404 not_found`)؛ و آزمون جدید برای سفارش به‌نیابت (اگر پذیرفته شود).
 
+
+### ۴‑۴) F‑28 · «امروز» در دو ماژول با ساعتِ UTC حساب می‌شود در حالی که shop از `Asia/Tehran` استفاده می‌کند (Medium)
+
+**ابزار کاشف:** ruff 0.17.6، قاعدهٔ `DTZ011` از خانوادهٔ `flake8-datetimez` — که در `pyproject.toml`
+پروژه **روشن نیست**. این یک باگِ منطقی است، نه یک ایرادِ سبکی.
+
+| محل | کد | چه چیزی را «امروز» می‌گیرد |
+| --- | --- | --- |
+| `modules/axis_assessment/service.py:31` | `today = date.today()` | **سنِ عضو** در ارزیابی محور‌ها |
+| `modules/nutrition/service.py:124` | `day = entry.get("logged_for_date") or date.today().isoformat()` | روزِ پیش‌فرض **ثبت غذایی** |
+| `modules/nutrition/service.py:182` | `day = day or date.today().isoformat()` | روزِ پیش‌فرض ثبت غذایی (شاخهٔ دوم) |
+| `modules/shop/service.py:61-62` | `zone = ZoneInfo(settings.shop_timezone)` / `moment = (now or datetime.now(UTC)).astimezone(zone)` | **درست** — الگوی مرجع داخل همان پروژه |
+| `app/config.py:67,91-99` | `shop_timezone: str = "Asia/Tehran"` + اعتبارسنج با `ZoneInfo` | **درست** — تنظیم و اعتبارسنجی موجود است |
+
+**چرا خطاست (محاسبه):** ایران UTC+3:30 است. `date.today()` از ساعتِ **محلیِ فرایند** استفاده می‌کند و
+در کانتینرها آن ساعت معمولاً UTC است. شاهد:
+
+| شاهد | نتیجه |
+| --- | --- |
+| `grep -n "TZ\|timezone\|tzdata"` روی `mp-app/infra/Dockerfile.backend`، `infra/docker-compose.yml`، `backend/Dockerfile`، `infra/ansible/` | **۰ مورد** ⇒ TZ کانتینر = UTC |
+| `grep -rn "datetime.now()"` در `modules app engine jobs` | بقیه همه `datetime.now(UTC)`‌اند؛ فقط همین ۳ محل `date.today()` بی‌منطقه‌اند |
+| بازهٔ خرابی در تهران | هر شب از **۰۰:۰۰ تا ۰۳:۳۰** به وقت محلی، «امروز» در nutrition و axis_assessment **دیروزِ UTC** است |
+
+**تأثیر کاربری (نه فنی):** در آن سه‌ونیم ساعت، ثبت غذاییِ بدون `logged_for_date` روی **تاریخ دیروز** می‌نشیند
+(تقویرِ کالری/وزن یک روز جابه‌جا می‌شود) و سنِ عضو در ارزیابی محور‌ها **دیرتر از موعد** یک سال بالا می‌رود —
+یعنی اگر تولدش همان روز باشد، تا سه‌ونیم ساعت بعد از نیمه‌شب تهران ارزیابی با سنِ سالِ قبل انجام می‌شود.
+همزمان `shop` با منطقهٔ زمانیِ درست کار می‌کند ⇒ **سه برداشتِ متفاوت از «امروز» در یک محصول.**
+
+**اثباتِ مرز (اجرای واقعی در همین جلسه):**
+
+```console
+$ python3 - <<'PY'
+from zoneinfo import ZoneInfo
+from datetime import datetime, UTC
+now = datetime(2026, 11, 21, 22, 0, tzinfo=UTC)          # ۰۱:۳۰ بامداد ۲۲ آبان در تهران
+print("UTC    :", now.date())
+print("Tehran :", now.astimezone(ZoneInfo("Asia/Tehran")).date())
+PY
+UTC    : 2026-11-21        # چیزی که date.today() در کانتینر می‌دهد ⇒ غلط
+Tehran : 2026-11-22        # چیزی که کاربر و ماژول shop انتظار دارند
+```
+
+الگوی اصلاح، بدون تغییرِ API عمومی:
+
+```python
+from datetime import UTC, date, datetime
+from zoneinfo import ZoneInfo
+from app.config import settings
+
+def _today_in_shop_zone() -> date:
+    return datetime.now(UTC).astimezone(ZoneInfo(settings.shop_timezone)).date()
+```
+
+**درگاه پذیرش:** `grep -rn "date.today()" modules app engine jobs` ⇒ ۰ مورد، به‌علاوهٔ یک تستِ مرزی که
+با `TZ=UTC` و ساعت ۲۲:۰۰ UTC، روزِ ثبت غذایی را `2026-11-22` انتظار داشته باشد.
+
+---
+
+### ۴‑۵) F‑29 · `app/sms.py`: شش `logging.error` داخل `except` بدون traceback، سه `urlopen` با schemes باز، و ۳۹ `# noqa` بلااثر (Low‑Medium)
+
+**ابزار کاشف:** ruff، قواعد `TRY400`، `S310`، `RUF100` — هر سه در پیکربندی فعلی پروژه خاموش‌اند.
+
+**(الف) traceback دور ریخته می‌شود.** `TRY400` شش مورد در **یک فایل** داد:
+
+```console
+app/sms.py:66:13: TRY400 Use `logging.exception` instead of `logging.error`
+app/sms.py:69:13 / 72:13 / 99:13 / 102:13 / 105:13  — همان پیام
+```
+
+`logging.error()` داخل بلاک `except` **فقط پیام** را ثبت می‌کند و زنجیرهٔ فراخوانی را دور می‌ریزد؛
+`logging.exception()` همان پیام را **به‌همراه traceback** می‌نویسد. نتیجه: هرگاه فراهم‌کنندهٔ SMS خطا دهد،
+در لاگ‌ها «ارسال ناموفق» دیده می‌شود ولی **ریشه (کد خطای HTTP، timeout، DNS، بدنهٔ پاسخ)** نیست —
+دقیقاً همان چیزی که برای تفکیکِ «باگِ ما» از «قطعیِ فراهم‌کننده» لازم است. این مورد با **F‑03**
+(رندرِ `rich` روی حلقهٔ رویداد) ترکیب می‌شود: SMS پرخطاترین مسیرِ خروجیِ شبکه است و کم‌لاگ‌ترین.
+
+**(ب) schemes باز.** `S310` شش مورد: `app/sms.py:52,61,94` و `eval/llm_column.py:59,100,107`.
+`urllib.request.urlopen` به‌طور پیش‌فرض `file://` و `ftp://` را هم می‌پذیرد؛ اگر host از یک setting بیاید
+(`sms_provider_url`)، مقدارِ دست‌کاری‌شده می‌تواند به خواندن فایل محلی بینجامد. شدتِ عملی **کم** است
+چون مقدار از محیط خوانده می‌شود نه از ورودی کاربر؛ ولی یک allowlist از schemes یا یک `# noqa: S310` مستند
+هزینهٔ صفر دارد.
+
+**(ج) `# noqa`های مرده — و یک تصحیحِ مهم بر F‑22.** `RUF100` در پیکربندی پیشنهادی **۳۹ مورد** داد
+(۴ موردش در migration) و خودش دلیل را می‌گوید:
+
+```console
+db/migrations/versions/c3f01ab129e2_…py:67:68: RUF100 [*] Unused `noqa` directive (non-enabled: `S608`)
+db/migrations/versions/c3f01ab129e2_…py:165:52 / :169:67 / :171:71  — همان پیام
+```
+
+**تصحیح بر F‑22:** در گزارش اصلی نوشتم آن ۴ خط «SQL با f-string» هستند و `# noqa: S608` دارند.
+آزمونِ مستقیم نشان داد **ruff حتی با `--ignore-noqa` هم روی این خطوط `S608` نمی‌دهد**:
+
+```console
+$ ruff check --no-cache --select S608 --ignore-noqa .
+All checks passed!
+```
+
+یعنی (۱) آن `# noqa`ها امروز **هیچ اثری ندارند** (چون خانوادهٔ `S` خاموش است — همان چیزی که `RUF100` می‌گوید)
+و (۲) `S608` روی `op.execute(f"DROP INDEX IF EXISTS ix_{table}_updated_at")` fire نمی‌شود، چون ruff آن را
+SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `DROP INDEX` است، نه `SELECT/INSERT` با شرط).
+**نتیجهٔ روش‌شناختی:** F‑22 را **فقط قاعدهٔ اختصاصیِ semgrep** در `audit/semgrep-mp.yml` می‌گیرد، نه ruff —
+پس برای آن مورد، ruff جایگزینِ semgrep نیست و هر دو باید در CI بمانند. شدتِ واقعیِ F‑22 هم پایین‌تر از چیزی است
+که عنوان «SQL با f-string» القا می‌کند: متغیرها از `sa.inspect()` می‌آیند نه از ورودی کاربر.
+
+| شاهد | نتیجه |
+| --- | --- |
+| `ruff check --select TRY400` | ۶ مورد، همه در `app/sms.py` |
+| `ruff check --select S310` | ۶ مورد (`app/sms.py` ×۳، `eval/llm_column.py` ×۳) |
+| `ruff check --select RUF100` | **۳۹** `# noqa` بلااثر (۴ موردش `S608` در migration) |
+| `ruff check --select S608 --ignore-noqa` | **۰** مورد ⇒ F‑22 با ruff قابل‌کشف نیست |
+| `ruff check --select S110,S112` | `api/v1/monitoring.py:24` (S110) + `scripts/dast.py:81,176,187` (S112) — هم‌پوشانی با F‑17 |
+| `ruff check --select S105,S106` | `app/config.py:16:22` «رمز سخت‌کدشدهٔ `DEFAULT_DEV_SECRET`» — مؤیدِ ریشهٔ **F‑02** |
+| `ruff check --select SLF001` | `modules/auth/router.py:55:30` دسترسی به `limiter._storage` — مؤیدِ **F‑13** |
+| `ruff check --select C901` | ۱۵ تابع >۱۰؛ بالاترین `app/config.py:128 validate_production_configuration` **(۲۸)** — همان **F‑15** با radon F(47) |
+| `ruff check --select PLW0603` | ۷ `global` در `app/logging.py`، `app/observability.py`، `app/profiling.py` — سطحِ تماس F‑03 |
+
+**شاهدِ خام:** `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف با مسیرهای نسبی)
++ `ruff-recommended-stats.txt` (۵۲ قاعده) + `ruff-all-rules.txt` (۱۰۸ قاعده با `--select ALL` = ۱۱٬۷۷۸ مورد)
++ `ruff-all-families.txt` (تجمیع بر پایهٔ خانواده) + پیکربندی `audit/ruff-recommended.toml`.
+
+---
+
 ---
 
 ## ۵) تصحیحاتِ وارد‌شده بر گزارش اصلی (شفاف و کامل)
@@ -1683,6 +1807,9 @@ def _own_member(db: Session, user: User) -> Member:
 | ۸ | §۱۲ (پیوست الف) | — | سه فایل شاهد جدید: `contract-invalid-authed.json`, `pathid-scan.json`, `probe_invalid_authed.py` | اجرای جدید |
 | ۹ | §۱ جدول شدت‌ها | ۲۴ یافته | **۲۷ یافته** (F‑25 Medium, F‑26 Medium, F‑27 Medium) | یافته‌های جدید |
 | ۱۰ | §۱۱ نقشهٔ رفع | ۲۲ ردیف | **۲۵ ردیف** (سه اقدام جدید با شاهد پذیرش) | یافته‌های جدید |
+| **۱۱** | **§۵ F‑22 و §۴‑۵** | **«۴ خط SQL با f-string که `# noqa: S608` دارند»** | **ruff `S608` روی این ۴ خط fire نمی‌شود — حتی با `--ignore-noqa` ⇒ «All checks passed!». آن `# noqa`ها امروز بلااثرند (`RUF100` ×۴). F‑22 را فقط قاعدهٔ اختصاصیِ semgrep می‌گیرد** | **اجرای مستقیم `ruff check --select S608 --ignore-noqa` در T‑50** |
+| **۱۲** | **§۱ جدول شدت‌ها** | **۲۷ یافته** | **۲۹ یافته** (F‑28 Medium: `date.today()` با UTC در برابر `Asia/Tehran`؛ F‑29 Low‑Med: `logging.error` بدون traceback در `app/sms.py`) | یافته‌های جدید از T‑50 |
+| **۱۳** | **§۱۲ پیوست الف** | **۵۵ فایل شاهد** | **۶۰ فایل شاهد** (۴ خروجی ruff + ۱ پیکربندی پیشنهادی) | اجرای جدید |
 
 **چیزی که تغییر نکرد** (و دوباره تأیید شد): صفر drift قرارداد، صفر `5xx` در **هر دو** ماتریس
 (۱٬۱۴۱ + ۸۷۲ سلول)، صفر نشت stack trace، سالم بودن JWT/OTP/idempotency، نبودِ `dangerouslySetInnerHTML`،
@@ -1693,7 +1820,7 @@ def _own_member(db: Session, user: User) -> Member:
 ## ۶) فهرست شواهد با hash — برای بازآزماییِ مستقل
 
 هر فایل شاهد در مخزن commit شده است. ستون «لینک مستقیم» همان فایل روی GitHub است
-(شاخهٔ `arena/2cde32d6-chat2db`). اگر hash یک فایل با آنچه در جدول زیر است differs،
+(شاخهٔ `arena/2cde32d6-chat2db`). اگر hash فایلی با آنچه در جدول زیر است تفاوت داشت،
 یعنی فایل دست‌کاری شده یا نسخهٔ دیگری اجرا شده است.
 
 | فایل | اندازه (بایت) | SHA‑256 (۱۶ رقم نخست) |
@@ -1708,10 +1835,13 @@ def _own_member(db: Session, user: User) -> Member:
 | `audit/evidence/contract-invalid-findings.json` | 227 | `8ec588731b3e813e…` |
 | `audit/evidence/contract-matrix-raw.json` | 850,104 | `3d58413631bd741f…` |
 | `audit/evidence/contract-rbac-findings.json` | 73,763 | `7a1615c7a80490bc…` |
+| `audit/evidence/detect-secrets.err` | 0 | `e3b0c44298fc1c14…` |
 | `audit/evidence/detect-secrets.json` | 51,599 | `c81a5c71ed768029…` |
+| `audit/evidence/eslint-stderr.txt` | 0 | `e3b0c44298fc1c14…` |
 | `audit/evidence/eslint-studio.json` | 227,239 | `f4bc1e42425fae5c…` |
 | `audit/evidence/jscpd-out/jscpd-report.json` | 13,131 | `b24d9fafa1c9a5f8…` |
 | `audit/evidence/knip-err.txt` | 1,132 | `39bd484355b70f7d…` |
+| `audit/evidence/knip-studio.json` | 0 | `e3b0c44298fc1c14…` |
 | `audit/evidence/live-security-raw.json` | 17,051 | `5fee5dc9e6712414…` |
 | `audit/evidence/live-security-verdicts.json` | 4,678 | `e469e8204e6943ab…` |
 | `audit/evidence/lizard-warnings.txt` | 6,316 | `60a06161a1227e87…` |
@@ -1729,6 +1859,10 @@ def _own_member(db: Session, user: User) -> Member:
 | `audit/evidence/radon-cc.txt` | 2,283 | `40dd187d192ab682…` |
 | `audit/evidence/radon-mi.txt` | 8,513 | `a7b72e7fd226eeb8…` |
 | `audit/evidence/rbac-systemerror-repro.json` | 3,240 | `4fd047831fcce31b…` |
+| `audit/evidence/ruff-all-families.txt` | 501 | `76f308417919b4bc…` |
+| `audit/evidence/ruff-all-rules.txt` | 4,857 | `cf6019cda5a780d0…` |
+| `audit/evidence/ruff-recommended-findings.txt` | 42,414 | `693ab7332acb8ac6…` |
+| `audit/evidence/ruff-recommended-stats.txt` | 2,153 | `2e3ee2e813ba0c55…` |
 | `audit/evidence/semgrep-backend.json` | 18,984 | `9dbfae3187f91bb1…` |
 | `audit/evidence/semgrep-client.json` | 3,428 | `f01227ccc53d73a9…` |
 | `audit/evidence/semgrep-studio.json` | 6,573 | `453fe65667f5e7b6…` |
@@ -1746,14 +1880,16 @@ def _own_member(db: Session, user: User) -> Member:
 | `audit/probe_load.py` | 7,721 | `940089b867e6446e…` |
 | `audit/probe_otp_limits.py` | 6,356 | `662906b965d4801e…` |
 | `audit/repro_rbac_systemerror.py` | 4,829 | `4d0cfbe573652b38…` |
+| `audit/ruff-recommended.toml` | 4,127 | `1cb99697bc881746…` |
 | `audit/scan_ui_wiring.py` | 7,088 | `64e64c20bfe2b1f5…` |
 | `audit/semgrep-mp.yml` | 7,002 | `d58146b4f372ca82…` |
 | `audit/serve_backend.py` | 10,139 | `fc1f4e3644718f19…` |
 | `audit/serve_plain.py` | 2,073 | `fe6a735f3ce45fb5…` |
 | `share/MP-AGENT-BRIEF.md` | 140,033 | `152a181579ece673…` |
-| `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 111,265 | `1f6823b1c3e41570…` |
+| `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 150,515 | `368cdcf97d10ae23…` |
+| `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,110 | `1f292decfd592051…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | (خودِ این پرونده) | hash پس از commit در `git log` |
 
 **جمع: 55 فایلِ hash‌شده · 3,019,018 بایت** (به‌علاوهٔ خودِ این پرونده).
 
@@ -2020,6 +2156,8 @@ def _own_member(db: Session, user: User) -> Member:
 | **F‑25 کفِ گارد شناسه** | **Medium** | **T‑34, T‑23, T‑47** | `contract-invalid-authed.json`, `pathid-scan.json` | `app/id_guard.py:47-52`, `app/deps.py:39` | `unexpected_2xx_on_bad_id == 0` |
 | **F‑26 دو شکل پاکت** | **Medium** | **T‑34** | `contract-invalid-authed.json` | هندلرهای `app/unhandled.py`/`app/errors.py` | `fastapi_default_detail == 0` |
 | **F‑27 پیش‌نیاز پروندهٔ عضو** | **Medium** | **T‑31, T‑48** | `contract-matrix-raw.json` (pass=seed) | `modules/shop/service.py:293-298` | ⇒ ۴۰۹ با `member_profile_required` |
+| **F‑28 «امروز» با UTC در برابر تهران** | **Medium** | **T‑50** | `ruff-recommended-findings.txt` | `modules/axis_assessment/service.py:31`، `modules/nutrition/service.py:124,182` در برابر `modules/shop/service.py:61-62` | `grep -rn "date.today()" modules app engine jobs` ⇒ **۰** مورد |
+| **F‑29 لاگ بدون traceback در SMS + noqaهای مرده** | **Low‑Med** | **T‑50** | `ruff-recommended-findings.txt` | `app/sms.py:66,69,72,99,102,105` و `:52,61,94` | `ruff check --select TRY400,S310,RUF100` ⇒ ۰ یافته |
 
 ---
 
@@ -2132,9 +2270,9 @@ git status --porcelain | wc -l        # ⇒ 0  (بازگرداندن کامل)
 
 | مورد | مقدار |
 |---|---|
-| تعداد اجراهای ثبت‌شده | **۴۹** (T‑01…T‑49 در ۶ دسته) |
+| تعداد اجراهای ثبت‌شده | **۵۰** (T‑01…T‑50 در ۶ دسته) |
 | تعداد سلول/درخواست اندازه‌گیری‌شده | ۱٬۱۴۱ (ماتریس مجوز) + ۸۷۲ (ورودی خصمانهٔ معتبر) + ۸۰۴ (پاس نادرست‌نتیجه، بایگانی‌شده) + ۱۶ (seed) + ~۴۴ (XFF/OTP) + ده‌ها هزار درخواست بار |
-| تعداد یافته | **۲۷** (F‑01…F‑27) |
+| تعداد یافته | **۲۹** (F‑01…F‑29) |
 | تعداد خاصیتِ سالمِ تأییدشده | ۲۷ |
 | تعداد یافتهٔ کاذبِ خودم که رد شد | ۱۲ + ۱ نقص روش‌شناختی (T‑33) |
 | حوزه‌های BLOCKED | ۱۱ |
