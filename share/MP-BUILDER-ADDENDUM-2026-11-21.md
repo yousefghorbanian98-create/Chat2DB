@@ -71,7 +71,7 @@ ruff check --no-cache . # انتظار: "All checks passed!"  ← سبزِ تو�
 
 **اقدام:**
 
-1. محتوای فایل **`audit/ruff-recommended.toml`** (۴٬۱۴۸ بایت، در مخزنِ ممیزی commit شده)
+1. محتوای فایل **`audit/ruff-recommended.toml`** (۴٬۵۶۴ بایت، در مخزنِ ممیزی commit شده)
    را جایگزینِ بلوکِ `[tool.ruff]` در `backend/pyproject.toml` کن. هر `ignore` در آن فایل
    **دلیلِ فارسیِ مستند** دارد؛ دلیل‌ها را به‌صورت کامنت نگه دار.
 2. بخش `[lint.isort] known-first-party` را **دقیقاً همان‌طور که هست** حفظ کن
@@ -425,7 +425,7 @@ ruff چیزی را می‌گیرد که در **متنِ کد** پیداست؛ F�
 
 | سند | کجا |
 |---|---|
-| پیکربندی آماده | `audit/ruff-recommended.toml` (۴٬۱۴۸ بایت) |
+| پیکربندی آماده | `audit/ruff-recommended.toml` (۴٬۵۶۴ بایت) |
 | ۴۳۰ یافته با `file:line` | `audit/evidence/ruff-recommended-findings.txt` |
 | ۵۲ قاعده با شمارش | `audit/evidence/ruff-recommended-stats.txt` |
 | ۱۰۸ قاعدهٔ `--select ALL` | `audit/evidence/ruff-all-rules.txt` |

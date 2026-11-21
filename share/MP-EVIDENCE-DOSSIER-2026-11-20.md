@@ -1938,9 +1938,9 @@ SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `D
 | `audit/serve_backend.py` | 10,139 | `fc1f4e3644718f19…` |
 | `audit/serve_plain.py` | 2,073 | `fe6a735f3ce45fb5…` |
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
-| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 35,148 | `fc3b322d2f63b1f0…` |
+| `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 35,148 | `2c39be1be788b26b…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 154,747 | `5c009419556867ec…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 154,826 | `5fe09a9005d18584…` |
 | `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,110 | `1f292decfd592051…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 
