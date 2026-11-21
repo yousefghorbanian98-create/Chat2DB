@@ -10,7 +10,7 @@
 
 # الحاقیهٔ A1 — دو یافتهٔ تازه، یک تصحیح، و یک ابزارِ گیتِ جدید
 
-## تصحیحاتِ این نسخه (A1.2) — پیش از هر عددی این را بخوان
+## تصحیحاتِ این نسخه (A1.3) — پیش از هر عددی این را بخوان
 
 یک اجرایِ مستقلِ این الحاقیه در محیطِ بیلدر، روی commit پایهٔ `662ff88` با ruff ‏۰٫۱۷٫۶،
 همهٔ اعداد را دوباره اندازه گرفت. **پنج اختلاف پیدا شد که سه‌تایش خطایِ متنِ اولیهٔ من بود**
@@ -581,6 +581,227 @@ ruff چیزی را می‌گیرد که در **متنِ کد** پیداست؛ F�
 شاهدِ اجراییِ عددی (قبل/بعد) + به‌روزرسانیِ سند. برای این الحاقیه، شاهدِ عددیِ
 «قبل» از همین متن برداشته شود (۴۳۰/۵۲، ۶×`TRY400`، ۳×`DTZ011`، ۳۹×`RUF100`،
 ۱۵×`C901` با بدترین ۲۸) و «بعد» باید صفرهای بخش‌های ۲ تا ۴ باشد.
+
+---
+
+## بخش ۹ · پروتکلِ اجرای بی‌ناظر (حلقهٔ خودران، بدونِ «ادامه بده»)
+
+> **چرا این بخش اضافه شد:** مالک اعلام کرد این الحاقیه واردِ حلقهٔ `FINN-AUDIT-LOOP.md`
+> شده و **بدونِ نظارت** تا پایان اجرا می‌شود. در حلقهٔ خودران، هر ابهام به یک
+> **اقدامِ خودسرانه** تبدیل می‌شود، نه به یک پرسش؛ و راحت‌ترین راهِ سبزکردنِ یک گیتِ
+> ایستا، **ضعیف‌کردنِ خودِ گیت** است. پس در این بخش سه چیز صریح تعریف شده:
+> مقدارِ موردانتظارِ هر عدد، اقدامِ دقیق در صورتِ اختلاف، و فهرستِ کارهای **ممنوع**.
+> **هیچ گامی در این الحاقیه «به تشخیصِ تو» نیست.**
+>
+> **A1.3 = A1.2 + همین بخش ۹.** هیچ عدد، یافته، گیت یا WP‌ای نسبت به A1.2 تغییر نکرده است.
+
+### ۹‑۱ · سه سطحِ نتیجه برای هر گیت
+
+| سطح | یعنی | اقدامِ اجباری |
+|---|---|---|
+| `MATCH` | عددِ اندازه‌گیری‌شده = عددِ سند | ادامه بده؛ عدد را در `EXECUTION-LOG.md` بنویس |
+| `BLOCKED-NUMERIC` | عدد فرق دارد، ولی **رفتار** درست است (تست‌ها سبز) | همان WP را متوقف کن؛ بلوکِ §۹‑۶ را کامل بنویس؛ پیکربندی را دستکاری **نکن**؛ به WP مستقلِ بعدی برو (§۹‑۵) |
+| `HARD-STOP` | به یکی از مواردِ §۹‑۴ رسیدی | آن کار را انجام **نده**؛ سؤالِ دقیق را در `EXECUTION-LOG.md` بنویس؛ به WP مستقلِ بعدی برو |
+
+**`BLOCKED-NUMERIC` شکست نیست.** در همین ممیزی، خودِ ممیز پنج عددِ اشتباه نوشت
+(§۵ ردیف‌های ۱۴ تا ۱۹ پروندهٔ شواهد) و بیلدر با اندازه‌گیریِ مستقل جلوی آنها ایستاد.
+اگر عددِ تو با این سند فرق دارد: **عددِ تو معتبر است، به شرطِ اینکه فرمانش را عیناً
+ثبت کنی** (فرمانِ کامل + خروجیِ خام + `ruff --version` + `git rev-parse HEAD`).
+کاری که هرگز مجاز نیست: عوض‌کردنِ پیکربندی یا پاک‌کردنِ یک `# noqa` برای اینکه عدد
+به سند برسد.
+
+### ۹‑۲ · اسکریپتِ پذیرش — همهٔ گیت‌ها را خودکار می‌سنجد
+
+این اسکریپت روی commit `662ff88` با ruff ‏۰٫۱۷٫۶ **اجرا و آزمون شده است**:
+مراحلِ `before` و `after-era` ⇒ «گیت‌های نامنطبق: ۰ / PASS»؛ آزمون‌های منفی
+(درختِ رفع‌نشده با stage‌های `after-wp26`, `after-wp36`, `after-wp45`) ⇒ به‌ترتیب
+۲، ۴ و ۵ گیتِ `BLOCKED-NUMERIC` و exit=1. پس گیت‌ها **دندان دارند**.
+
+```bash
+RUFF=/path/to/ruff ./verify-addendum-gates.sh before      # پس از نصبِ پیکربندی ⇒ 430/52
+RUFF=/path/to/ruff ./verify-addendum-gates.sh after-era   # پس از ERA001→ignore ⇒ 419/51
+RUFF=/path/to/ruff ./verify-addendum-gates.sh after-wp26  # پس از F‑29 ⇒ TRY400=0, RUF100=0
+RUFF=/path/to/ruff ./verify-addendum-gates.sh after-wp36  # پس از F‑28 ⇒ DTZ011=0, date.today()=0
+RUFF=/path/to/ruff ./verify-addendum-gates.sh after-wp45  # پس از F‑22 ⇒ 4×`# noqa: S608`=0
+```
+
+`CFG=` را خالی بگذار اگر پیکربندی را داخلِ `backend/pyproject.toml` نصب کرده‌ای
+(حالتِ درستِ نهایی). خروجیِ خامِ هر اجرا را **کامل** در `EXECUTION-LOG.md` بچسبان.
+
+```bash
+#!/usr/bin/env bash
+# verify-addendum-gates.sh — گیت‌های عددیِ الحاقیهٔ A1.3 برای اجرای بی‌ناظر (حلقهٔ خودران)
+#
+# کاربرد:   RUFF=/path/to/ruff ./verify-addendum-gates.sh [before|after-era|after-wp26|after-wp36|after-wp45]
+# محلِ اجرا: mp-app/backend   ·   نیازمندی: ruff 0.17.x (با نسخهٔ دیگر اعداد فرق می‌کنند)
+# خروجی:     یک جدول + «PASS» یا «ACTION» + exit code (0 = همهٔ گیت‌ها منطبق)
+#
+# هر «موردانتظار» در این فایل روی commit 662ff88 با ruff 0.17.6 اندازه‌گیری شده است
+# (۳۷۶ فایل، --no-cache). CFG را خالی بگذار اگر پیکربندی را در pyproject.toml نصب کرده‌ای؛
+# در غیر این صورت CFG=/path/to/ruff-recommended.toml بده.
+set -u
+STAGE="${1:-before}"
+RUFF="${RUFF:-ruff}"
+CFG="${CFG:-}"
+command -v "$RUFF" >/dev/null 2>&1 || { echo "FATAL: ruff پیدا نشد ⇒ RUFF=/path/to/ruff"; exit 2; }
+CARG=(); [ -n "$CFG" ] && CARG=(--config "$CFG")
+OUT="$(mktemp)"; trap 'rm -f "$OUT"' EXIT
+$RUFF check --no-cache "${CARG[@]}" --output-format concise . >"$OUT" 2>&1
+
+# ۲۰ `# noqa`ی که با پیکربندیِ جدید «مؤثر» می‌شوند و حذفشان ممنوع است (§۲‑الف)
+KEEP20="api/v1/monitoring.py:24 api/v1/monitoring.py:40 api/v1/monitoring.py:65
+cache/store.py:65 cache/store.py:74 cache/store.py:83 cache/store.py:92 cache/store.py:103
+modules/ai/router.py:28 modules/auth/router.py:56 modules/face_id/deep.py:74
+modules/outbox/service.py:115 scripts/dast.py:81 scripts/dast.py:98 scripts/dast.py:115
+scripts/dast.py:176 scripts/dast.py:187 scripts/deploy_gate.py:174
+tests/integration/test_phase8_reports.py:79 tests/integration/test_qf10_period_report.py:73"
+# چهار `# noqa: S608` روی خطوطِ F‑22 — تا پیش از رفعِ F‑22 باید بمانند (§۵)
+S608="db/migrations/versions/c3f01ab129e2_downstream_indexes.py:67"
+
+fail=0
+row() { # <نام> <موردانتظار> <واقعی> <gate|info>
+  local n="$1" e="$2" a="$3" lvl="${4:-gate}" v="INFO"
+  if [ "$lvl" = gate ]; then
+    if [ "$e" = "$a" ]; then v="MATCH"; else v="BLOCKED-NUMERIC"; fail=$((fail+1)); fi
+  fi
+  printf '| %-32s | %10s | %10s | %s |\n' "$n" "$e" "$a" "$v"
+}
+cnt() { grep -c "$1" "$OUT"; }
+present() { local f="${1%%:*}" l="${1##*:}"; [ -f "$f" ] && sed -n "${l}p" "$f" | grep -q '# noqa' && echo yes || echo no; }
+
+echo "== stage=$STAGE  cwd=$(pwd)  head=$(git rev-parse --short HEAD 2>/dev/null || echo n/a)  ruff=$($RUFF --version | awk '{print $2}')"
+echo "== cfg=${CFG:-<pyproject.toml نصب‌شده>}"
+case "$STAGE" in before|after-era|after-wp26|after-wp36|after-wp45) ;; *) echo "FATAL: stage نامعتبر"; exit 2;; esac
+echo "| گیت | موردانتظار | واقعی | نتیجه |"; echo "|---|---|---|---|"
+RV="$($RUFF --version | awk '{print $2}')"
+row "ruff نسخه (0.17 لازم است)" "0.17" "$(echo "$RV" | cut -d. -f1-2)" gate
+
+case "$STAGE" in
+  before)    exp_err=430; exp_rules=52 ;;
+  after-era) exp_err=419; exp_rules=51 ;;
+  *)         exp_err=""; exp_rules="" ;;
+esac
+act_err="$(grep -oE 'Found [0-9]+ error' "$OUT" | grep -oE '[0-9]+' | head -1)"
+act_rules="$($RUFF check --no-cache "${CARG[@]}" --statistics . 2>/dev/null | awk '$2 ~ /^[A-Z]+[0-9]+$/{n++} END{print n+0}')"
+if [ -n "$exp_err" ]; then row "کل یافته" "$exp_err" "${act_err:-0}" gate; row "قواعدِ متمایز" "$exp_rules" "$act_rules" gate
+else row "کل یافته (ثبتی)" "-" "${act_err:-0}" info; row "قواعدِ متمایز (ثبتی)" "-" "$act_rules" info; fi
+
+case "$STAGE" in after-wp26|after-wp36|after-wp45) exp_try=0 ;; *) exp_try=6 ;; esac
+case "$STAGE" in after-wp36|after-wp45) exp_dtz=0 ;; *) exp_dtz=3 ;; esac
+case "$STAGE" in before|after-era) exp_ruf=39 ;; *) exp_ruf=0 ;; esac
+row "RUF100 (noqa بلااثر)" "$exp_ruf" "$(cnt RUF100)" gate
+row "TRY400" "$exp_try" "$(cnt TRY400)" gate
+row "DTZ011" "$exp_dtz" "$(cnt DTZ011)" gate
+row "C901 (پیچیدگی)" "-" "$(cnt C901)" info
+row "S310 در app/sms.py" "-" "$(grep -c 'app/sms.py.*S310' "$OUT")" info
+row "format --check" "378 files" "$($RUFF format --no-cache "${CARG[@]}" --check . 2>&1 | grep -oE '[0-9]+ files already formatted' | head -1)" info
+
+k=0; for pair in $KEEP20; do [ "$(present "$pair")" = yes ] && k=$((k+1)); done
+row "۲۰ noqa ممنوع‌الحذف" "20" "$k" gate
+s=0; for f in $(ls db/migrations/versions/c3f01ab129e2_*.py 2>/dev/null); do
+  s=$((s + $(grep -c '# noqa: S608' "$f"))); done
+case "$STAGE" in after-wp45) row "۴ noqa: S608 (پس از F‑22)" "0" "$s" gate ;;
+             *)              row "۴ noqa: S608 (تا پیش از F‑22)" "4" "$s" gate ;; esac
+if [ "$STAGE" = "after-wp36" ] || [ "$STAGE" = "after-wp45" ]; then
+  row "date.today() در ۴ دایرکتوری" "0" "$(grep -rn 'date\.today()' modules app engine jobs 2>/dev/null | wc -l | tr -d ' ')" gate
+  row "ENV TZ در infra" "-" "$(grep -rl 'TZ=' ../infra 2>/dev/null | wc -l | tr -d ' ')" info
+fi
+echo "== گیت‌های نامنطبق: $fail"
+if [ "$fail" -eq 0 ]; then echo "PASS"
+else echo "ACTION (§۹‑۱): همین WP را متوقف کن · بلوکِ §۹‑۶ را در EXECUTION-LOG.md بنویس · پیکربندی را دستکاری نکن · به WP مستقلِ بعدی برو."
+fi
+exit $((fail > 0))
+```
+
+### ۹‑۳ · ممنوع: سبزکردنِ گیت با سرکوب
+
+در پیکربندیِ ruff **فقط دو تغییر** مجاز است:
+
+1. نصبِ **عیناً** همان متنِ بخشِ ۲‑الف (بدونِ کم‌وزیادکردنِ حتی یک قاعده یا کامنت).
+2. افزودنِ **یک** قلم به `ignore`: `"ERA001",` (گامِ ۲ ‏WP ‏0.9).
+
+هر یک از اینها **ممنوع** است و `HARD-STOP` محسوب می‌شود:
+
+| اقدامِ ممنوع | چرا |
+|---|---|
+| افزودنِ هر `ignore` یا `per-file-ignores` تازه | ۴۳۰ بودنِ این عدد **نتیجهٔ** ignoreهای مستندِ فعلی است؛ قلمِ جدید یعنی پاک‌کردنِ صورت‌مسئله |
+| کم‌کردنِ هر خانواده از `select` (مثلاً خاموش‌کردنِ `S` یا `DTZ`) | همان گیتی را می‌کشد که WP ‏0.9 برای ساختنش وجود دارد |
+| بالا بردنِ `mccabe.max-complexity` از ۱۰ | بدترین تابع امروز ۲۸ است؛ سقف را جابه‌جا نکن، تابع را بشکن (F‑15) |
+| حذفِ هر `# noqa` **جز** دو فهرستِ مجاز (§۹‑۳‑الف) | بعضی `noqa`ها با پیکربندیِ جدید مؤثر می‌شوند |
+| اجرای `ruff check --fix --unsafe-fixes` (۲۱۰ مورد) | در این الحاقیه مجاز نیست؛ فقط ۴۷ رفعِ **امن**، در commit جدا |
+| غیرمسدودکننده‌کردنِ یک گیتِ CI برای عبور از آن | معادلِ خاموش‌کردنِ دودزدنِ ساختمان است |
+| حذف یا `skip` کردنِ تست برای سبزکردنِ suite | خطِ قرمزِ مطلق |
+
+**۹‑۳‑الف · دو فهرستِ مجازِ حذفِ `# noqa`:**
+
+- **مجاز:** آن ۳۹ `RUF100`ی که با پیکربندیِ ۵۲قاعده‌ای بلااثر‌اند — **به‌جز** چهار
+  `# noqa: S608` در `db/migrations/versions/c3f01ab129e2_*.py:67,165,169,171` که فقط
+  **پس از** رفعِ F‑22 در WP ‏4.5 پاک می‌شوند (بخش ۵).
+- **ممنوع:** آن ۲۰ `# noqa`ی که با پیکربندیِ جدید **مؤثر** می‌شوند و در جدولِ
+  §۲‑الف فهرست شده‌اند (`api/v1/monitoring.py:24,40,65` · `cache/store.py:65,74,83,92,103`
+  · `modules/ai/router.py:28` · `modules/auth/router.py:56` · `modules/face_id/deep.py:74`
+  · `modules/outbox/service.py:115` · `scripts/dast.py:81,98,115,176,187`
+  · `scripts/deploy_gate.py:174` · `tests/integration/test_phase8_reports.py:79`
+  · `tests/integration/test_qf10_period_report.py:73`). اسکریپتِ §۹‑۲ هر دو فهرست را
+  خودش می‌شمارد (ردیف‌های «۲۰ noqa ممنوع‌الحذف» و «۴ noqa: S608»).
+
+### ۹‑۴ · `HARD-STOP` — بدونِ تأییدِ مالک انجام نده
+
+1. هر تغییرِ **schema** یا migration تازه (به‌جز همان F‑22 که در WP ‏4.5 تعریف شده).
+2. هر تغییرِ **رفتارِ محصولی**: تنها تصمیم‌های مجاز، همان پنج تصمیمِ پرامپتِ اصلی
+   به‌علاوهٔ `D‑6` و `D‑7` این الحاقیه‌اند. تصمیمِ هشتم را از خودت نساز.
+3. bump نسخهٔ هر وابستگی (ruff باید روی `0.17.x` بماند تا اعدادِ این سند معتبر باشند).
+4. `force-push`، تغییرِ branch protection، یا ادغامِ PR بدونِ چهار رکنِ قانونِ ۳.
+5. هر کاری که نیاز به **پرسیدن** دارد: سؤال را بنویس و رد شو؛ منتظر نمان، حدس هم نزن.
+
+### ۹‑۵ · وابستگی‌ها — یک بلوک نباید کلِ حلقه را بخواباند
+
+```
+WP 0.9 گام ۱ (نصبِ پیکربندی)  ──►  WP 0.9 گام ۲ (ERA001→ignore)  ──►  ۴۷ رفعِ امن  ──►  گیتِ CI
+        │                                                                     ▲
+        └── اگر BLOCKED-NUMERIC شد ──► WP 2.6 و WP 3.6 را با میان‌بُر ادامه بده │
+                                        (--extend-select TRY400,DTZ011)        │
+                                                                               │
+WP 4.5 (رفعِ F‑22)  ──► حذفِ ۴×`# noqa: S608`  ────────────────────────────────┘
+```
+
+`WP 2.6` و `WP 3.6` به نصبِ پیکربندی **وابسته نیستند**: گیتِ عددیِ هر دو را می‌توان با
+`ruff check --no-cache --extend-select TRY400,DTZ011 .` (که `select`ِ موجود را
+**جایگزین نمی‌کند**) سنجید. پس اگر `WP 0.9` بلوک شد، حلقه را ادامه بده و فقط
+`WP 0.9` را `BLOCKED` نگه دار.
+
+### ۹‑۶ · قالبِ رکوردِ بی‌ناظر در `EXECUTION-LOG.md`
+
+برای **هر** WP دقیقاً این بلوک، بدونِ فیلدِ خالی. اگر انحرافی نیست بنویس
+«انحراف: صفر» — **سکوت مبهم است** و در حلقهٔ بی‌ناظر خوانده نمی‌شود.
+
+```text
+WP: 0.9 گام ۱ · برچسب: addendum A1.3
+commit: <sha>
+فرمان‌ها (verbatim):
+  <هر فرمانی که زدی، عیناً>
+اسکریپتِ پذیرش (§۹‑۲): stage=<...> ⇒ <خروجیِ کاملِ جدول + PASS/ACTION>
+عددِ قبل / بعد: 430,52 ⇒ 419,51 (یا هر چه اندازه گرفتی)
+نتیجهٔ تست‌ها: <pytest: N passed / M skipped> · <ruff format --check>
+انحراف از سند: صفر | یا: <ردیفِ §۵ + عددِ تو + فرمانت>
+HARD-STOPهای برخوردشده: هیچ | یا: <مورد + سؤالِ دقیق>
+برچسب‌های تازه‌ای که این حلقه ساخت: هیچ | یا: <نامِ تازه> ≡ <نامِ سند>
+```
+
+**قاعدهٔ نام‌گذاری:** هر برچسب یا عبارتی که حلقه از خودش می‌سازد باید همان‌جا با
+معادلِ سند نگاشته شود — همان کاری که با `AD‑1 ≡ D‑6` و `AD‑2 ≡ D‑7` کردی و درست بود.
+نامِ بی‌نگاشت، در مرورِ بعدی غیرقابلِ ردیابی است.
+
+### ۹‑۷ · پایانِ حلقه
+
+وقتی همهٔ WPها تمام یا `BLOCKED` شدند، یک گزارشِ نهایی بساز با:
+
+1. جدولِ **۲۹ یافته × وضعیت** (`FIXED` / `BLOCKED-NUMERIC` / `HARD-STOP` / `NOT-STARTED`)
+   با commitِ هر `FIXED`.
+2. خروجیِ خامِ `verify-addendum-gates.sh after-wp45` (باید `PASS` باشد).
+3. فهرستِ کاملِ `HARD-STOP`ها به‌ترتیبِ اولویت، هرکدام با یک سؤالِ **بسته** (بله/خیر
+   یا دو گزینهٔ مشخص) — نه سؤالِ باز.
+4. `sha256` بستهٔ شواهدِ تولیدشدهٔ خودت.
 
 ---
 
