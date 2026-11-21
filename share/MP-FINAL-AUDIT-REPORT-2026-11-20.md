@@ -8,6 +8,9 @@
 > harness ابزار‌دار و **دقیقاً همان CMD داخل Dockerfile خودشان**.
 > **داده‌ها تماماً مصنوعی‌اند** (شماره‌های الگوی seed خودِ پروژه، `0912…`/`0913…`). هیچ دادهٔ واقعیِ عضو/مالی استفاده نشد.
 > **زبان:** فارسی، شناسه‌های فنی انگلیسی.
+> **پروندهٔ همراه:** هر تست، هر عدد خام، hash هر فایل شاهد و فهرست کامل منابع در
+> `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` آمده است (۴۹ اجرای ثبت‌شده، ۲۷ یافته، ۵۶ فایل شاهد).
+> اگر عددی در این گزارش با آن پرونده تفاوت داشت، **پروندهٔ شواهد معتبر است** و اختلاف در §۵ آن فهرست شده.
 
 ---
 
@@ -73,16 +76,16 @@
 | **F‑03** | **Critical** | قفل شدن سرور زیر بار؛ رندر `rich` روی event loop | ۱۴۸MB/۴ خطا؛ `/health` تایم‌اوت ۷+ دقیقه؛ SIGTERM بی‌پاسخ | **اثبات شد** |
 | **F‑04** | **High** | اشباع استخر اتصال؛ نبودِ هیچ متریک pool؛ ناسازگاری ظرفیت‌ها | `QueuePool … timeout 5.00` در `deps.py:53`؛ فروپاشی در ۸۰ کلاینت | **اثبات شد** |
 | **F‑05** | **High** | `SystemError` در `casbin enforce` زیر همزمانی (compile در هر درخواست) | ۳/۳۲٬۰۰۰؛ پشتهٔ کامل تا `ast.py:50` | **اثبات شد** |
-| **F‑06** | **High** | `/api/v1/metrics` بدون احراز هویت | HTTP 200 بدون توکن، ۳۴۶ خط، ۱۴ متریک | **اثبات شد** |
+| **F‑06** | **High** | `/api/v1/metrics` بدون احراز هویت | HTTP 200 بدون توکن، ۳۴۶ خط، ۱۲ متریک | **اثبات شد** |
 | **F‑07** | **High** | پوشش مستند ۹۴٫۲۸٪ در برابر واقعی ۸۳٫۷۳٪ | اجرای کامل pytest+cov (۴۶۱ ثانیه) | **اثبات شد** |
 | **F‑08** | **High** | `logout-all` توکن‌های بدون `sid` را باطل نمی‌کند | توکن واقعی ۴۰۱، توکن بی‌`sid` ۲۰۰ | **اثبات شد** |
 | **F‑09** | **High** | پول بزرگ: `2^53`، `2^53+1`، `10^18` پذیرفته می‌شوند + coercion رشته→عدد | HTTP 200 و بازگرداندن عین مقدار | **اثبات شد** |
 | **F‑10** | **Medium‑High** | ۳۱ خطای ESLint در استودیو (هیچ lint واقعی اجرا نمی‌شد) | ESLint 9 flat config: ۳۱ error/۳ warning | **اثبات شد** |
 | **F‑11** | **Medium‑High** | امتیاز جهش ۵۷٫۸٪ در ماژول پولی؛ ۳ شکاف واقعی | ۲۶/۴۵ کشته (راستی‌آزمایی دستی) | **اثبات شد** |
-| **F‑12** | **Medium** | `routes.json` مجموعهٔ گاردهای واقعی را کم‌تر نشان می‌دهد ⇒ اوراکل نامعتبر | ۶۰۱ مورد «نقش مجاز ولی انکار شد» | **اثبات شد** |
+| **F‑12** | **Medium** | `routes.json` مجموعهٔ گاردهای واقعی را کم‌تر نشان می‌دهد ⇒ اوراکل نامعتبر | ۶۰۲ مورد «نقش مجاز ولی انکار شد» | **اثبات شد** |
 | **F‑13** | **Medium** | guard تکراری روی یک مسیر (دو بار casbin enforce) | `axis-assessments/{id}/review` | **اثبات شد** |
 | **F‑14** | **Medium** | `gateway-return` با شناسهٔ نامعتبر → HTTP 200 | `GET /api/v1/payments/-1/gateway-return` | **اثبات شد** |
-| **F‑15** | **Medium** | ۵۵ هشدار پیچیدگی (lizard) و ۴۱ بلوک ≥C (radon)؛ بدترین CCN 46 | خروجی ابزارها | **اثبات شد** |
+| **F‑15** | **Medium** | ۵۵ هشدار پیچیدگی (lizard) و ۴۱ بلوک ≥C (radon)؛ بدترین درجهٔ radon **F** با CC ‏۴۷ و ۴۶ | خروجی ابزارها | **اثبات شد** |
 | **F‑16** | **Medium** | ۷ محل پولِ شناور در استودیو + ۱ sentinel منفی | Semgrep با قاعدهٔ اختصاصی | **اثبات شد** |
 | **F‑17** | **Medium** | ۴ خطای «except بی‌صدا» (از جمله در `api/v1/monitoring.py:18`) | Semgrep + bandit B110 | **اثبات شد** |
 | **F‑18** | **Medium** | ناسازگاری ظرفیت‌ها: ۱۶۴ handler سنکرون، threadpool=40، pool=60، 4 worker | `/audit/threads` + Dockerfile | **اثبات شد** |
@@ -90,6 +93,9 @@
 | **F‑20** | **Low** | ۲ export مرده در `lib/api.ts` | اسکن tag‑aware | **اثبات شد** |
 | **F‑21** | **Low** | ۵ session بدون context manager در اسکریپت‌ها | Semgrep | **اثبات شد** |
 | **F‑22** | **Low** | ۴ SQL با f‑string در یک migration | Semgrep | **اثبات شد** |
+| **F‑25** | **Medium** | گارد شناسه **کف** ندارد: ۱۲ endpoint با `-1`/`0`/`-0`/INT64_MIN پاسخ **۲۰۰** می‌دهند | ۴۸ سلول از ۸۷۲ سلولِ پاسِ با احراز هویت تأییدشده | **اثبات شد** |
+| **F‑26** | **Medium** | دو شکلِ متفاوت برای پاکت خطا: `{"error":…}` در برابر `{"detail":…}` | ۷۰ × ۴۰۴ و ۱ × ۴۰۵ با پاکت پیش‌فرض FastAPI | **اثبات شد** |
+| **F‑27** | **Medium** | پیش‌نیازِ «پروندهٔ عضو» در سبد خرید با `404 not_found` بیان می‌شود؛ سفارش به‌نیابت ممکن نیست | `shop.cart_add`/`shop.checkout` ⇒ ۴۰۴ در پاس seed | **اثبات شد** |
 
 **محدود/بی‌اثر (Low/Info):** `journal_mode=delete` پس از alembic (WAL فقط در رویداد `connect` موتور اعمال
 می‌شود) · هشدارهای `StarletteDeprecationWarning` برای `HTTP_422_UNPROCESSABLE_ENTITY` ·
@@ -460,7 +466,7 @@ sqlalchemy.exc.TimeoutError: QueuePool limit of size 40 overflow 20 reached,
 | ⇒ حداکثر اتصال همزمان روی یک فایل SQLite | **۲۴۰** | محاسبه |
 | `pool_timeout` | ۵ ثانیه ⇒ پاسخ **۵۰۰** (نه ۵۰۳) | مشاهده |
 
-**نبود مشاهده‌پذیری (اثبات زنده):** خروجی `GET /api/v1/metrics` شامل **۱۴ خانوادهٔ متریک** است:
+**نبود مشاهده‌پذیری (اثبات زنده):** خروجی `GET /api/v1/metrics` شامل **۱۲ خانوادهٔ متریک** است:
 `mp_http_requests_total`, `mp_http_requests_created`, `mp_http_request_duration_seconds_{bucket,count,sum,created}`,
 `mp_outbox_{pending,sending,sent,dead,dead_letters,oldest_pending_seconds,worker_stale}`.
 جست‌وجوی `pool|connection|session|sqlite|queue` در همان خروجی: **۰ تطبیق**.
@@ -543,7 +549,7 @@ SystemError: AST constructor recursion depth mismatch (before=39, after=34)
 ### F‑06 · `/api/v1/metrics` بدون احراز هویت (High)
 
 **مشاهده:** `GET /api/v1/metrics` بدون هیچ توکنی ⇒ **HTTP 200**، ۳۴۶ خط، ۶٬۵۲۹ بایت،
-۱۴ خانوادهٔ متریک. در `api/routes.json` هم `guards: []` ثبت شده (یعنی سهوی نیست، طراحی است).
+۱۲ خانوادهٔ متریک. در `api/routes.json` هم `guards: []` ثبت شده (یعنی سهوی نیست، طراحی است).
 
 **چه چیزی نشت می‌کند:** الگوی همهٔ مسیرها (`route="/auth/otp/request"` …)، توزیع statusها،
 هیستوگرام تأخیر، و **عمق صف outbox** (`mp_outbox_pending`, `mp_outbox_dead`,
@@ -711,7 +717,7 @@ ESLint 9 با flat config استاندارد (`@eslint/js` recommended + `typesc
 هیچ‌کدام اضافه/کم نیست) ⇒ فایل قرارداد **به‌روز** است.
 
 **بخش ناسالم:** فیلد `roles` در آن فایل، مجموعهٔ **مؤثر** گاردها را نشان نمی‌دهد.
-در ماتریس زندهٔ ۱۶۳×۷ (=۱٬۱۴۱ درخواست) **۶۰۱ مورد** پیش آمد که نقش «مجاز» اعلام شده بود
+در ماتریس زندهٔ ۱۶۳×۷ (=۱٬۱۴۱ درخواست) **۶۰۲ مورد** پیش آمد که نقش «مجاز» اعلام شده بود
 ولی سرور انکار کرد (۴۰۱/۴۰۳). علل واقعی (با شاهد):
 
 | علت | نمونهٔ زنده | پیام سرور |
@@ -754,6 +760,9 @@ ESLint 9 با flat config استاندارد (`@eslint/js` recommended + `typesc
 * مانیتورهای uptime/SEO آن را «سالم» می‌شمارند؛
 * در ماتریس ورودی نامعتبرِ من، تنها مورد «۲xx غیرمنتظره» همین بود (۱ از ۱٬۲۰۰+).
 
+**گسترهٔ واقعی (پس از بازاجرای معتبر):** این فقط `-1` نیست — هر چهار مقدار `-1`, `0`, `-0` و
+INT64_MIN روی همین مسیر ۲۰۰ می‌دهند، و همان الگو در ۱۱ مسیر دیگر هم هست ⇒ **F‑25**.
+
 **رفع:** همان HTML با status **404** (یا 422) برگردانده شود + برچسب متریک مجزا
 (`route="/payments/{id}/gateway-return", status="404"`) + یک آزمون.
 
@@ -764,14 +773,15 @@ ESLint 9 با flat config استاندارد (`@eslint/js` recommended + `typesc
 ### F‑15 · پیچیدگی: ۵۵ هشدار lizard و ۴۱ بلوک ≥C در radon
 
 * lizard: **۷۴۲ تابع**، میانگین CCN ‏۳٫۵، **۵۵ هشدار** (CCN>۱۰ یا طول>۶۰ خط) — یعنی ۷٫۳٪ توابع.
-* radon cc: **۹۵۶ بلوک**، میانگین **A (۲٫۹۸)**، **۴۱ بلوک C و بدتر**.
+* radon cc: **۹۵۶ بلوک**، میانگین **A (۲٫۹۸)**، **۴۱ بلوک C و بدتر** = C×31 · D×7 · E×1 · **F×2**.
 * radon mi: ۱۹۵ فایل بررسی شد.
 
 بدترین‌ها (با شاهد خط):
 
 | تابع | فایل:خط | CCN (lizard) | درجه (radon) | NLOC / طول |
 |---|---|---|---|---|
-| `validate_production_configuration` | `app/config.py:128` | **۴۶** | — | ۱۰۰ / ۱۱۶ خط |
+| `validate_production_configuration` | `app/config.py:128` | **۴۶** | **F (۴۷)** | ۱۰۰ / ۱۱۶ خط |
+| `prescribe_axis_work` | `engine/axis_prescription.py:43` | — | **F (۴۶)** | — |
 | `next_transfer_state` | `modules/shop/service.py:45` | — | **E (۳۴)** | — |
 | `estimate_percentile` | `engine/scoring.py:33` | ۲۸ | — | ۴۸ / ۶۰ |
 | `analyze` | `engine/segmental.py:66` | ۲۶ | — | ۸۵ / ۹۶ |
@@ -956,7 +966,7 @@ Semgrep این ۵ محل را علامت زد: `scripts/build_progressions.py:24
 | ۶ | هیچ ۵xx در ماتریس مجوز | ۱٬۱۴۱ درخواست: ۹۵۵ انکار، ۹۵ مجاز، ۵۷ ‏4xx کاری، **۰ خطای سرور** |
 | ۷ | هیچ نشت stack trace به کلاینت | در ۱٬۹۶۱ رکورد (شامل ورودی خصمانه) **۰ مورد** |
 | ۸ | پاکت خطا یکدست است | همهٔ ≥۴۰۰ با `{"error": {code, message, details}}` — **۰** پاکت ناهنجار |
-| ۹ | سقف شناسه‌ها کار می‌کند | `PathId(ge=1, le=MAX_SAFE_ID)`؛ `-1/0/10^23/abc/SQL/…` همه ۴xx (رفع DAST ‏M60/R18 تأیید شد) |
+| ۹ | **سقفِ** شناسه‌ها کار می‌کند (نه کف آن) | `99999999999999999999999` ⇒ ۷۰ × ۴۲۲ `invalid_id` (رفع DAST ‏M60/R18 تأیید شد)؛ `abc`/`null`/`1e5`/`1.5` ⇒ ۴۲۲/۴۰۴. **اما `-1`/`0`/`-0`/INT64_MIN ⇒ ۴۸ × ۲۰۰ ⇒ F‑25** |
 | ۱۰ | مالکیت داده نشت ندارد | ۱۶ درخواست بین‌عضوی با توکن عضو ⇒ **۰ پاسخ ۲۰۰** |
 | ۱۱ | JWT سخت‌گیرانه است | `alg=none`→۴۰۱، امضای جعلی→۴۰۱، امضای بریده→۴۰۱، منقضی→۴۰۱، `sid` جعلی→۴۰۱، `ver` نامعتبر→۴۰۱ |
 | ۱۲ | claim نقش بر DB غلبه نمی‌کند | توکن با `role=super_admin` ولی DB ‏`member` ⇒ **۴۰۳** |
@@ -997,6 +1007,7 @@ Semgrep این ۵ محل را علامت زد: `scripts/build_progressions.py:24
 | ۱۰ | «`journal_mode=WAL` همیشه فعال است» | پس از alembic = `delete`؛ WAL فقط در رویداد `connect` موتور | **تصحیح شد** (F‑18) |
 | ۱۱ | «صفحه‌های Analytics/Assessment/Login مرده‌اند» | از `adminApi.ts`/`session.ts`/`appStore` داده می‌گیرند | **رد شد** |
 | ۱۲ | «`fetchOrderReceipt`/`markOrderStatus` کد مرده‌اند» | با `await import()` پویا در `Shop.tsx:446,459` استفاده می‌شوند | **رد شد** (F‑19) |
+| ۱۳ | «پاس ورودی خصمانه با احراز هویت اجرا شد» | **نشد**: ۶۶۴ سلول از ۸۰۴ `401 «نشست معتبر نیست»` گرفتند چون توکن در پاس قبل با `logout-all` باطل شده بود ⇒ آن پاس **نادرس‌نتیجه** بود. با اسکریپت جدید `audit/probe_invalid_authed.py` (canary قبل/بعد، ۰ ورود مجدد) بازاجرا شد: ۸۷۲ سلول معتبر ⇒ سه یافتهٔ تازه F‑25/F‑26/F‑27 | **نقص روش‌شناختیِ خودم — اصلاح شد** |
 
 **مواردی که BLOCKED ماندند (و نباید «سالم» فرض شوند):**
 
@@ -1073,6 +1084,9 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | ۲۰ | pragmaها در `alembic/env.py` | F‑18 | ۱ ساعت | پس از `upgrade head`: `journal_mode=wal`, `foreign_keys=1` |
 | ۲۱ | حذف ثابت منسوخ ۴۲۲ + اصلاح شمارش مسیرها از OpenAPI | F‑24 | ۲ ساعت | اجرای بار بدون `StarletteDeprecationWarning` |
 | ۲۲ | Playwright + axe در CI (مرور ۱۰ دکمه، a11y، جریان‌های مالی روی دادهٔ مصنوعی) | F‑23/F‑10 | ۲–۳ روز | گزارش axe ⇒ ۰ خطای critical |
+| ۲۳ | افزودن **کف** به گارد شناسه (`v < 1` ⇒ ۴۲۲) در `app/id_guard.py` یا اعمال `PathId` در ۵۵ امضا | F‑25 | ۲ ساعت | `probe_invalid_authed.py` ⇒ `unexpected_2xx_on_bad_id == 0` |
+| ۲۴ | هندلر `StarletteHTTPException` برای نگاشت ۴۰۴/۴۰۵ مسیریابی به پاکت پروژه | F‑26 | ۱ ساعت | `fastapi_default_detail == 0` در همان پراب |
+| ۲۵ | تبدیل `NotFoundError` در `_own_member` به خطای اختصاصی `409 member_profile_required` + تصمیم دربارهٔ سفارش به‌نیابت | F‑27 | ۲ ساعت (+تصمیم محصول) | `POST /shop/cart` بدون پروندهٔ عضو ⇒ ۴۰۹ با کد اختصاصی |
 
 ---
 
@@ -1097,8 +1111,11 @@ health score) باید **دستی راستی‌آزمایی** شود؛ در ای
 | `audit/evidence/openapi-live.json` | سند OpenAPI زنده (۱۴۱ مسیر/۱۶۳ عملیات) |
 | `audit/evidence/metrics-noauth.txt` | خروجی `/metrics` بدون احراز هویت (F‑06) |
 | `audit/evidence/contract-matrix-raw.json` | ۱٬۹۶۱ رکورد خام ماتریس مجوز + ورودی نامعتبر |
-| `audit/evidence/contract-rbac-findings.json` | خلاصهٔ یافته‌های ماتریس (۶ مجازِ بدون احراز هویت، ۲ بیش‌ازحد مجاز، ۶۰۱ انکارِ مخالف قرارداد) |
-| `audit/evidence/contract-invalid-findings.json` | نتیجهٔ ورودی خصمانه (۰ ‏5xx، ۰ نشت، ۱ ‏2xx غیرمنتظره) |
+| `audit/evidence/contract-rbac-findings.json` | خلاصهٔ یافته‌های ماتریس (۶ مجازِ بدون احراز هویت، ۲ بیش‌ازحد مجاز، ۶۰۲ انکارِ مخالف قرارداد) |
+| `audit/evidence/contract-invalid-findings.json` | پاس ورودی خصمانهٔ **نخست** (نادرس‌نتیجه — توکن باطل؛ فقط به‌عنوان شاهدِ نقص روش نگه داشته شده) |
+| `audit/probe_invalid_authed.py` | پاس ورودی خصمانهٔ **معتبر** با canary احراز هویت (T‑34) |
+| `audit/evidence/contract-invalid-authed.json` | ۸۷۲ سلول معتبر: ۰ × 5xx، ۴۸ × ۲۰۰ روی شناسهٔ غیرمجزا (F‑25)، ۷۰ × پاکت پیش‌فرض (F‑26) |
+| `audit/evidence/pathid-scan.json` | اسکن گارد شناسه: ۰ کاربرد `PathId`، ۵۵ پارامتر `int` بدون گارد بازه |
 | `audit/evidence/contract-diff.json` | diff قرارداد و توزیع گاردها |
 | `audit/evidence/load-plain-dev.json` | بار پله‌ای روی سرور کنترل (F‑03/F‑04) |
 | `audit/evidence/logging-cost.json` | جدول هزینهٔ رندر لاگ |
@@ -1214,6 +1231,17 @@ for id in 27 31 36; do /tmp/run/venv-audit/bin/mutmut apply $id; \
 ۲ مورد «بیش‌ازحد مجاز» در برابر قرارداد: `POST /auth/logout-all` برای `coach` و `reception`
 ⇒ قرارداد `roles` ناقص است (F‑12)، نه حفرهٔ امنیتی (endpoint عمداً auth‑only است).
 
+**پاس ورودی خصمانه — نسخهٔ معتبر (۸۷۲ سلول، با canary احراز هویت):**
+
+| status | تعداد | | status | تعداد |
+|---|---|---|---|---|
+| ۴۲۲ | ۵۳۱ | | ۴۰۳ | ۳۴ |
+| ۴۰۴ | ۲۲۰ (۱۵۰ با پاکت پروژه، **۷۰ با پاکت پیش‌فرض** ⇒ F‑26) | | ۴۰۰ | ۲۴ |
+| **۲۰۰** | **۵۵** (۴۸ شناسهٔ غیرمجزا ⇒ F‑25، ۷ بدنهٔ خصمانه در `expenses.note`) | | ۴۰۹ | ۸ |
+| **۵xx** | **۰** | | نشت `Traceback` | **۰** |
+
+پاس نخست (۸۰۴ سلول) به‌دلیل توکنِ باطل‌شده **نادرس‌نتیجه** بود و بایگانی شد (§۹ ردیف ۱۳).
+
 ### ۱۴‑۲) توزیع گاردها در قرارداد (۱۶۳ عملیات)
 
 | گاردها | تعداد |
@@ -1279,7 +1307,7 @@ for id in 27 31 36; do /tmp/run/venv-audit/bin/mutmut apply $id; \
 | سقف threadpool ‏(anyio) | ۴۰ توکن |
 | pool_size / max_overflow / pool_timeout / pool_recycle | ۴۰ / ۲۰ / ۵s / ۱۸۰۰s |
 | ورکرهای uvicorn در Dockerfile | `WEB_CONCURRENCY:-4` |
-| خانواده‌های متریکِ عمومی | ۱۴ (هیچ‌کدام مربوط به pool) |
+| خانواده‌های متریکِ عمومی | **۱۲** (۶ `mp_http_*` + ۶ `mp_outbox_*`)؛ هیچ‌کدام مربوط به pool |
 | دکمه‌ها در استودیو | ۸۴ (۷۴ با onClick، ۱۰ بدون، ۰ تهی) |
 | exportهای `lib/api.ts` | ۸۱ |
 
@@ -1293,5 +1321,5 @@ for id in 27 31 36; do /tmp/run/venv-audit/bin/mutmut apply $id; \
 * **محیط اجرا:** sandbox ‏Arena — ۲ vCPU، ~۳٫۶GB RAM، پایتون ۳٫۱۱٫۲، Node ‏۲۲٫۲۲٫۳
 * **اپ اجراشد:** `0.0.0.0:8010` در سه پیکربندی (ابزار‌دار / کنترل خام / CMD واقعی Dockerfile)
 * **داده‌ها:** کاملاً مصنوعی
-* **تعداد یافته:** ۲۴ (۳ Critical، ۶ High، ۶ Medium، ۹ Low/Info) + ۱۲ یافتهٔ کاذبِ رد‌شده
+* **تعداد یافته:** ۲۷ (۳ Critical، ۶ High، **۹ Medium**، ۹ Low/Info) + ۱۲ یافتهٔ کاذبِ رد‌شده + ۱ نقص روش‌شناختیِ اصلاح‌شده
   + ۱۱ مورد BLOCKED
