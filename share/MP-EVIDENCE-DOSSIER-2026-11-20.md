@@ -1969,8 +1969,9 @@ commit پایهٔ `662ff88` با ruff ‏۰٫۱۷٫۶: **۷۲** (فقط `RUF100`
 | `audit/verify-addendum-gates.sh` | 5,409 | `7abab6c3f868697d…` |
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
 | `share/MP-BUILDER-ADDENDUM-2026-11-21.md` | 67,827 | `eb2a37d227703452…` |
+| `share/MP-BUILDER-HANDOFF-A1.3.md` | 27,908 | `3a0f9582b179651c…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 162,366 | `6d43280648d03d4d…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 162,435 | `e0fa7a67cbcd5321…` |
 | `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,784 | `65cb5aaf07cfc503…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 
