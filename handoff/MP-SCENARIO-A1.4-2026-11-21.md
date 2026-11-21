@@ -199,6 +199,22 @@
 - **`C4` (مرزها):** هفت schema مطابقِ نگاشتِ `C0` · یک نقشِ DB برای اپ که روی `auth.*` جز از طریقِ یک view/تابعِ باریک `SELECT` ندارد · partition ماهانهٔ ۱۴ جدولِ پرحجمِ `C0` · `pg_dump -n` برای پشتیبانِ تفکیک‌شده و retention متفاوت به ازای هر schema.
 - **قانونِ شواهد:** همهٔ اعدادِ بار/زمان‌بندیِ موجود در `04-evidence/raw/` روی SQLite سنجه شده‌اند. پس از `C3` آن‌ها را **re-baseline** کن و در سندِ شواهد برچسبِ «دورانِ SQLite» بزن. اعدادِ قدیمی را پاک نکن — به‌عنوانِ ستونِ «قبل» نگهشان دار.
 
+## B‑۴٫۵ · اصلاحِ `2026-11-21` شب — دو مورد از این سند با سنجه باطل شدند
+
+**۱. تفکیکِ `WP 4.6` که در §B‑۵ خواسته بودم لازم نیست — بیلدر خودش درست انجامش داده.** سنجه از commit `fe103a486` («WP 4.6: no member_id=-1 sentinel; narrow mp-ts-float-money regex (F-16)»): هفت فایل دست خورده و **هیچ‌کدام دارت نیست** — `.semgrep/mp-harness-rules.yml` (+۲/−۱)، `.semgrep/tests/mp-ts-float-money.ts` (+۱۹، تازه)، `mp-app/studio/src/pages/Nutrition.tsx` (+۵/−۱)، `mp-app/studio/tests/nutritionNoMemberSentinel.test.tsx` (+۲۹، تازه)، و سه سندِ `DECISIONS.md`/`EXECUTION-LOG.md`/`FINN-AUDIT-LOOP.md`. یعنی دقیقاً همان «نیمهٔ استودیو را انجام بده، نیمهٔ دارت را دست نزن» رعایت شده. **اقدامِ تو: هیچ.** فقط در داوری ثبت کن که `DEFERRED(D-n)` نیمهٔ دارت در `DECISIONS.md` موجود است.
+
+**۲. سه گیتِ `main` روی شاخهٔ بیلدر قرمز است و این شاخه در این حالت merge‌شدنی نیست.** سنجه: هر هشت check-run روی `main` سبز‌اند (`e2e-api`, `secret-scan`, `backend`, `studio`, `Client — pinned SDK…`, `Documentation links and handoff`, `client-flutter`, `live-contract`). روی tip شاخهٔ بیلدر (`9bfc99d6f27f`، «WP 2.4: RBAC decision cache + numeric-id normalisation + lock (F-05)» @ `2026-11-21T23:22:15Z`) سه مورد قرمز است:
+
+| job | گامِ قرمز | کدِ خروج | تشخیصِ سنجه‌شده |
+|---|---|---|---|
+| `secret-scan` | «Scan full Git history (redacted metadata)» | ۱ | **مثبتِ کاذبِ خودارجاع.** پنج annotation همه به `docs/MuscleParadise/audit/evidence/detect-secrets.json` خطوطِ ۱۸۲/۱۹۱/۲۰۵/۲۱۴/۲۲۱ اشاره دارند با `Potential secret match (generic-api-key); value withheld; commit 839500de55bf`. آن خطوط را خواندم: همه `"hashed_secret": "<۴۰ کاراکتر هگز>"` با `"is_verified": false` ⇒ **hash است، نه رازِ آشکار**. این فایل بخشی از dumpِ‏ `WP 0.1` است (commit `839500de55bf` @ `17:04:35Z`، **۱۱۵ فایل / ۸۲٬۶۱۲ خطِ افزوده**؛ بزرگ‌ترین‌ها `contract-matrix-raw.json` ۳۲٬۲۶۴ خط · `backend-coverage.xml` ۱۲٬۱۵۳ · `contract-invalid-authed.json` ۱۲٬۱۱۱). اسکنرِ تاریخ، baselineِ خودِ detect-secrets را کلیدِ API می‌بیند. **هیچ رازی نشت نکرده.** |
+| `live-contract` | «Seed + run API» | **۷** | **رگرسیونِ واقعی.** exit 7 یعنی سرویس بالا نیامده یا اتصال برقرار نشد. مظنونِ اول: همان commitِ tip که `WP 2.4` (RBAC cache + lock + نرمال‌سازیِ شناسهٔ عددی) را آورد. |
+| `Documentation links and handoff` | «Interaction map gate (contract drift + stale map)» | ۱ | **گیت دارد درست کار می‌کند.** ‏`WP 3.4` در `fc402a823` قرارداد را عوض کرد (`409` برای سبدِ بدونِ پروفایلِ عضو) و نقشهٔ تعامل بازتولید نشده ⇒ drift واقعی. |
+
+**`AD‑13` (پیشنهادی، هنوز صادر نشده):** برای سبز کردنِ `secret-scan` **اجازهٔ «ignore تازه» نده مگر با سه شرط** — (الف) allowlist **فقط و فقط** همان یک مسیر `docs/MuscleParadise/audit/evidence/detect-secrets.json` باشد؛ (ب) یک تستِ سلامتِ گیت اضافه شود که یک رازِ جعلی را در فایلی **دیگر** می‌کارد و اثبات می‌کند اسکنر هنوز آن را می‌گیرد؛ (ج) پیش از هر تغییری محلِ واقعیِ پیکربندیِ gitleaks پیدا شود — سنجه کردم که در ریشهٔ شاخه **`.gitleaks.toml` وجود ندارد** (`404`)، پس allowlist یا داخلِ `ci.yml` است یا در مسیری دیگر. بدونِ شرطِ (ب)، allowlist یعنی کور کردنِ گیت.
+
+**ترتیبِ اجباریِ تازه:** تا هر سه job سبز نشده‌اند هیچ merge‌ای انجام نشود — حتی mergeِ بسته‌هایی که داوریِ عددی‌شان `MATCH` است. و چون `live-contract` با exit 7 شکست، داوریِ عددیِ `WP 2.4` هم تا روشن‌شدنِ آن بی‌معناست: ممکن است راه‌اندازیِ اپ شکسته باشد.
+
 ## B‑۵ · آنچه در مسیرِ B (کلاینتِ TS/PWA) به تو **مربوط می‌شود** و آنچه نمی‌شود
 
 - **مربوط نمی‌شود:** نوشتنِ کلاینتِ TS. آن یک کارزارِ جدا با برنامهٔ خودش است (۱۱٬۸۴۵ خطِ دارت در ۱۷ حوزه) و به حلقهٔ بی‌ناظرِ تو سپرده نمی‌شود.
