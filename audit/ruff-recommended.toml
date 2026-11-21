@@ -22,7 +22,10 @@ select = [
   "FAST",   # قوانین اختصاصی FastAPI (FAST002 = وابستگی بدون Annotated)
   "SLF",    # دسترسی به عضو خصوصی (limiter._storage)
   "FBT",    # تلهٔ بولی در امضا (همان bank_verified: bool = False)
-  "ERA",    # کد کامنت‌شده (مرده)
+  "ERA",    # کد کامنت‌شده (مرده) — ولی ۱۱/۱۱ یافته‌اش روی این کدبیس کاذب است:
+           # security/rbac.py:146,161 و modules/population/gates.py:11 کامنتِ فارسی‌اند،
+           # db/models/content.py:73 و modules/assessment/equations.py:14-19 مستندِ شکلِ داده.
+           # در WP 0.9 این خانواده را به ignore منتقل کن ⇒ ۴۳۰ به ۴۱۹ می‌رسد.
   "T20",    # print
   "A",      # سایه‌زدن builtin
   "PERF", "PIE", "RET", "RSE", "FURB", "PTH", "SLOT",
