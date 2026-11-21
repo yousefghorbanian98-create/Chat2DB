@@ -1536,7 +1536,7 @@ modules/face_id/deep.py:74: unused variable 'image_bgr' (100% confidence)
 | `PLR2004` (magic value) | ۹۴۴ | بیشترش در تست‌ها و معادلاتِ علمی (`engine/`) — نویز |
 | `PLC0415` (import تنبل) | ۹۸۸ | الگوی رایج و بی‌ضرر این کدبیس (import داخل تابع برای شکستنِ وابستگی دوری) |
 | `COM` | ۸۶۵ | با `ruff format` تضادِ رسمی دارد |
-| `TRY003` + `EM101/EM102` | ۶۶۹ | پیامِ خطای فارسیِ inline الگوی عمدیِ پروژه است |
+| `TRY003` + `EM101/EM102` | **۷۲۰** (۳۶۰+۳۰۹+۵۱) | پیامِ خطای فارسیِ inline الگوی عمدیِ پروژه است |
 
 **شاهدِ خام:** `audit/evidence/ruff-recommended-findings.txt` (۴۳۰ ردیف `file:line: RULE`)،
 `ruff-recommended-stats.txt` (۵۲ قاعده با شمارش)، `ruff-all-rules.txt` (۱۰۸ قاعده)،
@@ -1932,14 +1932,14 @@ SQLِ قابل‌تزریقِ «کامل» تشخیص نمی‌دهد (فقط `D
 | `audit/probe_load.py` | 7,721 | `940089b867e6446e…` |
 | `audit/probe_otp_limits.py` | 6,356 | `662906b965d4801e…` |
 | `audit/repro_rbac_systemerror.py` | 4,829 | `4d0cfbe573652b38…` |
-| `audit/ruff-recommended.toml` | 4,127 | `1cb99697bc881746…` |
+| `audit/ruff-recommended.toml` | 4,148 | `f7f96f224b7b85e2…` |
 | `audit/scan_ui_wiring.py` | 7,088 | `64e64c20bfe2b1f5…` |
 | `audit/semgrep-mp.yml` | 7,002 | `d58146b4f372ca82…` |
 | `audit/serve_backend.py` | 10,139 | `fc1f4e3644718f19…` |
 | `audit/serve_plain.py` | 2,073 | `fe6a735f3ce45fb5…` |
 | `share/MP-AGENT-BRIEF.md` | 140,046 | `af8ef690c394ad92…` |
 | `share/MP-BUILDER-PROMPT-2026-11-21.md` | 40,447 | `9ffc5853019026d2…` |
-| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 154,722 | `fa505b74294d3e67…` |
+| `share/MP-EVIDENCE-DOSSIER-2026-11-20.md` | 154,747 | `812cbbde954e40e4…` |
 | `share/MP-FINAL-AUDIT-REPORT-2026-11-20.md` | 114,110 | `1f292decfd592051…` |
 | `share/MP-PROBLEMS-2026-11-20.md` | 40,422 | `a2e7910817bac975…` |
 
