@@ -592,4 +592,50 @@ GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو �
   · مجوز Apache-2.0 با قاعدهٔ ایستادهٔ «فقط ابزار آزاد/متن‌باز» سازگار است؛ و چون هرگز نباید وارد artifact توزیعی شود، بحثِ GPL/AGPL هم پیش نمی‌آید.
 
 **تصمیم:** نصب/اتصال نداریم. بعد از بسته شدنِ نقطهٔ بررسیِ ۱ و merge، اگر مالک خواست، فقط حالتِ code-only محلی روی MP آزمایش شود — بدون docs/PDF، بدون Cloud. برگشت‌پذیر و بی‌هزینه.
+---
+
+## داوریِ دورِ بیلدر پس از reset دوم: ‏AD‑21 و AD‑22 تأیید · و معمای «+۱» را **من حل کردم**
+
+### الف) AD‑21 (commit ‏`7bbccfa`) — تأیید ✅
+
+| سنجه | مقدار |
+|---|---|
+| `.github/workflows/apk.yml` | حذف شده (−۱۸۰ خط) · روی tip وجود ندارد |
+| تستِ گاردِ APK | حذف شده (−۲۷ خط از `test_release_signing_policy.py`) · grep سراسری: نیافت |
+| تستِ signing گریدل | **باقی** · ۶ تابعِ test در همان فایل |
+| شمارش | بیلدر: ۱۲۷۶ → ۱۲۷۵ · collect مستقلِ من روی tip: **۱۲۷۵** |
+
+### ب) AD‑22 (commit ‏`7fefb6f`) — تأیید ✅
+
+| سنجه | مقدار |
+|---|---|
+| `requirements.txt` | ۸۶ خط = ۲ هدر + **۸۴ پینِ `==`** · صفر ورودیِ غیر `==` |
+| بررسیِ URL | آن سه موردِ اولِ grep من false-positive بود: `httpcore`/`httptools`/`httpx` نامِ بسته‌اند نه URL |
+| پین‌های کلیدی | `fastapi==0.165.0` · `ruff==0.17.6` · و resolve تازهٔ **من** در venv مستقل همین دو را داد ⇒ «صفر تغییر نسخه» مستقل تأیید شد |
+| `ci.yml` | دقیقاً **۳** گامِ install به `pip install -c mp-app/backend/requirements.txt -e …` عوض شده (backend · یک گام میانی · e2e-api) |
+| DECISIONS | هر دو تصمیم با دلیل، شمارش و «نحوهٔ برگرداندن» ثبت‌اند؛ AD‑22 خودش تصحیحِ نامِ `constraints.txt` → `requirements.txt` را یادداشت کرده |
+| CI روی `7fefb6f` | **هر هشت سبز** · PR #24: `head=7fefb6f` · `mergeable_state=clean` |
+
+### ج) معمای «+۱» — حل شد، با مکانیسم و نامِ مقصر
+
+بیلدر ثبت کرده بود: collect ‏۱۲۷۵ ولی خلاصهٔ اجرا ۱۲۷۴ passed + 2 skipped = ۱۲۶، و نتوانسته بود توضیح دهد.
+سنجهٔ من در venv مستقل (pytest ‏9.2.0):
+  · collect با هر ترکیبِ پرچم: **۱۲۷۵** و فهرستِ node-id‌ها یکسان
+  · اجرای `-v`: ‏**۱۲۷۴ خطِ PASSED + دقیقاً ۱ خطِ SKIPPED** = ۱۲۷ نتیجه · صفر node-id تکراری · تفاوتِ مجموعه‌ای با collect = **صفر**
+  · پس نتیجهٔ دومِ «skipped» یک **skip در سطحِ ماژول** است: `tests/regression/test_dart_gate.py:25-26` با `pytest.importorskip("tree_sitter", …)` — ماژولی که tree-sitter ندارد، **صفر آیتم collect می‌کند ولی در خلاصه یک skipped شمرده می‌شود**
+  · حسابِ بسته: ۱۲۷۵ آیتم = ۱۲۷۴ passed + ۱ skipِ آیتمی (`test_real_apks_pass_the_deep_audit`)؛ خلاصه +۱ skipِ ماژولی = ۱۲۷۶
+  ⇒ **هیچ تستِ شبحی وجود ندارد**؛ تفاوت، قراردادِ شمارشِ pytest است نه پنهان‌کاری. بندِ «باز» بیلدر با این مکانیسم بسته می‌شود.
+
+### د) بدهیِ باقی‌ماندهٔ بیلدر: یک commit سند برای اشاره‌های کهنه به `apk.yml`
+
+۱۴ فایل هنوز `apk.yml` را mention می‌کنند. تفکیکِ من:
+  · **باید اصلاح شوند** (سندِ عملیاتی‌اند و دستورِ اجرا می‌دهند): `guides/flutter-codespace.md` · `runbooks/codespaces-execution.md` · `RELEASE-CHECKLIST.md` · `READY-TO-BUILD-2026-11-15.md` · `SESSION_HANDOFF.md` · `docs/architecture/repowise/PROJECT-HANDOFF.md` · دو فایلِ `architecture/repowise-*-scope-2026-11-18.txt` · `audit/CHECKLIST.md`
+  · **باید بمانند** (رکوردِ تاریخی‌اند؛ بازنویسیِ تاریخ ممنوع): `CHANGELOG.md` · `audit/DECISIONS.md` · `audit/EXECUTION-LOG.md` · `audit/INVENTORY.md` · `audit/findings.json`
+
+### هـ) فایلِ گم‌شدهٔ بیلدر
+
+`share/MP-BUILDER-HANDOFF-A1.3.md` در sandbox او untracked بود و با reset رفت. نسخهٔ commit‌شده در مخزنِ من سالم است و او می‌تواند از همین نشانی بازیابی کند:
+`https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-HANDOFF-A1.3.md`
+
+**merge همچنان ممنوع:** بیلدر هنوز آیتم‌های READY/TODO لوپ را دارد (۲٫۱، ۲٫۲، ۲٫۳، ٫۳، ۴٫۴ و بقیه) + همین commit سند؛ بعد از آنها داوریِ عددیِ من، بعد merge با تو.
 
