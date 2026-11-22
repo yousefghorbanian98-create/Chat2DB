@@ -521,4 +521,23 @@ GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو �
   آن پرچم فقط یک «تأییدِ انسانیِ دوم» می‌خواست که در مخزنِ تک‌نفره غیرممکن است؛ برداشتنش هیچ گیتِ فنی‌ای را کم نمی‌کند.
 
 بعد از Save، انتظارم `mergeable_state = clean` است؛ خودم دوباره می‌خوانم و ثبت می‌کنم. و باز هم: **merge نمی‌کنیم** تا داوریِ عددی تمام شود.
+---
+
+## لایهٔ دومِ قفل: یک branch protection ‏legacy روی `main` — سنجه‌شده، محتوایش نامعلوم
+
+| سنجه | مقدار |
+|---|---|
+| `GET /branches/main` | **`protected = true`** ⇒ یک قاعدهٔ branch protection قدیمی، **موازیِ** ruleset فعال است |
+| `GET /branches/arena/5a1e37b3-mp` | `protected = false` |
+| خواندنِ جزئیاتِ قاعده با توکنِ من | **403** ⇒ محتوایش را نمی‌بینم؛ فقط صفحهٔ Settings مالک می‌بیند |
+| `mergeable_state` پس از برداشتنِ تیکِ unattributed | هنوز `blocked` (با هشت check سبز و `reviewDecision=null`) |
+| status‌های legacy روی head | `state=pending` با **صفر** context |
+
+نتیجهٔ منطقی: قاعدهٔ legacy احتمالاً «Require status checks to pass before merging» را با نامِ check‌های **قدیمی** روشن دارد که هیچ‌وقت گزارش نمی‌شوند ⇒ PR برای همیشه منتظر می‌ماند. (گزینه‌های دیگر مثل «required reviews» با `reviewDecision=null` ناسازگارند.)
+
+**درمانِ درخواستی از مالک:** ‏Settings → Branches → قاعدهٔ `main` → Edit:
+در بخشِ «Require status checks to pass before merging» هر context تیک‌خورده را **بردار/پاک کن**؛ اگر بخشِ «Require pull request reviews» تیک دارد و شمارش غیرصفر است، صفرش کن یا تیکش را بردار؛ به «Restrict who can push» و «Allow force pushes / deletions» **دست نزن**؛ Save.
+اگر صفحه چیزی غیر از این‌ها نشان داد، به‌جای حدس، اسکرین‌شات بفرست تا دقیق بگویم.
+
+بعد از آن انتظار: ‏`mergeable_state = clean`. خودم می‌خوانم و ثبت می‌کنم. merge همچنان ممنوع تا داوریِ عددی.
 
