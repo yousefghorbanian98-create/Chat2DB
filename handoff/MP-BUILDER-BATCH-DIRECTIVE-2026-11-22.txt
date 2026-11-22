@@ -26,7 +26,7 @@
    عددِ بدونِ شاهد ممنوع: هر عددی که می‌نویسی باید فرمانِ سنجه‌اش در LOG باشد.
 
 ۵) پایان: پس از B4 یک اجرای کامل (suite + همهٔ گیت‌ها) + یک push + یک بخشِ BATCH-SUMMARY
-   با جدولِ «بسته ← commit‌ها ← اعدادِ گیت‌ها». بعد بایست و منتظرِ داوریِ ممیز بمان. merge ممنوع.
+   با جدولِ «بسته ← commit‌ها ← اعدادِ گیت‌ها». بعد بایست و منتظرِ داوریِ ممیز بمان. merge ممنوع **مگر** با «اجازهٔ merge صادر شد» از سوی ممیز و فقط طبقِ `handoff/MP-MERGE-PROTOCOL-2026-11-22.txt` (جایگزینِ این بند؛ فقط `gh pr merge 24 --merge`، squash/rebase/auto/admin/delete-branch ممنوع چون ۱۳۲ sha در اسنادِ ممیزی نقل شده) **مگر** با «اجازهٔ merge صادر شد» از سوی ممیز و فقط طبقِ `handoff/MP-MERGE-PROTOCOL-2026-11-22.txt` (جایگزینِ این بند؛ فقط `gh pr merge 24 --merge`، squash/rebase/auto/admin/delete-branch ممنوع چون ۱۳۲ sha در اسنادِ ممیزی نقل شده).
 
 نسخهٔ commit‌شدهٔ همین دستور (برای بازیابی پس از reset محیط):
 https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-BATCH-DIRECTIVE-2026-11-22.txt
