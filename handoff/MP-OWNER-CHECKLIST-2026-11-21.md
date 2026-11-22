@@ -638,4 +638,43 @@ GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو �
 `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-HANDOFF-A1.3.md`
 
 **merge همچنان ممنوع:** بیلدر هنوز آیتم‌های READY/TODO لوپ را دارد (۲٫۱، ۲٫۲، ۲٫۳، ٫۳، ۴٫۴ و بقیه) + همین commit سند؛ بعد از آنها داوریِ عددیِ من، بعد merge با تو.
+---
+
+## نقطهٔ بررسیِ ۱ — برشِ الف: داوریِ عددیِ WP 2.5 / WP 3.2 / WP 3.2 بسته شد ✅ (روی tip ‏`7fefb6f`)
+
+شرطِ ورود برقرار بود: هر هشت job سبز روی `7fefb6f`. پس داوری را **خودم و مستقل** اجرا کردم، نه با خواندنِ گزارشِ بیلدر.
+
+### الف) اجرای مستقلِ گیت‌ها در venv خودم
+
+پنج فایلِ گیت (`test_wp25_silent_failures` · `test_wp25_dast_skip_counter` · `test_wp25_scrape_errors_ready` · `test_wp32_error_envelope` · `test_wp32_detail_preserved`) ⇒ **۱۱ passed، ۰ failed** در ۲٫۱۳ ثانیه.
+
+### ب) WP 3.2 — اعدادِ پروبِ ۸۷۲ سلولی
+
+| سنجه | before ‏(`0afd240`) | after ‏(`8926fcd`+fix) |
+|---|---|---|
+| `cells_total` | 872 | 872 (یکسان) |
+| `fastapi_default_detail` | **70** | **0** |
+| status histogram | 422:531 · 404:220 · 200:55 · 403:34 · 400:24 · 409:8 | **کاملاً یکسان** |
+| `server_errors_5xx` / `leaked_stacktrace` / `bad_error_envelope` | 0 / 0 / 0 | 0 / 0 / 0 |
+| `id_guard_rejections` | 70 | 70 (انتظار: همین — یعنی گارد کار می‌کند) |
+| `unexpected_2xx_on_bad_id` | 48 | 48 ← **این یکی کارِ WP 3.2 نبود**؛ ببینid پایین |
+
+### ج) WP 3.1 — همان ۴۸ بسته شد
+
+`evidence/after/wp31/summary.json`: ‏`unexpected_2xx_on_bad_id` از **۴۸ به ۰** (بعد از `ccd8be671`، dependency ‏ِ floor شناسه). پس زنجیرهٔ ۲٫۵ → ۳٫۲ → ۳٫۱ کامل بسته است.
+
+### د) WP 2.5 — شمارنده‌ها و سیم‌کشیِ semgrep
+
+  · `monitoring.py`: ‏`mp_metrics_scrape_errors_total` با lock و `logger.warning` + traceback برای خطای scrape ‏(`/health/ready`)
+  · `scripts/dast.py`: ‏`_log_skip(where)` با شمارندهٔ `mp_dast_errors_total{where}` در نقطه‌های skip (عملیات/مثال) + فیلدِ `generation_skipped` در خروجی
+  · semgrep: قواعدِ پروژه **مسدودکننده** (`semgrep --config=.semgrep/project-rules.yml --error`) و قواعدِ harness کیت **غیرمسدودکننده** (`continue-on-error: true`) دقیقاً مطابقِ تصمیمِ فاز ۰ در WP 0.7
+  · آن سه نقطهٔ `dast.py:79,174,180` که در داوریِ قبلی بی‌شمارنده بودند، حالا `_log_skip` دارند
+
+### هـ) نتیجهٔ برشِ الف
+
+**WP 2.5 = بسته · WP 3.2 = بسته · WP 3.1 = بسته** (عددی، با اجرای مستقل و خواندنِ شواهد). پنج commit دستهٔ ۱ همچنان **MATCH** از داوریِ پیشین.
+برشِ ب (باقیِ آیتم‌های لوپِ بیلدر + commit سندِ `apk.yml`) که بسته شد، نقطهٔ بررسیِ ۱ کامل است و آن‌وقت یک تصمیمِ واقعی پیشِ روی توست:
+  · **گزینهٔ آ:** PR #24 را به‌عنوانِ دستهٔ ۱ همین حالا merge کن و بقیهٔ آیتم‌ها را در PR بعدی ببریم (ریسک: drift کمتر، ولی کارِ نیمه‌تمامِ بیلدر پشتِ merge می‌ماند)
+  · **گزینهٔ ب:** صبر کن تا کلِ لوپ تمام شود و بعد یک merge (ریسک: diff بزرگ‌تر و مدتِ بیشتر)
+  توصیهٔ من را همان لحظه با اعداد می‌دهم؛ تصمیم با تو.
 
