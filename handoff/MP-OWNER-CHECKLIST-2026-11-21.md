@@ -911,4 +911,54 @@ reachable بودنِ shaهای نقل‌شده · CI روی main تا سبزیِ
 | WP 4.7 (بارِ پله‌ای) | Docker/Postgres در هیچ سندباکسِ agent نیست؛ بخشِ semgrep-blocking **انجام‌شده** (‏`ci.yml:158-172`) | **نه** — BLOCKED-ENV |
 | ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴ | PARTIAL/BLOCKEDِ مستند (مثلاً F‑12 اوراکلِ `routes.json`، F‑02 پیش‌فرضِ fail-open) | بخشی بله، بخشی تصمیمِ محصول |
 | receiptQueue | بودجهٔ هارنس؛ در CI سبز | **بله** (ثبتِ یافته + اصلاح در فاز P) |
+---
+
+## داوریِ B5-closure (سه کامیت، tip ‏`6c473d0`) = MATCH ✅ + ششمین اصلاحِ سندِ خودم + یک کشفِ سنجه‌شده
+
+### الف) جدولِ داوری
+
+| ادعا | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| سه کامیت، بدونِ force-push | ‏`compare efa20d0...6c473d0` ⇒ `ahead_by=3`, **`behind_by=0`**؛ ۱۱ فایل، +۳۸٬۶۶۷/−۶۳۷ | ✅ |
+| هیچ تغییرِ ممنوعه‌ای نیست | اسکنِ فایل‌های حساس ⇒ **هیچ** (‏`requirements`/`package*.json`/`apiCoverage`/`.gitleaksignore`/`ci.yml`/`eslint`/`vitest`/ruleset/`share/`/`*.png` دست‌نخورده) | ✅ |
+| بک‌اند کامل سبز | اجرای مجددِ `coverage_run.sh` روی checkout ‏`6c473d0` در venvِ خودم ⇒ **`1307 passed, 2 skipped in 432.12s`، EXIT=0**، TOTAL **۹۱٪**، گیتِ per-directory **PASS** | ✅ |
+| تستی حذف نشد | node-id: ‏`efa20d0`=۱۳۰۶ ⇒ `6c473d0`=**۱۳۰۸** · **حذف ۰ · افزوده ۲** (دقیقاً دو تستِ طلاییِ تازه) | ✅ |
+| CI سبز | دو run (‏`push` 45050505792 و `pull_request` 45050511112) هر دو `success`؛ هر **۸ job** سبز؛ PR #24 ⇒ `OPEN`, **`mergeStateStatus=CLEAN`**, `reviewDecision=null`, head `6c473d025` | ✅ |
+| گیتِ طلاییِ تازه واقعی است | **آزمونِ جهشِ من:** ‏`if total > fatigue_budget:` ⇒ `<` در `engine/axis_prescription.py` ⇒ `test_outputs_match_golden` **FAILED**؛ بازگرداندن ⇒ `2 passed` و `git diff`=۰ | ✅ |
+| ‏`prescribe_axis_work` از F(46) به C(13) | radonِ من روی کلِ `mp-app/backend` بیرونِ تست/فیکسچر: ‏`efa20d0` ⇒ **F=1** (`prescribe_axis_work`=۴۶)، E=1، D=10، C=39 · `6c473d0` ⇒ **F=0**، E=1 (`next_transfer_state`=۳۴)، D=10، C=41؛ بدترینِ تابعِ تازه **۱۳(C)** ⇒ **هیچ بلوکِ تازه‌ای بالای CCN 15 نیست** و ≥D از ۱۲ به **۱۱** کاهش یافت | ✅ |
+| ‏`F-30` شمارهٔ آزادِ درست است | diffِ **معناییِ** `findings.json` (نه diffِ متنی): یافته‌ها ۲۹⇒**۳۰**، تازه فقط `F-30`، **۰ یافتهٔ تغییرکرده**، ۰ حذف‌شده ⇒ آن +۵۲۵/−۵۲۰ فقط باز-سری‌سازی است | ✅ |
+| رکوردها کامل‌اند | ‏`status.json[F-30]=OPEN` با سنجه · سرفصلِ CHECKLIST ⇒ «ب) **۳۰** یافته (F-01 … F-30)» · تغییرِ ژنراتور فقط یک خط (`۲۹`⇒`۳۰`) · ردیف‌های لوپ برای ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴/۴.۱/۴.۲/۴.۷ با دلیلِ سنجه‌دار · ‏`build_audit_inventory.py --check` ⇒ **EXIT=0** | ✅ |
+| انحرافِ سه‌کامیتی | علتِ سنجه‌شده: سطرِ ۱۳۵۶ خودِ `INVENTORY.md` **اندازهٔ خودش** را ثبت می‌کند (`1719 خط / 164538 بایت`) ⇒ نقطهٔ ثابت؛ پس همیشه یک ویرایش عقب می‌ماند و amend هم force-push می‌شد | ✅ **پذیرفته** |
+
+### ب) ششمین اصلاحِ سندِ خودم (صریح)
+
+در پیامِ B5-closure نوشتم «بخشِ semgrep-blocking انجام‌شده (`ci.yml:158-172`)». **این نادقیق بود و بیلدر درست اصلاحم کرد.**
+سنجهٔ خودم در `6c473d0`: گامِ **«Semgrep (project rules)» با `--error` و بدونِ `continue-on-error` ⇒ blocking** است،
+ولی گامِ **«Semgrep (harness rules, non-blocking)» در `ci.yml:170-172` هنوز `continue-on-error: true`** دارد و
+کامنتِ خودش می‌گوید «از فاز ۴ مسدودکننده می‌شود». پس آن بخش از WP 4.7 (و WP 0.7) **انجام نشده بود**.
+همچنین عددِ «۱۱ ‏await» من شمارِ ترکیبیِ `await|waitFor|findBy` بود؛ عددِ درستِ خودِ `await` **۱۰** است که او ثبت کرد.
+و دامنهٔ شمارشِ C متفاوت بود: با تست‌ها **۶۸⇒۷۰** (عددِ او)، بدونِ تست‌ها ۳۹⇒۴۱ (عددِ من) — هر دو درست در دامنهٔ خود.
+
+### ج) کشفِ سنجه‌شدهٔ ممیز: آن سه یافتهٔ harness چه هستند (برای تصمیمِ بعدی)
+
+semgrep را در venvِ جدا (`/tmp/sgv2`، نسخهٔ ۱.۱۸۶.۰) با همان فرمانِ CI اجرا کردم:
+
+| پیکربندی | یافته | معنا |
+|---|---|---|
+| ‏`.semgrep/project-rules.yml` (همان گامِ blocking) | **۰** | گامِ blocking واقعاً سبز است ✅ |
+| ‏`.semgrep/mp-harness-rules.yml` (گامِ `continue-on-error`) | **۳** | پس blocking شدنش **امروز CI را قرمز می‌کند** |
+
+و آن سه یافته **نقصِ محصول نیستند**:
+1. **۲× `mp-money-division` در `modules/admin/analytics.py:157` و `:325` = مثبتِ کاذبِ قاعده.** هر دو عبارت
+   `(end - start).total_seconds() / 60.0` است (دقیقه از timedelta، نه ریال). علت: ‏`metavariable-regex` قاعده
+   `(?i).*(rial|amount|price|balance|fee|total|discount).*` است و کلیدواژهٔ **`total`** به `total_seconds`/`total_minutes` می‌چسبد.
+2. **۱× `mp-dart-dynamic-cast` در `client/lib/core/api_client.dart:191` = عمدی و مستند**: تابعِ `_decode` با کامنتِ
+   «تست `api_client_test` این را قفل می‌کند».
+پس آخرین قلمِ ارزان و بدونِ نیاز به تصمیم، **تنگ‌کردنِ همان regex + کنترلِ مثبت + برداشتنِ `continue-on-error`** است، نه دست‌زدن به کدِ محصول.
+
+### د) نکتهٔ وزنِ مخزن (بدونِ اقدام)
+
+‏`tests/unit/fixtures/axis_prescription_golden.json` = **۷۲۷٬۱۸۲ بایت / ۳۷٬۸۶۴ خط** (۲٬۷۶۷ رکورد). به‌عنوانِ golden-master
+مشروع است و گیتش با جهش اثبات شد، ولی PR اکنون +۳۸٬۶۶۷ خط دارد. فقط ثبت می‌شود؛ کاهشِ `SAMPLES` گیت را ضعیف می‌کند ⇒ توصیه نمی‌شود.
+یک ریزهٔ سندِ باز: docstringِ `scripts/build_audit_inventory.py:5` هنوز «۲۹ یافته» می‌گوید در حالی که خطِ ۱۷۰ «۳۰» است.
 
