@@ -253,4 +253,45 @@
 ### یک نکتهٔ مجوز که باید بدانی
 
 توکنِ ممیزیِ من روی مخزنِ MP ‏`permissions.admin = true` گزارش می‌شود، ولی `branches/main/protection` را با `403 Resource not accessible by integration` رد می‌کند ⇒ آن installation مجوزِ ریزدانهٔ «Administration» را ندارد. پس **من نمی‌توانم** branch protection یا ruleset بسازم؛ این کار فقط با نشستِ مرورگریِ تو انجام می‌شود. اگر خواستی، می‌توانم یک‌بار `POST /repos/.../rulesets` را **با اجازهٔ صریحِ تو** امتحان کنم و نتیجه را دقیق گزارش دهم — ولی بدونِ اجازه دست نمی‌زنم، چون یک rulesetِ بدپیکربندی می‌تواند بیلدر را از push کردن قفل کند.
+---
+
+## وارسیِ `2026-11-22T08:5xZ` — ruleset ساخته شد ولی **کار نمی‌کند**، و دسته‌بندیِ کاملِ ۱۳ هشدار
+
+### الف) ruleset «Main» (id ‏`27826883`): نیمه‌درست — دو تنظیم، آن را بی‌اثر گذاشته
+
+| قلم | وضعیتِ سنجه‌شده |
+|---|---|
+| چهار نوعِ قاعده | ✅ `deletion` · `non_fast_forward` · `pull_request` · `required_status_checks` |
+| هشت checkِ اجباری | ✅ **هر هشت** دقیقاً فهرست شده‌اند، با `strict_required_status_checks_policy: true` (یعنی «up to date» هم روشن است) |
+| **`enforcement`** | ❌ **`disabled`** ⇒ هیچ‌چیز اعمال نمی‌شود |
+| **`conditions.ref_name.include`** | ❌ **`[]`** خالی ⇒ ruleset به **هیچ شاخه‌ای** هدف نگرفته؛ حتی با enforcement فعال هم بی‌اثر است |
+| آزمونِ عملی | PR #23 بازگشایی شد و `mergeable_state = unstable` ماند، نه `blocked` ⇒ تأییدِ مستقلِ بی‌اثر بودن |
+
+**دو کلیکِ باقی‌مانده:** در صفحهٔ ruleset ← (۱) **Target branches** ← Include ← `refs/heads/main` (یا `~DEFAULT_BRANCH`) ← Add ← (۲) بالای صفحه **Enforcement status** را از `Disabled` به **`Active`** ← Save. بعد به من بگو تا دوباره بخوانم: باید `enforcement=active` و include غیرخالی و PR #23 ‏`blocked` شود.
+
+`required_approving_review_count: 0` برای مالکِ تنها قابلِ قبول است؛ اگر روزی همکاری اضافه شد، ۱ بگذار.
+
+### ب) ۱۳ هشدارِ Dependabot — دسته‌بندیِ کامل از روی اسکرین‌شاتِ مالک + یک سنجهٔ قطعی‌کننده
+
+| قلم | عدد |
+|---|---|
+| کل | **۱۳** · `#1`…`#13` |
+| شدت | **۱ High** (`#8` ‏launch-editor `fs.existsSync()` روی Windows) · ۱۰ Moderate · ۲ Low (`#11` vite cross-origin، `#13` katex) |
+| Manifest | **۱۲** در `mp-app/studio/package-lock.json` · **۱** در `tools/mermaid-check/package-lock.json` (`#13` katex) |
+| Direct / Transitive | ۹ Direct · ۴ Transitive (`#1` esbuild، `#5` و `#12` ‏`@vitest/mocker`، `#13` katex) |
+| Development / Runtime | **۱۳ Development · ۰ Runtime** |
+| بسته‌های درگیر | `vite` (۷) · `launch-editor` (۴) · `vitest`/`@vitest/mocker` (۳… با #6,#5,#12) · `esbuild` (۱) · `katex` (۱) |
+
+**سنجهٔ قطعی‌کننده (چرا همه‌شان امروز صفر تعرض دارند):** ‏`mp-app/studio/Dockerfile` دو مرحله‌ای است — مرحلهٔ build ‏`npm ci && npm run build` (یعنی `tsc -b && vite build`؛ vite فقط **ابزارِ build** است) و مرحلهٔ runtime ‏**`nginx:1.27-alpine`** که `dist/` را serve می‌کند و `EXPOSE 80`. و compose (`mp-app/deploy/docker-compose.yml:44-51`) همان Dockerfile را build می‌کند و پورت را به **`127.0.0.1:${STUDIO_PORT:-8080}:80`** می‌بندد ⇒ **loopback-only**. پس در production **هیچ vite dev server‌ای اجرا نمی‌شود**؛ مسیرهای آسیب‌پذیر (`server.fs.allow/deny`، optimizer `.map`، mocker redirect، launch-editor، پراکسیِ dev serverِ esbuild) در artifactِ سروشده **وجود ندارند**.
+
+**پیامدها:**
+- هیچ‌کدام از ۱۳ به **دروازهٔ اولین عضو** تعلق ندارند. اولویتشان **پایین** است.
+- تنها تعرضِ واقعی: **ماشینِ توسعه‌دهنده‌ای که روی Windows ‏`npm run dev` می‌زند** — مخصوصاً `#8` (High) و چهار موردِ Windows-محورِ دیگر (`#3`,`#4`,`#7`,`#9`). یعنی یک خطرِ *محیطِ توسعه* است، نه *محصول*.
+- `#13` (katex) فقط در ابزارِ CI رسمِ دیاگرام است ⇒ کم‌اولویت‌ترین.
+- بنابراین `AD‑24` (کارزارِ npm-تنها) **فوری نیست**؛ ولی وقتی انجام شد، `#8` باید اولین bump باشد چون تنها High است.
+- یک هشدارِ صادقانه: `npm ci` در مرحلهٔ build همان lock را resolve می‌کند، پس بسته‌های آسیب‌پذیر در **imageِ build** نصب می‌شوند (هرچند به imageٔ runtime نمی‌رسند). این یک نکتهٔ زنجیرهٔ تأمینِ مرحلهٔ build است، نه یک آسیب‌پذیریِ runtime.
+
+### ج) compose جابه‌جا شده بود — تصحیحِ ارجاعِ خودم
+
+مسیرِ درستِ compose روی `main` ‏**`mp-app/deploy/docker-compose.yml`** است (نه `infra/docker-compose.yml` که در سنجه‌های قدیمی‌ترم به آن ارجاع دادم؛ آن مسیر اکنون `404` است). `mp-app/infra/Caddyfile` هم موجود است. همهٔ ارجاع‌های آینده باید از مسیرِ تازه باشند.
 
