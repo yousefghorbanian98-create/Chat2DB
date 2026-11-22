@@ -873,4 +873,42 @@ reachable بودنِ shaهای نقل‌شده · CI روی main تا سبزیِ
 
 **هم‌زمان بندِ «merge ممنوع» در `MP-BUILDER-BATCH-DIRECTIVE-2026-11-22.txt` اصلاح شد** (3,840 بایت / `3396a086eac7…`)
 تا دو سند با هم تناقض نکنند؛ و `MP-PENDING-TRIGGERS.md` (8,955 بایت / `b6b6ebdee38b…`) در T‑2/T‑3 و «قولِ ۲» به‌روز شد.
+---
+
+## داوریِ پنج کامیتِ گزارش‌نشده (‏`338abb3` ⇒ tip ‏`efa20d0`) = MATCH ✅ با دو اصلاح
+
+بیلدر بی‌اطلاعِ مالک پنج مرحله را پشتِ سر انجام داده بود: WP 3.5 · سه کامیتِ WP 4.1 · و commitِ شواهدِ اجرای کامل + BATCH-SUMMARY.
+مجموع: ‏`compare` ⇒ `status=ahead`, `ahead_by=5`, **`behind_by=0`** (بدونِ force-push)، ۱۰ فایل، +۱۱٬۸۵۵/−۶۵
+(‏۱۱٬۴۰۲ خطِ آن یک fixture طلاییِ ۶۰۰ نمونه‌ای است: `tests/regression/fixtures/wp41_config_golden.json`).
+
+### الف) جدولِ داوری
+
+| ادعا | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| بک‌اند کامل سبز | `PATH=/tmp/v24/bin:$PATH bash scripts/coverage_run.sh` روی checkout ‏`efa20d0` ⇒ **`1305 passed, 2 skipped in 398.39s`، EXIT=0**، TOTAL coverage **۹۱٪**، گیتِ per-directory **PASS** | ✅ دقیقاً همان عدد |
+| هیچ تستی حذف/skip نشده | node-id ها: `7fefb6f` = **۱۲۷۵** · `efa20d0` = **۱۳۰۶** ⇒ **حذف‌شده ۰ · افزوده ۳۱** | ✅ |
+| CI روی `efa20d0` سبز | دو run (‏`push` 45046793184 و `pull_request` 45046798284) هر دو `completed/success`؛ هر ۸ job سبز؛ step ۶ job استودیو («Unit tests (Vitest)») **success** ⇒ `npm test` در CI کامل و سبز | ✅ |
+| `mergeStateStatus=BLOCKED` | **اصلاحِ من:** اکنون GraphQL ⇒ `mergeStateStatus=CLEAN`، `statusCheckRollup=SUCCESS`، `reviewDecision=null`، `mergeable_state=clean`. علتِ BLOCKEDِ او: commit ساعتِ ۱۶:۵۸:۳۲، دو موجِ CI ساخته‌شده ۱۶:۵۸:۳۸ و ۱۶:۵۸:۴۲ و پایان‌یافته ۱۷:۰۵:۲۷ و ۱۷:۰۷:۴۶ ⇒ او در آن پنجرهٔ ~۹ دقیقه‌ای سنجیده. **همان درسِ ثبت‌شدهٔ موجِ دومِ CI** | ✅ (ادعایش لحظه‌ای درست، نتیجه‌گیری‌اش ناقص) |
+| WP 4.1: ‏`validate_production_configuration` از F(54) شکسته شد | radonِ من: در `338abb3` بدترین = `validate_production_configuration` **۵۴ (F)**، میانگین ۱۱.۳، ۷ بلوک · در `efa20d0` بدترین = `_sms_problems` **۱۳ (C)**، میانگین **۵.۴**، ۱۵ بلوک، **بلوکِ ≥D در config.py = ۰** | ✅ |
+| گیتِ طلایی واقعاً گیت است؟ | **آزمونِ جهشِ من:** شرطِ `if self.allow_dev_otp_echo:` را در `config.py` وارون کردم ⇒ `test_outcomes_match_golden` **FAILED** (خطِ ۱۱۸)؛ پس از بازگرداندن **2 passed** و `git diff` = ۰. پس tautology نیست | ✅ |
+| WP 3.5: ‏F‑09/F‑25 بازتولید نشد | `status.json` ⇒ هر دو `NOT-REPRODUCED` با سنجه (‏F‑25: **۲۶۰ درخواست** با ۴ شناسهٔ بد × ۳ نقش ⇒ **۰ پاسخِ 2xx**، چون `id_guard` پوشش می‌دهد؛ F‑09: ‏`Rial` با `StrictInt` و `le=MAX_SAFE_RIAL` ⇒ ردِ `2^53`، `2^53+1`، `10^18`، رشته و bool)؛ ۹ گاردِ سبز در `test_wp35_contract_guards.py`؛ `D‑16` ثبت شده | ✅ **دستورِ دائمیِ من رعایت شد** (اول سنجه روی HEAD، بعد فقط ادعایِ آنچه عوض می‌شود) |
+| receiptQueue ناپایدار است، skip/timeout نشد | مکانیسمِ سنجه‌شدهٔ من: فایل ۱۴۳ خط با **۴ تست و ۱۱ `await`/`findBy`/`waitFor` پشتِ‌سرهم** و **هیچ `testTimeout` صریحی** در `vitest.config.ts` یا خودِ فایل ⇒ بودجهٔ پیش‌فرضِ ۵۰۰۰ms هر تست؛ fetch با `vi.stubGlobal` stub شده (هیچ I/O واقعی نیست) ⇒ زیرِ بار، زمانِ تجمعیِ polling از بودجه می‌گذرد. در CI همان تست **سبز** است. پس نقصِ محصول نیست، بودجهٔ هارنس است | ✅ یافتهٔ باز (نه blocker) |
+| هیچ تغییرِ ممنوعه‌ای نیست | اسکنِ فایل‌های حساس در پنج کامیت ⇒ **هیچ** (`requirements`/`package.json`/`package-lock`/`apiCoverage`/`.gitleaksignore`/`ci.yml`/`eslint.config`/`vitest.config`/ruleset) دست‌نخورده | ✅ |
+| BATCH-SUMMARY نوشته شد | `EXECUTION-LOG.md:682-694` با جدولِ بسته/WP/وضعیت/کامیت/CI-run برای B1…B4 | ✅ |
+
+### ب) دومین اصلاحِ این نوبت — اسکنِ اولِ من ناقص بود
+
+اول `app/ modules/ db/ scripts/` را پیمودم و **F = ۰** دیدم و نوشتم «بدترین F حذف شده». اسکنِ کاملِ `mp-app/backend` (بیرونِ تست‌ها) نشان داد:
+**۱ بلوکِ F باقی است: `prescribe_axis_work` = CC ۴۶ در `engine/axis_prescription.py`** · ۱ بلوکِ E: `next_transfer_state` = ۳۴ در `modules/payments/manual_transfer_policy.py` · **≥D = ۲۵ · ≥C = ۵۱** (از ۱۱۲۳ بلوک).
+پس ادعای بیلدر («F46 باز است») **درست** بود و `F‑15 = FIXED-PARTIAL` صادقانه است. **درس:** پیمایشِ پیچیدگی باید کلِ `mp-app/backend` باشد، نه چهار پوشهٔ دمِ دستی.
+
+### ج) وضعیتِ واقعیِ باقی‌مانده (برای تصمیمِ merge)
+
+| قلم | ماهیت | جمع‌شدنی بدونِ تصمیمِ مالک؟ |
+|---|---|---|
+| WP 4.1 باقی‌مانده | آخرین بلوکِ F (`prescribe_axis_work` ۴۶) + E(۳۴) + ۲۵ بلوکِ ≥D + ۸ کلیدِ کیت | **بله** — با همان روشِ golden-master، بدونِ وابستگیِ تازه |
+| WP 4.2 (جهش‌سنجی ≥۸۰٪) | نیاز به ابزارِ تازه در وابستگی‌ها؛ سنجهٔ پیشینِ ممیز: **۵۷.۸٪** ⇒ شکافِ بزرگ | **نه** — وابستگیِ تازه + کارزارِ بزرگ ⇒ تصمیمِ مالک |
+| WP 4.7 (بارِ پله‌ای) | Docker/Postgres در هیچ سندباکسِ agent نیست؛ بخشِ semgrep-blocking **انجام‌شده** (‏`ci.yml:158-172`) | **نه** — BLOCKED-ENV |
+| ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴ | PARTIAL/BLOCKEDِ مستند (مثلاً F‑12 اوراکلِ `routes.json`، F‑02 پیش‌فرضِ fail-open) | بخشی بله، بخشی تصمیمِ محصول |
+| receiptQueue | بودجهٔ هارنس؛ در CI سبز | **بله** (ثبتِ یافته + اصلاح در فاز P) |
 
