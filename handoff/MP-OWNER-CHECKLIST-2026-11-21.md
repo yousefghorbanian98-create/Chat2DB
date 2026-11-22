@@ -703,4 +703,42 @@ GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو �
 ### ج) یک شفاف‌سازیِ دستور
 
 «push اضافه ممنوع» یعنی pushِ جدا برای ثبتِ لاگ ممنوع؛ ثبتِ نتیجهٔ CI در EXECUTION-LOG می‌تواند داخلِ commit بستهٔ بعدی بیاید. معوقهٔ لاگِ CIِ `f42342a` با همان مکانیسم بسته می‌شود.
+---
+
+## داوریِ B1-ادامه + B2 (چهار کامیت، tip ‏`cf33ad8`) = MATCH ✅ با دو یافتهٔ سندِ کوچک
+
+### الف) آنچه بیلدر تحویل داد (از `compare f42342a...cf33ad8` ⇒ ahead_by ۴، ۱۶ فایل، +۵۸۳/−۱۴)
+
+| کامیت | WP | محتوا |
+|---|---|---|
+| `e57a992` | 2.1 (F‑03) | لاگِ سرویس هرگز `rich` رندر نمی‌کند؛ نویسندهٔ صف‌دار بیرون از event loop؛ traceback با سقف |
+| `b9ce7be` | 2.2 (F‑04) | گیج‌ها و histogram استخر؛ timeout استخر ⇒ ۵۰۳ + `Retry-After`؛ اشباع ⇒ ready قرمز پس از ۱۰ ثانیه |
+| `f852675` | 2.3 (F‑18) | `WEB_CONCURRENCY` پیش‌فرض ۴⇒۱ در دو Dockerfile + §۱‑الف بودجهٔ اتصال در OPS‑RUNBOOK |
+| `cf33ad8` | 4.3 + 4.4 (F‑19/F‑20) | دو `await import("../lib/api")` ⇒ import ایستا؛ حذف `updateProduct` مرده + استثنای مستندِ گیت |
+
+### ب) راستی‌آزماییِ عددیِ مستقلِ من (نه پذیرشِ ادعا)
+
+| ادعای بیلدر | سنجهٔ من | نتیجه |
+|---|---|---|
+| `pytest tests/regression/` = 305 passed, 2 skipped | checkout ‏`cf33ad8` در `/tmp/mp2` + venv مستقل `/tmp/v24`: **`305 passed, 2 skipped, 1 warning in 20.67s`، EXIT=0** | ✅ دقیقاً همان عدد |
+| CI روی `cf33ad8` سبز | `check-runs` ⇒ هر **۸** job ‏`completed/success`؛ run ‏`45036409460` (event `pull_request`) success؛ PR #24 head `cf33ad8`، `mergeable_state=clean`، ۱۰۹ کامیت | ✅ |
+| معوقهٔ لاگِ CIِ `f42342a` | `EXECUTION-LOG.md:547` ⇒ run `45021576798` با فهرست jobها ثبت شده | ✅ (طبق شفاف‌سازی من، داخلِ commit بستهٔ بعد) |
+| بودجهٔ `pool_size 40 + max_overflow 20 = 60` | `db/base.py:61-62` ⇒ `_POOL_SIZE = 40`، `_MAX_OVERFLOW = 20`؛ `db/base.py:75-76` همان‌ها را به `create_engine` می‌دهد | ✅ فرمولِ runbook درست است |
+
+### ج) D‑13 = مجاز و سالم (استخراج از کیت، نه اختراع)
+
+`DECISIONS.md:368-395` معیارهای C1–C11 را با **منبعِ صریح** (`MP-FINAL-AUDIT-REPORT-2026-11-20.md`، بخش‌های رفع/شاهدِ F‑03 و F‑04) ثبت کرده؛ آنچه در سندباکس قابل اثبات نیست صادقانه `BLOCKED-ENV` (C4 بارِ ۸۰ کلاینت، C10 گیتِ ۲۰۰ همزمان) و آنچه معماری است `TODO` (C5، C9) علامت خورده؛ یک **اصلاحِ پیش‌از-commit** (پروکسی C4) هم ثبت شده. انطباقِ کد با معیارها را خودم دیدم: `app/logging.py` صفِ محدود + نخِ نویسنده + `max_frames=50`؛ `app/pool_metrics.py` گیج‌های `mp_db_pool_size/checkedout/overflow` + `SATURATION_RATIO = 0.9` و `SATURATION_WINDOW_SECONDS = 10.0`؛ `app/unhandled.py:83-97` هندلرِ `PoolTimeoutError` ⇒ ۵۰۳ + `Retry-After: 1` + کد `db_pool_exhausted`. تست‌های `test_wp21_logging_queue.py` و `test_wp22_pool_observability.py` موجودند.
+
+### د) D‑14 = پذیرفته ✅ — تضعیفِ گیت نیست
+
+گیت `apiCoverage` سه assertion خود-پلیس دارد: (۱) هر مسیرِ بک‌اند یا call واقعی دارد یا استثنای مستند (`missing ⇒ []`)؛ (۲) هر استثنا باید به مسیرِ واقعی نگاشت شود، `why` بلندتر از ۵ نویسه، و اگر `evidence: null` است `external/TODO` با توضیح داشته باشد؛ (۳) **خطِ ۷۴۰–۷۴۷: اگر مصرف‌کنندهٔ واقعیِ Studio/Client وجود داشته باشد، مسیر نمی‌تواند external/TODO بماند** ⇒ به‌محضِ ساختِ فرمِ ویرایش، استثنا باید با evidence جایگزین شود. شمارشِ من در `cf33ad8`: **۴۷ کلید** (۳۸ با `evidence: null` + TODO، ۹ با evidence واقعی)؛ B2 **دقیقاً یک** کلید افزود (+۷ خط). آستانهٔ `routes.length > 50` دست‌نخورده، هیچ تستی حذف/skip نشده، مسیرِ PATCH بک‌اند نگه داشته شده. پس «تضعیف گیت» رخ نداده؛ مکانیسمِ مستندسازیِ موجود درست مصرف شده.
+
+### هـ) دو یافتهٔ من (سند-سطح؛ در commit بستهٔ بعد بسته شوند)
+
+1. **کامنتِ کهنهٔ Dockerfile:** `mp-app/backend/Dockerfile:26` هنوز می‌گوید «`WEB_CONCURRENCY` lets the platform size this to the real CPU count; **4 is the measured floor**» در حالی که CMD همان فایل `WEB_CONCURRENCY:-1` است و OPS‑RUNBOOK §۱‑الف پیش‌فرض ۱ را ثبت کرده. تناقضِ درونِ یک فایل ⇒ کامنت باید بازنویسی شود (و `mp-app/infra/Dockerfile.backend` هم برای کامنتِ مشابه دیده شود).
+2. **دفترِ وضعیت عقب است:** در `docs/MuscleParadise/audit/CHECKLIST.md` @tip ردیف‌های **F‑03، F‑04، F‑18، F‑19، F‑20 هنوز `OPEN` با ستونِ شاهدِ خالی**‌اند، در حالی که هر پنج پیاده شده‌اند. الگوی درست همان است که برای WP 2.5/3.1/3.2 انجام شد: `FIXED` یا `FIXED-PARTIAL` (هرجا معیاری `TODO`/`BLOCKED-ENV` مانده) + sha کامیت + فهرست معیارها در ستونِ شاهد.
+
+### و) انضباطِ بسته‌ها
+
+۲ کامیت برای باقی‌ماندهٔ B1 (2.1 و 2.2) + ۲ کامیت برای B2 (2.3 و 4.3+4.4) ⇒ سقفِ «≤۲ کامیت در هر بسته» رعایت شده. گزارشِ نوبت کوتاه و عددی بود. `receiptQueue` زیر بارِ اجرای کامل timeout داد و بیلدر خودش آن را اعلام کرد (۴/۴ سبز به‌تنهایی) ⇒ پس از B4 باید در اجرای کامل **زمان‌بندی‌اش ثبت** شود، نه skip بی‌صدا.
 
