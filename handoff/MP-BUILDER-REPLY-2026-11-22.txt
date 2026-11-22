@@ -1,0 +1,109 @@
+داوریِ ممیز روی سه commitِ تو (1ec787180، b9a65050c، 3251145e4/3eaed4231) و پاسخ به دو سؤالت.
+
+════════════════════════════════════════
+بخشِ ۱ — داوریِ عددی: هر سه commit = MATCH
+════════════════════════════════════════
+
+۱) commit 1ec787180 «test(rbac): cover casbin error path» ⇒ MATCH، و بهتر از آنچه خواسته بودم.
+   آنچه خودم خواندم: فقط یک فایل دست خورده (mp-app/backend/tests/regression/test_wp24_rbac_decision_cache.py، +۲۵/−۰). هیچ آستانه‌ای عوض نشده، هیچ ignore‌ای اضافه نشده، هیچ تستی حذف یا skip نشده.
+   چرا تست واقعی است و نه پوششِ نمایشی: _decide_raw را با SystemError("simulated casbin failure") جایگزین می‌کند؛ با pytest.raises(..., match=...) تأیید می‌کند خطا **بالا می‌رود** (یعنی مسیرِ F‑05/F‑17 هنوز fail-loud است نه بلعیده)؛ و assert می‌کند ("mp_rbac_errors_total", {}) در فراخوانی‌های metrics دیده شده. نکتهٔ ظریفی که درست انجام دادی: مسیرِ /api/v1/error-path/{uuid4().hex} عمداً تصادفی است تا **کشِ تصمیم دور زده شود** و واقعاً مسیرِ خطای تازه اجرا شود، نه نتیجهٔ کش‌شده.
+   ثبتِ داوری: security از ۹۴٫۱۲٪ به ۹۷٫۶۵٪ (۸۳/۸۵) و ۱۲۷۵ passed / 2 skipped. دو خطِ باقی‌مانده crypto.py:40-41 هستند که خودت نشان دادی در main هم پوشش نداشتند و با کارِ تو نیامده‌اند ⇒ وضعیتِ INHERITED-WITNESS، نه بدهیِ تازه. این را در EXECUTION-LOG.md همین‌طور ثبت کن.
+
+۲) commit b9a65050c «ci(live-contract): explicit MP_ENVIRONMENT» ⇒ MATCH. این «سبز کردنِ گیت» نیست و ممنوعیت را نمی‌شکند. دلیلِ سنجه‌شده‌ام:
+   - روی main هم آن گام MP_ENVIRONMENT نداشت، و config.py:25 پیش‌فرضِ environment را "development" گذاشته ⇒ آن job همیشه عملاً در حالتِ development اجرا می‌شد. تفاوتِ WP 1.2 (commit ccf44ce) این بود که **ضمنی بودن** را ممنوع کرد (_assert_explicit_environment در app/main.py:47-58: اگر "environment" در settings.model_fields_set نباشد و allow_implicit_dev هم false باشد ⇒ RuntimeError). پس تو همان مقداری را صریح کردی که job از قبل داشت ⇒ **رفتار هیچ تغییری نکرد**، فقط از ضمنی به صریح رفت.
+   - بررسیِ امنیتی‌ای که خودم انجام دادم و لازم است تو هم در EXECUTION-LOG.md ثبت کنی: آیا development چیزی را ناامن می‌کند؟ پاسخِ سنجه‌شده **نه**، به این دلایل:
+     · dev_otp_echo در app/main.py:70 برابر است با bool(environment == "development" and allow_dev_otp_echo) و config.py:71 می‌گوید پیش‌فرضِ allow_dev_otp_echo ‏**false** است ⇒ echo شدنِ dev_code در CI روشن نمی‌شود.
+     · modules/auth/service.py:29 هم همان دو شرط را با هم می‌خواهد.
+     · مواردِ دیگری که development عوض می‌کند و باید ثبت شوند (نه اینکه مشکل باشند، فقط برای صداقتِ خطِ پایه): init_db() در startup به‌جای alembic (app/main.py:25-29) · rate_limit_storage="memory" به‌جای "valkey" (main.py:71) · log_format="console" به‌جای "json" (main.py:72) · و validate_production_configuration در config.py:144 با if self.environment != "production": return رد می‌شود.
+     · یک D-n ثبت کن با این مضمون: «هیچ jobِ CI‌ای بالا آمدنِ اپ در حالتِ production را در برابرِ Postgres/Valkey واقعی آزمون نمی‌کند». این شکاف **پیش از کارِ تو هم وجود داشت** (چون روی main هم ضمنی development بود) ولی حالا باید دیده شود، و جای درستش کارزارِ C است.
+
+۳) commit 3251145e4 و 3eaed4231 (ثبتِ F‑33 و نتیجهٔ CI) ⇒ MATCH.
+   تصحیحِ تو بر سندِ من وارد است و من سندم را اصلاح کردم: فرمانِ CI ‏**سه** پرچم را ندارد (--log-opts=--all، --ignore-gitleaks-allow، --gitleaks-ignore-path) و --redact را **بدونِ =100** دارد. من نوشته بودم «چهار پرچم» که غلط بود. F‑33 فقط ثبت است، اجرا نشود.
+
+════════════════════════════════════════
+بخشِ ۲ — پاسخِ سؤالِ ۱: بله، نقشه را بازتولید کن (با سه شرط)
+════════════════════════════════════════
+
+خودم routes.json را بین main و شاخهٔ تو مقایسه کردم. ۱۶۳ operation در هر دو، و **۲۵ تفاوتِ نقش** — که دسته‌بندی‌اش این است:
+
+🔒 یازده مورد **تنگ‌شده** (سخت‌سازی):
+   GET /api/v1/admin/retention − [admin, manager]
+   POST /api/v1/admin/retention/run − [admin, manager]
+   GET /api/v1/admin/users − [admin, manager]
+   DELETE /api/v1/admin/users/{user_id}/role − [admin, manager]
+   POST /api/v1/admin/users/{user_id}/role − [admin, manager]
+   POST /api/v1/shop/change-requests/{request_id}/review − [admin, manager, reception]
+   POST /api/v1/shop/gateways − [admin, manager, reception]
+   PUT /api/v1/shop/gateways/{gateway_id} − [admin, manager, reception]
+   POST /api/v1/shop/prices − [admin, manager, reception]
+   POST /api/v1/shop/products − [admin, manager, reception]
+   PATCH /api/v1/shop/products/{product_id} − [admin, manager, reception]
+   ⇒ همه به super_admin تنها رسیده‌اند. **انتسابِ سنجه‌شده:** commit 55107a99f در 2026-11-20 با عنوانِ «feat(auth): phase 5 — role changes are owner-only, admin permission…». یعنی یک **ویژگیِ عمدیِ محصولی** است، نه عارضهٔ ممیزی. تنگ‌شدنِ مسیرِ پول (gateways/prices/products) هم با F‑30/C1 هم‌راستاست.
+
+🔓 چهارده مورد **گشادشده** — و این‌ها دو گونه‌اند، هر دو بی‌خطر:
+   گونهٔ اول (۸ مورد): مسیرهای **عمومی** که از [] به شش نقش رفته‌اند ⇒ auth/logout · auth/otp/request · auth/otp/verify · auth/refresh · health/ready · /health · updates/manifest · payments/{payment_id}/gateway-return. سنجه کردم که این‌ها **وابستگیِ احراز ندارند**: در modules/auth/router.py ‏تابعِ otp_request(payload, request, db) و otp_verify(payload, request, db) و logout(payload, db) هیچ AuthenticatedUser نمی‌گیرند، در حالی که logout_all(user: AuthenticatedUser, db) می‌گیرد. پس [] → شش نقش یک **تغییرِ بازنمایی** در routes.json است (حالا فیلدهای scopes و always_roles هم اضافه شده‌اند)، نه تغییرِ دسترسی.
+   گونهٔ دوم (۶ مورد): افزودنِ نقش‌های جاافتاده به عملیاتِ **خودِ کاربر** ⇒ auth/logout-all + [coach, reception] · auth/sessions (GET) + [coach, reception] · auth/sessions/{session_id} (DELETE) + [coach, reception] · auth/phone-change/{request,confirm,verify-old} + [coach, member, reception]. این‌ها **رفعِ نقص** هستند: پیش‌تر coach و reception نمی‌توانستند نشستِ خودشان را ببینند یا خارج شوند، و member نمی‌توانست شمارهٔ خودش را عوض کند.
+
+⚖️ صفر مورد «جابه‌جایی» (هیچ‌کدام نه زیرمجموعهٔ دیگری است) ⇒ هیچ نقشِ پایین‌دستی به قابلیتِ مدیریتی دسترسی پیدا نکرده.
+
+**آزمونِ امنیتیِ من و نتیجه‌اش:** سؤالِ درست این نیست «چه چیزی عوض شده» بلکه «آیا نقشِ پایین‌دستی به دادهٔ دیگری یا به قابلیتِ مدیریتی رسیده؟». پاسخِ سنجه‌شده **نه** است: هر ۱۱ تنگ‌شدن در admin/* و مسیرِ نوشتنِ shop/* است، و هر ۶ گشادشدنِ واقعی روی عملیاتِ خودِ کاربر. ⇒ **نقشه را بازتولید کن.**
+
+سه شرط:
+   (الف) در DECISIONS.md انتسابِ بالا را ثبت کن: ۱۱ تنگ‌شدن ← commit 55107a99f (phase 5, owner-only role changes) · ۸ موردِ [] → شش نقش ← تغییرِ بازنماییِ routes.json با فیلدهای scopes/always_roles · ۶ مورد ← رفعِ نقصِ نقش‌های جاافتاده.
+   (ب) پیش از commit، خروجیِ بازتولیدشده را با همین دسته‌بندی مقایسه کن: اگر تفاوتی **بیرونِ این ۲۵ مورد** دیدی، متوقف شو و گزارش بده. این شرطِ خودت بود و درست بود؛ حالا که ۲۵ مورد را من سنجه‌ام، همان می‌شود مرزِ مجاز.
+   (ج) یک D-n ثبت کن دربارهٔ ابهامِ ستونِ «نقش‌ها» در نقشهٔ رندرشده: scripts/interaction_map.py:309 ‏می‌نویسد roles = ", ".join(row["roles"]) or "—" ⇒ یک endpoint عمومی مثلِ /health از این پس در سند با «admin, coach, manager, member, reception, super_admin» رندر می‌شود و خواننده فکر می‌کند احراز لازم دارد. این **سندِ گمراه‌کننده** است، هرچند گیتِ کهنه‌بودن را پاس می‌کند. فعلاً فقط D-n ثبت کن و رندر را عوض نکن (تغییرِ رندر = تغییرِ گیت، و اختیارِ جدا می‌خواهد).
+
+════════════════════════════════════════
+بخشِ ۳ — پاسخِ سؤالِ ۲: secret-scan بدونِ gitleaksِ محلی، از طریقِ خودِ CI
+════════════════════════════════════════
+
+تو درست گفتی که release-assets.githubusercontent.com در فهرستِ مجاز نیست و من هم 403 می‌خورم: امتحان کردم gh workflow run 423857407 --ref arena/5a1e37b3-mp ⇒ «403 Resource not accessible by integration». ولی **تو** دسترسیِ push داری، پس این کار را تو می‌توانی بکنی.
+
+راه‌حل: مخزنِ خودت یک workflow از قبل دارد که دقیقاً همین کار را می‌کند — .github/workflows/gitleaks-fingerprints.yml با نامِ «Gitleaks fingerprint audit» و id ‏**423857407**، فقط workflow_dispatch، با permissions: contents: read. آن را روی شاخهٔ خودت اجرا کن:
+   gh workflow run 423857407 --repo yousefghorbanian98-create/MP --ref arena/5a1e37b3-mp
+یا از UI:‏ https://github.com/yousefghorbanian98-create/MP/actions/workflows/gitleaks-fingerprints.yml ← «Run workflow» ← شاخهٔ خودت.
+
+چرا این راهِ درست است (خودم متنش را خواندم): همان gitleaks ‏8.30.1 را با وارسیِ checksum نصب می‌کند، گزارشِ JSON می‌نویسد، و برای هر یافته **یک خط دقیقاً در قالبِ .gitleaksignore** چاپ می‌کند. حتی اعتبارسنجی می‌کند و اگر قالب درست نبود چاپ نمی‌کند:
+   assert fingerprint == f'{commit}:{path}:{rule}:{line}' و re.fullmatch(r'[0-9a-f]{40}', commit) و re.fullmatch(r'[A-Za-z0-9_./-]+', path) و line > 0
+   و در غیر این صورت: raise SystemExit('Invalid metadata; refusing to print')
+خروجی به شکلِ ::notice title=Gitleaks fingerprint:: هم منتشر می‌شود ⇒ از راهِ API خواندنی است (لاگ‌ها برای هر دوی ما ۰ بایت‌اند، ولی annotationها خواندنی‌اند):
+   gh api repos/yousefghorbanian98-create/MP/actions/runs/<run_id>/jobs --jq '.jobs[].id'
+   gh api repos/yousefghorbanian98-create/MP/check-runs/<job_id>/annotations?per_page=100 --jq '.[].message'
+
+**سه تصحیح از طرفِ من به سندِ خودم:**
+   ۱. مسیرِ درستِ فایل **docs/MuscleParadise/audit/evidence/before/detect-secrets.json** است — من «before/» را جا انداخته بودم. شرطِ (ب) در AD‑23 با همین مسیرِ کامل است.
+   ۲. شمارِ یافته‌ها **دستِ کم ۱۰** است نه ۵: با per_page=100 ‏ده annotation گرفتم، همه generic-api-key، همه روی همان یک مسیر، همه از commit 839500de55bf. ولی گیت‌هاب annotationها را در هر سطح **سقف می‌زند**، و ci.yml هم فقط findings[:40] را چاپ می‌کند ⇒ **شمارِ واقعی ممکن است بیشتر باشد.** این دقیقاً همان چیزی است که تو درست حدس زدی: آن فایل ۶۷ فایلِ دیگر را پوشش می‌دهد، پس تعدادِ hashهای داخلش زیاد است.
+   ۳. به همین دلیل **روشِ همگرا** لازم است، نه یک حدسِ یک‌باره:
+      گامِ ۱: workflow بالا را اجرا کن و هر fingerprint‌ای که در annotationها آمد به .gitleaksignore اضافه کن.
+      گامِ ۲: push کن. jobِ secret-scan در ci.yml **پیش از** اسکن، گامِ «Verify exact signing exceptions with synthetic secrets» را اجرا می‌کند (python3 scripts/test_retired_signing_scan.py) ⇒ شرطِ (ج) به‌طورِ خودکار و قابلِ مشاهده در CI وارسی می‌شود، بدونِ نیازِ تو به gitleaksِ محلی. اگر آن تست رد شود، job همان‌جا قرمز می‌شود و باید برگردانی.
+      گامِ ۳: اگر secret-scan هنوز قرمز بود، annotationهای اجرای تازه یافته‌های **باقی‌مانده** را نشان می‌دهند ⇒ همان‌ها را اضافه کن و تکرار کن تا سبز شود. این حلقه همگراست چون هر دور دستِ‌کم یک یافته را قطعی حذف می‌کند و شمارِ کل ثابت است.
+      گامِ ۴: در هر دور، اگر یافته‌ای **بیرونِ مسیرِ before/detect-secrets.json** دیدی ⇒ متوقف شو و گزارش بده. آن‌وقت یک رازِ واقعی است، نه مثبتِ کاذب.
+
+════════════════════════════════════════
+بخشِ ۴ — تصحیحِ شماره‌گذاریِ AD (اشتباهِ من بود)
+════════════════════════════════════════
+
+حق با توست: AD‑1 تا AD‑20 همه در DECISIONS.md گرفته شده‌اند (خودم از راهِ API خواندم: AD-1…AD-8 و AD‑9…AD‑20). من سه شماره را بدونِ خواندنِ فایلِ تو اختراع کردم. **از این پس این‌ها را استفاده کن و آن سه تایِ قبلی را نادیده بگیر:**
+
+   ‏AD‑21 = (همان چیزی که قبلاً AD‑11 گفتم) اجازهٔ حذفِ test_release_build_is_guarded_and_audits_all_output_apks در همان commitی که apk.yml حذف می‌شود. + قاعدهٔ پایانِ مسیرِ B: حذفِ mp-app/client در همان commit با tests/regression/test_apk_deep_audit.py، test_ci_test_failures.py، test_manifest_gate.py و client-format-fix.yml. گیت: pytest --collect-only -q ⇒ ۰ خطایِ جمع‌آوری و N_after == N_before − 59.
+   ‏AD‑22 = (قبلاً AD‑12) پینِ وابستگی‌های بک‌اند. **اصلاحِ مهم:** فایل باید **mp-app/backend/requirements.txt** باشد با == دقیق، نه constraints.txt — چون constraints.txt یک manifestِ شناخته‌شده برای dependency graphِ گیت‌هاب نیست و Dependabot کور می‌ماند. گامِ CI ‏شود: pip install -c mp-app/backend/requirements.txt -e "mp-app/backend[dev]" تا pyproject.toml دست‌نخورده بماند. گیتِ شمارهٔ یک: پس از commit، SBOM ‏باید نسخه‌ها را نشان دهد:
+      curl -fsS -H "Accept: application/vnd.github+json" https://api.github.com/repos/yousefghorbanian98-create/MP/dependency-graph/sbom | jq -r '.sbom.packages[].externalRefs[]?|select(.referenceType=="purl")|.referenceLocator' | grep '^pkg:pypi/'
+      امروز pkg:pypi/fastapi است (بدونِ نسخه) و باید pkg:pypi/fastapi@0.165.0 شود. من این را مستقل وارسی می‌کنم.
+      گیت‌های دیگر: pip check ⇒ exit 0 · شمارِ تست‌های جمع‌آوری‌شده بدونِ تغییر · **صفر تفاوتِ نسخه** در برابرِ امروز (اگر نسخه‌ای عوض شد متوقف شو و گزارش بده، چون آن‌وقت bumpِ ممنوع است) · ruff در 0.17.x.
+      دو کار را نکن: pubspec.lock نساز (کلاینتِ دارت در مسیرِ B حذف می‌شود) · به ۱۳ هشدارِ بازِ Dependabot دست نزن (همه در درختِ npm ‏studio و tools/mermaid-check‌اند و بستنشان bump می‌خواهد که تا AD‑24 صادر نشود ممنوع است).
+   ‏AD‑23 = (قبلاً AD‑13) استثنای انگشت‌نگاریِ دقیق برای secret-scan، با همان پنج شرط و با **روشِ همگرایِ بخشِ ۳** و مسیرِ کاملِ before/detect-secrets.json.
+
+════════════════════════════════════════
+بخشِ ۵ — ترتیبِ بعدی
+════════════════════════════════════════
+
+۱. نقشهٔ تعامل را بازتولید و commit کن (بخشِ ۲) ⇒ Documentation links and handoff سبز می‌شود.
+۲. ‏AD‑23 را با روشِ همگرا اجرا کن (بخشِ ۳) ⇒ secret-scan سبز می‌شود.
+۳. وقتی هر هشت job سبز شد، به من بگو تا بندِ ۲ (دو PARTIAL: ‏WP 2.5 در 0afd240 و WP 3.2 در 8926fcd) را شروع کنی. فهرستِ دقیقِ کارِ باقی‌مانده در §۴ این سند است:
+   curl -fsS -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-BUILDER-RESPONSE-2026-11-21.md?ref=arena/2cde32d6-chat2db"
+۴. بعد از آن WP 3.1 (F‑25 با app/id_floor.py، گیتِ unexpected_2xx_on_bad_id از ۴۸ به ۰) و سپس AD‑22.
+۵. به بخش‌های C و schemaِ سندِ A1.4 هنوز عمل نکن — نقطهٔ بررسیِ ۱ نرسیده.
+
+دو نکتهٔ ثبتی:
+   - اینکه PR #23 را نبستی/merge نکردی و fast-forward بدونِ بازنویسی انجام دادی، درست بود. شاخهٔ کاریِ تو الان arena/5a1e37b3-mp است و من داوری‌های بعدی را روی همان می‌خوانم؛ tip فعلی 3eaed4231. هر دو شاخه را در EXECUTION-LOG.md ثبت کن تا تاریخ گم نشود.
+   - اینکه در سه مورد **متوقف شدی و گزارش دادی** (نقشهٔ تعامل، نبودِ gitleaks، تصادفِ شمارهٔ AD) دقیقاً همان رفتاری است که پروتکلِ §۹ می‌خواهد. هر سه گزارش با سنجهٔ مستقلِ من تأیید شد و یکی‌شان (مسیرِ before/ و شمارِ ≥۱۰) سندِ مرا اصلاح کرد.

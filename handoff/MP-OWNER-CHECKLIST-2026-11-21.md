@@ -9,7 +9,7 @@
 | # | کار | چرا فقط تو | وضعیت |
 |---|---|---|---|
 | ۱٫۱ | ~~پاک‌کردنِ چهار secretِ امضای اندروید + variableِ `MP_ANDROID_CERT_SHA256`~~ — **باطل شد؛ چیزی برای پاک‌کردن نیست** | **سنجهٔ مالک در `2026-11-21`:** همهٔ صفحه‌های secrets/variables **خالی** بودند. تأییدِ من از خودِ مخزن: گامِ «Prepare dedicated release signing material» با `set -euo pipefail` و `test -n "$KEYSTORE_B64" && … \|\| exit 1` نوشته شده ⇒ در نبودِ secret **به‌طورِ قطعی** شکست می‌خورد. گاه‌شمار: گیتِ امضا در `8e72de9` @ `2026-11-18 20:28:12` آمد، اولین قرمزی `20:28:25` (۱۳ ثانیه بعد)، آخرین سبز `2026-11-16` یعنی **پیش از** گیت ⇒ `apk.yml` ساختاراً غیرقابلِ موفقیت است. **خبرِ خوب:** مادهٔ امضا هرگز در GitHub نبوده ⇒ صفر نشتی، صفر پنجرهٔ تعرض، چیزی برای rotate کردن نیست | **بسته — بی‌اثر** |
-| ۱٫۲ | تأییدِ نهاییِ حذفِ `.github/workflows/apk.yml` (۴ `uses:`) **و اختیارِ `AD‑11`** (حذفِ یک تست در همان commit) | حذفِ workflow یک تغییرِ دامنهٔ محصولی است؛ سنجه شد که حذفش `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` را با `FileNotFoundError` می‌شکند و فهرستِ ممنوعه «حذفِ تست» را منع کرده ⇒ بدونِ اختیارِ تو بیلدر در بن‌بست می‌ماند | باز — بیلدر اجرا می‌کند |
+| ۱٫۲ | تأییدِ نهاییِ حذفِ `.github/workflows/apk.yml` (۴ `uses:`) **و اختیارِ `AD‑21`** (حذفِ یک تست در همان commit) | حذفِ workflow یک تغییرِ دامنهٔ محصولی است؛ سنجه شد که حذفش `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` را با `FileNotFoundError` می‌شکند و فهرستِ ممنوعه «حذفِ تست» را منع کرده ⇒ بدونِ اختیارِ تو بیلدر در بن‌بست می‌ماند | باز — بیلدر اجرا می‌کند |
 | ۱٫۳ | ~~آیا MP زنده است؟~~ — **جواب داده شد: «تا امروز حتی یک عضو هم نداشته، فقط خودم یک بار تستش کردم»** | — | **بسته · `2026-11-21`** ⇒ سنجهٔ پشتیبانِ من: `deploy.yml` **`total_count = 0` اجرا** و `environments = 0` در حالی که خودِ workflow ‏`environment: ${{ inputs.target }}` و `APP_URL`/`DOKPLOY_WEBHOOK` غیرخالی را الزام می‌کند ⇒ **MP هرگز هیچ‌جا استقرار نیافته**. نتیجه: هیچ سطحِ حملهٔ زنده‌ای وجود ندارد و `F‑01`/`F‑02`/`F‑06`/`F‑08`/`F‑09` امروز توسط هیچ‌کس قابلِ سوءاستفاده نیستند |
 | ۱٫۴ | تصمیمِ `card_number` در `C1`: رمزنگاریِ کامل یا فقط mask ذخیره‌شدن | تصمیمِ محصولی؛ بیلدر به‌شکلِ `AD-n` ثبت می‌کند | باز |
 | ۱٫۵ | روشن‌کردنِ تصمیمِ بازِ کیوسک/گیتِ ورود (تصمیمِ ۲ = «نامعلوم») | فقط تو می‌دانی؛ با یک آزمونِ دستگاه بسته می‌شود | باز — تا بسته نشود، PWA باید کیوسک‌پذیر بماند |
@@ -17,11 +17,11 @@
 | ۱٫۷ | دامنه/HTTPS/مقصدِ استقرار برای سطحِ وبِ عضو (`B0`) | زیرساختِ بیرونِ مخزن | باز — `web.yml` artifactِ `muscleparadise-web` را می‌سازد ولی compose هیچ سرویسی برای serve کردنش ندارد |
 | ۱٫۸ | اگر روزی Play/App Store خواستی: حساب و هزینه (۲۵ دلار یک‌بار / ۹۹ دلار سالانه) + انطباقِ target API 36 | حسابِ انسانی | در سناریوی فعلی **منتفی** |
 | ۱٫۹ | **روشن‌کردنِ Dependabot alerts** از تبِ **Security** مخزن | — | ✅ **انجام شد · `2026-11-21T23:39Z`** — اثباتِ سنجه‌شده: همان endpoint پاسخِ «**Dependabot alerts are disabled for this repository**» را به «**Resource not accessible by integration**» (`403`) تغییر داد. پیامِ اول فقط وقتی برمی‌گردد که قابلیت **خاموش** باشد؛ پیامِ دوم یعنی قابلیت **روشن** است و توکنِ ممیزی scope خواندنش را ندارد. اکنون رفتارش با `secret-scanning/alerts` و `code-scanning/alerts` یکی شده (هر سه `403`) |
-| ۱٫۹٫۱ | **«Dependabot security updates» را روشن نکن** (همان تب، کلیدِ دوم) | این کلید PRِ **bumpِ خودکارِ وابستگی** می‌سازد ⇒ مستقیماً با ممنوعیتِ «bump وابستگی» و با `AD‑12` (فریزِ نسخه‌ها در `constraints.txt`) تضاد دارد. سنجهٔ الان: ‏`security_and_analysis` هر دو فیلد `null` · **PR بازِ dependabot = ۰** از ۱ PR باز ⇒ فعلاً روشن نیست. alerts (دیدن) لازم داری، security updates (تغییر دادن) نه | ⚠️ **روشن نکن** |
+| ۱٫۹٫۱ | **«Dependabot security updates» را روشن نکن** (همان تب، کلیدِ دوم) | این کلید PRِ **bumpِ خودکارِ وابستگی** می‌سازد ⇒ مستقیماً با ممنوعیتِ «bump وابستگی» و با `AD‑22` (فریزِ نسخه‌ها در `constraints.txt`) تضاد دارد. سنجهٔ الان: ‏`security_and_analysis` هر دو فیلد `null` · **PR بازِ dependabot = ۰** از ۱ PR باز ⇒ فعلاً روشن نیست. alerts (دیدن) لازم داری، security updates (تغییر دادن) نه | ⚠️ **روشن نکن** |
 | ۱٫۱۰ | **روشن‌کردنِ secret scanning و push protection** اگر خاموش‌اند (برای مخزنِ public رایگان است) | عاملِ ممیزی `403` می‌گیرد و نمی‌تواند وضعیتش را بخواند ⇒ فقط تو می‌بینی | باز |
-| ۱٫۱۰٫۱ | ~~اجازهٔ allowlist برای `secret-scan`~~ — **`AD‑13` صادر شد** با پنج شرط؛ مکانیزم `.gitleaksignore` و تستِ سلامتِ گیت از قبل در مخزن بود | جزئیات در A1.4 §B‑۴٫۶ | ✅ صادر شد |
+| ۱٫۱۰٫۱ | ~~اجازهٔ allowlist برای `secret-scan`~~ — **`AD‑23` صادر شد** با پنج شرط؛ مکانیزم `.gitleaksignore` و تستِ سلامتِ گیت از قبل در مخزن بود | جزئیات در A1.4 §B‑۴٫۶ | ✅ صادر شد |
 | ۱٫۱۰٫۲ | تصمیم دربارهٔ **`F‑33`**: اسکنرِ secret در CI ضعیف‌تر از تستِ خودش است (چهار پرچمِ `--log-opts=--all`، `--redact=100`، `--ignore-gitleaks-allow`، `--gitleaks-ignore-path` را ندارد) | سنجه شد؛ هم‌ترازی یک‌خطی است ولی سطحِ سخت‌گیریِ گیت را عوض می‌کند ⇒ اختیارِ جدا می‌خواهد | باز |
-| ۱٫۱۱ | ~~تصمیم دربارهٔ `F‑32`~~ — **`AD‑12` صادر شد** (`2026-11-21` شب) | جزئیاتِ اجرا در A1.4 §B‑۴٫۶ | ✅ صادر شد — بیلدر اجرا می‌کند |
+| ۱٫۱۱ | ~~تصمیم دربارهٔ `F‑32`~~ — **`AD‑22` صادر شد** (`2026-11-21` شب) | جزئیاتِ اجرا در A1.4 §B‑۴٫۶ | ✅ صادر شد — بیلدر اجرا می‌کند |
 | ۱٫۱۲ | تصمیم دربارهٔ افزودنِ **CodeQL** (code scanning) | **سنجه شد:** از هفت workflow هیچ‌کدام CodeQL نیست ⇒ اسکنِ کد اصلاً پیکربندی نشده | باز — کم‌اولویت‌تر از ۱٫۹ چون ممیزیِ من semgrep را دستی اجرا کرد |
 
 ## ⚠️ هشدارِ فوریِ `2026-11-21T23:40Z` — PR #23 باز، غیرِ draft، و `main` هیچ گیتِ اجباری ندارد
@@ -72,7 +72,7 @@
 - **`F‑30` (ذخیرهٔ plaintextِ `card_number`) و همهٔ قلم‌های حریمِ خصوصی (`face_templates`, `biometric_consents`) امروز صفر تعرضِ واقعی دارند** چون آن جدول‌ها خالی‌اند ⇒ `C1` به «پیش از اولین پرداخت» موکول می‌شود، نه «همین حالا».
 - **تصمیمِ ③ تأیید و قوی‌تر شد:** هیچ APK‌ای پخش نشده ⇒ تغییرِ قرارداد (۲۰۰→۴۲۲/۴۰۴) بدونِ `min_client_version` آزاد است.
 - **`C2` و `B1` می‌توانند موازی شوند** (پیش‌تر «دو کارزار هم‌زمان ممنوع» بود) چون ریسکِ داده‌ایِ `C` با صفر عضو نزدیکِ صفر است. این **گزینه** است نه دستور؛ اگر ترتیبی را ترجیح می‌دهی همان ترتیبِ قبلی درست است.
-- **`AD‑13`** (allowlist مشروط برای `secret-scan`) را در بخشِ B‑۴٫۵ سندِ A1.4 ببین — تا صادر نکنی، بیلدر حق ندارد گیت را دست بزند.
+- **`AD‑23`** (allowlist مشروط برای `secret-scan`) را در بخشِ B‑۴٫۵ سندِ A1.4 ببین — تا صادر نکنی، بیلدر حق ندارد گیت را دست بزند.
 
 ## دستهٔ ۲ — بیلدرِ بی‌ناظر (با گیتِ عددی، یک commit به ازای هر بسته)
 
@@ -226,7 +226,7 @@
 | `https://github.com/yousefghorbanian98-create/MP/actions/runs/44962138925` (**«Graph Update: pip in /mp-app/backend»** — سندِ زندهٔ روشن‌شدنِ Dependabot) | ✅ `200` |
 | `https://github.com/yousefghorbanian98-create/MP/settings/actions` (مجوزهای workflow) | `404` بی‌هویت |
 
-### د) شاخهٔ بیلدر و فایل‌هایی که در `AD‑12`/`AD‑13` به آن‌ها ارجاع دادم
+### د) شاخهٔ بیلدر و فایل‌هایی که در `AD‑22`/`AD‑23` به آن‌ها ارجاع دادم
 
 | لینک | سنجهٔ من |
 |---|---|
@@ -234,7 +234,7 @@
 | `https://github.com/yousefghorbanian98-create/MP/commits/arena/da474b65-mp` | `429` (rate-limitِ موقتِ من) — در مرورگر کار می‌کند |
 | `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/.gitleaksignore` (سیاستِ انگشت‌نگاری، ۲۰ خط) | ✅ `200` |
 | `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/scripts/test_retired_signing_scan.py` (تستِ سلامتِ گیت) | ✅ `200` |
-| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/docs/MuscleParadise/audit/evidence/detect-secrets.json` (منبعِ مثبتِ کاذب) | در مرورگر |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/docs/MuscleParadise/audit/evidence/before/detect-secrets.json` (منبعِ مثبتِ کاذب) | در مرورگر |
 | `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/mp-app/backend/pyproject.toml` (۱۹ وابستگیِ بازه‌ای) | ✅ `200` |
 
 ### ه) اسنادِ ممیزی (مخزنِ Chat2DB، شاخهٔ `arena/2cde32d6-chat2db`)
@@ -243,7 +243,7 @@
 |---|---|
 | `https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/2cde32d6-chat2db/handoff` | فهرستِ همهٔ ۸ سند |
 | `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-OWNER-CHECKLIST-2026-11-21.md` | **همین سند** — شش دستهٔ کاری + دروازهٔ اولین عضو + پیوستِ لینک‌ها |
-| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-SCENARIO-A1.4-2026-11-21.md` | سناریوی کامل؛ ‏§B‑۴٫۵ اصلاحات و §B‑۴٫۶ متنِ `AD‑11`/`AD‑12`/`AD‑13` |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-SCENARIO-A1.4-2026-11-21.md` | سناریوی کامل؛ ‏§B‑۴٫۵ اصلاحات و §B‑۴٫۶ متنِ `AD‑21`/`AD‑22`/`AD‑23` |
 | `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-RESPONSE-2026-11-21.md` | داوریِ دو commit و فهرستِ PARTIALها در §۴ |
 | `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-KIT-2026-11-21.zip` | کیتِ منجمدِ بیلدر (`486,358` بایت / `9a192500…`) |
 
