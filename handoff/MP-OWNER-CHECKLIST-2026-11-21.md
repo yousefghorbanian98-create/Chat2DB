@@ -480,4 +480,45 @@
 تا آن کارها تمام نشده، **merge نمی‌کنیم**: اول داوریِ عددیِ من (نقطهٔ بررسیِ ۱)، بعد merge با تو.
 
 یک یادداشتِ ثبتی: بیلدر نوشته `share/MP-BUILDER-HANDOFF-A1.3.md` در sandbox‌اش untracked بوده و با reset محیط از بین رفته. در مخزنِ **من** آن فایل commit شده و سالم است (`handoff/MP-BUILDER-HANDOFF-A1.3.md`، ۲۷٬۹۰۸ بایت) ⇒ هیچ چیزِ تحویلی گم نشده؛ فقط کپیِ محلیِ او رفت.
+---
+
+## وارسیِ دو ضربهٔ تو ✅ و یک قفلِ پنهان در ruleset که فقط تو می‌توانی بازیش کنی
+
+### الف) هر دو ضربه درست انجام شد
+
+| قلم | سنجه |
+|---|---|
+| PR تازه | **#24** · `state=open` · `head=arena/5a1e37b3-mp @ 6c204ec` · `base=main` · عنوان دقیقاً «ممیزی A1.4 + AD-23: هر هشت گیت سبز» · ۱۰۲ commit · ۲۸۹ فایل · +۱۰۳٬۸۶۶/−۷۰۰ |
+| PR #23 | `state=closed` · `closed_at=2026-11-22T08:55:07Z` · **`merged=false`** ⇒ درست بسته شد، نه merge |
+| هشت check روی head ‏#24 | همه `success` |
+
+### ب) ولی `mergeable_state = blocked` با وجودِ هشت check سبز — علت را سنجه‌ام
+
+GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو نزده (`behind_by=0`) · PR draft نیست.
+پس مانع check نیست، مرورِ عادی هم نیست. مانع این پرچم در ruleset ‏`27826883` است:
+**`require_extra_approval_for_unattributed_changes: true`**
+
+چرا فعال می‌شود — سنجهٔ هویتِ نویسندگان در ۱۰۲ commitِ PR:
+  · **۲۰ commit با نویسندهٔ `arena-agent`** (یک کاربرِ جداگانهٔ GitHub، نه همکارِ این مخزن)
+  · ۲۳ commit با ایمیلِ بی‌پیوندِ `agent@arena.ai` · ۱ commit با `ci@muscleparadise.local`
+  · ۱۰۰ commit از ۱۰۰ تایِ بررسی‌شده trailer ‏`Co-authored-by: arena-agent` دارند
+یعنی بخشِ بزرگی از diff از دیدِ GitHub «unattributed» است ⇒ قواعد می‌گویند **یک تأییدِ اضافه از شخصی دیگر** لازم است.
+در مخزنِ یک‌نفره آن شخص وجود ندارد ⇒ این پرچم اینجا یک **قفلِ ابدی** است، نه یک کنترل.
+
+### ج) کاری که از تو می‌خواهم — فقط یک تیک
+
+1. باز کن: **https://github.com/yousefghorbanian98-create/MP/settings/rules/27826883**
+2. در بخشِ قاعدهٔ **Pull request**، تیکی که متنش دربارهٔ «unattributed changes» / تأییدِ اضافه برای تغییراتِ بی‌انتساب است را **بردار**.
+3. پایین صفحه **Save** بزن.
+4. به من بگو «تیک برداشته شد».
+
+**به هیچ چیزِ دیگرِ آن صفحه دست نزن:** هر هشت check باید بماند · `strict` باید روشن بماند · enforcement باید `active` بماند · include باید `~DEFAULT_BRANCH` بماند · «Required number of approvals» باید **۰** بماند.
+
+### د) چرا برداشتنش امن است — کنترل‌های جبرانی که سرِ جایشان‌اند
+
+  · هر هشت checkِ اجباری + سیاستِ strict (مانعِ فنیِ واقعی) · قواعدِ `deletion` و `non_fast_forward` روی main
+  · داوریِ عددیِ من پیش از هر merge (نقطهٔ بررسیِ ۱) · و خودِ قاعدهٔ ایستاده: **merge فقط با تو**
+  آن پرچم فقط یک «تأییدِ انسانیِ دوم» می‌خواست که در مخزنِ تک‌نفره غیرممکن است؛ برداشتنش هیچ گیتِ فنی‌ای را کم نمی‌کند.
+
+بعد از Save، انتظارم `mergeable_state = clean` است؛ خودم دوباره می‌خوانم و ثبت می‌کنم. و باز هم: **merge نمی‌کنیم** تا داوریِ عددی تمام شود.
 
