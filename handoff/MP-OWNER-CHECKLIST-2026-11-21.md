@@ -766,7 +766,7 @@ GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو �
 
 ### ج) `exact` — پذیرش **نه**؛ ولی سه الگو **ارزشِ وام‌گیری** دارند
 
-**چرا نه:** MP دو فرانتِ کارکردي دارد (Flutter برای کلاینت + React/Vite/Electron برای استودیو) با گیت‌های سبز؛ مهاجرت به فریم‌ورکی **سه هفته‌ old** با Androidِ ناتمام و Windowsِ «Early» و بدونِ اکوسیستم، یعنی بازنویسیِ دو فرانت بدونِ بستنِ حتی یک یافته. سندباکسِ من rustc/bun ندارد.
+**چرا نه:** MP دو فرانتِ کارکردي دارد (Flutter برای کلاینت + React/Vite/Electron برای استودیو) با گیت‌های سبز؛ مهاجرت به فریم‌ورکی **سه‌هفته‌old** با Androidِ ناتمام و Windowsِ «Early» و بدونِ اکوسیستم، یعنی بازنویسیِ دو فرانت بدونِ بستنِ حتی یک یافته. سندباکسِ من rustc/bun ندارد.
 
 **سه الگوی وام‌گرفتنی (بدونِ هیچ وابستگیِ تازه، با TS/Python موجود):**
 1. **حلقهٔ UIِ قطعی و agent-راندنی:** `bun scripts/agent.mjs web tree "tap X" "type Y" "clock +60000" state "screenshot out.png"`. سنجهٔ من: استودیوی MP **هیچ هارنسِ UI-راندنی ندارد** (در `mp-app/studio/package.json` و `tests/` اثری از playwright/puppeteer/cypress نیست؛ فقط vitest+tsc+eslint)؛ در مقابل بک‌اند ساعتِ تزریقی دارد (`app/clock.py`: `_now_utc()` و `today_in_shop_zone()`) و استودیو هیچ. یک `scripts/agent_drive.mjs` کوچک (tap/type/**clock**/state/screenshot، headless، یک خط) اجازه می‌دهد رگرسیونِ UI را **با اندازه‌گیری** ببینیم نه با خواندنِ کد؛ کنترلِ ساعت مستقیماً به **F‑28** («امروز» سه برداشت متفاوت) و منطقِ تاریخِ شمسی خدمت می‌کند.
