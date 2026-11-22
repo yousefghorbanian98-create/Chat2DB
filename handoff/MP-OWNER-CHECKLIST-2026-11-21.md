@@ -294,4 +294,83 @@
 ### ج) compose جابه‌جا شده بود — تصحیحِ ارجاعِ خودم
 
 مسیرِ درستِ compose روی `main` ‏**`mp-app/deploy/docker-compose.yml`** است (نه `infra/docker-compose.yml` که در سنجه‌های قدیمی‌ترم به آن ارجاع دادم؛ آن مسیر اکنون `404` است). `mp-app/infra/Caddyfile` هم موجود است. همهٔ ارجاع‌های آینده باید از مسیرِ تازه باشند.
+---
+
+## وارسیِ `2026-11-22` پس از «ست شد» — ruleset **فعال و درست** است، ولی PR #23 به شاخهٔ کهنه وصل است
+
+### الف) ruleset ‏`27826883` — تأیید شد ✅
+
+| قلم | مقدارِ سنجه‌شده |
+|---|---|
+| `enforcement` | ✅ **`active`** (قبلاً `disabled`) |
+| `conditions.ref_name.include` | ✅ **`["~DEFAULT_BRANCH"]`** (قبلاً `[]`) |
+| انواعِ قاعده | ✅ `deletion` · `non_fast_forward` · `pull_request` · `required_status_checks` |
+| تعدادِ check | ✅ **۸ از ۸**، verbatim |
+| `strict_required_status_checks_policy` | ✅ `true` |
+| آزمونِ عملی | ✅ PR #23 از `unstable` به **`mergeable_state = blocked`** پرید |
+| ruleset‌های مخزن | فقط همین یکی (پس تعارض یا تکراری در کار نیست) |
+
+**یک خبرِ خوبِ سنجه‌شده:** ‏`review_decision = null` روی PR #23 ⇒ قاعدهٔ `pull_request` با `required_approving_review_count: 0` از تو مرور نمی‌خواهد، و `require_extra_approval_for_unattributed_changes: true` هم مانعی برای مالکِ تنها نساخته. یعنی **blocked بودن فقط به خاطرِ check‌های قرمز است** — نه یک بن‌بستِ مروری. وقتی هر هشت سبز شوند، خودت می‌توانی merge کنی.
+
+**هزینهٔ `strict: true` را بدان:** چون «up to date with main» روشن است، هر بار که `main` جلو برود، PR باید از `main` به‌روزرسانی شود و **هر هشت job ‏دوباره اجرا می‌شوند** (backend ‏تنهایی ~۴۶۰ ثانیه). پس بهتر است merge ‏وقتی انجام شود که `main` تکان نخورده باشد.
+
+### ب) چرا هنوز `blocked` است — چهار job قرمز روی tipِ PR
+
+روی head ‏PR #23 یعنی `9bfc99d6f` ‏(۲۴ check-run): قرمز = `backend` · `live-contract` · `secret-scan` · `Documentation links and handoff` · سبز = `studio` · `client-flutter` · `Client — pinned SDK…` · `e2e-api` ‏skipped (چون `needs: [backend]` و backend قرمز بود).
+
+### ج) ⚠ یافتهٔ مهم: PR #23 پنج commit عقب‌تر از کارِ بیلدر است
+
+| قلم | مقدار |
+|---|---|
+| head ‏PR #23 | شاخهٔ `arena/da474b65-mp` @ `9bfc99d6f` |
+| شاخهٔ کاریِ بیلدر | `arena/5a1e37b3-mp` @ `db37b1bc0` |
+| `compare` | `status=ahead · ahead_by=5 · behind_by=0` ⇒ **fast-forward خالص** |
+| پنج commitِ جا مانده | `1ec787180` · `b9a65050c` · `3251145e4` · `3eaed4231` · `db37b1bc0` |
+| عواقب | روی `9bfc99d6f` ‏`backend` و `live-contract` **قرمز**اند؛ روی `db37b1bc0` **سبز** ⇒ merge کردنِ PR #23 به وضعیتِ امروز یعنی merge کردنِ کدِ با backendِ قرمز |
+
+**درمان (یک فرمان، در دستورِ کارِ بیلدر گذاشته شد):** ‏`git push origin arena/5a1e37b3-mp:arena/da474b65-mp` ⇒ PR #23 خودبه‌خود جلو می‌آید، شماره و تاریخچه‌اش حفظ می‌شود، PR تازه لازم نیست. ruleset ‏هم جلوی این push را نمی‌گیرد چون `deletion` و `non_fast_forward` فقط به `~DEFAULT_BRANCH` می‌خورند.
+
+### د) وضعیتِ CI روی `db37b1bc0` ‏در لحظهٔ وارسی
+
+سبز (۵): `backend` · `live-contract` · `studio` · `client-flutter` · `Client — pinned SDK · format gate · Android debug compile`
+در حالِ اجرا (۱): `e2e-api` · قرمز (۲): `secret-scan` · `Documentation links and handoff`
+هر دو قرمز در الحاقیه پاسخ گرفته‌اند ⇒ **هیچ‌کدام نیاز به تصمیمِ تو ندارند.**
+
+### هـ) شرطِ توقفِ من فعال شد — و یک اشتباهِ خودم اصلاح شد
+
+`secret-scan` بعد از دورِ اول، ده finding ‏در **مسیرِ دوم** نشان داد: ‏`docs/MuscleParadise/audit/evidence/**after**/detect-secrets.json` (من در `AD‑23` نوشته بودم «یک مسیر»). آن جمله از دادهٔ ناقص نوشته شده بود: سقفِ annotation ‏ده‌تا را نشان می‌داد. سنجهٔ ماهیت: هر دو baseline **فقط hash** دارند (`171/171` و `169/169` ‏`hashed_secret`، همه sha1ِ ۴۰-هگز، صفر plaintext) ⇒ یک کلاس‌اند. `AD‑23` به **دو مسیر** اصلاح شد و مرزِ سخت سرِ جای خودش ماند.
+
+**کاری از تو نمی‌خواهد:** فرمولِ fingerprint ‏داده شده و بیلدر ده موردِ دورِ دوم را خودش می‌سازد؛ dispatch تازه لازم نیست (workflow ‏`423857407` یک بار اجرا شد: `2026-11-22T05:37:02Z`، `workflow_dispatch`، `success`).
+
+### و) علتِ دقیقِ قرمزیِ `Documentation links and handoff` — هر چهار دروازه locally زده شد
+
+| دروازه | نتیجه |
+|---|---|
+| `scripts/docs_gate.py` | ✅ PASS — «18 Markdown files, 276 local links, 15 Mermaid diagram block(s), handoff headings, README entrypoints, SVG XML» |
+| `scripts/interaction_map.py --check` | ❌ FAIL — «نقشهٔ سطح تعامل کهنه است» |
+| `tools/mermaid-check` | ⚠ **هرگز اجرا نشده** — job در گامِ قبل متوقف می‌شود |
+| `scripts/repo_hygiene_gate.py` | ✅ PASS |
+
+یعنی تنها علتِ قرمزی، کهنه بودنِ نقشه است — همان چیزی که پاسخِ من دستورِ بازتولیدش را داد. و یک هشدارِ صادقانه: دروازهٔ mermaid **تا امروز یک بار هم اجرا نشده**، پس بعد از بازتولیدِ نقشه برای اولین بار اجرا می‌شود و ممکن است قرمزیِ تازه‌ای بدهد.
+
+### ز) بازتولیدِ نقشه را خودم از قبل انجام دادم — داوریِ عددیِ پیش‌دستانه
+
+در cloneِ موقت، بدون commit: ‏`31 سطح · رانش قرارداد 0 · بی‌تست 6` (از ۷). تغییر: ‏`interaction-map-2026-11-19.md` ‏(+۲۱/−۲۱) و `interaction-map.json` ‏(−۱۲/+۴۹)؛ در json هیچ کلیدی اضافه/حذف نشده، فقط `roles` و `tests`.
+
+**حسابِ شش نقش که بدون باقی‌مانده بسته می‌شود** (آزمونِ اصلیِ «بازتولید چیزی را پنهان نکرده»):
+
+| نقش | قدیم | تازه | تفاوت | تجزیه |
+|---|---|---|---|---|
+| `admin` | 102 | 103 | **+1** | −۳ تنگ‌شدن +۴ عمومی |
+| `manager` | 102 | 103 | **+1** | −۳ +۴ |
+| `super_admin` | 106 | 110 | **+4** | −۰ +۴ |
+| `coach` | 65 | 73 | **+8** | +۴ عمومی +۱ `sessions` +۳ `phone-change` |
+| `reception` | 42 | 50 | **+8** | +۴ +۱ +۳ |
+| `member` | 69 | 76 | **+7** | +۴ +۳ (`sessions` را داشت) |
+
+دسته‌بندی: **۳ تنگ‌شدن** (`admin/users*` به فقط `super_admin`) · **۴ اصلاحِ نمایش** (`otp/request`, `otp/verify`, `refresh`, `logout` که واقعاً عمومی‌اند — هیچ‌کدام `AuthenticatedUser` ندارند) · **۴ گشادشدنِ واقعی** (`sessions` و سه `phone-change`) · **صفر swap**.
+
+**گشادشدن‌ها IDOR نیستند — خواندم:** ‏`router.py:142` ⇒ `list_sessions(db, user_id=user.id, …)` · `service.py:174` ⇒ `row.user_id != user_id` · هر سه `phone-change` ‏(`router.py:88/101/114`) هیچ پارامترِ id از درخواست نمی‌خوانند و مالکیتِ `challenge_id` در `service.py:220-232` **در خودِ query** ‏(`AND user_id == user.id`) با ۴۰۴ سنجیده می‌شود. `service.py:414` هم که `db.get` بدون فیلتر به نظر می‌رسد، داخلِ هندلرِ `IntegrityError` و **بعد از** همان واکشیِ مالکیت‌سنجیده است. ⇒ محدود بودنِ `phone-change` به سه نقشِ مدیریتی یک **باگِ کارکردی** بود (عضو نمی‌توانست شمارهٔ خودش را عوض کند)، نه یک کنترلِ امنیتی.
+
+**یک پرچمِ اشتباهِ خودم را پس می‌گیرم:** ‏regex ‏من «هیچ بررسیِ مالکیتی در `verify_old_phone_change_otp`» چاپ کرد؛ بررسی در helper ‏است نه inline. آن خروجیِ ابزار بود، نه یافته.
 
