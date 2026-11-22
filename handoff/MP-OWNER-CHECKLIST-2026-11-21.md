@@ -1009,3 +1009,55 @@ WP 4.1 = PARTIAL (‏`next_transfer_state` E۳۴، ۱۰ بلوکِ D، ۸ کلی
 WP 4.7 = PARTIAL (بارِ پله‌ای BLOCKED-ENV) · **F‑30 OPEN** (ناپایداریِ receiptQueue؛ در CI سبز) · مثبتِ کاذبِ نهفتهٔ `mp-money-float-cast` ·
 گامِ ruff lint در `ci.yml` همچنان `continue-on-error` · ۰.۲ BLOCKED · ۱.۱/۱.۲/۱.۴ PARTIAL. هیچ‌کدام نقصِ correctness/امنیتِ فعال نیستند و همه در دفترِ کل ثبت‌اند.
 
+---
+
+## راستی‌آزماییِ merge (‏T‑3) = **انجام شد و سبز** ✅ — PR #24 روی `main` نشست، با **سه تصحیحِ سنجهٔ خودم**
+
+**تاریخ:** ۲۰۲۶‑۱۱‑۲۲ · **سنجه‌ها همه با `gh api` و `git` در کلونِ scratch خودم (`/tmp/mp2`) گرفته شده‌اند، نه از گزارشِ بیلدر.**
+
+### الف) حکمِ عددی
+
+| سنجه | مقدارِ اندازه‌گیری‌شده | نتیجه |
+|---|---|---|
+| `pulls/24` | `state=closed` · `merged=true` · `merged_at=2026-11-22T21:34:50Z` · `merge_commit_sha=35d4b35184b4148c658b415bd009fc076bf24e00` · ۱۲۲ کامیت · ۳۱۵ فایل · ‎+155,060/−1,071 | ✅ |
+| parentهای merge commit (هم API و هم `git rev-parse origin/main^1/^2`) | `^1=662ff8815add6f3a5be5e90432968a033e86e95d` · `^2=db28a1ea07000b34f1acf536be09a573faf8727a` | ✅ merge commitِ واقعی، نه fast-forward و نه squash |
+| `branches/main` | `35d4b35184b4…` · `protected=true` | ✅ |
+| **برابریِ درختِ `main` با tipِ داوری‌شده** | `tree(main)=tree(db28a1e)=6209967df90a6201ae3cb2fa08639bde5f64dfc7` · `git diff --shortstat` = ۰ خط | ✅ **مهم‌ترین سنجه:** اجرای کاملِ مستقلِ من در `db28a1e` (‏`1307 passed, 2 skipped in 210.77 s`، EXIT=0، coverage ۹۱٪، گیت PASS) **کلمه‌به‌کلمه برای `main` هم معتبر است** |
+| `compare/main...db28a1e` | `status=behind ahead_by=0 behind_by=1` | ✅ |
+| **زنجیرهٔ شاهد** | از **۱۲۲** کامیتِ فهرست‌شده در PR #24، **۱۲۲ تا** در فهرستِ ۲۶۸ کامیتِ `main` هستند ⇒ **۰ بیرون** | ✅ هدفِ `--merge` کامل محقق شد |
+| ارجاع‌های sha در اسنادِ ممیزی | از **۱۹۳** توکنِ هگز، **۷۲** توکن commitِ واقعی‌اند و **هر ۷۲ تا روی `main`** (تطابقِ مبهم = ۰)؛ ۱۲۱ توکنِ باقی commit نیستند (hashِ فایل مانند `07f3475b…`، عدد مانند `1500000`، شناسهٔ blob) | ✅ **۰ commitِ نقل‌شده بیرون از `main`** |
+| CI روی merge commit | run `45072898424` (‏`mp-ci`, push, `35d4b35`) = `completed/success` با **۸ از ۸ job سبز**؛ هر ۸ contextِ لازم در `check-runs` خودِ merge commit = `success`؛ `client-format-fix` run `45072898402` = `skipped` (به‌دستِ تریگرهای خودش)؛ `Graph Update` `45072899575` = `success` | ✅ |
+| چیزِ در جریان روی `main` | `in_progress=0` · `queued=0` (دو runِ در جریانِ مخزن روی دو شاخهٔ دیگرند) | ✅ |
+| ruleset `27826883` | `enforcement=active` · `updated_at=2026-11-22T09:02:29Z` (**پیش از merge ⇒ دست‌نخورده**) · ۸ context · `strict_required_status_checks_policy` · روش‌های merge `[merge, squash, rebase]` · approvals = ۰ | ✅ |
+| شواهد روی `main` | `docs/MuscleParadise/audit/evidence/` = ۱۱ مدخل (‏`after` ۳۴ مدخل، `before` ۱۸ مدخل، `bandit.json` 84,377 بایت، `detect-secrets.json` 53,680 بایت، `pip-audit.json`، `radon-cc.txt`، `radon-mi.txt`، `lizard-warnings.txt`، `requirements-freeze.txt`، `vulture.txt`) · `.gitleaksignore` = **60,102 بایت** | ✅ |
+| شاخهٔ کاری | `arena/5a1e37b3-mp` زنده در `33df26d` (فقط سندی: `EXECUTION-LOG.md` ‎+32 و سه تصحیحِ شمارِ خودِ `INVENTORY.md`) · **روی `main` نیست** · `INVENTORY.md` روی `main` = **۱۷۱۹ خط** | ✅ |
+
+### ب) آیا کاری در بازسازیِ شاخه گم شد؟ — سنجهٔ محتوایی، نه sha
+
+خطِ تاریخچه‌ای که پیش از بازسازی رها شد (‏`9bfc99d6f`، «WP 2.4») با `main` مقایسه شد:
+
+- `git diff --name-status 9bfc99d6f..main` = **۴۹ فایل: ۲۰ افزوده، ۲۸ تغییریافته، ۱ حذف‌شده**.
+- آن **یک** حذف = `.github/workflows/apk.yml` ⇒ **خودِ AD‑21** (حذفِ عمدیِ owner-approved، ‎−180 خط).
+- سرشماریِ node-id تست‌ها: **۱۲۷۵ ⇒ ۱۳۰۸** (‏۱ حذف، ۳۴ افزوده). آن یک حذف = `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` که **روی همان `apk.yml` ادعا می‌کرد** ⇒ پیامدِ ناگزیرِ AD‑21، نه پوششِ ازدست‌رفته.
+- هر فایلِ خط‌ازدست‌داده توضیحِ سنجه‌دار دارد: `findings.json` ‎−520/+525 (بازserialسازی؛ diffِ معناییِ پیش‌تر فقط `F-30` را نشان داد)، `axis_prescription.py` ‎−98/+135 (‏B5: ‏`prescribe_axis_work` 46(F)⇒13(C))، `config.py` ‎−45/+83 (54(F)⇒13(C))، `INVENTORY.md`/interaction-map (بازتولید)، `ci.yml` ‎−7/+10 (نامِ گام و حذفِ `continue-on-error`).
+- وارسیِ موردیِ گیت‌های WP روی `main` در venvِ مستقلِ خودم: ‏`test_wp25_scrape_errors_ready` · `test_wp32_error_envelope` · `test_wp25_silent_failures` · `test_wp32_detail_preserved` · `test_wp36_shop_today` ⇒ **۱۵ passed**. (دو تای اول در `tests/integration/` هستند نه `tests/regression/` — خطای دامنهٔ grepِ خودم.)
+
+**نتیجه: هیچ کاری گم نشده است.**
+
+### ج) سه تصحیحِ سنجهٔ خودم (بدونِ این‌ها حکمِ بالا غلط از آب درمی‌آمد)
+
+1. **کلونِ scratch من shallow بود** (`git rev-parse --is-shallow-repository` = `true`، ۲۶۵ آبجکت، ۲۱۸ کامیت در برابر **۲۶۸** کامیتِ واقعیِ `main`). به همین دلیل نخستین پاسِ من گفت «۲۶ shaِ نقل‌شده از `main` قابلِ دستیابی نیست» و «از ۱۲۲ کامیتِ PR فقط ۷۲ تا روی `main` نشستند». **هر دو غلط بود** — با فهرستِ کاملِ API از نو سنجیدم: **۰ sha و ۰ کامیتِ بیرون از `main`**. درس: در کلونِ shallow، `git merge-base --is-ancestor` برای کامیت‌های قدیمی **بی‌اعتبار** است؛ یا `--unshallow` یا فهرستِ API.
+2. **باگِ پارسِ خطا در اسکریپتِ خودم:** `gh api` در حالتِ خطا بدنهٔ JSON را روی stdout می‌ریزد و من کدِ خروج را نگرفته بودم ⇒ ۱۲۱ توکنِ غیرcommit به‌غلط «COMMIT / NOT-ON-MAIN» شمرده شدند. با `rc=$?` اصلاح شد: آن ۱۲۱ توکن `HTTP 422 «No commit found for SHA»` می‌دهند.
+3. **کلیدِ اشتباه در خوانشِ ruleset:** پارامتر `strict` نیست، `strict_required_status_checks_policy` است (نخستین تلاش `KeyError` داد).
+
+همچنین عددِ «۱۳۲ shaِ نقل‌شده» که پیش‌تر مبنای تصمیمِ `--merge` بود، با روشِ امروز **۷۲ commitِ قابلِ حل** است (از ۱۹۳ توکن). **مغزِ استدلال دست‌نخورده باقی است و با سنجه تأیید شد:** با squash، `main` به‌جای ۱۲۲ کامیت **یک** کامیت داشت و **هیچ‌کدام** از آن ۷۲ ارجاع از `main` قابلِ دستیابی نبود؛ با `--merge` **هر ۱۲۲ کامیت و هر ۷۲ ارجاع** زنده‌اند.
+
+### د) اقدامِ T‑3 (همان لحظه، بی‌درخواست) و شلیکِ T‑4
+
+- به مالک داده شد: بلوکِ بازیابیِ پلنِ فاز P با `curl` روی `handoff/MP-PRODUCTION-PLAN-P-2026-11-22.md` (‏۲۳٬۸۲۹ بایت / sha256 `f525a5143ebe8a3a607012788be0275b2cd12db4352f55e67464f78f767f32fc`) + سه تذکر: شروع با **P‑A = P‑1 ساعتِ استودیو** (‏P‑2 به آن تکیه می‌کند)، **P‑7 و P‑8 فقط با تأییدِ صریحِ مالک**، و **jobِ تازهٔ CI ممنوع + ویرایشِ ruleset `27826883` ممنوع**. قلمِ تازهٔ P‑3 (تنگ‌سازیِ `mp-money-float-cast` با کنترلِ مثبتِ اجباری) هم ضمیمه شد.
+- **T‑3 = FIRED (۲۰۲۶‑۱۱‑۲۲)** و چون شرطِ **T‑4** هم برقرار شد (‏T‑3 ‏FIRED **و** هر ۸ job روی merge commit ‏`success`) ⇒ **T‑4 = FIRED**: توصیهٔ اختیاریِ «آزمایشِ محلیِ code-only ابزارِ Graphify» با تذکرِ fitnessِ پایین، به مالک داده شد. هیچ محرکِ `PENDING` جز رویداد-محورها (‏T‑5/T‑6/T‑7) باقی نمانده است.
+
+### هـ) دو مشاهدهٔ جانبی در مخزنِ MP (سنجه‌شده، بدونِ اقدامِ من)
+
+1. شاخهٔ `arena/cfb2687f-mp` در `f9738f213` (‏۲۰۲۶‑۱۱‑۲۲T21:41:40Z) از **نشستِ دیگری** است و فقط `Amirreza-Piray-Training-Program.pdf` را به ریشهٔ مخزن افزوده: `diverged, ahead=1, behind=123`. یک **باینریِ نامرتبط با ممیزی** در ریشهٔ مخزن است و ۱۲۳ کامیت عقب ⇒ اگر روزی merge شود، گیتِ بهداشتِ مخزن و قاعدهٔ «باینری commit نشود» را نقض می‌کند. **توصیهٔ من: merge نشود؛** اگر مالک آن پرونده را می‌خواهد، بیرون از این مخزن نگه داشته شود.
+2. شاخهٔ `arena/da474b65-mp` در `9bfc99d6f` = همان خطِ رهاشدهٔ پیش از بازسازی: `behind, ahead=0, behind=77, files=0` ⇒ **کاملاً درونِ `main`** است و نگه‌داشتنش ارزشِ شاهدی ندارد (هرچونک sha‌هایش هنوز با refهای PR زنده‌اند). PRِ باز در مخزن = **۰**.
