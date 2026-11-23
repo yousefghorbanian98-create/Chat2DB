@@ -1061,3 +1061,76 @@ WP 4.7 = PARTIAL (بارِ پله‌ای BLOCKED-ENV) · **F‑30 OPEN** (ناپ
 
 1. شاخهٔ `arena/cfb2687f-mp` در `f9738f213` (‏۲۰۲۶‑۱۱‑۲۲T21:41:40Z) از **نشستِ دیگری** است و فقط `Amirreza-Piray-Training-Program.pdf` را به ریشهٔ مخزن افزوده: `diverged, ahead=1, behind=123`. یک **باینریِ نامرتبط با ممیزی** در ریشهٔ مخزن است و ۱۲۳ کامیت عقب ⇒ اگر روزی merge شود، گیتِ بهداشتِ مخزن و قاعدهٔ «باینری commit نشود» را نقض می‌کند. **توصیهٔ من: merge نشود؛** اگر مالک آن پرونده را می‌خواهد، بیرون از این مخزن نگه داشته شود.
 2. شاخهٔ `arena/da474b65-mp` در `9bfc99d6f` = همان خطِ رهاشدهٔ پیش از بازسازی: `behind, ahead=0, behind=77, files=0` ⇒ **کاملاً درونِ `main`** است و نگه‌داشتنش ارزشِ شاهدی ندارد (هرچونک sha‌هایش هنوز با refهای PR زنده‌اند). PRِ باز در مخزن = **۰**.
+
+---
+
+## داوریِ P‑A (بستهٔ نخستِ فاز P = P‑1 ساعتِ یکتای استودیو، شاخهٔ `arena/ff32c436-mp`) = **MATCH ✅** با چهار نکتهٔ سنجه‌دار
+
+**تاریخ:** ۲۰۲۶‑۱۱‑۲۲ · **tip:** `b3e2b29b4a84ffb692263ffc37c42a85dcee6c89` · **ahead ۲ / behind ۰** · ۱۹ فایل ‎+216/−63 · **۰ PR باز**
+**کامیت‌ها:** `eafb335` (۱۴ فایل: ‏`src/lib/clock.ts` تازه، `tests/clock.test.ts`، `eslint.config.mjs`، ۱۱ محلِ مصرف) + `b3e2b29` (۵ سند). شاخهٔ `arena/5a1e37b3-mp` دست‌نخورده؛ شاخه از `35d4b35` (= main) است.
+
+### الف) بازتولیدِ مستقلِ هر ادعا (همه در sandbox خودم، با `npm ci` از lock)
+
+| ادعای بیلدر | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| `npm run lint` ⇒ rc 0، خروجی خالی | `npm ci` (‏۵۴۰ بسته) سپس `npm run lint` ⇒ **rc 0، بدونِ هیچ خروجی** | ✅ |
+| `tsc -b` ⇒ rc 0 | `npx tsc -b` ⇒ **rc 0** | ✅ |
+| `npm run build` ⇒ rc 0 | `npm run build` ⇒ **rc 0، `✓ built in 8.43s`**؛ `dist` را خودم پاک کردم (‏۰ مورد در `git status`) | ✅ |
+| تستِ ساعت ⇒ ۷ passed | `npx vitest run tests/clock.test.ts` ⇒ **۷ passed** | ✅ |
+| کلِ استودیو ⇒ ۴۷ فایل/۳۰۶ passed/۹ skipped (۳۱۵) | `npm test` ⇒ **`Test Files 47 passed | 1 skipped (48)` · `Tests 306 passed | 9 skipped (315)` · exit 0 · ۱۱۱٫۵۹ ثانیه** (او ۱۷۴ ثانیه؛ شمارها یکسان) | ✅ |
+| C3 ⇒ ۰ موردِ `new Date(`/`Date.now(` بیرونِ `clock.ts` | `src` ⇒ **۰** · `electron` ⇒ **۰** · `scripts` ⇒ **۰** · `tests` ⇒ **۱** (‏`tests/jp7Trend.test.tsx:15`، تاریخِ ثابت و بیرونِ دامنهٔ قاعده) · `eslint.config.mjs:34` فقط درونِ توضیح | ✅ |
+| C4 ⇒ probe قاعده ۲ خطا می‌دهد | **probe مستقلِ خودم:** `src/__mp_probe_tmp.ts` با `new Date()` و `Date.now()` ⇒ `✖ 2 problems (2 errors, 0 warnings)` با `no-restricted-syntax` و همان دو پیام؛ سپس حذف ⇒ `git status` **۰** مورد. وارونه‌سنجی: `npx eslint src/lib/clock.ts` ⇒ **rc 0** (یعنی استثنا واقعاً فقط همان فایل است، نه کلِ `src`) | ✅ |
+| C5 ⇒ مرزِ نیمه‌شبِ تهران | خودم حساب کردم: ‏`2026-03-20T20:30:00Z` + ۳:۳۰ (‏IRST بدون DST از ۲۰۲۲) = دقیقاً `00:00` روزِ بعد ⇒ `2026-03-21` درست است؛ `20:00Z` ⇒ `23:30` همان روز؛ `23:50Z` ⇒ `03:20` روزِ بعد. هر سه تست با `setClock` ⇒ **بدونِ وابستگی به منطقهٔ دستگاهِ اجرا** | ✅ |
+| F‑28 نیمهٔ بک‌اند | `date.today()` در کدِ محصول = **۰** · `datetime.now()` بی‌tz = **۰** · `datetime.utcnow()` = **۰**؛ همهٔ ~۹۰ محل `datetime.now(UTC)`‌اند | ✅ |
+| بدونِ وابستگی/CI/ruleset تازه | `git diff --name-only main..tip | grep -cE 'package.json|package-lock|requirements.txt|\.github/|\.semgrep/|Dockerfile|compose'` ⇒ **۰** | ✅ |
+| INVENTORY با محیطِ کامل | `build_audit_inventory.py --check` با venvِ پُروابستگیِ خودم ⇒ **rc 0 «فهرست‌ها هم‌خوان‌اند»**؛ **۱۷۱۹ ⇒ ۱۷۲۱ خط**؛ شمارِ `/api/v1` در هر دو **۱۶۶** ⇒ بخشِ API واقعی است نه fallback؛ شمارِ فایل‌های استودیو ۱۲۲ ⇒ ۱۲۴ | ✅ |
+| CI روی full sha | run `45076479241` = `completed/success` و هر **۸** check-run روی `b3e2b29…` = `completed/success` (موجِ push-only چون PR نیست) | ✅ |
+
+**سنجهٔ تکمیلیِ من (حفره‌های قاعده):** راهِ دیگری برای گرفتنِ «اکنون» در `src` نمانده است ⇒ `.format()` بدون آرگومان = **۰**، `dayjs(`/`moment(` = **۰**، `Date.parse` = **۰**. `isoFromLocal` هم **مرده نیست** (‏`JalaliDateField.tsx:62` و `tests/jalaliDate.test.tsx:26`).
+
+### ب) نکتهٔ ۱ — D‑23: معیارِ «خواندنِ منطقه از API» برآورده نشد، ولی **شدنی بود** (سنجه)
+
+دلیلِ بیلدر: «منطقهٔ بک‌اند فقط در پاسخِ فروشگاه دیده می‌شود؛ خواندنش برای هر «امروز» یک وابستگیِ ناهمگام و یک نقطهٔ شکست تازه می‌سازد.» بخشِ دومِ دلیل **مهندسیِ درست** است (‏`today()` همگام است و نمی‌تواند `await` کند)، ولی بخشِ اول ناقص است:
+
+- ‏`GET /shop/status` همین حالا `"timezone": settings.shop_timezone` را برمی‌گرداند (‏`modules/shop/service.py:83`).
+- استودیو **همین حالا** آن را دارد: `ShopStatus.timezone: string` و `fetchShopStatus()` در `src/lib/api.ts:1401-1414` ⇒ **بدونِ endpoint تازه و بدونِ وابستگیِ تازه** قابلِ خواندن است (یک bootstrap یک‌بار در شروعِ برنامه، با همان ثابت به‌عنوانِ fallback).
+- ریسکِ واقعی سنجه شد: `MP_SHOP_TIMEZONE` یک تنظیمِ env-پذیرِ مستند است (‏`mp-app/backend/.env.example:42` و `docs/architecture/repowise/PROJECT-HANDOFF.md:353`) و اعتبارسنجش **هر منطقهٔ IANA** را می‌پذیرد (‏`app/config.py:100-108` با `ZoneInfo(value)`)، در حالی که پیش‌فرض `Asia/Tehran` است (‏`app/config.py:67`).
+- **اما** هیچ‌جای مخزن (compose/infra/Dockerfile) مقدارِ غیرپیش‌فرض تنظیم نمی‌کند ⇒ **واگرایی بالقوه است، نه باگِ زنده**. برای استقرارِ امروز صفر اثر دارد.
+
+**حکم:** برای P‑A پذیرفته است؛ ولی قلم باید **بسته** شود، نه ساکت رها: در **P‑C** یا bootstrap از `/shop/status` پیاده شود (با fallback و یک تست) یا یک `D‑25` صریح با دلیلِ مالک نوشته شود.
+
+### ج) نکتهٔ ۲ — D‑24: تغییرِ رفتارِ چهار پنل **هیچ تستی آن را پین نکرده است**
+
+- چهار محل از منطقهٔ محلیِ دستگاه به منطقهٔ فروشگاه رفت: `AdaptiveNutritionPanel` · `Nutrition` · `PeriodReportPanel` · `Expenses` (‏`isoDay(offset)` ⇒ `shiftIsoDay(today(), offset)`).
+- سنجه: فراخوانیِ `today(`/`shiftIsoDay(` بیرونِ `tests/clock.test.ts` = **۰**، در حالی که تستِ هر چهار صفحه موجود است (‏`adaptivePanel` · `nutritionPage` · `expensesPage` · `periodReportPanel`).
+- **فرضیهٔ «CI بسته به ساعتِ روز قرمز می‌شود» تأیید نشد** (این را صریح می‌گویم چون خودم مطرحش کردم): آن چهار تست فقط تاریخِ ثابتِ fixture دارند (`2026-03-15`، `2026-11-15`، …) و هرگز مقدارِ پیش‌فرضِ فیلد را ادعا نمی‌کنند ⇒ وابستگیِ به TZ در CI ساخته نشده. سوئیتِ کامل هم در sandbox من سبز بود.
+- همچنین یک نکتهٔ مستندی: در `Nutrition` توضیحِ «تاریخ محلی، نه UTC — «امروز» برای کاربر یعنی امروز» **حذف** شد، یعنی جهتِ طراحیِ پیشین عمداً وارونه شده است. substanceِ تغییر دفاع‌پذیر است (بک‌اند `logged_for_date or today_in_shop_zone()` را مصرف می‌کند و تاریخِ ارسالی را **رد نمی‌کند**، پس خطرِ ۴۰۹ نبود؛ ولی هم‌راستاییِ پیش‌فرضِ کلاینت با «امروزِ» سرور معنا دارد و برای دستگاهِ UTC+3:30 صفر تفاوت است).
+- **الزامِ P‑B:** با خودِ درایور (که `clock` آن طبقِ C3 از `clock.ts` عبور می‌کند) مقدارِ پیش‌فرضِ تاریخ در این چهار صفحه پین شود؛ نمونهٔ قطعی: `clock 2026-03-20T20:30:00Z` ⇒ انتظارِ `2026-03-21` در state — مستقل از منطقهٔ دستگاهِ CI.
+
+### د) نکتهٔ ۳ — گاردریلِ ناقص: `setClock` در دسترسِ کدِ محصول است
+
+`setClock` از `src/lib/clock.ts` export می‌شود و قاعدهٔ تازه فقط `new Date`/`Date.now` را منع می‌کند ⇒ هر فایلِ `src` می‌تواند ساعت را **فریز** کند. امروز **۰** فراخوانی در `src` بیرونِ `clock.ts` دارد (سنجه شد)، پس باگِ زنده نیست؛ ولی گاردش ارزان است: یک `no-restricted-imports` (یا selector) که `setClock` را بیرونِ تست ممنوع کند + یک probe. ⇒ قلمِ **P‑C**.
+
+### هـ) نکتهٔ ۴ — T‑7 شلیک شد: شش ردیفِ دفترِ وضعیت با واقعیتِ `main` هم‌خوان نیست
+
+برای هر ردیفِ `OPEN` در `CHECKLIST.md` وجودِ کامیتِ پیاده‌سازی و تستِ سبز را سنجم:
+
+| ردیف | وضعیتِ فعلی | شاهدِ سنجه‌شده | باید |
+|---|---|---|---|
+| **F‑05** | OPEN | کامیت `9bfc99d` «WP 2.4: RBAC decision cache + numeric-id normalisation + lock (F‑05)» · ۳ فایلِ تستِ ارجاع‌دهنده · `test_wp24_rbac_decision_cache.py` سبز | FIXED-PARTIAL/FIXED |
+| **F‑07** | OPEN | کامیت `20c3173` «WP 0.4 (F‑07): per-directory coverage gate…» | IN-PROGRESS/PARTIAL |
+| **F‑16** | OPEN | کامیت `fe103a4` «WP 4.6: no member_id=-1 sentinel…» · سنجهٔ من: `member_id == -1` در کدِ محصول = **۰** مورد | FIXED |
+| **F‑17** | OPEN | کامیت `0afd240` «WP 2.5 (F‑17): silent except -> log + counter…» · `test_wp25_silent_failures.py` سبز | FIXED-PARTIAL |
+| **F‑26** | OPEN | کامیت `8926fcd` «WP 3.2 (F‑26): one error envelope…» · ۲ فایلِ تست · `test_wp32_error_envelope.py` + `test_wp32_detail_preserved.py` سبز · slice-A: ‏`fastapi_default_detail` ‏۷۰⇒۰ روی ۸۷۲ سلول | FIXED |
+| **F‑27** | OPEN | کامیت `fc402a8` «WP 3.4: member_profile_required 409…» · ۲ فایلِ تست · `member_profile_required` در `modules/shop/service.py` موجود | FIXED |
+
+اجرای من روی `main`: ‏`test_wp24_rbac_decision_cache` + `test_wp25_silent_failures` + `test_wp32_error_envelope` + `test_wp32_detail_preserved` ⇒ **۱۶ passed**.
+درست‌هایِ دفتر: **F‑11** (‏۰ کامیت، ۰ تست) و **F‑30** (flake، OPENِ مستند) واقعاً بازند؛ **F‑23** مبهم است (تنها کامیتِ اشاره‌کننده `38a41a1 feat(phase8)` یک کامیتِ feature قدیمی است، نه رفع) ⇒ نیازمندِ تصمیم، نه حدس.
+
+### و) راستی‌آزماییِ تکمیلیِ merge (پس از unshallow) — تصحیحِ هفتم doubly confirmed
+
+کلونِ scratch را کامل کردم (`git fetch --unshallow` ⇒ `is-shallow-repository=false`، ۲۷۲ آبجکت). حالا **مستقل از API** هم همان نتیجه: هر **۱۲۲ از ۱۲۲** کامیتِ فهرست‌شدهٔ PR #24 نیاکانِ `main`‌اند و `9bfc99d6f` (نوکِ خطِ رهاشده) **هم** نیاکانِ `main` است. ⇒ یافتهٔ «۲۶ sha غیرقابلِ دستیابی / ۵۰ کامیتِ بیرون» که در گزارشِ نخستِ همین نوبت دادم، **کاملاً artefactِ shallow clone بود** و باطل است.
+
+### ز) اقلامِ بستهٔ بعد (P‑B) که با این داوری صادر شد
+
+**P‑B = P‑2 (درایورِ قطعیِ UI، `mp-app/studio/scripts/agent_drive.mjs`)** با C1…C8 پلن + **P‑B‑1** (پینِ مقدارِ پیش‌فرضِ تاریخِ همان چهار صفحه با خودِ درایور، مستقل از TZ). سپس **P‑C = P‑3** + چهار carry-over: (۱) تنگ‌سازیِ `mp-money-float-cast` با کنترلِ مثبتِ اجباری، (۲) گاردِ `setClock` + probe، (۳) bootstrap منطقه از `/shop/status` یا `D‑25` صریح، (۴) اصلاحِ شش ردیفِ کهنهٔ دفتر (فقط سند، با sha‌های بالا).
