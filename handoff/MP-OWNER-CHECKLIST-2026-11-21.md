@@ -1134,3 +1134,83 @@ WP 4.7 = PARTIAL (بارِ پله‌ای BLOCKED-ENV) · **F‑30 OPEN** (ناپ
 ### ز) اقلامِ بستهٔ بعد (P‑B) که با این داوری صادر شد
 
 **P‑B = P‑2 (درایورِ قطعیِ UI، `mp-app/studio/scripts/agent_drive.mjs`)** با C1…C8 پلن + **P‑B‑1** (پینِ مقدارِ پیش‌فرضِ تاریخِ همان چهار صفحه با خودِ درایور، مستقل از TZ). سپس **P‑C = P‑3** + چهار carry-over: (۱) تنگ‌سازیِ `mp-money-float-cast` با کنترلِ مثبتِ اجباری، (۲) گاردِ `setClock` + probe، (۳) bootstrap منطقه از `/shop/status` یا `D‑25` صریح، (۴) اصلاحِ شش ردیفِ کهنهٔ دفتر (فقط سند، با sha‌های بالا).
+
+---
+
+## بخشِ ۲۰۲۶‑۱۱‑۲۳ · داوریِ بستهٔ P‑B (درایورِ قطعیِ UI) — «کد: MATCH · سند: MISMATCH»
+
+**محرک:** ‏T‑8 (بیلدر بستهٔ فاز P را تحویل داد) · **شاخه:** `arena/ff32c436-mp` · **tip:** `6ff268530b2fbc63b848582342d4ad8711a70481`
+
+### الف) وضعیتِ زندهٔ GitHub (نخستین سنجهٔ نوبت، پیش از هر داوری)
+
+| سنجه | مقدارِ اندازه‌گیری‌شده | فرمان/منبع |
+|---|---|---|
+| tip شاخه | `6ff268530b2f…` | `gh api repos/yousefghorbanian98-create/MP/branches/arena/ff32c436-mp` |
+| `main` | `35d4b35184b4148c658b415bd009fc076bf24e00` (دست‌نخورده) | همان API |
+| ahead/behind | **ahead ۴ / behind ۰** | `gh api .../compare/main...arena/ff32c436-mp` ⇒ `status="ahead"` |
+| ترتیبِ کامیت‌ها | `eafb335` (P‑1) → `b3e2b29` (سندِ P‑A) → `b2810f12a…` (کدِ P‑B) → `6ff2685` (سندِ P‑B) | `git log --oneline` |
+| بازنویسیِ تاریخ؟ | **خیر** — `compare eafb335...tip` = ahead ۳ و `b3e2b29...tip` = ahead ۲ ⇒ fast-forward | همان |
+| CI | run `45106817970` = **success** · ۸/۸ check-run سبز روی full sha | `gh api .../actions/runs` + `check-runs` |
+| PR باز | **۰** | `gh api .../pulls?state=open` |
+| diff کل (`main...tip`) | **24 files changed, 657 insertions(+), 64 deletions(-)** | `git diff --shortstat` (دو-نقطه و سه-نقطه هر دو) + API compare |
+| diff فقطِ P‑B (`b3e2b29..tip`) | **7 files, +445/−5** | `git diff --shortstat` |
+| فایل‌های ترک‌شده | ۱۳۵۲ (main) ⇒ **۱۳۵۸** (tip) | `git ls-tree -r --name-only | wc -l` |
+
+مجموعهٔ ۷ فایلیِ P‑B: ‏`M docs/…/EXECUTION-LOG.md` · `M docs/…/INVENTORY.md` · `M mp-app/studio/package.json` · `A scripts/agent_drive.mjs` (۲۴۵ سطر) · `A tests/driver/{cli.test.tsx (۱۰)، driver.test.tsx (۹۸)، pins.test.tsx (۴۹)}`.
+**۰ فایلِ ممنوع:** بدونِ lockfile، requirements، `.github/`، `.semgrep/`، Dockerfile/compose، `eslint.config.mjs`، PNG/رسید، `dist/`. تنها تغییرِ `package.json` یک خط است: `"drive": "node scripts/agent_drive.mjs"` ⇒ **بدونِ وابستگیِ تازه** (AD‑24 رعایت شده؛ ماژول‌ها با `import()` پویا بار می‌شوند تا `node` خالی هم CLI را اجرا کند).
+
+### ب) جدولِ داوری: ادعا در برابرِ سنجهٔ مستقل
+
+| # | ادعای بیلدر | سنجهٔ ممیز (فرمانِ خودم) | نتیجه |
+|---|---|---|---|
+| ۱ | lint rc 0، خروجی خالی | `npm run lint` ⇒ rc=0، **۳۶ بایت** (فقط هدرِ npm) | هم‌خوان |
+| ۲ | `tsc -b` rc 0 | rc=0، **۰ بایت** | هم‌خوان |
+| ۳ | `npm test` = ۴۹ فایل / ۳۲۳ پاس / ۲ skip | **۴۹ passed \| ۲ skipped (۵۱) · ۳۲۳ passed \| ۱۰ skipped (۳۳۳) · ۱۲۲٫۱۶ ثانیه · FULL_EXIT=0** | هم‌خوان |
+| ۴ | `tests/driver` = ۲ فایل/۱۷ تست + ۱ skip | همان، و **در سه TZ** یکسان: ‏`UTC` · `America/Los_Angeles` · `Pacific/Kiritimati` | هم‌خوان |
+| ۵ | دو اجرای CLI با sha256 `4e2aa2b6…` | دو اجرا ⇒ هر دو **۲۴۸ بایت** و sha256 = `4e2aa2b68d54dadce4aa973b9967d652715df3d882428aba07e42b2b7fdac2a7` · `cmp` یکسان | هم‌خوان |
+| ۶ | اجرای CLI حدود ۳–۴ ثانیه | **۲٫۸۹** و **۲٫۹۱** ثانیه (`EPOCHREALTIME`) ⇒ C6 (≤۳۰ ثانیه) با فاصلهٔ زیاد | هم‌خوان |
+| ۷ | «یک تستِ CLI به‌علتِ **نبودِ npm** skip شد» | علتِ واقعی: ‏`it.skipIf(!process.env.MP_DRIVE_ARGV)` در `tests/driver/cli.test.tsx:6` — و npm **هست** (`/usr/local/bin/npm`). در خودِ LOG درست نوشته بود | **ناهم‌خوان در گزارش** (در LOG درست) |
+| ۸ | `git diff --stat main...HEAD` = ۲۴ فایل، **+619/−63** | **۲۴ فایل، +657/−64** (هم `git` و هم API compare) | **ناهم‌خوان (CO‑2)** |
+| ۹ | INVENTORY `--check` ⇒ **rc 0** «فهرست‌ها هم‌خوان‌اند» | روی tip ⇒ **rc=1 «کهنه: INVENTORY.md»** | **ناهم‌خوان (CO‑1)** |
+| ۱۰ | ردیف‌های `/api/v1` = ۱۶۶ | ۱۶۶ در هر سه ref (main / `b3e2b29` / tip)؛ سطرها ۱۷۱۹ → ۱۷۲۱ → **۱۷۲۵** | هم‌خوان |
+| ۱۱ | «۱۳۵۴ ⇒ ۱۳۵۸ فایل، ۴ فایلِ تازه» | ۱۳۵۸ در tip؛ ردیفِ committedِ INVENTORY هم ۱۳۵۸ | هم‌خوان |
+
+**نتیجه: کدِ P‑B = MATCH** (هر ۸ معیارِ C1…C8 بازتولید شد) · **سندِ P‑B = MISMATCH** در دو ادعا (ردیفِ ۸ و ۹). هیچ revert لازم نیست؛ tip همان پایهٔ P‑C است.
+
+### ج) دو ناهم‌خوانی و علتِ ریشه‌ایِ واحد
+
+هر دو از یک خطای ترتیب می‌آیند: **بازتولیدِ INVENTORY و گرفتنِ diff stat پیش از نشستنِ متنِ نهاییِ بخشِ LOG** انجام شده (بخشِ P‑B در LOG = **۳۳ سطر**: ‏۷۵۳ → ۷۸۶).
+شاهدِ قطعی: ردیفِ committedِ INVENTORY هنوز می‌گوید `| مستندات | docs/MuscleParadise/audit/EXECUTION-LOG.md | 753 | 119428 |` در حالی که فایلِ tip **۷۸۶ سطر / ۱۲۶٬۸۳۸ بایت** است؛ ‏۷۵۳ دقیقاً عددِ P‑A است.
+diffِ بازتولیدِ تازه فقط **۳ سطر** است و هر سه خودارجاع:
+`خطوط متنی 306342 → 306375` · `| مستندات | 319 | 109602 → 109635 |` · `EXECUTION-LOG.md | 753 | 119428 → 786 | 126838`.
+**همگراییِ راه‌حل سنجه شد:** دو بازتولیدِ پشتِ‌سرهم ⇒ هر دو ۱۷۲۵ سطر با sha256 یکسان `3d782e2266e03f5c33f0872ab6b24fc9848d3d19df6de44228ea4d635c28336e` (نقطهٔ ثابت) و سپس `--check` ⇒ rc 0. یعنی **یک** بازتولیدِ درست در جایِ درست، هر دو ناهم‌خوانی را می‌بندد.
+یادداشتِ روشیِ ممیز: ‏`/home/user/venv-mp` برای من هم ناپدید شده بود؛ با venv کاملِ `/tmp/v24` (Python 3.11.2 · fastapi 0.165.0 · sqlalchemy 2.1.9) همان سنجه‌ها reproduce شد ⇒ اختلاف از interpreter نیست. همچنین `scripts/build_audit_inventory.py` پرچمِ `--help` **ندارد** و `--help` دادن باعثِ **بازنویسیِ درجا** می‌شود (‏CHECKLIST ۱۵۰ + INVENTORY ۱۷۲۵ سطر) — تلهٔ تازهٔ ثبت‌شده.
+
+### د) معیارهای P‑B که با خواندنِ کد و اجرای مستقل تأیید شد
+
+- **C1** افعال و arity: ‏`VERBS = {render, clock, type, tap, state, snapshot}` · `ARITY {render:1, clock:1, type:2, tap:1, snapshot:1, state:0}` · `parseArgv`/`runSteps` export شده‌اند.
+- **C2** قطعیّت: ‏`state = sortKeys({...})` و دو خروجی بایت‌به‌بایت یکسان (سنجهٔ بالا).
+- **C3** ساعت از خودِ محصول: ‏`await import("../src/lib/clock.ts")` + `setClock(next)` و `setClock(null)` در `finally` ⇒ **نه** `vi.setSystemTime`ِ jsdom.
+- **C4** خروجیِ متنی، نه باینری: ‏`snapshot` = ‏`document.body.textContent` نرمال‌شده.
+- **C5** خطاهای شناسه‌دار: ‏`DRV-001…DRV-005` با `{code, step, message, hint}` — اجرای واقعیِ من: صفحهٔ ناشناخته ⇒ `DRV-002` با فهرستِ پنج صفحه؛ فعلِ ناشناخته ⇒ `DRV-001`.
+- **C6** زمان: ‏۲٫۸۹ ثانیه.
+- **C7** بدونِ وابستگی و بدونِ دست زدن به `eslint.config.mjs` (با هدرِ `/* global process, document, localStorage, Response, Headers, URL, setTimeout */`).
+- **C8** پوششِ صفحه‌های واقعی: ‏`PAGES` = Shop · Nutrition · Expenses · PeriodReportPanel · AdaptiveNutritionPanel(props `memberId:7`) ⇒ پنج صفحه، از جمله **صفحهٔ فرم‌دار**.
+- **P‑B‑1 (carry-overِ P‑A: پینِ «امروز» در منطقهٔ فروشگاه)** — هر چهار پنل با دو زمانِ مرزی:
+  ‏`20:30Z ⇒ /daily?date=2026-03-21` و `20:00Z ⇒ date=2026-03-20` (مرزِ IRST=UTC+3:30) · `PeriodReportPanel ⇒ anchor=2026-03-21` · `Expenses ⇒ to=2026-03-21 و from=2026-02-19` (پنجرهٔ ۳۰ روزه) · `AdaptiveNutritionPanel ⇒ POST /weight-logs` با بدنهٔ حاوی `2026-03-21`.
+
+### هـ) دو probe مستقلِ ممیز (چیزی که بیلدر گزارش نکرده بود)
+
+1. **probe جهش (آیا پین‌ها باربرند؟):** در scratch، ‏`SHOP_TIMEZONE = "Asia/Tehran"` را به `"UTC"` تغییر دادم ⇒ `TZ=UTC npx vitest run tests/driver` ⇒ **1 failed | 4 failed | 13 passed | 1 skipped** (هر ۴ پین قرمز). سپس از backup بازگرداندم: ‏`git diff --stat` ⇒ **۰ خط** و اجرای دوباره ⇒ ۲ فایل/۱۷ تست سبز. ⇒ پین‌ها تزئینی نیستند؛ دقیقاً همان چیزی را می‌گیرند که D‑24 می‌خواست.
+2. **کنترلِ بدونِ پین (آیا درایور تاریخِ واقعی را هم درست می‌دهد؟):** ‏`render Expenses state` بدونِ `clock` ⇒ `GET /api/v1/expenses?from=2026-10-24&to=2026-11-23` = تاریخِ واقعیِ محیطِ اجرا؛ با `clock 2026-03-20T20:30:00Z` ⇒ `from=2026-02-19&to=2026-03-21`. ⇒ پین‌ها به fixture چسبیده‌اند نه به ساعتِ دستگاه.
+3. **اجرای تستِ skip‌شده:** با `MP_DRIVE_ARGV='["clock","2026-03-20T20:30:00Z","render","Expenses","state"]'` و `MP_DRIVE_OUT=/tmp/cli_out.json` ⇒ **3 files passed · 18 tests passed** و فایلِ خروجی ۲۴۸ بایت با **همان sha256** و `cmp` یکسان با `npm run drive`. ⇒ آن تست سالم است، فقط conditionally gated (و در CI هیچ‌وقت اجرا نمی‌شود).
+
+### و) اقلامِ صادرشده از این داوری
+
+- **CO‑1 (الزامی):** بازتولیدِ INVENTORY به‌عنوانِ **آخرین گام پس از متنِ نهاییِ LOG** در P‑C؛ سپس `--check` ⇒ rc 0. اگر کهنه ماند، در کامیتِ بعدی — **هرگز amend**.
+- **CO‑2 (الزامی):** اصلاحیهٔ عددی در LOG: ‏`main...HEAD` روی tipِ P‑B = **24 files, +657/−64** (نه ۶۱۹/۶۳).
+- **CO‑3 (پیشنهادی، غیرمسدودکننده):** تستِ `cli.test.tsx` در CI هرگز اجرا نمی‌شود چون `MP_DRIVE_ARGV` تنظیم نمی‌شود؛ اگر روزی خواستیم پوششِ CI بگیرد، باید یک step با آن env اضافه شود ⇒ **خارجِ دامنهٔ فاز P** (‏`.github/` ممنوع). فقط ثبت شد تا گم نشود.
+- **CO‑4 (ثبتِ روشیِ ممیز):** «دلیلِ skip» را همیشه از خودِ کد بخوان، نه از گزارشِ بیلدر (۱۲مین تصحیحِ خودم: نخست به‌غلط `isToolAvailable`/`src/test/harness` را از حافظه نقل کردم که **اصلاً وجود ندارند**؛ سنجه نشان داد علت `MP_DRIVE_ARGV` است).
+- **مجوزِ P‑C صادر شد:** ‏`handoff/MP-BUILDER-PC-AUTHORIZATION-2026-11-23.txt` — دامنه فقط P‑3 پلن + CO‑1/CO‑2 + شش ردیفِ کهنهٔ `status.json`. دو قلمِ باقی‌ماندهٔ carry-over صریحاً **مجوز نگرفتند**: تنگ‌سازیِ `mp-money-float-cast` (‏P‑F) و گاردِ `setClock` (‏P‑D) و bootstrap منطقهٔ فروشگاه/‏D‑25 (‏P‑F).
+- **سنجهٔ تازهٔ ممیز برای P‑C:** ‏`scripts/docs_gate.py` امروز دقیقاً **۱۸ فایل** را اسکن می‌کند و `docs/MuscleParadise/audit/` در `CORE_MARKDOWN_FILES` **نیست** ⇒ بدونِ افزودنِ `GATE-CODES.md` به آن فهرست، معیارِ C7 پلن بی‌معنا می‌ماند. baseline‌های سبز: ‏docs_gate rc=0 (‏۱۸ md/۲۷۶ لینک/۱۵ Mermaid، sorted-sha `1730e4d9b55c800ae48adad3…`) · `interaction_map.py --check` rc=0 (‏۳۱ سطح/۱۶۳ مسیر/رانش صفر، sorted-sha `29261bdef03b3369718ccf79…`) · `repo_hygiene_gate.py` rc=0 (sorted-sha `e7635353f6757cbc756c4d26…`).
+- **علتِ ریشه‌ایِ شش ردیفِ کهنهٔ دفتر سنجه شد:** ‏`docs/MuscleParadise/audit/status.json` (‏۲۴ کلید، ۱۰٬۶۱۶ بایت) هیچ کلیدی برای F‑05/F‑07/F‑16/F‑17/F‑26/F‑27 ندارد و `build_audit_inventory.py:178` کلیدِ غایب را `OPEN` می‌گذارد ⇒ راهِ حل، افزودنِ شش کلید به **status.json** است نه دست‌کاریِ `CHECKLIST.md` (که تولیدی است و خودش می‌نویسد «دستی ویرایش نکنید»).
