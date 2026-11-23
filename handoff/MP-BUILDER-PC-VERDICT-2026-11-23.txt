@@ -325,9 +325,12 @@ builder correctly refused to guess a status for it. Because it is a
 product/owner judgement, not a measurement question, the reviewer put it
 to the owner with three options: (a) record as non-issue and close,
 (b) keep OPEN as an inventory note, (c) split into its own package with
-a real acceptance test. The owner's answer will be recorded verbatim in
-the next authorized package; until then F-23 must stay untouched in
-status.json.
+a real acceptance test. The owner asked for the reviewer's own reading,
+so the reviewer MEASURED the ten locations instead of guessing.
+See ADDENDUM A below: zero dead buttons. The ruling and the exact text
+to record are in section 9 of
+handoff/MP-BUILDER-PD-AUTHORIZATION-2026-11-23.txt. Until the builder
+records it under that authorization, F-23 stays untouched in status.json.
 
 ---------------------------------------------------------------------
 8. WHAT IS STILL BLOCKED
@@ -359,3 +362,76 @@ tests have teeth; six stale status rows closed against six real witness
 commits; CO-1 and CO-2 closed; three non-blocking observations carried;
 F-23 awaiting the owner.
 =====================================================================
+
+=====================================================================
+ADDENDUM A — F-23 measured by the reviewer (same day, tip 5720e5a)
+=====================================================================
+The finding as stored is one line with no evidence:
+  {"id": "F-23", "title": "۱۰ دکمه بدون `onClick` (موجودی، نه لزوماً نقص)",
+   "source": "FINAL-AUDIT"}
+The original report (share/MP-FINAL-AUDIT-REPORT-2026-11-20.md:919-940)
+listed the ten locations and declared the manual review BLOCKED because
+no headless browser was available. It is not blocked any more: the ten
+locations can be read in the source, and reading them settles it.
+
+Reviewer's census of mp-app/studio/src/**/*.tsx at tip 5720e5a
+(comment lines excluded):
+    total buttons                      = 83
+    with a direct onClick              = 74
+    without onClick                    =  9
+       under Popconfirm / Upload        =  4   (handler injected by antd)
+       type="submit" inside <form>      =  5   (handler is the form's onSubmit)
+       genuinely dead buttons           =  0
+    comment lines wrongly counted once  =  1   (83 + 1 = the old total 84)
+
+The ten reported locations, one by one:
+  1 components/AdminPermissions.tsx:247  <Button danger size="small" loading={busy}>سلب</Button>
+        wrapped in <Popconfirm ... onConfirm={() => void revoke(row)}> at :241-250
+        => HEALTHY. antd Popconfirm clones its child and attaches the click.
+  2 components/DeviceSessions.tsx:118    <Button danger size="small" ...>خروج دستگاه</Button>
+        wrapped in <Popconfirm ... onConfirm={() => void revoke(row)}> at :112-121
+        => HEALTHY, same pattern.
+  3 components/PhoneChangeDialog.tsx:173 that line IS `onClick={onClose}` on the
+        <button> whose tag opens at :170 => the old scanner mis-read a
+        multi-line tag. FALSE POSITIVE. (A different button at :178 is
+        type="submit" inside the form at :125 with onSubmit => HEALTHY.)
+  4 components/ReceiptQueue.tsx:129      <Button type="primary" ...>تأیید</Button>
+        wrapped in <Popconfirm ... onConfirm={() => void approve(row)}> at :124-132
+        => HEALTHY. (The sibling at :133 has its own onClick.)
+  5 components/TopBar.tsx:8              a JSDoc COMMENT line:
+        "*    پیش از این `<button>` بدون `onClick` با نقطهٔ قرمزِ همیشگی بود."
+        => SCANNER ARTEFACT, not code. It documents a bug that was already fixed.
+  6 pages/Expenses.tsx:329               <Button size="small">فیش</Button>
+        wrapped in <Upload accept="image/jpeg,image/png,image/webp"
+        showUploadList={false} beforeUpload={(file) => { void uploadReceipt(row.id, file); return false; }}>
+        => HEALTHY. antd Upload attaches the click to open the file dialog.
+  7 pages/Shop.tsx:651 (reported)        that line is `onChange={...}` of a Select;
+        the real button is :653 <button type="submit"> inside <form onSubmit> at :613
+        => HEALTHY. The reported line number had drifted.
+  8 pages/Shop.tsx:696 (reported)        that line is `</div>`; the real button is
+        :698 <button type="submit"> inside <form onSubmit> at :661 => HEALTHY.
+  9 pages/Shop.tsx:741 (reported)        that line is an <Input>; the real button is
+        :743 <button type="submit"> inside <form onSubmit> at :710 => HEALTHY.
+ 10 pages/Shop.tsx:820 (reported)        that line is `)}`; the real button is
+        :822 <button type="submit"> inside <form onSubmit> at :779 => HEALTHY.
+
+All five submit buttons were verified to sit in a form that HAS onSubmit:
+Shop.tsx forms at :613, :661, :710, :779 (each `onSubmit={(e) => {`),
+PhoneChangeDialog.tsx form at :125 (`onSubmit={(event) => void submit(event)}`).
+
+RULING (reviewer's recommendation, put to the owner):
+F-23 is NOT AN ISSUE and does not reproduce. Record it as
+NOT-REPRODUCED with the evidence above — no new package, no product
+change, no Playwright work needed. Note the precedent: the same report
+had already rejected a "75 wireless buttons" claim at line 1003 and kept
+"10 of 84" as the residue; this measurement shows the residue is zero.
+The exact status.json text to record is section 9 of the P-D
+authorization, so the closure lands with witnesses inside an authorized
+package instead of floating as an opinion.
+
+Reviewer self-correction (15th): the reviewer's FIRST scanner reported 4
+buttons without onClick, not 9, because it looked only at capitalized
+`<Button` tags and not at lowercase `<button`, and it skipped nothing.
+The corrected scan counts both, excludes comment lines explicitly, and
+classifies each remaining case by its wrapper. The number 4 was never
+quoted as a finding.

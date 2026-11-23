@@ -1,0 +1,349 @@
+=====================================================================
+MP — P-D AUTHORIZATION (reviewer-issued)
+Repository : yousefghorbanian98-create/MP
+Branch     : arena/ff32c436-mp   (only this branch)
+Base tip   : 5720e5a48cd89abe8c4bea1daf3e045cf3af0258  (P-C, MATCH)
+CI at base : run 45111202901 = completed/success, 8 check-runs, all success
+Issued     : 2026-11-23 by the reviewer on Chat2DB branch
+             arena/4648b14f-chat2db (commit recorded in the push log)
+Package    : P-D = plan P-4 + plan P-5 + trigger T-11(ب) setClock guard
+             + the three P-C observations OBS-1/OBS-2/OBS-3
+             + recording the F-23 ruling in status.json
+=====================================================================
+
+§0  RECOVERY (if your sandbox resets)
+---------------------------------------------------------------------
+This authorization is committed in the Chat2DB repo. Fetch it without a
+clone:
+
+  curl -sSL -H "Accept: application/vnd.github.raw" \
+    "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-BUILDER-PD-AUTHORIZATION-2026-11-23.txt?ref=arena/4648b14f-chat2db"
+
+Size and sha256 are printed in the commit message and re-verified
+against the GitHub contents API after the push.
+
+Reset lesson (already learned once, on P-C): a stale index fabricates
+deletions. The correct recovery is `git fetch origin`, confirm the
+pushed tip with `git rev-parse origin/arena/ff32c436-mp`, then
+`git reset --mixed <pushed-tip>`, then require an empty
+`git status --porcelain`. If it is not empty, stop and inspect; do not
+commit over it.
+
+§1  WHERE THINGS STAND
+---------------------------------------------------------------------
+P-C verdict = MATCH on all ten criteria, zero forbidden paths, zero
+product-code changes. CO-1 is CLOSED (`build_audit_inventory.py --check`
+now returns rc 0 at the tip; it returned rc 1 "کهنه" at the P-B tip).
+CO-2 is CLOSED (the P-B statistic correction is recorded in
+EXECUTION-LOG). Your refusal to start P-D/P-F without an authorization
+was correct. This file is that authorization for P-D only.
+
+The label "P-F" does not exist in the plan file. The money-float
+narrowing and the D-25 shop-timezone bootstrap are triggers T-10 and
+T-11(الف); they are NOT part of P-D and remain unauthorized.
+
+§2  PERMITTED PATHS (exactly these; anything else is a violation)
+---------------------------------------------------------------------
+ 1. mp-app/studio/eslint.config.mjs
+      append new config blocks for P-4 and the setClock guard.
+ 2. scripts/staleness_gate.py                       (new file, P-5)
+ 3. .github/workflows/ci.yml
+      ONE new step inside the existing `docs` job, placed after the
+      "Repository hygiene ..." step, of the form
+        - name: Staleness gate (source newer than artifact)
+          run: python3 scripts/staleness_gate.py
+      Nothing else in this file may change. No new job. No new `uses:`
+      (a `run:` step needs no action pin). Do not touch any pinned SHA.
+ 4. mp-app/backend/tests/integration/test_staleness_gate.py  (new)
+      red-first pytest for the new gate.
+ 5. mp-app/backend/tests/integration/test_gate_codes.py
+      OBS-1 only: derive the expected code list from the scripts instead
+      of hardcoding it.
+ 6. scripts/docs_gate.py and scripts/interaction_map.py
+      OBS-2 only: make both gates write human findings to the SAME
+      stream. OBS-3 only: nothing here (documentation change).
+ 7. docs/MuscleParadise/audit/GATE-CODES.md
+      add the STALE-### rows for the new gate, add the exit-code
+      contract (0 green / 1 findings / 2 argparse misuse), and add the
+      stream decision from OBS-2. Additive only; keep trailing-whitespace
+      and link hygiene clean (the file is inside docs_gate scope).
+ 8. docs/MuscleParadise/audit/status.json
+      ONE key: F-23 (ruling text in §9). No other key may change.
+ 9. docs/MuscleParadise/audit/EXECUTION-LOG.md
+      exactly one new section for P-D.
+10. docs/MuscleParadise/audit/CHECKLIST.md, INVENTORY.md and
+    docs/MuscleParadise/architecture/interaction-map-2026-11-19.md
+      ONLY through their generators, as the last step before the docs
+      commit (CO-1). Never hand-edited.
+
+§3  FORBIDDEN (hard stop, no exceptions)
+---------------------------------------------------------------------
+ - Any product code: mp-app/studio/src/**, mp-app/backend/app/**,
+   mp-app/client/**. Zero changes. If a new lint rule reveals a
+   LEGITIMATE violation in product code, HARD STOP and ask — do not
+   move code to satisfy a rule (P-4 C5 of the plan).
+ - src/lib/clock.ts. The D-25 bootstrap (reading the shop timezone from
+   /shop/status instead of the SHOP_TIMEZONE constant) is T-11(الف) and
+   is NOT authorized here. The setClock guard must be an ESLint rule
+   only, not a code change.
+ - .semgrep/** (T-10 money-float narrowing is not authorized).
+ - Lockfiles, requirements*.txt, package.json dependencies, any install
+   or bump (AD-24: no new dependencies, no version bumps).
+ - Deleting or weakening
+   mp-app/backend/tests/regression/test_b2_wp23_wp43_wp44.py:31
+   `test_no_dynamic_import_in_studio_handlers` (P-4 C4: belt and braces).
+ - Adding anything to eslint `ignores` beyond the three files measured
+   in §4 (session.ts, api.ts, update.ts) and the pre-existing entries.
+ - Any new CI job, any new or modified `uses:` action, any change to a
+   pinned SHA, any change to another job.
+ - main branch, pull requests, merges, force-push, amend, rebase.
+   The reviewer never pushes to MP; the builder never merges.
+ - Hand-editing CHECKLIST.md, INVENTORY.md or interaction-map-*.md.
+ - Hand-editing the audit inventory generator's output paths.
+
+§4  MEASURED BASELINES AT THE BASE TIP (all re-measured by the reviewer)
+---------------------------------------------------------------------
+Environment: a fresh NON-shallow clone at tip 5720e5a (shallow=false,
+274 commits visible) plus a full venv built with
+`pip install -c mp-app/backend/requirements.txt -e mp-app/backend[dev]`
+(fastapi 0.165.0). Do not measure with a dependency-poor interpreter;
+that silently degraded a document regeneration once (1719 -> 1551 lines).
+
+ESLint config today
+  eslint.config.mjs = 65 lines.
+  The P-1 clock block is the style to mirror (lines 34-51):
+    files:   ["src/**/*.{ts,tsx}"]
+    ignores: ["src/lib/clock.ts"]
+    rules:   no-restricted-syntax with two selectors and Persian
+             messages ("از src/lib/clock.ts استفاده کنید ...").
+  Existing ignores at line 10: **/dist/**, **/node_modules/**,
+  **/coverage/**. Blocks exist for electron/**/*.cjs (:53),
+  public/sw.js (:58), tests/**/*.{ts,tsx} (:62).
+
+P-4 C1 baseline (dynamic import of the data layer)
+  `await import(` occurrences in src/pages/** and src/components/** = 0.
+  => The rule is green on arrival. Nothing needs "fixing".
+
+P-4 C2 baseline (transport calls) — READ THIS CAREFULLY
+  `fetch(` / `axios` / `XMLHttpRequest` in src/**/*.ts(x) outside
+  src/lib/api.ts = 6, and ALL SIX are inside src/lib:
+    src/lib/session.ts:112  POST /auth/otp/request
+    src/lib/session.ts:122  POST /auth/otp/verify
+    src/lib/session.ts:183  POST /auth/refresh
+    src/lib/session.ts:297  the central sessionFetch send wrapper
+    src/lib/session.ts:332  POST /auth/logout
+    src/lib/update.ts:39    GET  {base}/updates/manifest
+  src/lib/api.ts imports { getAccessToken, sessionFetch } from
+  "./session" (line 10) and contains exactly ONE direct fetch at line
+  532: `await fetch("/health", { signal })` — a health probe that
+  deliberately bypasses the auth transport.
+  In src/pages/**, src/components/** and src/stores/** the count of
+  direct transport calls is 0.
+  => CONCLUSION: the "one data layer" is src/lib/{session,api,update}.ts,
+     not api.ts alone. The plan's C2 wording ("outside src/lib/api.ts")
+     would fabricate 6 violations in healthy code. The authorized rule
+     is therefore: forbid fetch/axios/XMLHttpRequest in
+     files ["src/**/*.{ts,tsx}"] with
+     ignores ["src/lib/session.ts","src/lib/api.ts","src/lib/update.ts"],
+     each ignore carrying a Persian comment saying why. With that scope
+     the violation count today is 0 and stays 0.
+
+T-11(ب) baseline (setClock guard)
+  `setClock` in src/** outside src/lib/clock.ts = 0 occurrences.
+  It is defined at src/lib/clock.ts:16 and used only by
+  mp-app/studio/scripts/agent_drive.mjs (lines 113, 117, 159, 203).
+  0 test files under src use it.
+  => A rule restricting `setClock` imports to tests and scripts is green
+     on arrival in src.
+
+CI job `docs` today (step order, .github/workflows/ci.yml)
+    checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+    setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5, py 3.11
+    run: python3 scripts/docs_gate.py
+    setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4, node 22
+    run: python3 scripts/interaction_map.py --check
+    run: cd tools/mermaid-check && npm ci --no-audit --no-fund && node check.mjs
+    run: python3 scripts/repo_hygiene_gate.py       <-- new step goes AFTER this
+  Gate lines elsewhere in the file: :103, :108, :110, :112; manifest
+  gate at tools/manifest_gate.py:348; lint gate at :206.
+
+P-5 baseline (artifact presence)
+  Tracked files under mp-app/studio/dist = 0.
+  .gitignore line 7 = `dist/`, line 54 = `mp-app/studio/dist/`.
+  => In CI the artifact does not exist, so the gate MUST print a
+     documented skip reason and exit 0 (plan P-5 C2). Its real value is
+     for local builder/reviewer runs; say so honestly in the LOG
+     (plan P-5 C6).
+
+status.json vocabulary
+  The generator's docstring (scripts/build_audit_inventory.py:6) lists
+  OPEN / IN-PROGRESS / FIXED / DEFERRED / NOT-REPRODUCED. The generator
+  prints whatever string it finds (it does not validate), and the file
+  today also contains FIXED-PARTIAL and BLOCKED. Current counts over
+  30 keys: FIXED-PARTIAL 8, FIXED 15, NOT-REPRODUCED 2, IN-PROGRESS 3,
+  BLOCKED 1, OPEN 1.
+  => For F-23 use NOT-REPRODUCED. Do not invent a new status value.
+
+Gates at the base tip (must stay green, and these are the numbers to beat)
+  python3 scripts/docs_gate.py               rc 0
+    "Documentation gate passed: 19 Markdown files, 280 local links,
+     15 Mermaid diagram block(s), handoff headings, README entrypoints,
+     SVG XML."
+  python3 scripts/interaction_map.py --check rc 0
+    "Interaction map gate passed: 31 سطح، 163 مسیر قرارداد، رانش صفر."
+    sorted-sha 29261bdef03b3369...  (must NOT change unless the map
+    content legitimately changes; a --check run never writes)
+  python3 scripts/repo_hygiene_gate.py       rc 0
+    sorted-sha e7635353f6757cbc...
+  python3 scripts/build_audit_inventory.py --check   rc 0
+  pytest tests/integration/test_gate_codes.py        10 passed, 1.33 s
+  INVENTORY line 10: 1360 tracked files / 306825 lines; 166 /api/v1 rows
+  EXECUTION-LOG.md: 836 lines / 137527 bytes
+
+§5  ACCEPTANCE CRITERIA (D1..D14) — each one must be evidenced
+---------------------------------------------------------------------
+D1   P-4 rule A: `await import(` whose source resolves to the data layer
+     (src/lib/api) inside src/pages/** or src/components/** is a lint
+     ERROR. Evidence: the rule text + a positive control (§7).
+D2   P-4 rule B: `fetch(`, `axios`, `XMLHttpRequest` in
+     src/**/*.{ts,tsx} is a lint ERROR, with ignores exactly
+     ["src/lib/session.ts","src/lib/api.ts","src/lib/update.ts"], each
+     with a Persian comment. Evidence: rule text + `npm run lint` output.
+D3   T-11(ب): importing or calling `setClock` from src/** (product code)
+     is a lint ERROR; tests and mp-app/studio/scripts remain allowed.
+     Evidence: rule text + positive control.
+D4   `npm run lint` at the end: 0 errors AND 0 warnings (plan P-4 C3;
+     the CI gate is at ci.yml:206). Paste the tail of the output.
+D5   `test_no_dynamic_import_in_studio_handlers` still exists and still
+     passes (plan P-4 C4). Paste the pytest line.
+D6   P-5: scripts/staleness_gate.py compares source freshness against
+     the artifact (mp-app/studio/dist when present) and, when the
+     artifact is absent, prints a documented skip and exits 0
+     (plan P-5 C1/C2). Evidence: BOTH runs — with no dist (skip, rc 0)
+     and with a deliberately stale dist (red, rc 1).
+D7   P-5: the failure message contains the exact rebuild command
+     `cd mp-app/studio && npm run build` (plan P-5 C3).
+D8   P-5: exit codes are only 0 or 1 (2 for argparse misuse is
+     acceptable and must be documented). A red-first pytest exists at
+     mp-app/backend/tests/integration/test_staleness_gate.py using
+     ROOT = Path(__file__).resolve().parents[4] and passes.
+D9   P-5: exactly one step added to the `docs` job; `git diff` of
+     .github/workflows/ci.yml shows +N/-0 inside that job only, no new
+     job, no `uses:` change (plan P-5 C5). Paste the diff.
+D10  The new gate speaks the P-C code language: STALE-001 (artifact
+     older than source), STALE-002 (artifact missing where one is
+     expected) — or the codes you actually emit — with the same
+     `CODE path:line: message <- suggestion` format, the same per-code
+     cap of 20, and a `--json` mode with pure JSON on stdout and the
+     green summary on stderr. Rows added to GATE-CODES.md.
+D11  OBS-1 fixed: test_gate_codes_doc_lists_every_active_code derives
+     the expected codes from the scripts (for example
+     set(docs_gate.SUGGESTIONS) | set(interaction_map.SUGGESTIONS) plus
+     the staleness table) instead of hardcoding them, and still passes.
+D12  OBS-2 fixed: both gates emit human findings on the SAME stream
+     (reviewer's recommendation: stderr for both, stdout reserved for
+     --json and the green summary). `--json` stdout purity must stay
+     byte-identical in behaviour.
+D13  OBS-3 fixed: GATE-CODES.md documents the exit-code contract
+     (0 / 1 / 2) for every gate it lists.
+D14  F-23 recorded exactly as §9 states, one key only, then CHECKLIST
+     and INVENTORY regenerated LAST (CO-1) and
+     `build_audit_inventory.py --check` returns rc 0.
+
+§6  ORDER OF WORK
+---------------------------------------------------------------------
+ 1. Re-measure §4 at the current tip and confirm the base tip is
+    5720e5a (or a descendant of it). If the tip moved, stop and ask.
+ 2. Write the red-first tests first: test_staleness_gate.py, and the
+    OBS-1 change to test_gate_codes.py. Show them RED for the right
+    reason (a missing module is a valid red here, since the script does
+    not exist yet; a missing node_modules or venv is NOT a valid red).
+ 3. Implement scripts/staleness_gate.py with the STALE-### codes and
+    --json. Make the tests green.
+ 4. Add the ESLint blocks (D1/D2/D3). Run `npm run lint`; it must be
+    0 errors / 0 warnings. Run the positive controls (§7).
+ 5. Add the single ci.yml step (D9).
+ 6. Apply OBS-2 and OBS-3.
+ 7. Run the full local set: docs_gate, interaction_map --check,
+    repo_hygiene_gate, build_audit_inventory --check, the two gate test
+    files, and `npm run lint`. All must be rc 0.
+ 8. Record F-23 in status.json (§9), write the ONE EXECUTION-LOG section
+    (before regeneration), then regenerate CHECKLIST/INVENTORY/
+    interaction-map LAST and re-run --check.
+ 9. Commit and push. Budget: at most 3 commits, 1 LOG section, 1 push.
+    Suggested split: (a) tests red-first, (b) implementation + ci.yml +
+    observations, (c) status/log/regeneration.
+10. Wait for CI. Report the run id and the 8 conclusions. Do not merge.
+11. Report SUMMARY per §10.
+
+§7  MANDATORY POSITIVE CONTROLS (a rule that never fires is not a rule)
+---------------------------------------------------------------------
+PC-1  Create a temporary file under src/pages/ containing
+      `const m = await import("../lib/api");` and a raw
+      `await fetch("/api/v1/x")`, plus `import { setClock } from
+      "../lib/clock"; setClock(null);`. Run `npm run lint` and paste the
+      THREE errors with their rule ids and Persian messages. Then delete
+      the file and show lint green again (0/0) and `git status` clean.
+PC-2  For the staleness gate: create a fake artifact directory older
+      than the sources and show rc 1 with a STALE-### line and the
+      rebuild command in the message; then remove it and show the
+      documented skip with rc 0. Also show `--json` purity (stdout
+      parses as JSON, no green summary on stdout).
+PC-3  Mutation witness for the new pytest: break the gate deliberately
+      (for example invert the freshness comparison) and show the new
+      test FAIL, then restore it byte-identically
+      (`git diff --stat` empty) and show it PASS.
+PC-4  Prove the OBS-1 change has teeth: add a fake code (for example
+      "DOC-999") to docs_gate.SUGGESTIONS in a scratch copy, show the
+      table test FAIL, then restore.
+Every positive control must leave the tree clean; paste
+`git status --porcelain | wc -l` = 0 at the end.
+
+§8  HARD-STOP CONDITIONS (stop and ask, do not improvise)
+---------------------------------------------------------------------
+ - `npm run lint` reports a violation in real product code that is not
+   one of the six measured lib call sites.
+ - The new ci.yml step makes any of the 8 jobs red.
+ - The mermaid-check job or any pinned action needs touching.
+ - interaction_map --check changes its sorted-sha without a legitimate
+   map-content change.
+ - The regeneration of CHECKLIST/INVENTORY changes line counts by more
+   than the expected additive delta (a dependency-poor interpreter is
+   the usual cause — rebuild the venv and retry before concluding).
+ - Anything in §3 becomes necessary.
+
+§9  F-23 RULING — record this verbatim in status.json
+---------------------------------------------------------------------
+Key: "F-23"
+Value:
+  {
+    "status": "NOT-REPRODUCED",
+    "note": "سنجهٔ داور در tip 5720e5a: ۸۳ دکمه در src/**/*.tsx (بدونِ سطرهای توضیح) — ۷۴ با onClick مستقیم، ۹ بدون onClick که ۴ مورد هندلر را از پوششِ antd می‌گیرند (AdminPermissions.tsx:247 و DeviceSessions.tsx:118 و ReceiptQueue.tsx:129 زیرِ Popconfirm با onConfirm، و Expenses.tsx:329 زیرِ Upload با beforeUpload) و ۵ مورد type=\"submit\" داخلِ فرمِ دارای onSubmit‌اند (PhoneChangeDialog.tsx:178 با فرمِ :125، و Shop.tsx:653/698/743/822 با فرم‌های :613/:661/:710/:779). دکمهٔ مرده = ۰. عددِ پیشین «۱۰ از ۸۴» دو خطای اسکنر داشت: سطرِ توضیحِ TopBar.tsx:8 (متنِ `<button>` داخلِ کامنت) و onClickِ چندسطریِ PhoneChangeDialog.tsx:173 (= onClick={onClose}). تصمیمِ مالک: غیرِمسئله، با شاهدِ کد."
+  }
+No other status.json key may change. F-11 and F-30 stay OPEN.
+
+§10  SUMMARY TEMPLATE (paste into your report)
+---------------------------------------------------------------------
+  tip before / after            :
+  commits added (max 3)         :
+  files changed (+/-)           :
+  forbidden paths touched       : must be "none"
+  npm run lint                  : X errors, Y warnings (must be 0/0)
+  positive controls PC-1..PC-4  : one line each with the observed output
+  staleness gate, no artifact   : rc + printed skip line
+  staleness gate, stale artifact: rc + STALE-### line + rebuild command
+  new pytest                    : N passed
+  test_gate_codes.py            : N passed
+  docs_gate                     : rc + summary line (md/links/mermaid)
+  interaction_map --check       : rc + sorted-sha
+  repo_hygiene_gate             : rc + sorted-sha
+  build_audit_inventory --check : rc
+  ci.yml diff                   : +N/-0 in job docs only
+  CI run id + conclusions       : must be 8/8 success
+  tracked files before/after    : 1360 -> ?
+  deviations / self-corrections : list every one, including your own
+                                 mistakes, with the numbers
+
+The reviewer will re-measure every number above independently.
+Builder-reported figures are treated as claims.
+=====================================================================
