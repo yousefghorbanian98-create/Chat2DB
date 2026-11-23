@@ -1,0 +1,128 @@
+پروتکلِ merge برای بیلدر — PR #24 در yousefghorbanian98-create/MP
+نسخهٔ ۱ · ۲۰۲۶‑۱۱‑۲۲ · صادرکننده: ممیز · به‌جای بندِ «merge ممنوع» در دستورِ B1–B4
+وضعیت: این بندِ جدید **جایگزینِ** «merge ممنوع» است. مالک در ۲۰۲۶‑۱۱‑۲۲ صریحاً دستور داد merge را بیلدر انجام دهد.
+شرطِ شروع: فقط وقتی ممیز در پیامِ paste‌شده عبارتِ «اجازهٔ merge صادر شد» را با این پروتکل بفرستد.
+بدونِ آن عبارت، merge همچنان ممنوع است (یعنی تا پایانِ B4 و داوریِ عددیِ T‑1 دست نگه دار).
+
+────────────────────────────────────────
+۰) چرا فقط `--merge` و نه squash/rebase (سنجه‌شده، سلیقه‌ای نیست)
+────────────────────────────────────────
+در اسنادِ ممیزی **۱۳۲ sha یکتا** نقل شده است:
+  EXECUTION-LOG.md: ۷۸ · DECISIONS.md: ۲۱ · FINN-AUDIT-LOOP.md: ۱۸ · CHECKLIST.md: ۸ · status.json: ۷
+نمونه‌ها: cf33ad8 (۶ بار)، 9024f44 (۵)، e57a992 (۴)، f852675 (۳)، b9ce7be (۳)، 92b8db0 (۲)، 7fefb6f، 6c204ec.
+- `--squash` ⇒ همهٔ کامیت‌ها در یکی جمع می‌شوند و این shaها از main قابلِ استناد نمی‌مانند ⇒ کلِ زنجیرهٔ شاهدِ ممیزی می‌شکند.
+- `--rebase` ⇒ shaها بازنویسی می‌شوند (تاریخِ بازنویسی‌شده) ⇒ همان خرابی + نقضِ قاعدهٔ «بازنویسیِ تاریخ ممنوع».
+- `--merge` ⇒ همهٔ shaهای اصلی روی main باقی می‌مانند ⇒ شاهدِ ممیزی دست‌نخورده می‌ماند.
+پس: **فقط `gh pr merge 24 --merge`**. هر سه روش در ruleset مجازند، ولی فقط همین یکی شاهد را نگه می‌دارد.
+
+────────────────────────────────────────
+۱) پیش‌سنجه‌ها — هر شش باید دقیقاً همین را بدهند، وگرنه merge نکن
+────────────────────────────────────────
+R=yousefghorbanian98-create/MP
+
+۱‑۱. tipِ شاخه و headِ PR یکی باشند:
+  gh api repos/$R/branches/arena/5a1e37b3-mp --jq '.commit.sha'
+  gh api repos/$R/pulls/24 --jq '.head.sha'
+  ⇒ هر دو یک full sha یکسان (این همان tipِ نهاییِ پس از B4 است).
+
+۱‑۲. وضعیتِ PR:
+  gh api repos/$R/pulls/24 --jq '[.state,.mergeable,.mergeable_state,.draft] | @tsv'
+  ⇒ `open    true    clean    false`
+  هر چیزی جز `clean` (مثلاً `blocked` یا `behind`) ⇒ merge نکن، گزارش بده.
+
+۱‑۳. هر ۸ check روی **full sha** سبز باشند (short sha کافی نیست — درسِ موجِ دومِ CI):
+  gh api repos/$R/commits/<FULL_SHA>/check-runs --jq '.check_runs[] | "\(.name): \(.status)/\(.conclusion)"'
+  ⇒ هشت نامِ یکتا، همه `completed/success`:
+     backend · studio · live-contract · e2e-api · secret-scan · client-flutter ·
+     Documentation links and handoff · Client — pinned SDK · format gate · Android debug compile
+
+۱‑۴. هیچ run یا suite در جریان نباشد (وگرنه سبزیِ فعلی موقتی است):
+  gh api "repos/$R/actions/runs?head_sha=<FULL_SHA>" --jq '.workflow_runs[] | "\(.id) \(.event) \(.status)/\(.conclusion)"'
+  gh api repos/$R/commits/<FULL_SHA>/check-suites --jq '.check_suites[] | "\(.app.slug): \(.status)/\(.conclusion)"'
+  ⇒ هیچ `in_progress`/`queued`/`null` نباشد. اگر بود: صبر کن تا تمام شود و دوباره از ۱‑۳ بسنج.
+
+۱‑۵. درختِ کاری تمیز و بدونِ force-push:
+  git status --porcelain   ⇒ فقط ورودی‌های `??` مجاز (share/ و var/receipts)؛ هیچ فایلِ track‌شدهٔ تغییرکرده نباشد
+  gh api "repos/$R/compare/main...<FULL_SHA>" --jq '[.status,.ahead_by,.behind_by] | @tsv'
+  ⇒ `ahead   N   0`  (‏behind_by باید **۰** باشد؛ اگر >۰ بود یعنی main جلو رفته ⇒ merge نکن، گزارش بده)
+
+۱‑۶. تأییدیهٔ ممیز در پیام باشد (عبارتِ «اجازهٔ merge صادر شد» + tipِ موردانتظار).
+  اگر tipِ واقعی با tipِ موردانتظارِ ممیز فرق داشت ⇒ merge نکن و تفاوت را گزارش بده.
+
+────────────────────────────────────────
+۲) خودِ merge — یک فرمان، بدونِ هیچ پرچمِ دیگر
+────────────────────────────────────────
+  gh pr merge 24 --merge
+
+ممنوع: `--squash` · `--rebase` · `--auto` · `--admin` · `--delete-branch` · هر ترکیبِ دیگر.
+ممنوع: pipe/redirect/`;`/`||` بعد از این فرمان (کدِ خروج باید دیده شود).
+`cd` و `git` ساده پیش از آن با `&&` مجاز است؛ خودِ فرمانِ merge باید **آخرین** فرمانِ زنجیره باشد.
+تلاشِ دوباره: حداکثر **یک** بار، فقط اگر خطا «موقتی» بود (network/timeout). در هر خطایِ دیگر ⇒ توقف.
+
+────────────────────────────────────────
+۳) پس‌سنجه‌ها — همان لحظه گزارش کن
+────────────────────────────────────────
+۳‑۱. merge انجام شد:
+  gh api repos/$R/pulls/24 --jq '[.state,.merged,.merged_at,.merge_commit_sha] | @tsv'
+  ⇒ `closed    true    <timestamp>    <sha>`
+
+۳‑۲. main جلو رفته:
+  gh api repos/$R/branches/main --jq '.commit.sha'
+  ⇒ دیگر `662ff8815...` نیست؛ parentهای merge commit باید `662ff88...` و `<FULL_SHA>` باشند:
+  gh api repos/$R/commits/<MERGE_SHA> --jq '[.sha[0:7],(.parents|map(.sha[0:7])|join("+"))] | @tsv'
+
+۳‑۳. شاهدِ ممیزی روی main زنده است (اثباتِ اینکه `--merge` درست بوده):
+  for s in cf33ad8 9024f44 e57a992 f852675 b9ce7be; do
+    gh api "repos/$R/commits/$s" --jq '"\(.sha[0:7]) reachable"' ; done
+  gh api "repos/$R/compare/main...<FULL_SHA>" --jq '.status'   ⇒ باید `identical` یا `behind` باشد (نه `ahead`)
+
+۳‑۴. CI روی main (به‌دلیلِ `strict: true` هر ۸ job دوباره اجرا می‌شوند):
+  gh api "repos/$R/actions/runs?branch=main&per_page=5" --jq '.workflow_runs[] | "\(.id) \(.head_sha[0:7]) \(.status)/\(.conclusion)"'
+  ⇒ تا سبز شدنِ هر ۸ job صبر کن و نتیجهٔ نهایی را گزارش بده. اگر قرمز شد: **هیچ چیزی را revert یا force نکن**؛
+     فقط گزارش بده و منتظرِ داوریِ ممیز بمان.
+
+۳‑۵. پرونده‌های شاهد روی main منتقل شدند:
+  gh api "repos/$R/contents/docs/MuscleParadise/audit/evidence?ref=main" --jq '.[].name'
+  gh api "repos/$R/contents/.gitleaksignore?ref=main" --jq '.size'
+
+۳‑۶. شاخهٔ کاری را **حذف نکن** (‏`--delete-branch` ممنوع بود): refها باید برای استنادِ shaها زنده بمانند.
+
+۳‑۷. همهٔ اعدادِ ۳‑۱ تا ۳‑۵ را با فرمان و خروجیِ خام در یک بخشِ `EXECUTION-LOG.md` بنویس
+  (روی شاخهٔ کاری، پس از merge؛ اگر لازم شد یک commitِ سندیِ جدا روی همان شاخه — این push مجاز است
+   چون شاخهٔ کاریِ خودت است و main را دست نمی‌زند).
+
+────────────────────────────────────────
+۴) توقفِ سخت — merge نکن و فوراً گزارش بده
+────────────────────────────────────────
+- خطای `403` / «not authorized» / هر خطایِ احراز هویت روی `gh pr merge` ⇒ **توقف**. بیشتر از یک بار تلاش نکن،
+  راهِ دیگر (API مستقیم، `--admin`، بستنِ PR، ساختِ PR جدید) را امتحان نکن. متنِ دقیقِ خطا را بفرست؛
+  مالک با UI انجام می‌دهد (پیوستِ ۵).
+- `mergeable_state` هر چیزی جز `clean`.
+- `behind_by > 0` نسبت به main (یعنی main جلو رفته) ⇒ اول گزارش بده؛ خودسرانه rebase/merge معکوس نکن.
+- هر check قرمز، در جریان، یا غایب (کمتر از ۸ نام).
+- tipِ واقعی با tipِ موردانتظارِ ممیز متفاوت باشد.
+- CI روی main پس از merge قرمز شد ⇒ هیچ revert/force-push انجام نده؛ فقط گزارش.
+- هر وسوسه‌ای برای `--squash`/`--rebase`/`--auto`/`--admin`/`--delete-branch`.
+
+────────────────────────────────────────
+۵) پیوست — راهِ جایگزینِ مالک (فقط اگر بیلدر ۴۰۳ گرفت؛ مرحله‌به‌مرحله)
+────────────────────────────────────────
+۱. برو به https://github.com/yousefghorbanian98-create/MP/pull/24
+۲. صبر کن تا هر ۸ check سبز شوند و نوشتهٔ «All checks have passed» را ببینی.
+۳. اگر دکمهٔ «Merge pull request» خاکستری است، روی «Show all checks» و سپس «Re-run jobs» نزن؛
+   فقط صفحه را تازه کن — ممکن است موجِ دومِ CI در جریان باشد (درسِ ثبت‌شده).
+۴. روی فلشِ کنارِ دکمه کلیک کن و **Create a merge commit** را انتخاب کن.
+   **Merge squash و Rebase and merge را انتخاب نکن** (۱۳۲ sha در اسنادِ ممیزی باطل می‌شود).
+۵. روی **Create a merge commit** کلیک کن و منتظر بمان تا وضعیتِ PR «Merged» شود.
+۶. **Confirm merge** را دوبار نزن؛ اگر خطا داد، صفحه را تازه کن و وضعیت را ببین.
+۷. به ممیز بگو «merge شد» تا main و CI را با سنجه راستی‌آزمایی کند.
+نکن‌ها: PR را close نکن · قوانینِ شاخه/ruleset ‏27826883 را ویرایش نکن · rule تازه نساز ·
+شاخهٔ arena/5a1e37b3-mp را حذف نکن · هیچ bump وابستگی (Dependabot) را merge نکن.
+
+────────────────────────────────────────
+۶) بازیابیِ این فایل اگر سندباکس reset شد
+────────────────────────────────────────
+curl -fsS -H "Accept: application/vnd.github.raw" \
+  "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-MERGE-PROTOCOL-2026-11-22.txt?ref=arena/2cde32d6-chat2db" \
+  -o /tmp/MERGE-PROTOCOL.txt
+# hash و اندازهٔ انتظاری در handoff/README.md همان مخزن ثبت شده است.

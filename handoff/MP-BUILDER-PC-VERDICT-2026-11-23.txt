@@ -1,0 +1,361 @@
+=====================================================================
+MP — P-C VERDICT (reviewer adjudication, all numbers re-measured)
+Repository : yousefghorbanian98-create/MP
+Branch     : arena/ff32c436-mp
+Tip        : 5720e5a48cd89abe8c4bea1daf3e045cf3af0258
+CI run     : 45111202901  -> completed / success (8 check-runs, all "success")
+Date       : 2026-11-23
+Reviewer   : Chat2DB arena/4648b14f-chat2db (auditor role; never pushes to MP)
+Authorization judged against: handoff/MP-BUILDER-PC-AUTHORIZATION-2026-11-23.txt
+                              (21160 bytes, sha256 4d56279c92451142057d8aa6...)
+=====================================================================
+
+VERDICT: MATCH on all ten criteria C1..C10. Zero forbidden-path
+violations. Zero product-code changes. No revert, no rework required.
+Three NON-BLOCKING observations are carried into the next package (section 6).
+F-23 remains undecided in this verdict: it is an owner decision and has
+been put to the owner (section 7). P-D and P-F remain BLOCKED (section 8).
+
+---------------------------------------------------------------------
+0. RECOVERY (if a sandbox reset wipes the workspace)
+---------------------------------------------------------------------
+Every deliverable of this phase is committed on the Chat2DB branch.
+Fetch any of them without a clone:
+
+  curl -sSL -H "Accept: application/vnd.github.raw" \
+    "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-BUILDER-PC-VERDICT-2026-11-23.txt?ref=arena/4648b14f-chat2db"
+
+Same pattern for the other files; expected size and sha256 of this file
+are printed at the bottom of the commit message and re-verified against
+the GitHub contents API after the push (local == remote check).
+
+---------------------------------------------------------------------
+1. CENSUS (measured from the GitHub API and a fresh non-shallow clone)
+---------------------------------------------------------------------
+git rev-parse --is-shallow-repository = false (fresh clone at /tmp/mp3,
+274 commits visible). A shallow scratch clone invalidated an entire
+adjudication pass once before; that trap is checked first, every time.
+
+  main                        = 35d4b3518 (unchanged, still the merge of PR #24)
+  arena/ff32c436-mp           = 5720e5a48  (== the tip the builder reported)
+  compare main...tip          = status "ahead", ahead 6, behind 0
+  whole-branch diff           = 28 files changed, 1163 insertions(+), 120 deletions(-)
+  open pull requests          = 0
+  tracked files               = 1358 (at P-B tip) -> 1360 (now)  [+2, exactly the
+                                two new files authorized: GATE-CODES.md and
+                                test_gate_codes.py]
+
+Commits since the P-A docs commit, oldest first (all confirmed ancestors
+of the tip with `git merge-base --is-ancestor`, i.e. no force-push, no
+history rewrite, no amend):
+
+  eafb335  P-1  studio clock + ESLint guard          (P-A)
+  b3e2b29  P-A docs                                  (P-A)
+  b2810f1  P-2  deterministic UI driver + pins       (P-B)
+  6ff2685  P-B docs                                 (P-B)
+  b7ed4ae  P-C  stable gate codes DOC-### / MAP-### with C2 format,
+                per-code cap 20, --json             <- P-C code commit
+  5720e5a  P-C docs: status F-05/F-07/F-16/F-17/F-26/F-27 (6 keys),
+                EXECUTION-LOG P-C (+ P-B correction), regen
+                CHECKLIST/INVENTORY                 <- P-C docs commit
+
+P-C file set (6ff2685..5720e5a), measured: 8 files changed,
+512 insertions(+), 62 deletions(-).
+
+  M  docs/MuscleParadise/audit/CHECKLIST.md          (regenerated)
+  M  docs/MuscleParadise/audit/EXECUTION-LOG.md      (+1 section, line 788)
+  A  docs/MuscleParadise/audit/GATE-CODES.md         (65 lines / 5106 bytes)
+  M  docs/MuscleParadise/audit/INVENTORY.md          (regenerated)
+  M  docs/MuscleParadise/audit/status.json           (+6 keys)
+  A  mp-app/backend/tests/integration/test_gate_codes.py (171 lines / 6221 bytes)
+  M  scripts/docs_gate.py                            (212 -> 276 lines)
+  M  scripts/interaction_map.py                      (405 -> 479 lines)
+
+Forbidden paths touched (grep over the changed-file list for .github/,
+.semgrep/, package-lock, requirements, Dockerfile, eslint.config, *.png,
+var/receipts/, dist/, share/, mp.db): NONE.
+Product code touched (mp-app/backend/app/, mp-app/studio/src/,
+mp-app/client/): NONE.
+scripts/agent_drive.mjs touched: NO (0 changes) — correct, it was
+forbidden in this package.
+src/lib/clock.ts touched: NO — correct (reserved for P-D).
+
+The sandbox-reset recovery the builder described (`git reset --mixed`
+onto the pushed tip) is consistent with what I measure: the five earlier
+commits are all still ancestors of the tip, the branch tip equals the
+pushed tip, and the working tree at the tip is clean. The phantom
+"8 files, 741 deletions" was a stale index, not lost work. Confirmed:
+nothing was lost.
+
+---------------------------------------------------------------------
+2. C1..C10 — MY MEASUREMENTS vs THE BUILDER'S CLAIMS
+---------------------------------------------------------------------
+Environment used for every run below: /tmp/v3 (python -m venv, then
+`pip install -c mp-app/backend/requirements.txt -e mp-app/backend[dev]`),
+fastapi 0.165.0 — the same version the authorization predicted. No run
+was accepted from a dependency-poor interpreter (that mistake degraded a
+document regeneration once before: 1719 -> 1551 lines).
+
+C1 — Stable codes exist and are documented
+  codes in scripts/docs_gate.py       : DOC-001 ... DOC-009 (SUGGESTIONS table
+                                        + frozen dataclass Finding)
+  codes in scripts/interaction_map.py : MAP-001 ... MAP-003
+  codes in GATE-CODES.md              : 17 = DOC-001..009, MAP-001..003,
+                                        DRV-001..005
+  Provenance of DRV-###: `git log -S 'DRV-001' -- .../agent_drive.mjs`
+  => first introduced by b2810f1 (P-B). 11 references still present in
+  the driver; the driver was NOT modified in P-C. So GATE-CODES.md
+  registers pre-existing driver codes, it does not invent new ones.
+  Claim: MATCH.
+
+C2 — One fixed human format `CODE path:line: message <- suggestion`
+  Measured live with a deliberately broken temporary document:
+    DOC-002 docs/MuscleParadise/architecture/modules/zz-probe-temp.md:3: trailing whitespace <- فاصلهٔ انتهای سطر را حذف کنید.
+  Unknown line renders as "-" as specified:
+    MAP-002 <path>/interaction-map.md:-: نقشهٔ سطح تعامل کهنه است ...
+  `Finding.render()` is the single formatting point in both scripts.
+  Claim: MATCH.
+
+C3 — Full classification, per-code cap of 20, no early exit
+  Probe document: 56 lines = 25 trailing-whitespace lines + 25 broken
+  links + 1 empty mermaid block + 1 unclosed fence.
+  Measured stderr of `docs_gate.py` (red):
+    20 x DOC-002 printed, then "+5 موردِ دیگر (DOC-002)"
+    20 x DOC-006 printed, then "+5 موردِ دیگر (DOC-006)"
+     1 x DOC-003, 1 x DOC-005
+    1 x header "Documentation gate failed:"
+    total printed finding lines = 42; total findings = 52
+  `PER_CODE_LIMIT = 20` in both scripts (docs_gate.py:85,
+  interaction_map.py:247). The gate does not stop at the first error.
+  Claim: MATCH.
+
+C4 — Additive deltas only
+  before (baseline quoted in the authorization):
+    docs_gate.py  rc 0: "Documentation gate passed: 18 Markdown files,
+    276 local links, 15 Mermaid diagram block(s), ..."
+    sorted-sha 1730e4d9b55c800ae48adad3...
+  after (measured now):
+    docs_gate.py  rc 0: "Documentation gate passed: 19 Markdown files,
+    280 local links, 15 Mermaid diagram block(s), ..."
+    sorted-sha 6a23a62934be9ddb325c1dda...
+  => markdown files 18 -> 19 (only the authorized new document),
+     links 276 -> 280 (N = 4 = exactly the 4 local links inside
+     GATE-CODES.md, all resolving: ../../../scripts/docs_gate.py,
+     ../../../scripts/interaction_map.py,
+     ../../../mp-app/studio/scripts/agent_drive.mjs,
+     ../architecture/interaction-map-2026-11-19.md),
+     Mermaid blocks UNCHANGED at 15 (GATE-CODES.md has 0 mermaid blocks).
+  interaction_map.py --check: rc 0, "Interaction map gate passed:
+    31 سطح، 163 مسیر قرارداد، رانش صفر." sorted-sha
+    29261bdef03b3369718ccf79... == the baseline sha, byte-identical.
+  repo_hygiene_gate.py: rc 0, sorted-sha e7635353f6757cbc756c4d26...
+    == the baseline sha, byte-identical.
+  Claim: MATCH (his LOG quotes the same three baseline shas I issued).
+
+C5 — Exit codes preserved
+  green: docs_gate rc 0, interaction_map --check rc 0, hygiene rc 0,
+         build_audit_inventory --check rc 0 ("فهرست‌ها هم‌خوان‌اند").
+  red  : docs_gate rc 1 with the probe document; interaction_map rc 1
+         with a stale map; --json without --check rc 2 (argparse error:
+         "--json فقط همراه --check معنی دارد").
+  Claim: MATCH.
+
+C6 — `--json`: pure JSON on stdout, summary on stderr, no cap
+  red probe:  rc 1, stdout parses as JSON, 52 findings, keys exactly
+              ['code','line','message','path','suggestion']; the green
+              summary appears 0 times on stdout.
+  green:      rc 0, stdout = "[]", summary on stderr.
+  interaction_map --check --json green: rc 0, stdout = "[]", summary
+              "Interaction map gate passed: 31 سطح، 163 مسیر قرارداد،
+              رانش صفر." on stderr.
+  Claim: MATCH.
+
+C7 — New document inside the docs_gate scope
+  `Path("docs/MuscleParadise/audit/GATE-CODES.md")` appended to
+  CORE_MARKDOWN_FILES (docs_gate.py), with a Persian comment. Verified
+  by the test fixture `test_gate_codes_doc_is_in_docs_gate_scope` and by
+  the 18 -> 19 count in C4. Deleting the file turns the gate red with
+  DOC-001 (measured, section 3).
+  Claim: MATCH.
+
+C8 — Real red-first, not an environment artefact
+  The builder's LOG states the test file was written before any script
+  change and discloses TWO bugs he found in his own test (not in the
+  gate): dataclasses need `sys.modules[name] = module` under
+  spec_from_file_location on Python 3.11, and `resolve_local_target`
+  resolves relative to cwd (CI runs from the repo root, so a test had to
+  chdir). Both fixes are inside the test file; the gate's semantics were
+  not weakened to make the test pass. The LOG also records that his
+  first claimed red run was void.
+  I cannot replay history, so I proved the same property differently and
+  more strongly: two mutations of the delivered code (section 3). Both
+  turn the delivered tests red. A test suite that goes red under both
+  mutations is not ceremonial.
+  Claim: MATCH (accepted on the mutation evidence).
+
+C9 — Test placement and root resolution
+  mp-app/backend/tests/integration/test_gate_codes.py,
+  `ROOT = Path(__file__).resolve().parents[4]` (parents[2] would have
+  pointed at mp-app/backend/scripts — the known trap), following
+  test_ci_artifacts.py:12. Runs in 1.33 s; `10 passed, 1 warning` (the
+  warning is the unrelated fastapi/starlette testclient deprecation).
+  ruff with the CI selection
+  (--select E,F,W,I,N,UP,B,SIM,DTZ,TRY400,S --ignore E501,N802) =>
+  "All checks passed!". Together with test_ci_artifacts.py: 19 passed.
+  Claim: MATCH.
+
+C10 — Budget respected
+  commits: exactly 2 (b7ed4ae code, 5720e5a docs) — limit was <= 2.
+  EXECUTION-LOG: exactly 1 new section, at line 788, "## P‑C — کدهای
+  پایدار گیت‌ها (P‑3 کدگذاری) · بستن carry‑over های P‑B".
+  pushes: 1. No PR, no merge, no amend, no force-push (ancestor check
+  above). Claim: MATCH.
+
+---------------------------------------------------------------------
+3. MY OWN MUTATION WITNESSES (teeth test, run and reverted)
+---------------------------------------------------------------------
+Witness 1 — weaken the cap: `PER_CODE_LIMIT = 20` -> `25`
+  result: FAILED test_per_code_cap_is_20_then_plus_n; 1 failed, 9 passed.
+  (The test really pins the cap and the "+5 موردِ دیگر (DOC-006)" line.)
+
+Witness 2 — delete docs/MuscleParadise/audit/GATE-CODES.md
+  result: 3 failed, 7 passed, including
+  FAILED test_gate_codes_doc_lists_every_active_code, and
+  `docs_gate.py` rc 1 (DOC-001 required file missing).
+  (The document is load-bearing for both the gate and the test.)
+
+Witness 3 — `--check` must never write
+  The write path (`DOC.write_text(...)` / `ARTIFACT.write_text(...)`)
+  sits after `if args.check: ... return`, and
+  `test_stale_map_is_map002_and_check_never_writes` asserts the stale
+  file content is unchanged ("stale\n") after a red --check run.
+  Verified by reading interaction_map.py:432-472.
+
+Witness 4 — regeneration is a fixed point, documents were not hand-edited
+  I re-ran both generators with the full venv and byte-compared their
+  output against the committed files:
+    CHECKLIST.md                          -> byte-identical
+    INVENTORY.md                          -> byte-identical
+    interaction-map-2026-11-19.md         -> byte-identical
+  Afterwards: 0 modified files, 0 untracked files, and
+  `build_audit_inventory.py --check` rc 0. This also closes CO-1
+  (regenerate last, never amend): at the P-B tip this very --check was
+  rc 1 "کهنه"; at the P-C tip it is rc 0.
+
+After every probe and mutation the tree was restored to a clean state
+(`git status --porcelain` empty) before any conclusion was drawn.
+
+Reviewer self-correction (14th, recorded honestly): my first two probe
+attempts were VOID. The temporary broken document was created through an
+inline python heredoc in which I typed ")" instead of "]" twice, so the
+file was never written and the gate legitimately stayed green. Those two
+rounds produced no evidence and none of their numbers are quoted above.
+The third round built the probe with plain bash and is the one measured
+here.
+
+---------------------------------------------------------------------
+4. status.json — the six carry-over keys
+---------------------------------------------------------------------
+Exactly six keys were appended, ASCII hyphens (not U+2011), F-11 and
+F-30 untouched and still OPEN, F-23 untouched. Each witness commit was
+re-measured independently with `git cat-file -t`, `git log -1 --format=%s`
+and `git merge-base --is-ancestor`:
+
+  F-05  FIXED        9bfc99d  commit  ancestor  "WP 2.4: RBAC decision cache + numeric-id normalisation + lock (F-05)"
+  F-07  IN-PROGRESS  20c3173  commit  ancestor  "WP 0.4 (F-07): per-directory coverage gate; subprocess coverage; db/scri..."
+  F-16  FIXED        fe103a4  commit  ancestor  "WP 4.6: no member_id=-1 sentinel; narrow mp-ts-float-money regex (F-16)"
+  F-17  FIXED        0afd240  commit  ancestor  "WP 2.5 (F-17): silent except -> log + counter; no-silent-except guard"
+  F-26  FIXED        8926fcd  commit  ancestor  "WP 3.2 (F-26): one error envelope for Starlette HTTP errors (404/405)"
+  F-27  FIXED        fc402a8  commit  ancestor  "WP 3.4: member_profile_required 409 for cart without member profile (F-2..."
+
+Every commit message names the same finding id and the same WP number
+the builder claimed. Note F-07 is honestly IN-PROGRESS, not FIXED.
+
+CHECKLIST.md rows re-read after regeneration: F-05 FIXED, F-07
+IN-PROGRESS, F-16 FIXED, F-17 FIXED, F-26 FIXED, F-27 FIXED, and
+F-11 OPEN / F-23 OPEN / F-30 OPEN (untouched).
+INVENTORY.md rows re-read: line 10 "کل فایل‌های ترک‌شده: 1360 (خطوط
+متنی: 306825)"; line 968 test_gate_codes.py 171 lines / 6221 bytes;
+line 1361 EXECUTION-LOG.md 836 lines / 137527 bytes; line 1363
+GATE-CODES.md 65 lines / 5106 bytes; 166 /api/v1 rows (unchanged from
+P-B). Line counts and byte sizes quoted in INVENTORY match the real
+files on disk (I re-measured EXECUTION-LOG.md: 836 lines / 137527 bytes).
+
+---------------------------------------------------------------------
+5. Carry-over obligations from the P-B verdict — status
+---------------------------------------------------------------------
+CO-1 (regenerate last, never amend)      : CLOSED (section 3, witness 4).
+CO-2 (correct the P-B stat in the LOG)   : CLOSED. The P-C section
+  carries "اصلاحیهٔ P‑B (CO‑2)" explaining that the 24-files/619/63
+  figure was taken before the final LOG text landed; the true figure at
+  that tip was 24 files / +657 / -64, which is what I measured.
+CO-3 (cli.test.tsx never runs in CI)     : recorded, no action needed.
+CO-4 (read skip reasons from the code)   : respected.
+
+---------------------------------------------------------------------
+6. NON-BLOCKING OBSERVATIONS carried to the next package
+---------------------------------------------------------------------
+These are NOT defects in P-C and do NOT require rework. They are small
+hardening items to fold into P-D if the owner authorizes it.
+
+OBS-1  `test_gate_codes_doc_lists_every_active_code` hardcodes the code
+       list (DOC 1..9, MAP 1..3, DRV 1..5) inside the test. If someone
+       later adds DOC-010 to `SUGGESTIONS` and forgets the table row,
+       the test would still pass. Deriving the expected set from
+       `set(docs_gate.SUGGESTIONS) | set(interaction_map.SUGGESTIONS)`
+       (both modules are already imported by the fixtures) would make
+       the table self-policing.
+
+OBS-2  The two gates send their human findings to different streams:
+       docs_gate.py:143 -> sys.stderr, interaction_map.py:457 ->
+       sys.stdout. Both keep stdout pure JSON under --json, so nothing
+       breaks, but one stream for both would make CI log capture and any
+       future JSON consumer uniform.
+
+OBS-3  GATE-CODES.md documents the cap and --json purity, but not the
+       exit-code contract (0 green / 1 findings / 2 argparse misuse for
+       `--json` without `--check`). One table row would close that.
+
+---------------------------------------------------------------------
+7. F-23 — NOT DECIDED HERE (owner decision)
+---------------------------------------------------------------------
+F-23 ("۱۰ دکمه بدون onClick — موجودی، نه لزوماً نقص") is still OPEN and
+still ambiguous: an inventory count, not a demonstrated defect. The
+builder correctly refused to guess a status for it. Because it is a
+product/owner judgement, not a measurement question, the reviewer put it
+to the owner with three options: (a) record as non-issue and close,
+(b) keep OPEN as an inventory note, (c) split into its own package with
+a real acceptance test. The owner's answer will be recorded verbatim in
+the next authorized package; until then F-23 must stay untouched in
+status.json.
+
+---------------------------------------------------------------------
+8. WHAT IS STILL BLOCKED
+---------------------------------------------------------------------
+P-D (ESLint data-layer guardrails P-4 + scripts/staleness_gate.py P-5,
+     plus the T-11 `setClock` guard)                : BLOCKED, no authorization yet.
+P-F / T-10 (tightening the `mp-money-float-cast`
+     semgrep rule + the D-25 shop-timezone
+     bootstrap)                                     : BLOCKED, no authorization yet.
+     The builder's refusal to start either one without a reviewer
+     authorization is correct per section 3 of the P-C authorization.
+     Note on labels: the plan file calls the money-float narrowing and
+     the D-25 bootstrap T-10/T-11 triggers, not a package named "P-F";
+     the next authorization will state the label explicitly so the two
+     records agree.
+T-9  (fresh merge protocol at the end of phase P, merge executed by the
+     builder, never by the reviewer)                : PENDING.
+Nothing may be merged to main. main stays at 35d4b3518.
+No pull request may be opened unless genuinely necessary (owner promise 7).
+
+---------------------------------------------------------------------
+9. SUMMARY LINE FOR THE OWNER
+---------------------------------------------------------------------
+P-C = MATCH. 10 of 10 criteria reproduced independently; 8 files changed
+(+512/-62) with zero forbidden paths and zero product-code changes; CI
+run 45111202901 green 8/8 at tip 5720e5a; three documents proven
+byte-identical to their generators' output; two mutations prove the new
+tests have teeth; six stale status rows closed against six real witness
+commits; CO-1 and CO-2 closed; three non-blocking observations carried;
+F-23 awaiting the owner.
+=====================================================================

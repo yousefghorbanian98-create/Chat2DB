@@ -1,0 +1,156 @@
+الحاقیه بر پاسخِ ۲۰۲۲‑۱۱‑۲۲ — چهار چیز که بعد از paste شدنِ آن پاسخ سنجه شد.
+اگر پاسخِ اصلی را نگرفتی، اول آن را بخوان؛ این سند فقط چهار اصلاح/افزودنی است.
+همهٔ عددهای زیر را خودم روی tip ‏db37b1bc0 (شاخهٔ arena/5a1e37b3-mp) سنجه‌ام، نه از گفتهٔ کسی.
+
+════════════════════════════════════════
+بخشِ ۱ — PR #23 به شاخهٔ کهنه وصل است. قبل از هر merge‌ای این را درست کن.
+════════════════════════════════════════
+
+سنجه:
+  · head ‏PR #23 = شاخهٔ arena/da474b65-mp روی commit ‏9bfc99d6f
+  · شاخهٔ کاریِ تو = arena/5a1e37b3-mp روی commit ‏db37b1bc0
+  · compare ‏arena/da474b65-mp...arena/5a1e37b3-mp ⇒ status=ahead · ahead_by=5 · behind_by=0
+    یعنی **fast-forward خالص**؛ هیچ واگرایی نیست، هیچ merge commit‌ای لازم نیست.
+  · پنج commit‌ای که PR ندارد: 1ec787180 · b9a65050c · 3251145e4 · 3eaed4231 · db37b1bc0
+
+چرا این خطرناک است و نه فقط نامرتب:
+  روی 9bfc99d6f (همان tip‌ای که PR نشان می‌دهد) چهار job قرمز است: backend · live-contract · secret-scan · Documentation links and handoff.
+  روی db37b1bc0 ‏backend و live-contract **سبز** شده‌اند (کارِ commit ‏b9a65050c).
+  ⇒ اگر مالک امروز PR #23 را merge کند، کدی را merge کرده که backend‌اش قرمز است.
+
+کاری که باید بکنی (یک فرمان، از ریشهٔ مخزن):
+  git push origin arena/5a1e37b3-mp:arena/da474b65-mp
+  چون fast-forward خالص است، PR #23 خودبه‌خود به db37b1bc0 (یا هر tip تازه‌تر) به‌روز می‌شود و شماره و تاریخچهٔ PR حفظ می‌شود. PR تازه نساز.
+
+یک نکتهٔ قوانین: ruleset ‏«Main» (id ‏27826883) الان enforcement=active است ولی conditions.ref_name.include = ["~DEFAULT_BRANCH"]،
+یعنی قاعده‌های deletion و non_fast_forward فقط به **main** می‌خورند، نه به شاخهٔ PR ⇒ این push هیچ قانونی را نمی‌شکند.
+
+════════════════════════════════════════
+بخشِ ۲ — شرطِ توقفِ من فعال شد: یک مسیرِ **دوم** پیدا شد. AD‑23 اصلاح می‌شود.
+════════════════════════════════════════
+
+اول اعترافِ خودم: من در AD‑23 نوشتم «فقط یک مسیر». آن جمله از دادهٔ **ناقص** نوشته شده بود —
+GitHub تعدادِ annotation‌ها را می‌بُرد، و من فقط ۱۰ annotation دیدم، همه در before/ ‏.
+حقیقت این است که **دو** baseline ‏detect-secrets در evidence ‏commit شده، نه یکی. جملهٔ «یک مسیر» باطل است.
+
+سنجهٔ دورِ دومِ secret-scan روی db37b1bc0 ‏(check-run 137109535399، یازده annotation):
+  · ۱۰ مورد failure، همه: docs/MuscleParadise/audit/evidence/**after**/detect-secrets.json
+  · rule = generic-api-key · commit = 839500de55bfd08ac0826dc1a795837bdff54c35
+  · خطوط: 136, 143, 150, 157, 166, 175, 189, 198, 205, 214
+  · یک warning بی‌ربط: «Node.js 20 is deprecated» — نادیده گرفته شود.
+
+بررسیِ ماهیت که خودم انجام دادم (و تو باید در EXECUTION-LOG.md تکرار و ثبت کنی):
+  after/detect-secrets.json ⇒ ۵۳٬۱۵۷ بایت · ۶۶ فایل · ۱۷۱ finding
+  before/detect-secrets.json ⇒ ۵۲٬۵۷۳ بایت · ۶۵ فایل · ۱۶۹ finding
+  هر دو: کلیدهای هر finding = filename · hashed_secret · is_verified · line_number · type
+  **۱۷۱/۱۷۱ و ۱۶۹/۱۶۹ دارای hashed_secret‌اند و همهٔ آن hash‌ها sha1ِ ۴۰-هگزِ معتبرند.**
+  صفر مورد plaintext · رشتهٔ «plain» صفر بار در فایل ظاهر می‌شود · ۲۷ detector فعال (از جمله PrivateKeyDetector و JwtTokenDetector).
+  ⇒ هر دو فایل یک کلاس‌اند: baseline ‏ابزار، نه secretِ واقعی. همان توجیهِ before/ برای after/ هم برقرار است.
+
+تصمیمِ من (AD‑23 اصلاح‌شده): استثنا از «یک مسیر» به **دو مسیر** گسترش می‌یابد، هر دو زیر docs/MuscleParadise/audit/evidence/ :
+    evidence/before/detect-secrets.json
+    evidence/after/detect-secrets.json
+و نه هیچ چیز دیگر. مرزِ سخت سرِ جای خودش است: اگر در دورهای بعدی finding‌ای **بیرونِ این دو فایل** دیدی،
+اضافه نکن؛ بایست و گزارش بده. این دقیقاً همان شرطی است که برای جلوگیری از تبدیلِ استثنا به عادت گذاشته بودم.
+
+کارِ عملی — به dispatch تازه نیاز نداری:
+  workflow ‏423857407 یک بار اجرا شد (۲۰۲۶‑۱۱‑۲۲T05:37:02Z، event=workflow_dispatch، success) و تو خروجی‌اش را در db37b1bc0 مصرف کردی.
+  ولی فرمولِ fingerprint را داری: {commit40}:{path}:{rule}:{line}
+  و annotation‌ها هر چهار جزء را می‌دهند ⇒ ده fingerprint ‏دورِ دوم را خودت بساز. قالبِ پرونده همان است که الان در .gitleaksignore داری:
+    839500de55bfd08ac0826dc1a795837bdff54c35:docs/MuscleParadise/audit/evidence/after/detect-secrets.json:generic-api-key:136
+  (و به همان ترتیب برای ۱۴۳، ۱۵۰، ۱۵۷، ۱۶۶، ۱۷۵، ۱۸۹، ۱۹۸، ۲۰۵، ۲۱۴)
+  بالای هر گروه یک کامنتِ یک‌خطی بگذار که بگوید اینها baseline ‏ابزارِ hash‌شده‌اند، نه credential —
+  چون ۸ entryِ قبلیِ پرونده هم همین الگو را دارند (مثلاً «Synthetic Stripe-shaped string for secret-pattern regression testing»).
+
+وضعیتِ فعلیِ پرونده روی db37b1bc0 ‏(سنجهٔ من): ۳۳ خط · ۱۸ fingerprintِ معتبرِ ۴۰-هگز ·
+مسیرهای پوشش‌داده‌شده: fixture‌های تست (jwt در test_m46_security_matrix.py:89 · stripe-access-token در test_apk_deep_audit.py:62) ·
+docs/MuscleParadise/REPORT-QF-00-BASELINE-2026-11-19.md · و evidence/before/detect-secrets.json
+(روی 9bfc99d6f این پرونده ۲۰ خط و ۸ fingerprint بود ⇒ تو ۱۰ تا اضافه کردی. حساب درست است.)
+
+هشدارِ صادقانه: چون annotation ‏سقف دارد، ممکن است بعد از این ده مورد، مواردِ بیشتری در after/ ظاهر شود.
+ci.yml خودش findings[:40] را چاپ می‌کند. پس حلقه را **تا سبز شدن** ادامه بده، نه تا «ده مورد اضافه شد».
+هر دور: fingerprint‌ها را اضافه کن → push کن → annotation‌ها را دوباره بخوان.
+ci.yml پیش از اسکن، scripts/test_retired_signing_scan.py را اجرا می‌کند ⇒ سلامتِ خودِ گیت در هر دور خودکار وارسی می‌شود.
+
+════════════════════════════════════════
+بخشِ ۳ — علتِ دقیقِ قرمزیِ «Documentation links and handoff»: فقط یک دروازه از چهار دروازه
+════════════════════════════════════════
+
+آن job چهار دروازه را پشتِ سر هم اجرا می‌کند. من هر چهار را locally روی db37b1bc0 زدم:
+  ۱) python3 scripts/docs_gate.py            ⇒ **PASS** · «18 Markdown files, 276 local links, 15 Mermaid diagram block(s), handoff headings, README entrypoints, SVG XML»
+  ۲) python3 scripts/interaction_map.py --check ⇒ **FAIL** · exit=1 · پیامِ دقیق: «نقشهٔ سطح تعامل کهنه است — python3 scripts/interaction_map.py را اجرا و commit کن»
+  ۳) tools/mermaid-check: npm ci && node check.mjs ⇒ **هرگز اجرا نشد** — job در گامِ ۲ متوقف می‌شود
+  ۴) python3 scripts/repo_hygiene_gate.py    ⇒ **PASS** · «index ignored, no tracked .claude/, no agent-tool git hook»
+
+دو نتیجهٔ عملی:
+  · تنها کارِ لازم: نقشه را بازتولید و commit کن (همان چیزی که در پاسخِ اصلی گفتم). نه docs_gate و نه hygiene مشکل ندارند؛ دست به آنها نزن.
+  · دروازهٔ mermaid **تا امروز یک بار هم اجرا نشده**، چون گامِ ۲ همیشه جلویش را می‌گرفت. یعنی بعد از بازتولیدِ نقشه،
+    برای اولین بار اجرا می‌شود و ممکن است قرمزیِ تازه‌ای بدهد. این را از قبل بدان تا غافلگیر نشوی؛ اگر قرمز شد، گزارش بده و خودسرانه rule‌اش را شل نکن.
+
+════════════════════════════════════════
+بخشِ ۴ — بازتولیدِ نقشه را خودم از قبل انجام دادم. خروجی‌ات را با این مقایسه کن.
+════════════════════════════════════════
+
+من در یک cloneِ موقت (بدون commit) ‏python3 scripts/interaction_map.py را روی db37b1bc0 اجرا کردم تا پاسخِ «بازتولید کن» را
+با حدس ندهم. اگر خروجیِ تو با این اعداد یکی نبود، یعنی چیزی در محیطِ تو فرق دارد — بایست و بگو.
+
+گزارشِ خودِ اسکریپت: «نقشه نوشته شد: docs/MuscleParadise/architecture/interaction-map-2026-11-19.md · 31 سطح · رانش قرارداد 0 · بی‌تست 6»
+
+اندازهٔ تغییر:
+  · ۲ فایل: interaction-map-2026-11-19.md ‏(+۲۱/−۲۱) و interaction-map.json ‏(−۱۲/‌+۴۹) · جمعاً +۷۰/−۳۴
+  · در json هیچ کلیدی اضافه یا حذف نشده؛ فقط مقدارِ دو کلیدِ roles و tests عوض شده (۴ آرایهٔ roles از [] به شش نقش پر شد)
+  · **رانش قرارداد ۰** ⇒ routes.json با نقشه هم‌خوان است
+  · سطحِ بی‌تست از ۷ به ۶ (studio-page:Analytics تستِ mp-app/studio/tests/wp15Money.test.ts را گرفت؛ nutritionPage یک تستِ دوم گرفت)
+
+مهم‌ترین بخش — حسابِ شش نقش که **دقیقاً** بسته می‌شود. این آزمونِ اصلیِ «بازتولید چیزی را پنهان نکرده» است:
+
+  نقش         قدیم   تازه   تفاوت   تجزیه
+  admin        102    103    +1     −۳ (admin/users* تنگ شد) +۴ (endpoint‌های عمومی)
+  manager      102    103    +1     −۳ (همان) +۴ (همان)
+  super_admin  106    110    +4     −۰ (admin/users* را نگه داشت) +۴
+  coach         65     73    +8     +۴ عمومی +۱ sessions +۳ phone-change
+  reception     42     50    +8     +۴ عمومی +۱ sessions +۳ phone-change
+  member        69     76    +7     +۴ عمومی +۳ phone-change  (sessions را از قبل داشت)
+
+هر شش ردیف بدون باقی‌مانده بسته می‌شوند ⇒ هیچ تغییرِ پنهانی در نقشه نیست.
+
+دسته‌بندیِ محتواییِ همان ۲۱ سطر:
+  الف) تنگ‌شدن (۳ سطر): GET /api/v1/admin/users · DELETE /api/v1/admin/users/*/role · POST /api/v1/admin/users/*/role
+      از «manager, admin, super_admin» به **فقط super_admin**. جهتِ درست. منبعش commit ‏55107a99f («phase 5 owner-only») است.
+  ب) اصلاحِ نمایش (۴ سطر): POST otp/request · POST otp/verify · POST refresh · POST logout
+      از «—» به شش نقش. اینها واقعاً عمومی‌اند: در modules/auth/router.py هیچ‌کدام AuthenticatedUser ندارند
+      (خطوطِ ۶۹، ۷۶، ۱۲۲، ۱۲۷). یعنی نقشه قبلاً نقش‌ها را خالی نشان می‌داد، نه اینکه مجوز عوض شده باشد.
+      برای همین رندرِ interaction_map.py:309 باید یک D-n بگیرد (رندر را عوض نکن — عوض کردنش تغییرِ گیت است).
+  ج) گشادشدنِ واقعی (۴ سطر): GET /api/v1/auth/sessions (+coach +reception) و سه phone-change/* (+member +coach +reception)
+
+بررسیِ امنیتیِ بخشِ ج — این را کامل خواندم، چون گشادشدنِ مجوز همان چیزی است که می‌تواند IDOR باشد:
+  · router.py:142 ⇒ service.list_sessions(db, user_id=user.id, current_sid=sid) — هویت از توکن می‌آید، نه از درخواست.
+  · router.py:147 ⇒ service.revoke_session(db, user_id=user.id, session_id=session_id) و service.py:174 ⇒
+    «if row is None or row.user_id != user_id or row.revoked_at is not None» — مالکیت سنجیده می‌شود.
+  · هر سه phone-change در router.py:88، 101، 114 ‏user: AuthenticatedUser می‌گیرند و **هیچ پارامترِ id‌ای از درخواست نمی‌خوانند**؛
+    تنها ورودی‌های کنترل‌شدهٔ کاربر new_phone · challenge_id · code هستند.
+  · مالکیتِ challenge_id در service.py:220-232 ‏(_phone_change_challenge) **در خودِ query** سنجیده می‌شود:
+    «WHERE challenge_id == challenge_id AND user_id == user.id» و اگر نبود/تمام‌شده/باطل بود ⇒ NotFoundError
+    (یعنی ۴۰۴، نه ۴۰۳ ⇒ oracleِ وجود هم لو نمی‌رود). verify_old در خط ۳۱۰ همین helper را صدا می‌زند.
+  · یک مورد که ممکن است IDOR به نظر برسد و نیست: service.py:414 ‏«current = db.get(PhoneChangeChallenge, challenge_id)».
+    این داخلِ هندلرِ IntegrityError ‏در confirm_phone_change است، **بعد از** اینکه همان challenge_id در ابتدای تابع
+    با فیلترِ مالکیت گرفته شده؛ تنها کاری که می‌کند set کردنِ invalidated_at روی همان رکوردِ متعلقِ به خودِ فراخوان است.
+  ⇒ نتیجه: گشادشدنِ این چهار endpoint **اصلاحِ کارکردی** است نه ارتقای دسترسی. محدود ماندنِ phone-change به
+    manager/admin/super_admin یک باگ بود: یعنی یک عضوِ عادی نمی‌توانست شمارهٔ **خودش** را عوض کند.
+
+تصحیحِ یک پرچمِ اشتباهِ خودم: وقتی با regex ‏دنبالِ بررسیِ مالکیت در verify_old_phone_change_otp گشتم، ابزارم «هیچ بررسیِ مالکیتی» چاپ کرد.
+آن خروجیِ regex ‏بود نه یافتهٔ واقعی — بررسی در helper ‏است، نه inline. آن پرچم را پس می‌گیرم.
+
+ثبت کن: یک AD یا D-n با این مضمون که «بازتولیدِ نقشهٔ ۲۰۲۶‑۱۱‑۲۲: ۳ تنگ‌شدن + ۴ اصلاحِ نمایش + ۴ گشادشدنِ خود-دامنه؛
+صفر swap؛ حسابِ شش نقش بسته؛ مالکیتِ challenge_id در سطحِ query» — با ارجاع به service.py:220-232 و router.py:88/101/114/142/147.
+
+════════════════════════════════════════
+وضعیتِ CI روی db37b1bc0 ‏در لحظهٔ نوشتنِ این سند
+════════════════════════════════════════
+  سبز (۵): backend · live-contract · studio · client-flutter · Client — pinned SDK · format gate · Android debug compile
+  در حالِ اجرا (۱): e2e-api  (needs: backend — حالا که backend سبز شده، راه افتاده)
+  قرمز (۲): secret-scan ‏(بخشِ ۲ همین سند) · Documentation links and handoff ‏(بخشِ ۳ و ۴ همین سند)
+  gitleaks-fingerprints: completed/success ‏(dispatch)
+
+ترتیبِ پیشنهادی: اول بخشِ ۱ (یک فرمان، PR را نجات می‌دهد) → بعد بخشِ ۴ (بازتولیدِ نقشه) → بعد بخشِ ۲ (فingerprint‌های دورِ دوم).
+سپس هر هشت job ‏باید سبز باشند. آن‌وقت نوبتِ داوریِ عددیِ WP 2.5 و WP 3.2 ‏و نقطهٔ بررسیِ ۱ می‌رسد؛ merge با مالک است، نه تو.

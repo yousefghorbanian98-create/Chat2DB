@@ -1,0 +1,1249 @@
+# چک‌لیستِ مالک — کلِ کارهای پیشِ رو در شش دسته
+
+- **تاریخ:** ۲۰۲۶‑۱۱‑۲۱ · **منبعِ تصمیم‌ها:** باکسِ سؤالِ شش‌گانه (پاسخِ مالک) + الحاقیهٔ `MP-SCENARIO-A1.4-2026-11-21.md`
+- **قاعدهٔ این سند:** هر قلم یا «سنجه‌شده» است یا صریحاً «باید سنجیده شود». هیچ عددِ تخمینی به‌عنوانِ واقعیت نیامده.
+- **مخاطب:** مالکِ محصول. بخشِ بیلدر در `MP-SCENARIO-A1.4-2026-11-21.md` بخشِ B است.
+
+> **اولِ هر نوبت:** `handoff/MP-PENDING-TRIGGERS.md` را با وضعیتِ زندهٔ GitHub مقایسه کن.
+> هر محرکی که شرطش برقرار شده، **بی‌درخواست و در همان نوبت** به مالک بگو و `FIRED` ثبت کن.
+> محرکِ **T‑3** = به‌محضِ merge شدنِ PR #24 توسط مالک، توصیهٔ شروعِ **فاز P** (`MP-PRODUCTION-PLAN-P-2026-11-22.md`) را روی میز بگذار.
+
+## دستهٔ ۱ — فقط تو می‌توانی انجام دهی (کلید، حساب، تصمیم، merge)
+
+| # | کار | چرا فقط تو | وضعیت |
+|---|---|---|---|
+| ۱٫۱ | ~~پاک‌کردنِ چهار secretِ امضای اندروید + variableِ `MP_ANDROID_CERT_SHA256`~~ — **باطل شد؛ چیزی برای پاک‌کردن نیست** | **سنجهٔ مالک در `2026-11-21`:** همهٔ صفحه‌های secrets/variables **خالی** بودند. تأییدِ من از خودِ مخزن: گامِ «Prepare dedicated release signing material» با `set -euo pipefail` و `test -n "$KEYSTORE_B64" && … \|\| exit 1` نوشته شده ⇒ در نبودِ secret **به‌طورِ قطعی** شکست می‌خورد. گاه‌شمار: گیتِ امضا در `8e72de9` @ `2026-11-18 20:28:12` آمد، اولین قرمزی `20:28:25` (۱۳ ثانیه بعد)، آخرین سبز `2026-11-16` یعنی **پیش از** گیت ⇒ `apk.yml` ساختاراً غیرقابلِ موفقیت است. **خبرِ خوب:** مادهٔ امضا هرگز در GitHub نبوده ⇒ صفر نشتی، صفر پنجرهٔ تعرض، چیزی برای rotate کردن نیست | **بسته — بی‌اثر** |
+| ۱٫۲ | تأییدِ نهاییِ حذفِ `.github/workflows/apk.yml` (۴ `uses:`) **و اختیارِ `AD‑21`** (حذفِ یک تست در همان commit) | حذفِ workflow یک تغییرِ دامنهٔ محصولی است؛ سنجه شد که حذفش `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` را با `FileNotFoundError` می‌شکند و فهرستِ ممنوعه «حذفِ تست» را منع کرده ⇒ بدونِ اختیارِ تو بیلدر در بن‌بست می‌ماند | باز — بیلدر اجرا می‌کند |
+| ۱٫۳ | ~~آیا MP زنده است؟~~ — **جواب داده شد: «تا امروز حتی یک عضو هم نداشته، فقط خودم یک بار تستش کردم»** | — | **بسته · `2026-11-21`** ⇒ سنجهٔ پشتیبانِ من: `deploy.yml` **`total_count = 0` اجرا** و `environments = 0` در حالی که خودِ workflow ‏`environment: ${{ inputs.target }}` و `APP_URL`/`DOKPLOY_WEBHOOK` غیرخالی را الزام می‌کند ⇒ **MP هرگز هیچ‌جا استقرار نیافته**. نتیجه: هیچ سطحِ حملهٔ زنده‌ای وجود ندارد و `F‑01`/`F‑02`/`F‑06`/`F‑08`/`F‑09` امروز توسط هیچ‌کس قابلِ سوءاستفاده نیستند |
+| ۱٫۴ | تصمیمِ `card_number` در `C1`: رمزنگاریِ کامل یا فقط mask ذخیره‌شدن | تصمیمِ محصولی؛ بیلدر به‌شکلِ `AD-n` ثبت می‌کند | باز |
+| ۱٫۵ | روشن‌کردنِ تصمیمِ بازِ کیوسک/گیتِ ورود (تصمیمِ ۲ = «نامعلوم») | فقط تو می‌دانی؛ با یک آزمونِ دستگاه بسته می‌شود | باز — تا بسته نشود، PWA باید کیوسک‌پذیر بماند |
+| ۱٫۶ | merge در **دو دسته + یک کارزار**، فقط پس از داوریِ عددیِ من | سیاستِ انتخابیِ خودت (`review_then_merge`) | جاری |
+| ۱٫۷ | دامنه/HTTPS/مقصدِ استقرار برای سطحِ وبِ عضو (`B0`) | زیرساختِ بیرونِ مخزن | باز — `web.yml` artifactِ `muscleparadise-web` را می‌سازد ولی compose هیچ سرویسی برای serve کردنش ندارد |
+| ۱٫۸ | اگر روزی Play/App Store خواستی: حساب و هزینه (۲۵ دلار یک‌بار / ۹۹ دلار سالانه) + انطباقِ target API 36 | حسابِ انسانی | در سناریوی فعلی **منتفی** |
+| ۱٫۹ | **روشن‌کردنِ Dependabot alerts** از تبِ **Security** مخزن | — | ✅ **انجام شد · `2026-11-21T23:39Z`** — اثباتِ سنجه‌شده: همان endpoint پاسخِ «**Dependabot alerts are disabled for this repository**» را به «**Resource not accessible by integration**» (`403`) تغییر داد. پیامِ اول فقط وقتی برمی‌گردد که قابلیت **خاموش** باشد؛ پیامِ دوم یعنی قابلیت **روشن** است و توکنِ ممیزی scope خواندنش را ندارد. اکنون رفتارش با `secret-scanning/alerts` و `code-scanning/alerts` یکی شده (هر سه `403`) |
+| ۱٫۹٫۱ | **«Dependabot security updates» را روشن نکن** (همان تب، کلیدِ دوم) | این کلید PRِ **bumpِ خودکارِ وابستگی** می‌سازد ⇒ مستقیماً با ممنوعیتِ «bump وابستگی» و با `AD‑22` (فریزِ نسخه‌ها در `constraints.txt`) تضاد دارد. سنجهٔ الان: ‏`security_and_analysis` هر دو فیلد `null` · **PR بازِ dependabot = ۰** از ۱ PR باز ⇒ فعلاً روشن نیست. alerts (دیدن) لازم داری، security updates (تغییر دادن) نه | ⚠️ **روشن نکن** |
+| ۱٫۱۰ | **روشن‌کردنِ secret scanning و push protection** اگر خاموش‌اند (برای مخزنِ public رایگان است) | عاملِ ممیزی `403` می‌گیرد و نمی‌تواند وضعیتش را بخواند ⇒ فقط تو می‌بینی | باز |
+| ۱٫۱۰٫۱ | ~~اجازهٔ allowlist برای `secret-scan`~~ — **`AD‑23` صادر شد** با پنج شرط؛ مکانیزم `.gitleaksignore` و تستِ سلامتِ گیت از قبل در مخزن بود | جزئیات در A1.4 §B‑۴٫۶ | ✅ صادر شد |
+| ۱٫۱۰٫۲ | تصمیم دربارهٔ **`F‑33`**: اسکنرِ secret در CI ضعیف‌تر از تستِ خودش است (چهار پرچمِ `--log-opts=--all`، `--redact=100`، `--ignore-gitleaks-allow`، `--gitleaks-ignore-path` را ندارد) | سنجه شد؛ هم‌ترازی یک‌خطی است ولی سطحِ سخت‌گیریِ گیت را عوض می‌کند ⇒ اختیارِ جدا می‌خواهد | باز |
+| ۱٫۱۱ | ~~تصمیم دربارهٔ `F‑32`~~ — **`AD‑22` صادر شد** (`2026-11-21` شب) | جزئیاتِ اجرا در A1.4 §B‑۴٫۶ | ✅ صادر شد — بیلدر اجرا می‌کند |
+| ۱٫۱۲ | تصمیم دربارهٔ افزودنِ **CodeQL** (code scanning) | **سنجه شد:** از هفت workflow هیچ‌کدام CodeQL نیست ⇒ اسکنِ کد اصلاً پیکربندی نشده | باز — کم‌اولویت‌تر از ۱٫۹ چون ممیزیِ من semgrep را دستی اجرا کرد |
+
+## ⚠️ هشدارِ فوریِ `2026-11-21T23:40Z` — PR #23 باز، غیرِ draft، و `main` هیچ گیتِ اجباری ندارد
+
+| سنجه | مقدار |
+|---|---|
+| PR باز | **`#23`** · `arena/da474b65-mp` → `main` · ساخته‌شده `2026-11-20T20:52:51Z` · عنوان: «دیاگرام‌های وضعیت فعلی (diagram-design) — **بدون merge**» |
+| `draft` | **`false`** |
+| `mergeable` | **`true`** |
+| `mergeable_state` | **`unstable`** |
+| اندازه | **۴۶ commit** · **+۱۰۳٬۱۰۹/−۶۶۶** در **۲۸۶ فایل** |
+| checks روی tip | **۸ failure · ۲ skipped · ۶ success** |
+| `rulesets` روی مخزن | **`[]`** — یعنی خالی (این یکی را توانستم بخوانم، `403` نبود) |
+| `branches/main/protection` | `403` برای توکنِ ممیزی ⇒ قابلِ تعیین نیست |
+| `allow_auto_merge` / `allow_merge_commit` / … | همه `null` در پاسخِ API |
+
+**استنتاج (صریحاً به‌عنوانِ استنتاج، نه سنجهٔ مستقیم):** در API گیت‌هاب `mergeable_state = unstable` یعنی «قابلِ merge با checkهای **قرمزِ غیرِ اجباری**»؛ اگر آن checkها **required** بودند وضعیت `blocked` می‌شد. پس به‌احتمالِ قوی **`main` هیچ status check اجباری ندارد** و `rulesets` هم خالی است ⇒ **این PR با ۸ گیتِ قرمز، یک کلیک با merge شدن فاصله دارد.**
+
+**سه اقدام، به ترتیبِ اولویت:**
+
+| # | اقدام | چرا |
+|---|---|---|
+| ۱ | ~~PR #23 را merge نکن / Convert to draft بزن~~ — **مالک آن را بست** | ✅ **انجام شد · `closed_at = 2026-11-21T23:44:31Z`** و این **محکم‌تر** از draft است: PR بسته بدونِ بازگشایی merge نمی‌شود. سه آزمونِ سلامت: (الف) `merged = false` و `merged_at = null` ⇒ **هر زمان قابلِ بازگشایی** است و چیزی از دست نرفته؛ (ب) شاخهٔ `arena/da474b65-mp` سرِ جایش است، tip همان `9bfc99d6f27f` @ `23:22:15Z`، **۴۶ جلو / ۰ عقب** نسبت به `main`؛ (ج) ‏`ci.yml` تریگرِ `push: branches: [main, "arena/**"]` دارد **علاوه بر** `pull_request` ⇒ CI با بسته‌شدنِ PR از کار نمی‌افتد. پاداش: پیش‌تر هر push **دو** اجرا می‌ساخت (`event=push` و `event=pull_request` در `23:22:22Z` و `23:22:18Z`)؛ از این پس **یک** اجرا ⇒ مصرفِ runner نصف و قرمزیِ تکراری حذف |
+| ۲ | روی `main` **required status checks** بگذار: ‏`backend` · `live-contract` · `secret-scan` · `studio` · `client-flutter` · `Documentation links and handoff` · `e2e-api` · `Client — pinned SDK…` | مسیر: Settings ← Branches ← Branch protection rules ← ‏`main` ← «Require status checks to pass before merging» ← «Require branches to be up to date». این همان معیارِ «گیتِ بلاک‌کننده» است که در دستهٔ ۶ به‌عنوانِ هدفِ کلاسِ جهانی آمده. توکنِ من `403` می‌گیرد ⇒ فقط تو می‌توانی |
+| ۳ | بازبینیِ این PR را **با diff نخوان** | ‏۱۰۳٬۱۰۹ خط افزوده که بخشِ عمده‌اش dumpِ ماشین‌ساختِ شاهد است (`WP 0.1` به‌تنهایی ۸۲٬۶۱۲ خط در ۱۱۵ فایل). هیچ انسانی این را بازبینی نمی‌کند ⇒ بازبینی باید **گیت‌محور** باشد (همان روشِ داوریِ عددیِ من)، نه diff‌محور |
+| ۴ | **هشدارِ باقی‌مانده: بستنِ PR از `main` محافظت نمی‌کند** | ‏`rulesets = []` سنجه شد و `branches/main/protection` برای توکنِ ممیزی `403` است ⇒ به‌احتمالِ قوی pushِ مستقیم به `main` و همچنین ساختنِ یک PR تازه و merge کردنش با checkهای قرمز هنوز ممکن است. **اقدامِ ۲ (required status checks) حالا مهم‌تر از پیش است، نه کم‌تر** |
+| ۵ | تأییدِ جانبیِ روشن‌شدنِ Dependabot | سنجهٔ تصادفی ولی قاطع: اجرای `event=dynamic` به نام **«Graph Update: pip in /mp-app/backend»** روی `main` در `2026-11-21T23:30:39Z` با نتیجهٔ **success** — یعنی گیت‌هاب همین الان دارد وابستگی‌های پایتونِ بک‌اند را برای Dependabot فهرست می‌کند. این تأییدِ مستقلِ اقدامِ ۱٫۹ است، قوی‌تر از تغییرِ پیامِ `403` |
+
+**یک نکتهٔ ترتیبی:** تا وقتی required checks گذاشته نشده، هر push تازهٔ بیلدر می‌تواند روی شاخه‌ای بنشیند که یک کلیک با `main` فاصله دارد. پس اقدامِ ۲ پیش از ادامهٔ حلقه انجام شود.
+
+## دروازهٔ اولین عضو — حداقلِ مطلق پیش از اولین استقرار یا اولین عضوِ واقعی
+
+چون سنجه شد که MP **هرگز استقرار نیافته** و **صفر عضو** دارد، فوریت از «امشب» به «پیش از اولین عضو» تغییر می‌کند. این **فرصت** است نه خطر: هیچ داده‌ای برای از دست دادن نیست.
+
+| # | قلم | چرا برای اولین عضو لازم است | وضعیت |
+|---|---|---|---|
+| ۱ | `F‑02` — پیش‌فرضِ fail-open و echo شدنِ `dev_code` | بدونِ آن هر کسی می‌تواند برای هر شماره‌ای حساب بسازد | باز (`WP 1.2`) |
+| ۲ | `F‑01` — اعتماد به `X-Forwarded-For` در rate-limit | ۳۰/۳۰ OTP پذیرفته، ۲۲۸٫۴ حدس/ثانیه ⇒ اولین عضو یعنی اولین هدف | باز (`WP 1.1`) |
+| ۳ | `F‑06` — `/api/v1/metrics` بدونِ احراز | ۳۴۶ خط و ۱۲ خانوادهٔ متریک به هر رهگذر | باز (`WP 1.4`) |
+| ۴ | `F‑09` — مبلغ در `2^53+1` | اولین پرداختِ واقعی | باز (`WP 1.5`) |
+| ۵ | `F‑08` — `logout-all` بدونِ `sid` | اولین نشستِ واقعی | باز (`WP 1.3`) |
+| ۶ | **سبز شدنِ هر سه jobِ قرمزِ CI** | ‏`live-contract` با exit 7 یعنی ممکن است اپ اصلاً بالا نیاید | ❌ قرمز روی `9bfc99d6f27f` |
+| ۷ | `B0` — مقصدِ استقرار برای artifactِ موجودِ وب | تا این نباشد «اولین عضو» هیچ راهِ ورودی ندارد | باز |
+
+**چیزهایی که با صفر عضو از فهرستِ فوری خارج می‌شوند** (نه نادیده — فقط عقب‌تر):
+
+- **خطرِ کارزارِ `C` فرو می‌ریزد.** دادهٔ تولیدی نیست ⇒ **هیچ مهاجرتِ داده‌ای، هیچ پنجرهٔ cutover، هیچ dual-write و هیچ تمرینِ بازیابی روی دادهٔ واقعی لازم نیست.** ترسناک‌ترین بخشِ `C3` باطل است؛ تمرینِ بازیابی فقط روی دادهٔ مصنوعی معنا دارد.
+- **`F‑30` (ذخیرهٔ plaintextِ `card_number`) و همهٔ قلم‌های حریمِ خصوصی (`face_templates`, `biometric_consents`) امروز صفر تعرضِ واقعی دارند** چون آن جدول‌ها خالی‌اند ⇒ `C1` به «پیش از اولین پرداخت» موکول می‌شود، نه «همین حالا».
+- **تصمیمِ ③ تأیید و قوی‌تر شد:** هیچ APK‌ای پخش نشده ⇒ تغییرِ قرارداد (۲۰۰→۴۲۲/۴۰۴) بدونِ `min_client_version` آزاد است.
+- **`C2` و `B1` می‌توانند موازی شوند** (پیش‌تر «دو کارزار هم‌زمان ممنوع» بود) چون ریسکِ داده‌ایِ `C` با صفر عضو نزدیکِ صفر است. این **گزینه** است نه دستور؛ اگر ترتیبی را ترجیح می‌دهی همان ترتیبِ قبلی درست است.
+- **`AD‑23`** (allowlist مشروط برای `secret-scan`) را در بخشِ B‑۴٫۵ سندِ A1.4 ببین — تا صادر نکنی، بیلدر حق ندارد گیت را دست بزند.
+
+## دستهٔ ۲ — بیلدرِ بی‌ناظر (با گیتِ عددی، یک commit به ازای هر بسته)
+
+**۲‑الف · فوری (پیش از هر بستهٔ تازه):**
+1. بستنِ دو `PARTIAL`: ‏`WP 2.5` (اجرای semgrep روی `mp-silent-except-pass` + سه محلِ `scripts/dast.py:79,174,180` + نامِ `mp_metrics_scrape_errors_total` + بازتابِ `/health/ready`) و `WP 3.2` (افزودنیِ پراب برای `fastapi_default_detail`، عددِ ۷۱ → ۰، ثبتِ شعاعِ تأثیرِ ۴ `raise HTTPException` در `devtools/sandbox_bank.py`).
+2. تفکیکِ `WP 4.6`: نیمهٔ استودیو انجام شود (`pages/Nutrition.tsx:50`، `mp-ts-float-money`)؛ نیمهٔ دارت (چهار قاعدهٔ `mp-dart-*`) ‏`DEFERRED(D-n)`.
+3. فریزِ عملکردیِ `mp-app/client` در `DECISIONS.md`.
+
+**۲‑ب · سپس:** ‏`WP 3.1` (F‑25) با `app/id_floor.py` پس از مسیریابی، `422` و `code="invalid_id"` ⇒ `unexpected_2xx_on_bad_id` از **۴۸** به **۰**.
+
+**۲‑ج · سپس:** ‏`WP 0.1` (۴۹ ردیف، سه وضعیتِ مجاز، بدونِ `PARTIAL`) · `WP 0.2` (ماتریسِ ۱۶۳×۷ ⇒ **۶۰۲** مخالفت به **۰** در ۱٬۱۴۱ سلول) · فازِ ۱ (پنج Critical).
+
+**⟵ نقطهٔ بررسیِ ۱:** داوریِ عددیِ من → merge دستهٔ ۱ (فازِ ۰ + فازِ ۱) → **تازه** A1.4 را به بیلدر بده (چون آن سند ممنوعیتِ `HARD-STOP` روی schema/migration را برمی‌دارد و این اجازه نباید پیش از بسته‌شدنِ Criticalها فعال شود).
+
+**۲‑د · پس از نقطهٔ بررسیِ ۱:** ‏`D1` (حذفِ `apk.yml` + SHA-pinning ‏**۳۸/۳۸** + پینِ `flutter-version` در `web.yml` و `client-format-fix.yml`) · `C0` (سندِ دسته‌بندیِ ۶۵ ردیفی + دو تستِ گیت + خطِ پایهٔ تخلفِ مرزِ ماژول) · فازِ ۲ · فازِ ۳ · فازِ ۴ (نیمهٔ استودیو) · `C1` (**پس از** `WP 1.2`/`F‑02`، چون کلیدِ رمز از `settings.secret_key` مشتق می‌شود: `security/crypto.py:52`) · `B0` (سرویسِ `client-web` یا مسیرِ static در `infra/Caddyfile` + smoke test).
+
+**⟵ نقطهٔ بررسیِ ۲:** داوریِ من → merge دستهٔ ۲.
+
+## دستهٔ ۳ — من (ممیزی و داوری)
+
+1. **داوریِ عددی در هر نقطهٔ بررسی** — از روی diff و خروجیِ خام، نه از روی گزارشِ بیلدر. دلیلِ سنجه‌شدهٔ این قاعده: دو commitِ `0afd240` و `8926fcd` هر دو «انجام شد» گزارش شدند و هر دو PARTIAL بودند.
+2. **نگهداریِ اسنادِ ماندگار** در `handoff/` — کیتِ منجمد (`486,358` بایت / `9a192500…`؛ بازتولید با ژنراتور همان بایت‌ها می‌دهد) + الحاقیه‌ها.
+3. **تصحیحِ علنیِ سندِ خودم وقتی غلط است.** تا امروز سه مورد: شمارِ `RUF100` (۷۲/۵۹/۳۹ وابسته به پیکربندی)، الگوی `lstrip("+-")` برای کفِ شناسه (‏`-1` را `1` می‌کرد و می‌پذیرفت)، و شدتِ `F‑30` (که «نشت از API» نیست چون مسیرِ خواندن هم کارت را mask می‌کند هم `secret_key` را برنمی‌گرداند).
+4. **سنجهٔ تازه وقتی لازم شود** — مانند ۴۲ `uses:` با ۰ پینِ SHA، ۵۹ path param با `int` خام در برابرِ ۶ رشته‌ای، ۱۸ فایلِ مدلِ دامنه‌محور برای ۶۴ جدول، ۲۳ `batch_alter_table`.
+5. **نوشتنِ برنامهٔ عددیِ کارزارهای بزرگ** (‏`C` و `B`) با گیت به ازای هر مرحله، پیش از شروعِ آن‌ها.
+
+## دستهٔ ۴ — دو کارزارِ بزرگ (بازبینیِ جدا، ترتیبِ اجباری)
+
+### کارزارِ C — Postgres و مرزهای داده
+خطِ پایهٔ سنجه‌شده: **۰ سرویسِ Postgres در `infra/docker-compose.yml`** (امروز: `backend`, `studio`, `backup`, `valkey 9.1.3`, `valkey-exporter`, `prometheus v3.16.0`, `ollama 0.40.16`) · **۳۸ migration** · **۲۳ `batch_alter_table`** · **۲۳ `pragma`** · **۱٬۲۵۲ تست سبز روی SQLite** · پوششِ لایهٔ `db` ‏**۷۰٫۴۰٪** (ضعیف‌ترین پس از `scripts` ‏۴۶٫۲۲٪) · سناریوهای چنددیتابیسی در ممیزی **BLOCKED** بودند.
+
+| مرحله | خروجیِ تحویلی | گیت |
+|---|---|---|
+| `C2` | **یک عدد**: «X تست از ۱٬۲۵۲ روی Postgres شکست» | تا این عدد ثبت نشود، `C3` شروع نشود؛ هیچ کدِ محصولی جز تنظیماتِ اتصال عوض نشود |
+| `C3` | خنثی‌سازیِ ۲۳ `batch_alter_table` و ۲۳ `pragma` · جایگزینیِ `journal_mode=wal`/`foreign_keys=1` · سرویسِ `backup` از «کپیِ فایلِ SQLite» به `pg_dump` | ‏`alembic upgrade head` روی Postgres بدونِ خطا + هر ۱٬۲۵۲ تست سبز + `EXPLAIN` روی سه پرس‌وجوی داغ + **یک تمرینِ بازیابیِ کامل با زمانِ سنجه‌شده** |
+| `C4` | هفت schema مطابقِ ۱۸ فایلِ مدل · نقشِ DB محدود (اپ روی `auth.*` جز از view/تابعِ باریک `SELECT` ندارد) · partition ماهانهٔ ۱۴ جدولِ پرحجم · `pg_dump -n` برای retention تفکیک‌شده | گیتِ دسترسی: اتصالِ اپ **نمی‌تواند** `auth.otp_codes` را مستقیم بخواند |
+| قانونِ شواهد | اعدادِ بار/زمان‌بندیِ موجود در `04-evidence/raw/` همه روی SQLite سنجه شده‌اند | پس از `C3` **re-baseline** کن و برچسبِ «دورانِ SQLite» بزن؛ اعدادِ قدیمی را به‌عنوانِ ستونِ «قبل» نگه دار |
+
+### کارزارِ B — کلاینتِ عضو با TypeScript/PWA
+سنجهٔ کاری که جایگزین می‌شود: **۷۳ فایلِ دارت / ۱۷٬۲۲۹ خط** (که ۴۴ فایل / ۱۱٬۸۴۵ خطش در `client/lib` است) در **۱۷ حوزهٔ عملکردی** با ۲۹ فایلِ تست — یعنی هم‌اندازهٔ کلِ استودیو (۱۰۱ فایلِ TS/TSX / ۱۷٬۱۵۳ خط).
+
+| مرحله | محتوا | گیت |
+|---|---|---|
+| `B0` | مقصدِ استقرار برای artifactِ **موجودِ** `muscleparadise-web` | یک URL واقعی + smoke test در CI — بدونِ نوشتنِ یک خط کلاینتِ تازه |
+| `B1` | اسکلتِ PWA (فقط npm ⇒ **در همین چت قابلِ توسعه و تست**) + کلاینتِ تولیدشده از OpenAPI (۱۶۳ عملیات) + manifestِ نصب‌پذیر و کیوسک‌پذیر | ‏`tsc` ۰ خطا + تستِ واحد + Lighthouse/PWA معیارِ مشخص |
+| `B2..Bn` | ۱۷ حوزه به ترتیبِ اولویت | هر حوزه فقط وقتی مهاجرت‌شده است که آزمونِ برابریِ قراردادش سبز باشد |
+| پایانِ B | حذفِ `mp-app/client` + `client-format-fix.yml` (۵ `uses:`) + چهار قاعدهٔ `mp-dart-*` از `semgrep-mp.yml` + **سه فایلِ تست در همان commit** | ‏`pytest --collect-only -q` ⇒ **۰ خطایِ جمع‌آوری** و `N_after == N_before − 59` · گیتِ `WP 0.8` از **۳۸/۳۸** به **۳۳/۳۳** — سنجه شد که حذفِ `client` سه خطایِ جمع‌آوری می‌دهد و pytest پیش‌فرض **کلِ سوئیت را `Interrupted` می‌کند** |
+
+**اولویتِ ۱۷ حوزه:** ‏`auth` ← `home`/`today`/`checkin` ← `progress`/`nutrition`/`assessment14`/`bodycomp` ← `classes`/`intake`/`feedback` ← `notifications`/`chat`/`profile`/`shell` ← **`wallet` و `shop` آخر از همه**. دلیلِ سنجه‌شده: سه جهشِ *زندهٔ* ممیزی دقیقاً در ماژولِ پول بود (`#27` مرزِ مبلغِ صفر، `#31` پیش‌فرضِ `bank_verified`، `#36` ‏`or`→`and`).
+
+**وابستگیِ اجباری:** ‏`B2..Bn` فقط **پس از merge فازِ ۳** (که شکلِ قرارداد را عوض می‌کند: ۲۰۰→۴۲۲/۴۰۴ و پاکتِ خطا). ساختنِ کلاینتِ تازه روی قراردادِ در حالِ تغییر = دوبارکاری.
+
+## یادداشتِ مهم دربارهٔ «چیزی پیدا نشد»
+
+صفحه‌های خالیِ GitHub سه علتِ کاملاً متفاوت دارند و فقط یکی‌شان خبرِ خوب است:
+
+| صفحه | علتِ سنجه‌شده | معنا |
+|---|---|---|
+| Secrets / Variables | واقعاً خالی‌اند (مالک نگاه کرد) | ✅ خبرِ خوب: مادهٔ حساسی هرگز در GitHub نبوده |
+| Dependabot alerts | **غیرفعال** — پیامِ صریحِ API | ⚠️ «چیزی پیدا نشد» یعنی «نگاه نکرد» |
+| Code scanning / CodeQL | هیچ workflow پیکربندی نشده | ⚠️ همین |
+| Secret scanning | برای من `403` ⇒ قابلِ تعیین نیست | ❓ باید خودت نگاه کنی |
+
+**و مهم‌تر از همه:** حتی اگر هر چهار اسکنر روشن باشند، هیچ‌کدام **یک** مورد از یافته‌های ممیزی را پیدا نمی‌کنند. اسکنرهای GitHub دنبالِ دو چیزند: CVEِ شناخته‌شده در وابستگی‌ها، و secretِ commit‌شده. ‏`F‑01` (اعتماد به XFF ⇒ ۳۰/۳۰ OTP پذیرفته، ۲۲۸٫۴ حدس در ثانیه)، `F‑02` (پیش‌فرضِ fail-open + echo شدنِ `dev_code`)، `F‑06` (`/api/v1/metrics` بدونِ احراز، ۳۴۶ خط و ۱۲ خانوادهٔ متریک)، `F‑08` و `F‑09` (مبلغ در `2^53+1`) نقصِ **طراحی، پیکربندی و مجوز**‌اند و در هیچ پایگاهِ CVE‌ای ثبت نشده‌اند. سنجهٔ مستقلِ من روی ۱۸ نسخهٔ نصب‌شدهٔ خودِ MP: ‏`pip-audit` ⇒ **«No known vulnerabilities found»** — یعنی وابستگی‌هایت امروز پاک‌اند؛ خطرِ واقعیِ تو آن پنج Critical است که هیچ اسکنری نمی‌بیندشان.
+
+**یک تفکیکِ انتساب که باید ثبت بماند:** اسکنِ اولِ من ۶ CVE نشان داد (`mcp 1.29.0` ×۵ و `wcmatch 8.5.2` ×۱). این‌ها **ابزارِ خودِ ممیزی** بودند نه محصولِ تو — آزمونِ انتساب: هیچ‌کدام در `mp-app/backend/pyproject.toml` نیستند (۰ وقوع) و `Required-by` هر دو خالی است. هرگز این شش CVE را به MP نسبت نده.
+
+## دستهٔ ۵ — هرگز نکن (با دلیلِ سنجه‌شده)
+
+| ممنوع | دلیلِ سنجه‌شده |
+|---|---|
+| بازنویسی در Go / Elixir / Rust | همهٔ registryها **http=000** (`proxy.golang.org`, `hex.pm`, `repo.hex.pm`, `builds.hex.pm`, `crates.io`, `static.crates.io`) و هیچ toolchain نصب نیست ⇒ کیفیت «اعلام‌شده» می‌شود نه «سنجیده‌شده». و هیچ‌کدام پنج Critical را حل نمی‌کنند |
+| دیتابیس/سرویسِ جدا به ازای هر دستهٔ داده | تراکنشِ `payments`↔`ledger_entries`↔`wallet_transactions`↔`orders` می‌شکند · FKها (`members.user_id`, `face_templates.member_id`) از بین می‌روند · `F‑04` امروز هم در ظرفیتِ ۶۰ و ۸۰ ورکر **۹۰ نمونه از ۱۴۵** را به سقف رساند |
+| merge بر مبنای گزارشِ خودِ بیلدر | دو موردِ `PARTIAL` که «انجام شد» گزارش شدند |
+| شروعِ `C2` پیش از بسته‌شدنِ فازِ ۱ | ‏`F‑01`/`F‑02` امروز قابلِ سوءاستفاده‌اند؛ مهاجرتِ DB هفته‌ها کارِ دیگر را فریز می‌کند |
+| دادنِ اجازهٔ schema/migration به حلقهٔ بی‌ناظر پیش از نقطهٔ بررسیِ ۱ | تنها ترکیبِ واقعاً خطرناک: عاملِ بی‌ناظر + دسترسی به schema + امنیتِ نبسته |
+| افزودنِ قابلیتِ تازه به کلاینتِ دارت | ۱۷٬۲۲۹ خطی که جایگزین می‌شود؛ هر قابلیتِ تازه = دوبارکاری |
+| نگه‌داشتنِ هم‌زمانِ دو کارزارِ بزرگ (‏`C` و `B`) در یک هفته | هیچ‌کدام تمام نمی‌شود |
+
+## دستهٔ ۶ — معیارِ «کلاسِ جهانی» و وضعیتِ امروزِ تو
+
+| قلم | وضعیتِ سنجه‌شده |
+|---|---|
+| گیتِ عددی به ازای هر بستهٔ کاری | ✅ داری (ستونِ چهارمِ ۳۰ ردیفِ برنامه + الحاقیه) |
+| اسکنرِ آسیب‌پذیریِ وابستگی (Dependabot) | ❌ **غیرفعال** — پیامِ خودِ API |
+| اسکنِ کد (CodeQL) | ❌ هیچ workflow ندارد |
+| پینِ وابستگی‌های بک‌اند | ❌ **۱۹ از ۱۹ بازه‌ای** (`>=`)، ۰ `==`، بدونِ lock/constraints؛ در برابرِ استودیو که `package-lock.json` دارد و دارت که `pubspec.lock` **ندارد** |
+| پینِ ابزارِ امنیتی | ✅ ‏`gitleaks-fingerprints.yml` نسخهٔ **۸٫۳۰٫۱** را «verified» نصب می‌کند — تنها جایی که پروژه چیزی را پین کرده |
+| امضا **و وارسیِ امضا در CI** | ✅ الگویش را داری (`apksigner verify --print-certs` با گواهیِ پین‌شده · `umask 077` · پاکسازی با `if: always()`) — با حذفِ کانالِ اندروید بی‌استفاده می‌شود؛ همان الگو را برای imageهای Docker و artifact وب نگه دار |
+| پینِ toolchain | ❌ `channel: stable` بدونِ `flutter-version` در `apk.yml:29` و `web.yml:21` |
+| SHA-pinning اقدام‌ها | ❌ **۰ از ۴۲** |
+| build بازتولیدپذیر + SBOM + checksum | ❌ (برای imageها و artifact وب لازم است) |
+| آزمونِ خودکارِ قرارداد روی ۱۶۳ عملیات | ⚠️ ابزارش هست (`probe_invalid_authed.py`) ولی هنوز آزمونِ CI نشده — همان `WP 3.5` |
+| انتشارِ پله‌ای + گزارشِ خرابی | ❌ |
+
+**هدفِ قابلِ سنجه:** پس از `D1` و `B`، تعدادِ زبان‌های محصول از ۴ (پایتون، TypeScript، دارت، Kotlin DSL) به **۲** می‌رسد، toolchainهای CI از **۶** (پایتون، نود، فلاتر، JDK از `jdk4py`، apktool از npm، داکر) به **۳**، workflowها از **۷** به **۵**، و سطحِ بی‌گیت از **۳** (دارت، Kotlin DSL، YAML) به **۰**.
+
+## فهرستِ فشردهٔ زمانی
+
+| بازه | کار |
+|---|---|
+| **همین امروز** | ۱٫۱ (پاک‌کردنِ secrets) · ۱٫۳ (جوابِ «زنده است یا نه») · paste کردنِ سه بندِ فوری برای بیلدر (‏`handoff/MP-BUILDER-RESPONSE-2026-11-21.md` §۴ + تفکیکِ `WP 4.6` + «A1.4 را در نقطهٔ بررسیِ ۱ بگیر») |
+| **این هفته** | بسته‌شدنِ دو `PARTIAL` + `WP 3.1` + `WP 0.1`/`0.2` + فازِ ۱ ⟵ نقطهٔ بررسیِ ۱ ⟵ merge دستهٔ ۱ |
+| **پس از آن** | ‏`D1` + `C0` + فازهای ۲–۴ + `C1` + `B0` ⟵ نقطهٔ بررسیِ ۲ ⟵ merge دستهٔ ۲ |
+| **کارزارها** | `C2` → `C3` → `C4` (با تمرینِ بازیابی) · سپس `B1` → `B2..Bn` → پایانِ B |
+---
+
+## پیوستِ لینک‌ها — `2026-11-21T23:50Z`
+
+**راهنمای صداقت:** گیت‌هاب به درخواستِ **بی‌هویت** برای همهٔ صفحه‌های `settings/*` کدِ `404` می‌دهد، پس `404`ِ من دلیلِ خرابیِ لینک نیست. ستونِ «سنجهٔ من» فقط آن‌هایی را `200` نشان می‌دهد که **بدونِ نشست** هم دیده می‌شوند؛ بقیه در مرورگرِ واردشدهٔ تو کار می‌کنند.
+
+### الف) محافظتِ `main` — اقدامِ ۲، مهم‌ترینِ مانده
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/settings/branches` (branch protection کلاسیک) | `404` بی‌هویت ⇒ در مرورگرِ تو باز می‌شود |
+| `https://github.com/yousefghorbanian98-create/MP/settings/rules` (Rulesets — مسیرِ جدیدتر و پیشنهادی) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/rules` (**صفحهٔ وارسی**: پس از ذخیره اینجا فهرست می‌شود) | ✅ `200` |
+
+تنظیماتِ لازم در فرم: الگو `main` · «Require a pull request before merging» **اختیاری** (اگر بزنی، بیلدر دیگر نمی‌تواند مستقیم به `main` push کند که خوب است، ولی خودت هم باید از PR بروی) · «Require status checks to pass before merging» **الزامی** · «Require branches to be up to date before merging» **الزامی** · «Do not allow force pushes» **الزامی** (سیاستِ ما هم force-push را ممنوع کرده).
+
+**هشت check با نامِ دقیق** (از jobهای اجرای `44961471336` استخراج شد؛ همین‌ها را در کادرِ جست‌وجو تایپ کن):
+
+1. `backend`
+2. `live-contract`
+3. `secret-scan`
+4. `studio`
+5. `client-flutter`
+6. `e2e-api`
+7. `Documentation links and handoff`
+8. `Client — pinned SDK · format gate · Android debug compile`
+
+### ب) امنیت و Dependabot
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/security` (هابِ امنیت — از اینجا به همهٔ بخش‌ها می‌روی) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/security/dependabot` (شمارِ هشدارها — همان عددی که از تو خواستم) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/secrets` (secret scanning) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/code-scanning` (CodeQL — انتظار دارم «پیکربندی نشده» ببینی) | `404` بی‌هویت |
+| `https://github.com/yousefghorbanian98-create/MP/security/policy` | ✅ `200` |
+| ~~`https://github.com/yousefghorbanian98-create/MP/settings/security`~~ | **این را استفاده نکن** — مالک گزارش کرد که حتی واردشده هم `404` داد؛ برای مخزنِ publicِ حسابِ شخصی، این کنترل‌ها زیرِ تبِ **Security** هستند نه Settings |
+
+### ج) PR و CI
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/pull/23` (دکمهٔ **Reopen** برای نقطهٔ بررسیِ ۱؛ `merged=false` پس بازگشایی ممکن است) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions` | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions/runs/44961471336` (اجرای قرمزِ چهارگانه روی tip بیلدر) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/actions/runs/44962138925` (**«Graph Update: pip in /mp-app/backend»** — سندِ زندهٔ روشن‌شدنِ Dependabot) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/settings/actions` (مجوزهای workflow) | `404` بی‌هویت |
+
+### د) شاخهٔ بیلدر و فایل‌هایی که در `AD‑22`/`AD‑23` به آن‌ها ارجاع دادم
+
+| لینک | سنجهٔ من |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/MP/tree/arena/da474b65-mp` | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/commits/arena/da474b65-mp` | `429` (rate-limitِ موقتِ من) — در مرورگر کار می‌کند |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/.gitleaksignore` (سیاستِ انگشت‌نگاری، ۲۰ خط) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/scripts/test_retired_signing_scan.py` (تستِ سلامتِ گیت) | ✅ `200` |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/docs/MuscleParadise/audit/evidence/before/detect-secrets.json` (منبعِ مثبتِ کاذب) | در مرورگر |
+| `https://github.com/yousefghorbanian98-create/MP/blob/arena/da474b65-mp/mp-app/backend/pyproject.toml` (۱۹ وابستگیِ بازه‌ای) | ✅ `200` |
+
+### ه) اسنادِ ممیزی (مخزنِ Chat2DB، شاخهٔ `arena/2cde32d6-chat2db`)
+
+| لینک | محتوا |
+|---|---|
+| `https://github.com/yousefghorbanian98-create/Chat2DB/tree/arena/2cde32d6-chat2db/handoff` | فهرستِ همهٔ ۸ سند |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-OWNER-CHECKLIST-2026-11-21.md` | **همین سند** — شش دستهٔ کاری + دروازهٔ اولین عضو + پیوستِ لینک‌ها |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-SCENARIO-A1.4-2026-11-21.md` | سناریوی کامل؛ ‏§B‑۴٫۵ اصلاحات و §B‑۴٫۶ متنِ `AD‑21`/`AD‑22`/`AD‑23` |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-RESPONSE-2026-11-21.md` | داوریِ دو commit و فهرستِ PARTIALها در §۴ |
+| `https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-KIT-2026-11-21.zip` | کیتِ منجمدِ بیلدر (`486,358` بایت / `9a192500…`) |
+
+**بازیابیِ بدونِ توکنِ هر سند** (برای بیلدر یا هر محیطِ دیگری):
+`curl -fsS -H "Accept: application/vnd.github.raw" "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/<نامِ فایل>?ref=arena/2cde32d6-chat2db"`
+
+### یک نکتهٔ مجوز که باید بدانی
+
+توکنِ ممیزیِ من روی مخزنِ MP ‏`permissions.admin = true` گزارش می‌شود، ولی `branches/main/protection` را با `403 Resource not accessible by integration` رد می‌کند ⇒ آن installation مجوزِ ریزدانهٔ «Administration» را ندارد. پس **من نمی‌توانم** branch protection یا ruleset بسازم؛ این کار فقط با نشستِ مرورگریِ تو انجام می‌شود. اگر خواستی، می‌توانم یک‌بار `POST /repos/.../rulesets` را **با اجازهٔ صریحِ تو** امتحان کنم و نتیجه را دقیق گزارش دهم — ولی بدونِ اجازه دست نمی‌زنم، چون یک rulesetِ بدپیکربندی می‌تواند بیلدر را از push کردن قفل کند.
+---
+
+## وارسیِ `2026-11-22T08:5xZ` — ruleset ساخته شد ولی **کار نمی‌کند**، و دسته‌بندیِ کاملِ ۱۳ هشدار
+
+### الف) ruleset «Main» (id ‏`27826883`): نیمه‌درست — دو تنظیم، آن را بی‌اثر گذاشته
+
+| قلم | وضعیتِ سنجه‌شده |
+|---|---|
+| چهار نوعِ قاعده | ✅ `deletion` · `non_fast_forward` · `pull_request` · `required_status_checks` |
+| هشت checkِ اجباری | ✅ **هر هشت** دقیقاً فهرست شده‌اند، با `strict_required_status_checks_policy: true` (یعنی «up to date» هم روشن است) |
+| **`enforcement`** | ❌ **`disabled`** ⇒ هیچ‌چیز اعمال نمی‌شود |
+| **`conditions.ref_name.include`** | ❌ **`[]`** خالی ⇒ ruleset به **هیچ شاخه‌ای** هدف نگرفته؛ حتی با enforcement فعال هم بی‌اثر است |
+| آزمونِ عملی | PR #23 بازگشایی شد و `mergeable_state = unstable` ماند، نه `blocked` ⇒ تأییدِ مستقلِ بی‌اثر بودن |
+
+**دو کلیکِ باقی‌مانده:** در صفحهٔ ruleset ← (۱) **Target branches** ← Include ← `refs/heads/main` (یا `~DEFAULT_BRANCH`) ← Add ← (۲) بالای صفحه **Enforcement status** را از `Disabled` به **`Active`** ← Save. بعد به من بگو تا دوباره بخوانم: باید `enforcement=active` و include غیرخالی و PR #23 ‏`blocked` شود.
+
+`required_approving_review_count: 0` برای مالکِ تنها قابلِ قبول است؛ اگر روزی همکاری اضافه شد، ۱ بگذار.
+
+### ب) ۱۳ هشدارِ Dependabot — دسته‌بندیِ کامل از روی اسکرین‌شاتِ مالک + یک سنجهٔ قطعی‌کننده
+
+| قلم | عدد |
+|---|---|
+| کل | **۱۳** · `#1`…`#13` |
+| شدت | **۱ High** (`#8` ‏launch-editor `fs.existsSync()` روی Windows) · ۱۰ Moderate · ۲ Low (`#11` vite cross-origin، `#13` katex) |
+| Manifest | **۱۲** در `mp-app/studio/package-lock.json` · **۱** در `tools/mermaid-check/package-lock.json` (`#13` katex) |
+| Direct / Transitive | ۹ Direct · ۴ Transitive (`#1` esbuild، `#5` و `#12` ‏`@vitest/mocker`، `#13` katex) |
+| Development / Runtime | **۱۳ Development · ۰ Runtime** |
+| بسته‌های درگیر | `vite` (۷) · `launch-editor` (۴) · `vitest`/`@vitest/mocker` (۳… با #6,#5,#12) · `esbuild` (۱) · `katex` (۱) |
+
+**سنجهٔ قطعی‌کننده (چرا همه‌شان امروز صفر تعرض دارند):** ‏`mp-app/studio/Dockerfile` دو مرحله‌ای است — مرحلهٔ build ‏`npm ci && npm run build` (یعنی `tsc -b && vite build`؛ vite فقط **ابزارِ build** است) و مرحلهٔ runtime ‏**`nginx:1.27-alpine`** که `dist/` را serve می‌کند و `EXPOSE 80`. و compose (`mp-app/deploy/docker-compose.yml:44-51`) همان Dockerfile را build می‌کند و پورت را به **`127.0.0.1:${STUDIO_PORT:-8080}:80`** می‌بندد ⇒ **loopback-only**. پس در production **هیچ vite dev server‌ای اجرا نمی‌شود**؛ مسیرهای آسیب‌پذیر (`server.fs.allow/deny`، optimizer `.map`، mocker redirect، launch-editor، پراکسیِ dev serverِ esbuild) در artifactِ سروشده **وجود ندارند**.
+
+**پیامدها:**
+- هیچ‌کدام از ۱۳ به **دروازهٔ اولین عضو** تعلق ندارند. اولویتشان **پایین** است.
+- تنها تعرضِ واقعی: **ماشینِ توسعه‌دهنده‌ای که روی Windows ‏`npm run dev` می‌زند** — مخصوصاً `#8` (High) و چهار موردِ Windows-محورِ دیگر (`#3`,`#4`,`#7`,`#9`). یعنی یک خطرِ *محیطِ توسعه* است، نه *محصول*.
+- `#13` (katex) فقط در ابزارِ CI رسمِ دیاگرام است ⇒ کم‌اولویت‌ترین.
+- بنابراین `AD‑24` (کارزارِ npm-تنها) **فوری نیست**؛ ولی وقتی انجام شد، `#8` باید اولین bump باشد چون تنها High است.
+- یک هشدارِ صادقانه: `npm ci` در مرحلهٔ build همان lock را resolve می‌کند، پس بسته‌های آسیب‌پذیر در **imageِ build** نصب می‌شوند (هرچند به imageٔ runtime نمی‌رسند). این یک نکتهٔ زنجیرهٔ تأمینِ مرحلهٔ build است، نه یک آسیب‌پذیریِ runtime.
+
+### ج) compose جابه‌جا شده بود — تصحیحِ ارجاعِ خودم
+
+مسیرِ درستِ compose روی `main` ‏**`mp-app/deploy/docker-compose.yml`** است (نه `infra/docker-compose.yml` که در سنجه‌های قدیمی‌ترم به آن ارجاع دادم؛ آن مسیر اکنون `404` است). `mp-app/infra/Caddyfile` هم موجود است. همهٔ ارجاع‌های آینده باید از مسیرِ تازه باشند.
+---
+
+## وارسیِ `2026-11-22` پس از «ست شد» — ruleset **فعال و درست** است، ولی PR #23 به شاخهٔ کهنه وصل است
+
+### الف) ruleset ‏`27826883` — تأیید شد ✅
+
+| قلم | مقدارِ سنجه‌شده |
+|---|---|
+| `enforcement` | ✅ **`active`** (قبلاً `disabled`) |
+| `conditions.ref_name.include` | ✅ **`["~DEFAULT_BRANCH"]`** (قبلاً `[]`) |
+| انواعِ قاعده | ✅ `deletion` · `non_fast_forward` · `pull_request` · `required_status_checks` |
+| تعدادِ check | ✅ **۸ از ۸**، verbatim |
+| `strict_required_status_checks_policy` | ✅ `true` |
+| آزمونِ عملی | ✅ PR #23 از `unstable` به **`mergeable_state = blocked`** پرید |
+| ruleset‌های مخزن | فقط همین یکی (پس تعارض یا تکراری در کار نیست) |
+
+**یک خبرِ خوبِ سنجه‌شده:** ‏`review_decision = null` روی PR #23 ⇒ قاعدهٔ `pull_request` با `required_approving_review_count: 0` از تو مرور نمی‌خواهد، و `require_extra_approval_for_unattributed_changes: true` هم مانعی برای مالکِ تنها نساخته. یعنی **blocked بودن فقط به خاطرِ check‌های قرمز است** — نه یک بن‌بستِ مروری. وقتی هر هشت سبز شوند، خودت می‌توانی merge کنی.
+
+**هزینهٔ `strict: true` را بدان:** چون «up to date with main» روشن است، هر بار که `main` جلو برود، PR باید از `main` به‌روزرسانی شود و **هر هشت job ‏دوباره اجرا می‌شوند** (backend ‏تنهایی ~۴۶۰ ثانیه). پس بهتر است merge ‏وقتی انجام شود که `main` تکان نخورده باشد.
+
+### ب) چرا هنوز `blocked` است — چهار job قرمز روی tipِ PR
+
+روی head ‏PR #23 یعنی `9bfc99d6f` ‏(۲۴ check-run): قرمز = `backend` · `live-contract` · `secret-scan` · `Documentation links and handoff` · سبز = `studio` · `client-flutter` · `Client — pinned SDK…` · `e2e-api` ‏skipped (چون `needs: [backend]` و backend قرمز بود).
+
+### ج) ⚠ یافتهٔ مهم: PR #23 پنج commit عقب‌تر از کارِ بیلدر است
+
+| قلم | مقدار |
+|---|---|
+| head ‏PR #23 | شاخهٔ `arena/da474b65-mp` @ `9bfc99d6f` |
+| شاخهٔ کاریِ بیلدر | `arena/5a1e37b3-mp` @ `db37b1bc0` |
+| `compare` | `status=ahead · ahead_by=5 · behind_by=0` ⇒ **fast-forward خالص** |
+| پنج commitِ جا مانده | `1ec787180` · `b9a65050c` · `3251145e4` · `3eaed4231` · `db37b1bc0` |
+| عواقب | روی `9bfc99d6f` ‏`backend` و `live-contract` **قرمز**اند؛ روی `db37b1bc0` **سبز** ⇒ merge کردنِ PR #23 به وضعیتِ امروز یعنی merge کردنِ کدِ با backendِ قرمز |
+
+**درمان (یک فرمان، در دستورِ کارِ بیلدر گذاشته شد):** ‏`git push origin arena/5a1e37b3-mp:arena/da474b65-mp` ⇒ PR #23 خودبه‌خود جلو می‌آید، شماره و تاریخچه‌اش حفظ می‌شود، PR تازه لازم نیست. ruleset ‏هم جلوی این push را نمی‌گیرد چون `deletion` و `non_fast_forward` فقط به `~DEFAULT_BRANCH` می‌خورند.
+
+### د) وضعیتِ CI روی `db37b1bc0` ‏در لحظهٔ وارسی
+
+سبز (۵): `backend` · `live-contract` · `studio` · `client-flutter` · `Client — pinned SDK · format gate · Android debug compile`
+در حالِ اجرا (۱): `e2e-api` · قرمز (۲): `secret-scan` · `Documentation links and handoff`
+هر دو قرمز در الحاقیه پاسخ گرفته‌اند ⇒ **هیچ‌کدام نیاز به تصمیمِ تو ندارند.**
+
+### هـ) شرطِ توقفِ من فعال شد — و یک اشتباهِ خودم اصلاح شد
+
+`secret-scan` بعد از دورِ اول، ده finding ‏در **مسیرِ دوم** نشان داد: ‏`docs/MuscleParadise/audit/evidence/**after**/detect-secrets.json` (من در `AD‑23` نوشته بودم «یک مسیر»). آن جمله از دادهٔ ناقص نوشته شده بود: سقفِ annotation ‏ده‌تا را نشان می‌داد. سنجهٔ ماهیت: هر دو baseline **فقط hash** دارند (`171/171` و `169/169` ‏`hashed_secret`، همه sha1ِ ۴۰-هگز، صفر plaintext) ⇒ یک کلاس‌اند. `AD‑23` به **دو مسیر** اصلاح شد و مرزِ سخت سرِ جای خودش ماند.
+
+**کاری از تو نمی‌خواهد:** فرمولِ fingerprint ‏داده شده و بیلدر ده موردِ دورِ دوم را خودش می‌سازد؛ dispatch تازه لازم نیست (workflow ‏`423857407` یک بار اجرا شد: `2026-11-22T05:37:02Z`، `workflow_dispatch`، `success`).
+
+### و) علتِ دقیقِ قرمزیِ `Documentation links and handoff` — هر چهار دروازه locally زده شد
+
+| دروازه | نتیجه |
+|---|---|
+| `scripts/docs_gate.py` | ✅ PASS — «18 Markdown files, 276 local links, 15 Mermaid diagram block(s), handoff headings, README entrypoints, SVG XML» |
+| `scripts/interaction_map.py --check` | ❌ FAIL — «نقشهٔ سطح تعامل کهنه است» |
+| `tools/mermaid-check` | ⚠ **هرگز اجرا نشده** — job در گامِ قبل متوقف می‌شود |
+| `scripts/repo_hygiene_gate.py` | ✅ PASS |
+
+یعنی تنها علتِ قرمزی، کهنه بودنِ نقشه است — همان چیزی که پاسخِ من دستورِ بازتولیدش را داد. و یک هشدارِ صادقانه: دروازهٔ mermaid **تا امروز یک بار هم اجرا نشده**، پس بعد از بازتولیدِ نقشه برای اولین بار اجرا می‌شود و ممکن است قرمزیِ تازه‌ای بدهد.
+
+### ز) بازتولیدِ نقشه را خودم از قبل انجام دادم — داوریِ عددیِ پیش‌دستانه
+
+در cloneِ موقت، بدون commit: ‏`31 سطح · رانش قرارداد 0 · بی‌تست 6` (از ۷). تغییر: ‏`interaction-map-2026-11-19.md` ‏(+۲۱/−۲۱) و `interaction-map.json` ‏(−۱۲/+۴۹)؛ در json هیچ کلیدی اضافه/حذف نشده، فقط `roles` و `tests`.
+
+**حسابِ شش نقش که بدون باقی‌مانده بسته می‌شود** (آزمونِ اصلیِ «بازتولید چیزی را پنهان نکرده»):
+
+| نقش | قدیم | تازه | تفاوت | تجزیه |
+|---|---|---|---|---|
+| `admin` | 102 | 103 | **+1** | −۳ تنگ‌شدن +۴ عمومی |
+| `manager` | 102 | 103 | **+1** | −۳ +۴ |
+| `super_admin` | 106 | 110 | **+4** | −۰ +۴ |
+| `coach` | 65 | 73 | **+8** | +۴ عمومی +۱ `sessions` +۳ `phone-change` |
+| `reception` | 42 | 50 | **+8** | +۴ +۱ +۳ |
+| `member` | 69 | 76 | **+7** | +۴ +۳ (`sessions` را داشت) |
+
+دسته‌بندی: **۳ تنگ‌شدن** (`admin/users*` به فقط `super_admin`) · **۴ اصلاحِ نمایش** (`otp/request`, `otp/verify`, `refresh`, `logout` که واقعاً عمومی‌اند — هیچ‌کدام `AuthenticatedUser` ندارند) · **۴ گشادشدنِ واقعی** (`sessions` و سه `phone-change`) · **صفر swap**.
+
+**گشادشدن‌ها IDOR نیستند — خواندم:** ‏`router.py:142` ⇒ `list_sessions(db, user_id=user.id, …)` · `service.py:174` ⇒ `row.user_id != user_id` · هر سه `phone-change` ‏(`router.py:88/101/114`) هیچ پارامترِ id از درخواست نمی‌خوانند و مالکیتِ `challenge_id` در `service.py:220-232` **در خودِ query** ‏(`AND user_id == user.id`) با ۴۰۴ سنجیده می‌شود. `service.py:414` هم که `db.get` بدون فیلتر به نظر می‌رسد، داخلِ هندلرِ `IntegrityError` و **بعد از** همان واکشیِ مالکیت‌سنجیده است. ⇒ محدود بودنِ `phone-change` به سه نقشِ مدیریتی یک **باگِ کارکردی** بود (عضو نمی‌توانست شمارهٔ خودش را عوض کند)، نه یک کنترلِ امنیتی.
+
+**یک پرچمِ اشتباهِ خودم را پس می‌گیرم:** ‏regex ‏من «هیچ بررسیِ مالکیتی در `verify_old_phone_change_otp`» چاپ کرد؛ بررسی در helper ‏است نه inline. آن خروجیِ ابزار بود، نه یافته.
+---
+
+## وارسیِ `2026-11-22` دورِ سوم — سؤالِ توقفِ بیلدر، و اصلاحِ دومِ `AD‑23` (سه مسیر)
+
+**سؤالِ بیلدر چه بود:** «کدام فایل‌ها مجازند fingerprint بگیرند؟» با سه گزینه. **پاسخِ من به تو: گزینهٔ سوم** (`before/` + بالاسری + `after/`)، و الحاقیهٔ ۲ همین را به بیلدر می‌دهد.
+
+**چرا سوم — سنجه‌های من روی `ea1efe524`:**
+
+| فایل | بایت | finding | `hashed_secret` | `is_verified:true` |
+|---|---|---|---|---|
+| `evidence/detect-secrets.json` (بالاسری) | 53,680 | 173 | 173/173 | **0** |
+| `evidence/before/detect-secrets.json` | 52,573 | 169 | 169/169 | **0** |
+| `evidence/after/detect-secrets.json` | 53,157 | 171 | 171/171 | **0** |
+
+هر سه فقط hash‌اند (sha1ِ ۴۰-هگز)، صفر plaintext، و خودِ detect-secrets هیچ‌کدام را secretِ زنده تأیید نکرده. ترکیبِ rule‌ها هم یکسان است (Hex High Entropy ۱۷ + Secret Keyword ۷ تا ۱۱ + Basic Auth ۲ + Base64 ۲ + JWT ۱). گزینهٔ اول حلقه را هرگز همگرا نمی‌کرد؛ گزینهٔ دوم خودتضاد بود (after/ را با سنجهٔ یکسان stop نگه می‌داشت).
+
+**اعترافِ دومِ من:** «یک مسیر» غلط بود، «دو مسیر» هم ناقص بود. واقعیت **سه** baseline است. `AD‑23` نسخهٔ ۳ = همین سه مسیر، و مرزِ سخت سرِ جای خودش: findingِ بیرونِ این سه ⇒ بایست و گزارش بده. و استثنا سطحِ fingerprint می‌ماند، نه path allowlist در `.gitleaks.toml`، تا secretِ واقعیِ آینده در همین فایل‌ها هنوز گیر بیفتد.
+
+**همگراییِ یک‌ضربه‌ای به‌جای ده‌ها dispatch:** سقفِ annotation ‏ده‌تاست، پس حلقهٔ batch‌ی به ~۵۰ دور نیاز داشت. الحاقیهٔ ۲ به بیلدر یک اسکریپتِ commit‌شده می‌دهد (`scripts/gen_evidence_fingerprints.py`) که مجموعهٔ کاملِ ~۵۱۳ fingerprint را از خودِ سه فایل deterministic می‌سازد (خطِ هر `hashed_secret` با جست‌وجوی رشته، نه حدس) ⇒ حلقه در **یک push** بسته می‌شود. entry‌های اضافه بی‌اثرند ولی هیچ سطرِ flag‌شده‌ای جا نمی‌ماند.
+
+**تأییدِ انضباطِ بیلدر:** ‏`.gitleaksignore` بین `db37b1bc0` و `ea1efe524` بایت‌به‌بایت یکسان است ⇒ در دورهای ۲ و ۳ هیچ fingerprint بیرون از `before/` اضافه نشده. commit ‏`37a829db5` فقط `EXECUTION-LOG.md` ‏+۱۱ خط است و شماره‌های run ‏اش (`44990174499`، `44990769317`، `44990830149`) با سنجه‌های من هم‌خوان است. یک تصحیحِ کوچک بر سندِ او هم در الحاقیهٔ ۲ آمده (annotation‌ها مسیر/خط **می‌دهند**؛ آنچه پنهان می‌ماند مقدار است).
+
+**CI روی `ea1efe524` = هفت سبز، یک قرمز:** ‏`backend` · `live-contract` · `studio` · `client-flutter` · `Client — pinned SDK…` · `e2e-api` · و **`Documentation links and handoff`** سبز شدند. با سبز شدنِ job ‏docs، دروازهٔ mermaid **برای اولین بار در تاریخِ مخزن** اجرا شد و pass شد. تنها قرمز: `secret-scan`.
+
+**بازتولیدِ نقشهٔ بیلدر با سنجهٔ مستقلِ من تطبیق دارد:** او +۲۱/−۲۲ و +۴۹/−۲؛ من در scratch ‏+۲۱/−۲۱ و +۴۹/−۱۲. تفاوتِ یک خط ناچیز است و چون دروازه سبز است و حسابِ شش نقش بسته می‌ماند پذیرفته شد. `D-9` و `D-10` در `DECISIONS.md` ثبت شده‌اند ⇒ شرطِ انتساب اجرا شده.
+
+**یادداشتِ جانبی بدونِ اقدام:** دو entry ‏برای `mp-app/client/android/keystore/keystore.properties` از پیش روی `main` بوده‌اند ولی خودِ فایل روی شاخهٔ بیلدر `404` است ⇒ بی‌اثرند. دست‌نخورده می‌مانند؛ فقط یک خطِ ثبتِ stale در `EXECUTION-LOG` خواسته شده.
+
+**کاری که از تو می‌خواهم:** در کارتِ سؤالِ بیلدر **گزینهٔ سوم** را Submit کن، بعد الحاقیهٔ ۲ را paste کن:
+`handoff/MP-BUILDER-ADDENDUM2-2026-11-22.txt`
+---
+
+## داوریِ دو commit ‏«guard» (سؤالِ دومِ بیلدر) — پاسخ: **نگه‌دار** (گزینهٔ اول)
+
+بیلدر پرسید آیا `b9e88e5` و `fae50c5` عمدی‌اند. هر دو diff را خط‌به‌خط خواندم؛ نه از روی پیامِ commit.
+
+### `b9e88e5` — حذفِ گاردِ **تکراری**، نه حذفِ گارد
+
+| سنجه | مقدار |
+|---|---|
+| گاردِ سطحِ روتر | `APIRouter(dependencies=[Depends(require_permission())])` در `modules/axis_assessment/router.py:14` — روی **همهٔ** مسیرهای ماژول، از جمله `review` |
+| گاردِ حذف‌شده | پارامترِ `user: Annotated[User, Depends(require_permission())]` روی `review_assessment` — **همان** گارد، همان آرگومان |
+| آرگومان‌پذیری | `def require_permission():` در `app/deps.py:129` **هیچ آرگومانی نمی‌گیرد**؛ casbin را با `(نقش، مسیر، متد)` اجرا می‌کند ⇒ خطرِ «دو گارد با مجوزِ متفاوت» وجود ندارد |
+| `routes.json` | `"guards": ["permission","permission"]` ⇒ `["permission"]` — تصحیحِ داده، نه تغییرِ مجوز |
+| تست | دو تستِ تازه: `test_wp03_axis_single_guard.py` ‏(+۵۸) و `test_no_duplicate_guard.py` ‏(+۵۰) که تکرارِ هم‌نوع را برای همیشه ممنوع می‌کند |
+
+⇒ مجوزِ مؤثر **عوض نشده**؛ فقط یک `enforce` اضافهٔ پرهزینه حذف شده. جهت: خنثی.
+
+### `fae50c5` — بستنِ یک مسیرِ **عمومی**، با سه لایه
+
+| سنجه | مقدار |
+|---|---|
+| قبل | `/api/v1/metrics` با `"guards": []` و `"roles": []` ⇒ **عمومی** |
+| لایهٔ اپ | `require_metrics_token`: توکن تنظیم‌نشده ⇒ **۴۰۳** (fail-closed) · هدر/توکن غلط ⇒ ۴۰۱ · مقایسه با `hmac.compare_digest` (ثابت‌زمان) |
+| لایهٔ لبه | `Caddyfile`: ‏`handle /api/v1/metrics { respond 404 }` ⇒ حتی با توکنِ لو رفته هم از اینترنت در دسترس نیست؛ Prometheus مستقیم به `backend:8000` می‌زند |
+| لایهٔ استقرار | `docker-compose.yml`: ‏`MP_METRICS_TOKEN: ${MP_METRICS_TOKEN:?…}` روی **هم** backend **هم** prometheus ⇒ بدون توکن، Compose بالا نمی‌آید |
+| راز در مخزن؟ | **نه.** grep سراسری: مقدار فقط از محیط می‌آید؛ `prometheus.yml` هم `credentials: ${MP_METRICS_TOKEN}` (expand-env). تنها رشتهٔ سخت‌کدشده، توکنِ مصنوعیِ تست است (`test-metrics-token-0123456789abcdef`) که با fixture ‏autouse ‏monkeypatch می‌شود |
+| تست‌ها | `test_wp13_metrics_auth.py` ‏(+۷۵) + به‌روزرسانیِ چهار تستِ موجود به هدرِ `METRICS_AUTH` |
+
+⇒ جهت: **تنگ‌شدنِ محض**. برگرداندنش یعنی باز کردنِ دوبارهٔ `/metrics` به اینترنت.
+
+### نتیجه و یک نکتهٔ مدل‌سازی
+
+هر دو عمدی‌اند، هر دو تست دارند، و هر دو در `DECISIONS.md` راهنمای برگرداندن هم دارند (خطِ ۱۱). **صفر گشادشدن.** پاسخ به بیلدر: گزینهٔ اول («Yes, keep them»).
+
+نکتهٔ صادقانه برای ثبت در D‑10: ‏`routes.json` برای `/metrics` ‏نقش‌های `manager, admin, super_admin` مدل کرده، در حالی که اجرای واقعی **توکن‌محور** است نه نقش‌محور. این یک انتخابِ مدل‌سازی برای نقشه است نه حفرهٔ امنیتی — توکن از نقش مشتق نمی‌شود. وقتی نقشه را داوریِ عددی می‌کنم (نقطهٔ بررسیِ ۱) همین را هم می‌سنجم.
+---
+
+## وارسیِ همگراییِ `AD‑23` — تأییدِ کامل، و **یک کارِ دو-ضربه‌ای که فقط تو می‌توانی**
+
+### الف) حلقهٔ همگرایی — با سنجهٔ من تأیید شد ✅
+
+| قلم | مقدارِ سنجه‌شده |
+|---|---|
+| commit‌های حلقه پس از `ea1efe524` | **۴۹** = ۴۸ دورِ fingerprint + ۱ commit سند (`6c204ec`) |
+| فایل‌های عوض‌شده در کلِ حلقه | فقط `.gitleaksignore` ‏(+۷۲/−) + `DECISIONS.md` ‏(+۹) + `EXECUTION-LOG.md` ‏(+۱۲) |
+| `.gitleaksignore` روی tip | ۵۰ خط · **۴۰ fingerprint** · **صفر تکراری** · صفر خطِ نامعتبر |
+| سه مسیرِ مجاز | ۱۶۲ بالاسری + ۱۵ `before/` + ۶۱ `after/` = **۴۸۲** · همه با commit ‏`839500de…` و rule ‏`generic-api-key` |
+| حسابِ بسته | ۴۸۲ − ۱۰ (دورِ اول که از قبل بود) = **۴۷۲** = دقیقاً آنچه compare نشان می‌دهد |
+| entry‌های بیرونِ سه مسیر | فقط ۸ موردِ از پیش موجود (fixture‌های تست + REPORT) ⇒ مرزِ سخت شکسته نشد |
+
+### ب) CI — هر هشت check، روی **هر دو** tip، سبز ✅
+
+روی `4272eae` ‏(نوکِ حلقه) و روی `6c204ec` ‏(commit سند): `backend` · `live-contract` · `secret-scan` · `studio` · `client-flutter` · `e2e-api` · `Documentation links and handoff` · `Client — pinned SDK · format gate · Android debug compile` — همه `completed/success`. (`gitleaks-fingerprints` هم success.)
+این **اولین باری** است که هر هشت با هم سبزند. دروازهٔ ruleset حالا معنای کاملش را دارد.
+
+### ج) ⚠ تنها گرهٔ باقی‌مانده: head ‏PR #23 — و فقط تو می‌توانی بازیش کنی
+
+| سنجه | مقدار |
+|---|---|
+| PR #23 | `head = arena/da474b65-mp @ 9bfc99d6f` · `state = open` · `mergeable_state = blocked` |
+| فاصله تا tip سبز | `ahead_by = 56 · behind_by = 0` ⇒ fast-forward خالص |
+| بیلدر | push به `arena/da474b65-mp` را **نپذیرفت** (سیاستِ شاخهٔ کاریِ خودش) — درست هم می‌گفت |
+| من | `git push --dry-run` با توکنِ خودم ⇒ **403 Permission denied** ⇒ من هم نمی‌توانم |
+
+**پس راهِ UI است، دو ضربه:**
+1. در صفحهٔ مخزنِ MP، شاخه را به `arena/5a1e37b3-mp` ببر و دکمهٔ **«Create PR»** (همان که در اسکرین‌شاتِ خودت کنارِ `+103373 −700` بود) را بزن؛ base = `main`. عنوان پیشنهادی: «ممیزی A1.4 + AD-23: هر هشت گیت سبز». PR تازه **همان لحظه هر هشت check سبز** را نشان می‌دهد چون check-run‌ها روی `6c204ec` از قبل موجودند.
+2. بعد PR #23 را **Close** کن. محتوایش زیرمجموعهٔ کاملِ PR تازه است (fast-forward) و گفتگوهایش روی PR بسته هم خواندنی می‌مانند.
+
+چرا نه force و نه دست‌کاریِ دیگر: قواعدِ `deletion` و `non_fast_forward` روی `main` فعال‌اند و هیچ‌کس نباید تاریخچه را بازنویسی کند؛ ساختنِ PR تازه هیچ قانونی را نمی‌شکند.
+
+### د) آنچه بیلدر بعد از این انجام می‌دهد (خودش فهرست کرده)
+
+بخش‌های ۲ تا ۶ دستور: بستنِ `WP 2.5`/`WP 3.2` · `AD‑12` (پین‌های freeze — با نامِ درستش `requirements.txt`، نه `constraints.txt`) · `AD‑11` (حذفِ `apk.yml` و آن یک تستِ گارد) · `B‑4.5`/`B‑4.6` در Chat2DB.
+تا آن کارها تمام نشده، **merge نمی‌کنیم**: اول داوریِ عددیِ من (نقطهٔ بررسیِ ۱)، بعد merge با تو.
+
+یک یادداشتِ ثبتی: بیلدر نوشته `share/MP-BUILDER-HANDOFF-A1.3.md` در sandbox‌اش untracked بوده و با reset محیط از بین رفته. در مخزنِ **من** آن فایل commit شده و سالم است (`handoff/MP-BUILDER-HANDOFF-A1.3.md`، ۲۷٬۹۰۸ بایت) ⇒ هیچ چیزِ تحویلی گم نشده؛ فقط کپیِ محلیِ او رفت.
+---
+
+## وارسیِ دو ضربهٔ تو ✅ و یک قفلِ پنهان در ruleset که فقط تو می‌توانی بازیش کنی
+
+### الف) هر دو ضربه درست انجام شد
+
+| قلم | سنجه |
+|---|---|
+| PR تازه | **#24** · `state=open` · `head=arena/5a1e37b3-mp @ 6c204ec` · `base=main` · عنوان دقیقاً «ممیزی A1.4 + AD-23: هر هشت گیت سبز» · ۱۰۲ commit · ۲۸۹ فایل · +۱۰۳٬۸۶۶/−۷۰۰ |
+| PR #23 | `state=closed` · `closed_at=2026-11-22T08:55:07Z` · **`merged=false`** ⇒ درست بسته شد، نه merge |
+| هشت check روی head ‏#24 | همه `success` |
+
+### ب) ولی `mergeable_state = blocked` با وجودِ هشت check سبز — علت را سنجه‌ام
+
+GraphQL: ‏`mergeStateStatus=BLOCKED` · `reviewDecision=null` · base جلو نزده (`behind_by=0`) · PR draft نیست.
+پس مانع check نیست، مرورِ عادی هم نیست. مانع این پرچم در ruleset ‏`27826883` است:
+**`require_extra_approval_for_unattributed_changes: true`**
+
+چرا فعال می‌شود — سنجهٔ هویتِ نویسندگان در ۱۰۲ commitِ PR:
+  · **۲۰ commit با نویسندهٔ `arena-agent`** (یک کاربرِ جداگانهٔ GitHub، نه همکارِ این مخزن)
+  · ۲۳ commit با ایمیلِ بی‌پیوندِ `agent@arena.ai` · ۱ commit با `ci@muscleparadise.local`
+  · ۱۰۰ commit از ۱۰۰ تایِ بررسی‌شده trailer ‏`Co-authored-by: arena-agent` دارند
+یعنی بخشِ بزرگی از diff از دیدِ GitHub «unattributed» است ⇒ قواعد می‌گویند **یک تأییدِ اضافه از شخصی دیگر** لازم است.
+در مخزنِ یک‌نفره آن شخص وجود ندارد ⇒ این پرچم اینجا یک **قفلِ ابدی** است، نه یک کنترل.
+
+### ج) کاری که از تو می‌خواهم — فقط یک تیک
+
+1. باز کن: **https://github.com/yousefghorbanian98-create/MP/settings/rules/27826883**
+2. در بخشِ قاعدهٔ **Pull request**، تیکی که متنش دربارهٔ «unattributed changes» / تأییدِ اضافه برای تغییراتِ بی‌انتساب است را **بردار**.
+3. پایین صفحه **Save** بزن.
+4. به من بگو «تیک برداشته شد».
+
+**به هیچ چیزِ دیگرِ آن صفحه دست نزن:** هر هشت check باید بماند · `strict` باید روشن بماند · enforcement باید `active` بماند · include باید `~DEFAULT_BRANCH` بماند · «Required number of approvals» باید **۰** بماند.
+
+### د) چرا برداشتنش امن است — کنترل‌های جبرانی که سرِ جایشان‌اند
+
+  · هر هشت checkِ اجباری + سیاستِ strict (مانعِ فنیِ واقعی) · قواعدِ `deletion` و `non_fast_forward` روی main
+  · داوریِ عددیِ من پیش از هر merge (نقطهٔ بررسیِ ۱) · و خودِ قاعدهٔ ایستاده: **merge فقط با تو**
+  آن پرچم فقط یک «تأییدِ انسانیِ دوم» می‌خواست که در مخزنِ تک‌نفره غیرممکن است؛ برداشتنش هیچ گیتِ فنی‌ای را کم نمی‌کند.
+
+بعد از Save، انتظارم `mergeable_state = clean` است؛ خودم دوباره می‌خوانم و ثبت می‌کنم. و باز هم: **merge نمی‌کنیم** تا داوریِ عددی تمام شود.
+---
+
+## لایهٔ دومِ قفل: یک branch protection ‏legacy روی `main` — سنجه‌شده، محتوایش نامعلوم
+
+| سنجه | مقدار |
+|---|---|
+| `GET /branches/main` | **`protected = true`** ⇒ یک قاعدهٔ branch protection قدیمی، **موازیِ** ruleset فعال است |
+| `GET /branches/arena/5a1e37b3-mp` | `protected = false` |
+| خواندنِ جزئیاتِ قاعده با توکنِ من | **403** ⇒ محتوایش را نمی‌بینم؛ فقط صفحهٔ Settings مالک می‌بیند |
+| `mergeable_state` پس از برداشتنِ تیکِ unattributed | هنوز `blocked` (با هشت check سبز و `reviewDecision=null`) |
+| status‌های legacy روی head | `state=pending` با **صفر** context |
+
+نتیجهٔ منطقی: قاعدهٔ legacy احتمالاً «Require status checks to pass before merging» را با نامِ check‌های **قدیمی** روشن دارد که هیچ‌وقت گزارش نمی‌شوند ⇒ PR برای همیشه منتظر می‌ماند. (گزینه‌های دیگر مثل «required reviews» با `reviewDecision=null` ناسازگارند.)
+
+**درمانِ درخواستی از مالک:** ‏Settings → Branches → قاعدهٔ `main` → Edit:
+در بخشِ «Require status checks to pass before merging» هر context تیک‌خورده را **بردار/پاک کن**؛ اگر بخشِ «Require pull request reviews» تیک دارد و شمارش غیرصفر است، صفرش کن یا تیکش را بردار؛ به «Restrict who can push» و «Allow force pushes / deletions» **دست نزن**؛ Save.
+اگر صفحه چیزی غیر از این‌ها نشان داد، به‌جای حدس، اسکرین‌شات بفرست تا دقیق بگویم.
+
+بعد از آن انتظار: ‏`mergeable_state = clean`. خودم می‌خوانم و ثبت می‌کنم. merge همچنان ممنوع تا داوریِ عددی.
+---
+
+## پاسخ به «قاعده‌ای نیست، یکی بسازم؟» — **نه.** و تصحیحِ فرضِ «لایهٔ دوم» از خودم
+
+### الف) صفحهٔ Branches خالی، **درست** است
+
+هیچ قاعدهٔ legacy نساز. سیستمِ حفاظتِ این مخزن **فقط** همان ruleset ‏`27826883` است و باید تنها بماند.
+آن `protected=true` که از API دیدم اثرِ **خودِ ruleset** روی `main` بوده، نه یک قاعدهٔ موازی.
+فرضِ «branch protection قدیمی با check‌های مرده» که در بخشِ قبلی نوشتم **غلط بود** و آن را پس می‌گیرم.
+
+### ب) علتِ واقعیِ `blocked` — ساده و بی‌خطر
+
+باز شدنِ PR #24 یک runِ **دوم** از `mp-ci` راه انداخت (`event=pull_request`، ساعت ۰۸:۵۴:۲۷)، جدا از runِ اولِ `event=push` (۰۸:۱۳).
+تا وقتی runِ دوم در جریان بود، check‌های اجباری از دیدِ PR ‏«pending» بودند ⇒ `mergeable_state=blocked`.
+وقتی runِ دوم سبز تمام شد، قفل خودبه‌خود باز شد.
+
+| سنجهٔ نهایی | مقدار |
+|---|---|
+| run‌های `mp-ci` روی head | دو تا: push ‏۰۸:۱۳ و pull_request ‏۰۸:۵۴ — هر دو `completed/success` |
+| check-suite‌ها | دو تا، هر دو `completed/success`، هر دو وصل به PR #24 |
+| check-run‌ها | ۱۶ مورد (دو موجِ هشت‌تایی)، همه سبز |
+| `mergeable_state` | **`clean`** · GraphQL: **`CLEAN`** · `reviewDecision=null` |
+
+### ج) درسِ ثبتی برای خودم
+
+`blocked` با check‌های سبز لزوماً یعنی «قفلِ پنهان» نیست؛ می‌تواند یعنی «یک موجِ دومِ CI هنوز در راه است».
+دفعهٔ بعد اول ترتیبِ زمانیِ run‌ها را ببینم (رویدادِ push و pull_request جدا)، بعد دنبالِ قفل بگردم.
+
+### د) وضعیتِ دربِ merge
+
+هیچ مانعِ **فنی** باقی نمانده: هر هشت check سبز · strict راضی · approvals لازم صفر ·merge box ‏clean.
+مانعِ باقی‌مانده فقط **فرآیندی** است و عمدی: داوریِ عددیِ من روی بخش‌های ۲ تا  کارِ بیلدر، بعد merge با تو.
+هیچ قاعدهٔ تازه‌ای نساز، هیچ تیکِ دیگری نزن، هیچ چیزی را merge نکن.
+---
+
+## ارزیابیِ ابزارِ بیرونی: ‏Graphify (سؤالِ مالک، `2026-11-22`) — تصمیم: **الان نه**
+
+سنجه‌ها: مخزن `Graphify-Labs/graphify` · مجوز **Apache-2.0** (فایل LICENSE خوانده شد) · ۱۵۱٬۷۲۶ ستاره · Python · فعال (push ‏۲۰۲۶‑۱۱‑۲۱) · بستهٔ PyPI با نامِ **`graphifyy`** نسخهٔ `0.9.115`، `requires_python >=3.11.5`.
+کارش: تبدیلِ کد+داکیومنت+اسکیما+PDF به گرافِ دانشِ قابلِ پرس‌وجو؛ AST محلیِ deterministic با tree-sitter؛ بدون vector store؛ به‌صورت skill برای Claude Code/Cursor/Codex/Gemini CLI و یک سرور MCP محلی (`graphify-mcp`، بدون اکانت).
+
+**«تماماً رایگان؟» — با تفکیک:**
+  · بخشِ متن‌باز/محلی: **بله**، Apache-2.0، بدون اکانت؛ حالتِ code-only کاملاً آفلاین و بدون API key («nothing leaves your machine»).
+  · استثنا ۱: استخراجِ معناییِ docs/PDF/تصویر محتوا را به یک ارائه‌دهندهٔ LLM می‌فرستد (اولویت: Gemini → Kimi → Claude → OpenAI → Bedrock) ⇒ کلید و هزینهٔ توکن با تو، و داده از ماشین خارج می‌شود.
+  · استثنا ۲: سرویسِ ابریِ تجاریِ اختیاری «Graphify Cloud» با مدلِ freemium («Start free, no card required» تیرِ آزمایشی است نه رایگانِ همیشگی).
+
+**به کارِ MP می‌آید؟ صادقانه: الان نه.**
+  · MP همین حالا «نقشه از کد» را به‌صورت **گیتِ اجباری در CI** دارد: `interaction_map.py` + گیتِ drift · `route_guard_gate` · `export_routes` · `docs_gate` · گیتِ mermaid · مولدِ inventory. graphify هم‌پوشانی دارد ولی جای آن در CIِ MP خالی نیست.
+  · ارزشِ احتمالی‌اش کاوش است («چه کسی این را صدا می‌زند»)؛ در داوریِ من شاهدِ grep/AST مستقیم قابلِ اتکاتر است.
+  · ریسک‌ها: منبعِ حقیقتِ موازی (گرافِ cache‌شده با schema bump) · فرستادنِ شواهدِ ممیزی به بیرون در حالتِ docs/PDF (تضاد با محرمانگیِ همین پرونده) · وابستگیِ تازهٔ Python ≥3.11.5 · طراحی برای skill‌های IDE، نه Arena.
+  · مجوز Apache-2.0 با قاعدهٔ ایستادهٔ «فقط ابزار آزاد/متن‌باز» سازگار است؛ و چون هرگز نباید وارد artifact توزیعی شود، بحثِ GPL/AGPL هم پیش نمی‌آید.
+
+**تصمیم:** نصب/اتصال نداریم. بعد از بسته شدنِ نقطهٔ بررسیِ ۱ و merge، اگر مالک خواست، فقط حالتِ code-only محلی روی MP آزمایش شود — بدون docs/PDF، بدون Cloud. برگشت‌پذیر و بی‌هزینه.
+---
+
+## داوریِ دورِ بیلدر پس از reset دوم: ‏AD‑21 و AD‑22 تأیید · و معمای «+۱» را **من حل کردم**
+
+### الف) AD‑21 (commit ‏`7bbccfa`) — تأیید ✅
+
+| سنجه | مقدار |
+|---|---|
+| `.github/workflows/apk.yml` | حذف شده (−۱۸۰ خط) · روی tip وجود ندارد |
+| تستِ گاردِ APK | حذف شده (−۲۷ خط از `test_release_signing_policy.py`) · grep سراسری: نیافت |
+| تستِ signing گریدل | **باقی** · ۶ تابعِ test در همان فایل |
+| شمارش | بیلدر: ۱۲۷۶ → ۱۲۷۵ · collect مستقلِ من روی tip: **۱۲۷۵** |
+
+### ب) AD‑22 (commit ‏`7fefb6f`) — تأیید ✅
+
+| سنجه | مقدار |
+|---|---|
+| `requirements.txt` | ۸۶ خط = ۲ هدر + **۸۴ پینِ `==`** · صفر ورودیِ غیر `==` |
+| بررسیِ URL | آن سه موردِ اولِ grep من false-positive بود: `httpcore`/`httptools`/`httpx` نامِ بسته‌اند نه URL |
+| پین‌های کلیدی | `fastapi==0.165.0` · `ruff==0.17.6` · و resolve تازهٔ **من** در venv مستقل همین دو را داد ⇒ «صفر تغییر نسخه» مستقل تأیید شد |
+| `ci.yml` | دقیقاً **۳** گامِ install به `pip install -c mp-app/backend/requirements.txt -e …` عوض شده (backend · یک گام میانی · e2e-api) |
+| DECISIONS | هر دو تصمیم با دلیل، شمارش و «نحوهٔ برگرداندن» ثبت‌اند؛ AD‑22 خودش تصحیحِ نامِ `constraints.txt` → `requirements.txt` را یادداشت کرده |
+| CI روی `7fefb6f` | **هر هشت سبز** · PR #24: `head=7fefb6f` · `mergeable_state=clean` |
+
+### ج) معمای «+۱» — حل شد، با مکانیسم و نامِ مقصر
+
+بیلدر ثبت کرده بود: collect ‏۱۲۷۵ ولی خلاصهٔ اجرا ۱۲۷۴ passed + 2 skipped = ۱۲۶، و نتوانسته بود توضیح دهد.
+سنجهٔ من در venv مستقل (pytest ‏9.2.0):
+  · collect با هر ترکیبِ پرچم: **۱۲۷۵** و فهرستِ node-id‌ها یکسان
+  · اجرای `-v`: ‏**۱۲۷۴ خطِ PASSED + دقیقاً ۱ خطِ SKIPPED** = ۱۲۷ نتیجه · صفر node-id تکراری · تفاوتِ مجموعه‌ای با collect = **صفر**
+  · پس نتیجهٔ دومِ «skipped» یک **skip در سطحِ ماژول** است: `tests/regression/test_dart_gate.py:25-26` با `pytest.importorskip("tree_sitter", …)` — ماژولی که tree-sitter ندارد، **صفر آیتم collect می‌کند ولی در خلاصه یک skipped شمرده می‌شود**
+  · حسابِ بسته: ۱۲۷۵ آیتم = ۱۲۷۴ passed + ۱ skipِ آیتمی (`test_real_apks_pass_the_deep_audit`)؛ خلاصه +۱ skipِ ماژولی = ۱۲۷۶
+  ⇒ **هیچ تستِ شبحی وجود ندارد**؛ تفاوت، قراردادِ شمارشِ pytest است نه پنهان‌کاری. بندِ «باز» بیلدر با این مکانیسم بسته می‌شود.
+
+### د) بدهیِ باقی‌ماندهٔ بیلدر: یک commit سند برای اشاره‌های کهنه به `apk.yml`
+
+۱۴ فایل هنوز `apk.yml` را mention می‌کنند. تفکیکِ من:
+  · **باید اصلاح شوند** (سندِ عملیاتی‌اند و دستورِ اجرا می‌دهند): `guides/flutter-codespace.md` · `runbooks/codespaces-execution.md` · `RELEASE-CHECKLIST.md` · `READY-TO-BUILD-2026-11-15.md` · `SESSION_HANDOFF.md` · `docs/architecture/repowise/PROJECT-HANDOFF.md` · دو فایلِ `architecture/repowise-*-scope-2026-11-18.txt` · `audit/CHECKLIST.md`
+  · **باید بمانند** (رکوردِ تاریخی‌اند؛ بازنویسیِ تاریخ ممنوع): `CHANGELOG.md` · `audit/DECISIONS.md` · `audit/EXECUTION-LOG.md` · `audit/INVENTORY.md` · `audit/findings.json`
+
+### هـ) فایلِ گم‌شدهٔ بیلدر
+
+`share/MP-BUILDER-HANDOFF-A1.3.md` در sandbox او untracked بود و با reset رفت. نسخهٔ commit‌شده در مخزنِ من سالم است و او می‌تواند از همین نشانی بازیابی کند:
+`https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/2cde32d6-chat2db/handoff/MP-BUILDER-HANDOFF-A1.3.md`
+
+**merge همچنان ممنوع:** بیلدر هنوز آیتم‌های READY/TODO لوپ را دارد (۲٫۱، ۲٫۲، ۲٫۳، ٫۳، ۴٫۴ و بقیه) + همین commit سند؛ بعد از آنها داوریِ عددیِ من، بعد merge با تو.
+---
+
+## نقطهٔ بررسیِ ۱ — برشِ الف: داوریِ عددیِ WP 2.5 / WP 3.2 / WP 3.2 بسته شد ✅ (روی tip ‏`7fefb6f`)
+
+شرطِ ورود برقرار بود: هر هشت job سبز روی `7fefb6f`. پس داوری را **خودم و مستقل** اجرا کردم، نه با خواندنِ گزارشِ بیلدر.
+
+### الف) اجرای مستقلِ گیت‌ها در venv خودم
+
+پنج فایلِ گیت (`test_wp25_silent_failures` · `test_wp25_dast_skip_counter` · `test_wp25_scrape_errors_ready` · `test_wp32_error_envelope` · `test_wp32_detail_preserved`) ⇒ **۱۱ passed، ۰ failed** در ۲٫۱۳ ثانیه.
+
+### ب) WP 3.2 — اعدادِ پروبِ ۸۷۲ سلولی
+
+| سنجه | before ‏(`0afd240`) | after ‏(`8926fcd`+fix) |
+|---|---|---|
+| `cells_total` | 872 | 872 (یکسان) |
+| `fastapi_default_detail` | **70** | **0** |
+| status histogram | 422:531 · 404:220 · 200:55 · 403:34 · 400:24 · 409:8 | **کاملاً یکسان** |
+| `server_errors_5xx` / `leaked_stacktrace` / `bad_error_envelope` | 0 / 0 / 0 | 0 / 0 / 0 |
+| `id_guard_rejections` | 70 | 70 (انتظار: همین — یعنی گارد کار می‌کند) |
+| `unexpected_2xx_on_bad_id` | 48 | 48 ← **این یکی کارِ WP 3.2 نبود**؛ ببینid پایین |
+
+### ج) WP 3.1 — همان ۴۸ بسته شد
+
+`evidence/after/wp31/summary.json`: ‏`unexpected_2xx_on_bad_id` از **۴۸ به ۰** (بعد از `ccd8be671`، dependency ‏ِ floor شناسه). پس زنجیرهٔ ۲٫۵ → ۳٫۲ → ۳٫۱ کامل بسته است.
+
+### د) WP 2.5 — شمارنده‌ها و سیم‌کشیِ semgrep
+
+  · `monitoring.py`: ‏`mp_metrics_scrape_errors_total` با lock و `logger.warning` + traceback برای خطای scrape ‏(`/health/ready`)
+  · `scripts/dast.py`: ‏`_log_skip(where)` با شمارندهٔ `mp_dast_errors_total{where}` در نقطه‌های skip (عملیات/مثال) + فیلدِ `generation_skipped` در خروجی
+  · semgrep: قواعدِ پروژه **مسدودکننده** (`semgrep --config=.semgrep/project-rules.yml --error`) و قواعدِ harness کیت **غیرمسدودکننده** (`continue-on-error: true`) دقیقاً مطابقِ تصمیمِ فاز ۰ در WP 0.7
+  · آن سه نقطهٔ `dast.py:79,174,180` که در داوریِ قبلی بی‌شمارنده بودند، حالا `_log_skip` دارند
+
+### هـ) نتیجهٔ برشِ الف
+
+**WP 2.5 = بسته · WP 3.2 = بسته · WP 3.1 = بسته** (عددی، با اجرای مستقل و خواندنِ شواهد). پنج commit دستهٔ ۱ همچنان **MATCH** از داوریِ پیشین.
+برشِ ب (باقیِ آیتم‌های لوپِ بیلدر + commit سندِ `apk.yml`) که بسته شد، نقطهٔ بررسیِ ۱ کامل است و آن‌وقت یک تصمیمِ واقعی پیشِ روی توست:
+  · **گزینهٔ آ:** PR #24 را به‌عنوانِ دستهٔ ۱ همین حالا merge کن و بقیهٔ آیتم‌ها را در PR بعدی ببریم (ریسک: drift کمتر، ولی کارِ نیمه‌تمامِ بیلدر پشتِ merge می‌ماند)
+  · **گزینهٔ ب:** صبر کن تا کلِ لوپ تمام شود و بعد یک merge (ریسک: diff بزرگ‌تر و مدتِ بیشتر)
+  توصیهٔ من را همان لحظه با اعداد می‌دهم؛ تصمیم با تو.
+---
+
+## داوریِ بستهٔ B1 (commit ‏`f42342a`) = MATCH ✅ و رفعِ بن‌بستِ بریف‌های WP 2.1/2.2
+
+### الف) داوریِ commit سند
+
+| سنجه | مقدار |
+|---|---|
+| فایل‌ها | ۸ سندِ عملیاتی (+۱/−۱ یا +۳/−۳) + دو audit doc (`DECISIONS` +۷، `EXECUTION-LOG` +۱۳) |
+| لکه‌بینیِ diff | `RELEASE-CHECKLIST` و `SESSION_HANDOFF` و `flutter-codespace` و `codespaces-execution` و `PROJECT-HANDOFF` ⇒ ارجاع به job ‏`client-pinned` در `ci.yml` با یادداشتِ AD‑21 · دو فایلِ repowise ⇒ **فقط یادداشتِ درون‌خطی**، محتوای snapshot دست‌نخورده · CHANGELOG/findings/finn دست‌نخورده |
+| CI روی `f42342a` | هر هشت `success` |
+| گیت‌های محلیِ بیلدر | docs gate ‏exit 0 (۱۸ md/۲۷۶ لینک/۱۵ mermaid) · interaction-map ‏drift 0 |
+
+### ب) بن‌بستِ بریف‌ها — حل شد، بدونِ اختراعِ معیار
+
+بیلدر درست ایستاده بود: جدولِ لوپ برای WP 2.1/2.2 فقط یک خط دارد و کیتش گم شده بود.
+من کیتِ **منجمدِ خودم** را باز کردم: بریفِ واقعی در `03-findings/MP-FINAL-AUDIT-REPORT-2026-11-20.md` است
+(پروفایلِ `ConsoleRenderer`+rich روی event loop ≈ خطِ ۵۵ و ۱۳۹ و ۳۸۳–۴۰۴، مقایسه با `JSONRenderer`، جدولِ عمقِ صف/ظرفیتِ استخر)
+به‌علاوهٔ قواعدِ `04-evidence/MP-AGENT-BRIEF.md` و یک‌خطی‌های `F-03`/`F-04` در CHECKLIST و findings.json خودِ مخزن.
+دستورِ من به بیلدر: کیت را با hashِ `9a1925005ca5c28c128f242a913da2a179a32eafaad8967bc908f34506492834` بازیابی کند،
+معیارِ پذیرش را از این سه منبع استخراج کند و **پیش از پیاده‌سازی** به‌صورت `D-13` ثبت کند، بعد red-first بسازد.
+هیچ معیاری اختراع نمی‌شود؛ هیچ کاری بدونِ معیار شروع نمی‌شود.
+
+### ج) یک شفاف‌سازیِ دستور
+
+«push اضافه ممنوع» یعنی pushِ جدا برای ثبتِ لاگ ممنوع؛ ثبتِ نتیجهٔ CI در EXECUTION-LOG می‌تواند داخلِ commit بستهٔ بعدی بیاید. معوقهٔ لاگِ CIِ `f42342a` با همان مکانیسم بسته می‌شود.
+---
+
+## داوریِ B1-ادامه + B2 (چهار کامیت، tip ‏`cf33ad8`) = MATCH ✅ با دو یافتهٔ سندِ کوچک
+
+### الف) آنچه بیلدر تحویل داد (از `compare f42342a...cf33ad8` ⇒ ahead_by ۴، ۱۶ فایل، +۵۸۳/−۱۴)
+
+| کامیت | WP | محتوا |
+|---|---|---|
+| `e57a992` | 2.1 (F‑03) | لاگِ سرویس هرگز `rich` رندر نمی‌کند؛ نویسندهٔ صف‌دار بیرون از event loop؛ traceback با سقف |
+| `b9ce7be` | 2.2 (F‑04) | گیج‌ها و histogram استخر؛ timeout استخر ⇒ ۵۰۳ + `Retry-After`؛ اشباع ⇒ ready قرمز پس از ۱۰ ثانیه |
+| `f852675` | 2.3 (F‑18) | `WEB_CONCURRENCY` پیش‌فرض ۴⇒۱ در دو Dockerfile + §۱‑الف بودجهٔ اتصال در OPS‑RUNBOOK |
+| `cf33ad8` | 4.3 + 4.4 (F‑19/F‑20) | دو `await import("../lib/api")` ⇒ import ایستا؛ حذف `updateProduct` مرده + استثنای مستندِ گیت |
+
+### ب) راستی‌آزماییِ عددیِ مستقلِ من (نه پذیرشِ ادعا)
+
+| ادعای بیلدر | سنجهٔ من | نتیجه |
+|---|---|---|
+| `pytest tests/regression/` = 305 passed, 2 skipped | checkout ‏`cf33ad8` در `/tmp/mp2` + venv مستقل `/tmp/v24`: **`305 passed, 2 skipped, 1 warning in 20.67s`، EXIT=0** | ✅ دقیقاً همان عدد |
+| CI روی `cf33ad8` سبز | `check-runs` ⇒ هر **۸** job ‏`completed/success`؛ run ‏`45036409460` (event `pull_request`) success؛ PR #24 head `cf33ad8`، `mergeable_state=clean`، ۱۰۹ کامیت | ✅ |
+| معوقهٔ لاگِ CIِ `f42342a` | `EXECUTION-LOG.md:547` ⇒ run `45021576798` با فهرست jobها ثبت شده | ✅ (طبق شفاف‌سازی من، داخلِ commit بستهٔ بعد) |
+| بودجهٔ `pool_size 40 + max_overflow 20 = 60` | `db/base.py:61-62` ⇒ `_POOL_SIZE = 40`، `_MAX_OVERFLOW = 20`؛ `db/base.py:75-76` همان‌ها را به `create_engine` می‌دهد | ✅ فرمولِ runbook درست است |
+
+### ج) D‑13 = مجاز و سالم (استخراج از کیت، نه اختراع)
+
+`DECISIONS.md:368-395` معیارهای C1–C11 را با **منبعِ صریح** (`MP-FINAL-AUDIT-REPORT-2026-11-20.md`، بخش‌های رفع/شاهدِ F‑03 و F‑04) ثبت کرده؛ آنچه در سندباکس قابل اثبات نیست صادقانه `BLOCKED-ENV` (C4 بارِ ۸۰ کلاینت، C10 گیتِ ۲۰۰ همزمان) و آنچه معماری است `TODO` (C5، C9) علامت خورده؛ یک **اصلاحِ پیش‌از-commit** (پروکسی C4) هم ثبت شده. انطباقِ کد با معیارها را خودم دیدم: `app/logging.py` صفِ محدود + نخِ نویسنده + `max_frames=50`؛ `app/pool_metrics.py` گیج‌های `mp_db_pool_size/checkedout/overflow` + `SATURATION_RATIO = 0.9` و `SATURATION_WINDOW_SECONDS = 10.0`؛ `app/unhandled.py:83-97` هندلرِ `PoolTimeoutError` ⇒ ۵۰۳ + `Retry-After: 1` + کد `db_pool_exhausted`. تست‌های `test_wp21_logging_queue.py` و `test_wp22_pool_observability.py` موجودند.
+
+### د) D‑14 = پذیرفته ✅ — تضعیفِ گیت نیست
+
+گیت `apiCoverage` سه assertion خود-پلیس دارد: (۱) هر مسیرِ بک‌اند یا call واقعی دارد یا استثنای مستند (`missing ⇒ []`)؛ (۲) هر استثنا باید به مسیرِ واقعی نگاشت شود، `why` بلندتر از ۵ نویسه، و اگر `evidence: null` است `external/TODO` با توضیح داشته باشد؛ (۳) **خطِ ۷۴۰–۷۴۷: اگر مصرف‌کنندهٔ واقعیِ Studio/Client وجود داشته باشد، مسیر نمی‌تواند external/TODO بماند** ⇒ به‌محضِ ساختِ فرمِ ویرایش، استثنا باید با evidence جایگزین شود. شمارشِ من در `cf33ad8`: **۴۷ کلید** (۳۸ با `evidence: null` + TODO، ۹ با evidence واقعی)؛ B2 **دقیقاً یک** کلید افزود (+۷ خط). آستانهٔ `routes.length > 50` دست‌نخورده، هیچ تستی حذف/skip نشده، مسیرِ PATCH بک‌اند نگه داشته شده. پس «تضعیف گیت» رخ نداده؛ مکانیسمِ مستندسازیِ موجود درست مصرف شده.
+
+### هـ) دو یافتهٔ من (سند-سطح؛ در commit بستهٔ بعد بسته شوند)
+
+1. **کامنتِ کهنهٔ Dockerfile:** `mp-app/backend/Dockerfile:26` هنوز می‌گوید «`WEB_CONCURRENCY` lets the platform size this to the real CPU count; **4 is the measured floor**» در حالی که CMD همان فایل `WEB_CONCURRENCY:-1` است و OPS‑RUNBOOK §۱‑الف پیش‌فرض ۱ را ثبت کرده. تناقضِ درونِ یک فایل ⇒ کامنت باید بازنویسی شود (و `mp-app/infra/Dockerfile.backend` هم برای کامنتِ مشابه دیده شود).
+2. **دفترِ وضعیت عقب است:** در `docs/MuscleParadise/audit/CHECKLIST.md` @tip ردیف‌های **F‑03، F‑04، F‑18، F‑19، F‑20 هنوز `OPEN` با ستونِ شاهدِ خالی**‌اند، در حالی که هر پنج پیاده شده‌اند. الگوی درست همان است که برای WP 2.5/3.1/3.2 انجام شد: `FIXED` یا `FIXED-PARTIAL` (هرجا معیاری `TODO`/`BLOCKED-ENV` مانده) + sha کامیت + فهرست معیارها در ستونِ شاهد.
+
+### و) انضباطِ بسته‌ها
+
+۲ کامیت برای باقی‌ماندهٔ B1 (2.1 و 2.2) + ۲ کامیت برای B2 (2.3 و 4.3+4.4) ⇒ سقفِ «≤۲ کامیت در هر بسته» رعایت شده. گزارشِ نوبت کوتاه و عددی بود. `receiptQueue` زیر بارِ اجرای کامل timeout داد و بیلدر خودش آن را اعلام کرد (۴/۴ سبز به‌تنهایی) ⇒ پس از B4 باید در اجرای کامل **زمان‌بندی‌اش ثبت** شود، نه skip بی‌صدا.
+---
+
+## بررسیِ دو ابزارِ پیشنهادیِ مالک: ‏`morluto/rea` و ‏`expo/exact` (۲۰۲۶‑۱۱‑۲۲)
+
+### الف) شناسنامه (از `api.github.com`)
+
+| | `morluto/rea` | `expo/exact` |
+|---|---|---|
+| توضیح | Reverse engineer anything with agents (از رفتارِ اپ تا باینریِ بومی) | یک بار بنویس؛ بومی روی web/macOS/iOS/Linux اجرا می‌شود و agent می‌تواند بسازد/اجرا/ببیند/تست کند |
+| مجوز · زبان | **MIT** · TypeScript | **MIT** · Rust |
+| ستاره/fork/issue | ۴۷۳٬۶۶۹ / ۱۱۵٬۵۲۴ / ۱٬۳۱۶ باز | ۴٬۹۰۴ / ۱۴۳ / ۲۸ باز |
+| سن | ایجاد ۲۰۲۶‑۰۴‑۱۴، آخرین push ۲۰۲۶‑۱۱‑۲۲ | ایجاد **۲۰۲۶‑۱۱‑۰۲** (≈۳ هفته)، آخرین push ۲۰۲۶‑۱۱‑۲۲ |
+| نصب | `npx rea-agents setup` (Node/npm) + MCP | `git clone` + `bun scripts/exact.mjs setup` (Rust via rustup + **Bun 1.4.2**) |
+| پلتفرمِ هدف | باینریِ بومی، JS/Electron، وب‌سایت، ‎.NET، **اپِ Android**، firmware، ترافیک/ران‌تایمِ ضبط‌شده | web ✓ · iOS ✓ · macOS ✓ · Linux ✓ · Android «Works، پرداختِ Material 3 در جریان» · Windows «Early» |
+
+### ب) `rea` — تناسب با MP **اکنون: بسیار کم** (سه دلیلِ اندازه‌گیری‌شده)
+
+1. **آرتیفکتی برای تحلیل وجود ندارد:** job ‏`client-pinned` در `ci.yml:456` فقط «Android debug compile» می‌کند؛ ساختِ Kotlin/Gradle تنها در `apk.yml` بود که با **AD‑21 حذف شد** (کامنتِ `ci.yml:450` همان را می‌گوید). پس در خطِ لوله هیچ APK/AAB ساخته نمی‌شود که REA تحلیلش کند.
+2. **نیازِ بازِ MP در کدِ خودمان است:** همهٔ F‑03…F‑34 و آیتم‌های لوپ با ruff/semgrep/gitleaks/pytest/vitest/tsc/interaction-map پوشش داده می‌شوند؛ مهندسیِ معکوس هیچ شاهدِ ناقصی را کامل نمی‌کند.
+3. **مسیرِ رایگان محدود است:** decompilation عمیق به provider نیاز دارد — README می‌گوید **Hopper** پس از تأیید نصب می‌شود و «demo mode یا فعال‌سازی لایسنس» می‌خواهد (تجاری)؛ Ghidra/IDA/Kuna نصبِ موجودِ خودت را مصرف می‌کنند (Ghidra رایگان است ولی Java می‌خواهد). سندباکسِ من java/flutter/gradle/docker ندارد ⇒ **BLOCKED-ENV**.
+
+**کاربردِ مشروعِ آینده (فقط پس از checkpoint 1 و merge، و فقط اگر دوباره تصمیم به ساختِ release APK گرفتیم):** ممیزیِ یک‌بارهٔ آرتیفکت — فهرستِ permissionها، `android:debuggable`، endpoint/secretِ پخته‌شده در باینری، و اثباتِ اعمالِ R8 (شاهدِ WP 0.6) — با **Ghidra نه Hopper**، بیرون از پوشهٔ مخزن (توصیهٔ خودِ README)، و خروجی‌ها **هرگز بدونِ بازبینیِ secret-scan commit نشوند**.
+
+### ج) `exact` — پذیرش **نه**؛ ولی سه الگو **ارزشِ وام‌گیری** دارند
+
+**چرا نه:** MP دو فرانتِ کارکردي دارد (Flutter برای کلاینت + React/Vite/Electron برای استودیو) با گیت‌های سبز؛ مهاجرت به فریم‌ورکی **سه‌هفته‌old** با Androidِ ناتمام و Windowsِ «Early» و بدونِ اکوسیستم، یعنی بازنویسیِ دو فرانت بدونِ بستنِ حتی یک یافته. سندباکسِ من rustc/bun ندارد.
+
+**سه الگوی وام‌گرفتنی (بدونِ هیچ وابستگیِ تازه، با TS/Python موجود):**
+1. **حلقهٔ UIِ قطعی و agent-راندنی:** `bun scripts/agent.mjs web tree "tap X" "type Y" "clock +60000" state "screenshot out.png"`. سنجهٔ من: استودیوی MP **هیچ هارنسِ UI-راندنی ندارد** (در `mp-app/studio/package.json` و `tests/` اثری از playwright/puppeteer/cypress نیست؛ فقط vitest+tsc+eslint)؛ در مقابل بک‌اند ساعتِ تزریقی دارد (`app/clock.py`: `_now_utc()` و `today_in_shop_zone()`) و استودیو هیچ. یک `scripts/agent_drive.mjs` کوچک (tap/type/**clock**/state/screenshot، headless، یک خط) اجازه می‌دهد رگرسیونِ UI را **با اندازه‌گیری** ببینیم نه با خواندنِ کد؛ کنترلِ ساعت مستقیماً به **F‑28** («امروز» سه برداشت متفاوت) و منطقِ تاریخِ شمسی خدمت می‌کند.
+2. **تلهٔ buildِ کهنه ممنوع:** driverِ Exact از راندنِ buildِ قدیمی‌تر از source سرباز می‌زند و فرمانِ بازسازیِ دقیق را چاپ می‌کند ⇒ افزودنش به هارنس/CI ما ارزان است و دقیقاً همان کلاسِ خطایی را می‌بندد که خودم با short-sha و موجِ دومِ CI تجربه کردم.
+3. **کامپایلری که درس می‌دهد:** یک اجرا تا **۲۰ خطای مستقل با شناسهٔ پایدار و پیشنهادِ دقیق** گزارش می‌کند (`[type-assign]`، `[lower-unknown-attr]`) ⇒ الگو برای `scripts/docs_gate.py` و `scripts/interaction_map.py --check`: شناسهٔ پایدار + پیشنهادِ اصلاح + خروجیِ دسته‌ای به‌جای fail-fast. این رفت‌وبرگشتِ بیلدر را کم می‌کند (همان هدفِ دستورِ کم‌توکن) و با شماره‌گذاری F‑xx ما هم‌خوان است.
+
+یادداشت: گاردریل‌های Exact («هیچ I/O در view، هیچ حلقه/`await` در action») مستقلٌ جهتِ **F‑19/WP 4.3** را تأیید می‌کنند (حذفِ `await import()` از داخلِ هندلر) ⇒ اقدامی لازم نیست.
+
+### د) تصمیم
+
+**هیچ‌کدام نصب/اتصال نشوند** (هم‌راستا با AD‑24: بدونِ bump و بدونِ وابستگیِ تازه وسطِ لوپ). ترتیب: B3 ⇒ B4 ⇒ داوریِ عددیِ من ⇒ checkpoint 1 ⇒ merge توسط مالک. پس از آن، در صورتِ تمایل: الگوهای ۲ و ۳ به‌عنوان کارهای کوچکِ هارنس، الگوی ۱ به‌عنوان WP اختیاریِ پس‌از-merge، و REA فقط اگر release APK دوباره ساخته شود.
+---
+
+## پلنِ تولیدِ فاز P تحویل شد (‏`handoff/MP-PRODUCTION-PLAN-P-2026-11-22.md`)
+
+سه الگوی وام‌گرفته از `expo/exact` به‌علاوهٔ هر آنچه سنجه‌ها مفید نشان داد، در قالبِ هشت فازِ
+مشخصات‌دار (P‑1…P‑8) نوشته و **commit** شد: 23,829 بایت / `f525a5143ebe…`.
+نکته‌های کلیدیِ پلن که از اندازه‌گیری آمد، نه حدس:
+
+- استودیو همهٔ ابزارِ لازم را **همین حالا** دارد (`@testing-library/react`، `user-event`، `jsdom`، `vitest` با `environment: "jsdom"`) ⇒ درایورِ UI بدونِ هیچ وابستگیِ تازه ممکن است.
+- نیمهٔ بک‌اندیِ F‑28 بسته است (`app/clock.py` + `tests/regression/test_wp36_shop_today.py`)؛ نیمهٔ استودیویی باز است (**۱۱ فایل** با `new Date(` و نبودِ `src/lib/clock.ts`).
+- گیت‌های ما دسته‌ای چاپ می‌کنند ولی شناسهٔ پایدار/پیشنهاد ندارند ⇒ فاز P‑3 **فقط فرمت** را عوض می‌کند، با سنجهٔ الزامیِ «مجموعهٔ تشخیص‌ها پیش و پس یکسان» و «exit codeها همان».
+- ruleset ‏`27826883` هر ۸ check را با `strict: true` لازم می‌داند ⇒ **job تازهٔ CI ممنوع**؛ گیت‌های تازه داخلِ job `docs` (کنارِ `repo_hygiene_gate.py` در `ci.yml:112`) و تست‌های تازه از `npm test` در job `studio` (‏`ci.yml:211`).
+- P‑7 (آستانهٔ اندازهٔ bundle) و P‑8 (ممیزیِ آرتیفکت با Ghidra) **مشروط به تأییدِ صریحِ مالک**‌اند؛ P‑8 چون امروز هیچ APK/AAB ساخته نمی‌شود (‏`apk.yml` با AD‑21 حذف شد).
+- همچنین ردیفِ `MP-BUILDER-BATCH-DIRECTIVE-2026-11-22.txt` که در `handoff/README.md` جا افتاده بود (3,208 بایت / `47693c42dcd7…`) افزوده شد ⇒ جدولِ README دوباره کامل است.
+
+زمانِ شروع: **پس از checkpoint 1 و merge** — تا لوپِ جاریِ B3/B4 کش نیاید.
+---
+
+## داوریِ B3 (سه کامیت، tip ‏`338abb3`) = MATCH ✅ + یک اصلاحِ سندِ خودم + یک یافتهٔ تازهٔ ممیز
+
+### الف) جدولِ داوری (هر عدد با فرمانِ خودش)
+
+| ادعای بیلدر | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| سه کامیت، بدونِ force-push | ‏`compare cf33ad8...338abb3` ⇒ `status=ahead`, `ahead_by=3`, **`behind_by=0`** ⇒ `cf33ad8` هنوز نیاکانِ tip است | ✅ |
+| CI سبز، run ‏`45039993907` | ‏`completed/success` · head `338abb3` · event `pull_request` · هر **۸** job ‏`success` | ✅ |
+| ۴۴ تست در سه سوئیتِ پرداخت | venvِ مستقل `/tmp/v24` روی checkout ‏`338abb3`: **`44 passed in 8.67s`، EXIT=0** | ✅ |
+| red-first: ‏۱ failed سپس ۶ passed | همان فایلِ تست را روی **`cf33ad8`** (پیش از اصلاح) اجرا کردم ⇒ **`1 failed, 5 passed`** و خطای واقعی `200 = <Response [200 OK]>.status_code` | ✅ |
+| اصلاحِ روتر محدود است | ‏`9024f44` = +۶/−۳: پارامترِ `status_code=200` با **پیش‌فرضِ همان ۲۰۰** + `except NotFoundError` ⇒ ۴۰۴ با همان صفحه؛ تستِ گارد اثبات می‌کند شکست‌های دیگر ۲۰۰ ماندند | ✅ بدونِ widening |
+| ‏`getToken` دیگر export نیست (نیمهٔ دومِ F‑20) | ‏`api.ts:61` ⇒ `function getToken()` بدونِ export · **۰ فایل** بیرون از `api.ts` آن را import می‌کند | ✅ |
+| کامنتِ Dockerfile (یافتهٔ B2 من) | بازنویسی شد با حسابِ بودجه: هر worker ‏`pool_size 40 + max_overflow 20 = 60` و عددِ ~۲۴۰ برای ۴ worker | ✅ |
+| ‏`status.json` + بازتولیدِ CHECKLIST/INVENTORY | شش رکوردِ تازه: F‑03/F‑04/F‑18/F‑19 = `FIXED-PARTIAL`، F‑14/F‑20 = `FIXED`؛ ردیف‌های CHECKLIST (۷۸/۷۹/۸۹/۹۳/۹۴/۹۵) بازتولید شده با sha؛ `git ls-files` = **۱۳۴۷** (همان ۱٬۱۸۳→۱٬۳۴۷) | ✅ یافتهٔ B2 من بسته شد |
+| تغییرِ خطِ F‑12 اصلاح است نه رگرسیون | رکوردِ `F-12` = `BLOCKED` **از قبل** در `status.json` بود (در diffِ این بسته **۰** بار افزوده شده) ⇒ خروجیِ کهنه اصلاح شد | ✅ |
+| همهٔ گیت‌ها exit 0 | خودم اجرا کردم: `docs_gate` ✅ (۱۸ md/۲۷۶ لینک/۱۵ mermaid) · `repo_hygiene_gate` ✅ · `interaction_map --check` ✅ (۳۱ سطح/۱۶۳ مسیر/رانش ۰) · `build_audit_inventory --check` ✅ · `route_guard_gate` ✅ **۱۶۳ مسیر/۱۵۵ guard/۸ عمومی** + تستش `6 passed` | ✅ |
+| انحراف از سقفِ کامیت (۳ به‌جای ۲) | علت: کامیتِ push‌شده بدونِ force-push amend نمی‌شد ⇒ کامیتِ جدا انتخاب کرد | ✅ **انحرافِ پذیرفته** — انتخابِ درست طبقِ قواعد |
+
+### ب) پنجمین اصلاحِ سندِ خودم (صریح و بی‌پوشش)
+
+**یافتهٔ F‑14 در کیتِ من (`MP-FINAL-AUDIT-REPORT-2026-11-20.md`) در بخشِ «شناسهٔ نامعتبر ⇒ ۲۰۰» کهنه است.**
+سنجه: روی `cf33ad8` شناسه‌های `-1`، `0`، `-0` و `INT64_MIN` **همین حالا ۴۲۲ با کدِ `invalid_id`** می‌دهند
+(مکانیسم: `app/id_guard.py` — `"code": "invalid_id"` و `JSONResponse(status_code=422, content=BODY)`، کارِ **WP 3.1**).
+نقصِ واقعی فقط **شناسهٔ معتبرِ ناموجود** بود (۲۰۰ با بدنهٔ HTML) که اکنون ۴۰۴ است. بیلدر درست داوری کرد:
+آن پنج مورد را **گاردِ سبز** نگه داشت و به‌عنوانِ رفع **ادعا نکرد**؛ `D‑15` هم همین دامنه را ثبت کرده.
+این چهارمین/پنجمین باری است که سندِ خودم را با سنجه اصلاح می‌کنم (پیش‌تر: شمارِ مسیرهای AD‑23 دو بار، فرضیهٔ branch-protectionِ قدیمی، appendِ ناتمامِ چک‌لیست).
+**درسِ جاری‌شده به دستورِ کار:** پیش از نوشتنِ هر تستِ قرمز، وضعیتِ واقعیِ هر مورد را **روی HEAD اندازه بگیر** و فقط آنچه واقعاً عوض می‌شود را ادعا کن.
+
+### ج) یافتهٔ تازهٔ ممیز (خارج از گزارشِ بیلدر): دامنهٔ bandit و کاراکترهای bidi
+
+- اسکنِ من روی **همهٔ ۱٬۳۴۷ فایلِ track‌شده**: پنج فایلِ متنی هنوز `U+200F` (RIGHT-TO-LEFT MARK) دارند —
+  **۳ مورد در `scripts/repo_hygiene_gate.py`** (خط‌های ۴۱/۵۰/۶۶، داخلِ رشته‌های فارسی؛ همین اسکریپت یک گیتِ CI است در `ci.yml:112`)،
+  و یکی در هرکدام از `audit/CHECKLIST.md:90`، `audit/findings.json:367`، `audit/FINN-AUDIT-LOOP.md:64` (این آخری **در همین بسته نوشته شده**) و `REPORT-OLD-ANDROID-KEY-REVIEW-2026-11-18.md:34`.
+- چرا CI سبز می‌ماند: `ci.yml:155-156` ابتدا `cd mp-app/backend` می‌کند و سپس `bandit -r . -ll -q` ⇒ **`scripts/` ریشهٔ مخزن هرگز اسکن نمی‌شود**.
+- دو ریسکِ سنجه‌شده: (۱) هر ویرایشِ آیندهٔ پایتون زیرِ `mp-app/backend` با یک RLM ⇒ قرمزیِ دوبارهٔ CI، دقیقاً همان که B3 را سه‌کامیتی کرد؛ (۲) اگر کسی دامنهٔ bandit را به ریشهٔ مخزن widen کند (سخت‌سازیِ طبیعی)، CI **بی‌درنگ** روی سه RLMِ موجود در یک گیت قرمز می‌شود.
+- توصیهٔ ممیز (نه برای B4، تا انضباطِ بسته نشکند): در **P‑3** یک گیتِ `BIDI-###` اضافه شود با دامنهٔ **فایل‌های کد** (‏`py/ts/tsx/js/mjs/sh/yml`) و نه نثرِ `.md`؛ و آن سه RLM در `repo_hygiene_gate.py` با **گریزِ `\u200f`** جایگزین شوند (رندر یکسان، بدونِ کاراکترِ کنترلیِ خام). تا آن موقع فقط در `EXECUTION-LOG` به‌عنوانِ ریسکِ شناخته‌شده ثبت شود.
+
+### د) وضعیتِ باقی‌مانده (بدونِ تغییر در ترتیب)
+
+**B3 کامل نیست:** WP 3.3 انجام شد، **WP 3.5 (F‑25، ۱۱ مسیرِ دیگر) شروع نشده**. سپس B4 (‏۴.۱/۴.۲/۴.۷ + بازهای PARTIAL/BLOCKED: ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴)، بعد اجرای کامل + BATCH-SUMMARY ⇒ **T‑1** شلیک می‌شود ⇒ داوریِ عددیِ من ⇒ **T‑2** بستهٔ checkpoint 1 ⇒ merge توسط مالک ⇒ **T‑3** توصیهٔ فاز P.
+سقفِ کامیتِ B3 را با توجه به کامیتِ اجباریِ CI **۴** می‌گذارم (۲ برای ۳.۳ + ۱ اجباری + ۱ برای ۳.۵)، به‌شرطِ ثبتِ دلیل در LOG.
+---
+
+## واژگونیِ قاعدهٔ merge توسط مالک (۲۰۲۶‑۱۱‑۲۲) — از «فقط مالک» به «بیلدر با اجازهٔ صریحِ ممیز»
+
+**دستورِ مالک:** «هر زمان که موقع مرج کردن بود در پیام به خودِ بیلدر بگو تا انجام بده.»
+این یک واژگونیِ صریحِ قاعدهٔ پیشین است (پیش‌تر: merge فقط کارِ مالک، بیلدر و ممیز هرگز). پس از این:
+
+1. **مجریِ merge = بیلدر**، فقط در پیامِ paste‌شده‌ای که عبارتِ **«اجازهٔ merge صادر شد»** را دارد.
+2. **ممیز هرگز خودش `gh pr merge` نمی‌زند** (مگر مالک صریحاً او را مأمور کند). نقشِ ممیز: صدورِ اجازه پس از داوریِ عددیِ T‑1، و راستی‌آزماییِ merge با سنجه.
+3. **راهِ UIِ مالک فقط جایگزینِ حالتِ ۴۰۳ است** (پیوستِ ۵ پروتکل، مرحله‌به‌مرحلهٔ فارسی با «نکن‌ها»).
+4. زمانِ صدورِ اجازه: پس از B4 + BATCH-SUMMARY + داوریِ کاملِ من (T‑1 ⇒ T‑2). تا آن لحظه merge همچنان ممنوع است.
+
+### پروتکلِ صادرشده: ‏`handoff/MP-MERGE-PROTOCOL-2026-11-22.txt` (11,660 بایت / `670e287015d4…`)
+
+**سنجهٔ سرنوشت‌ساز — چرا فقط `--merge`:** در اسنادِ ممیزی **۱۳۲ sha یکتا** نقل شده است
+(‏`EXECUTION-LOG.md` ۷۸ · `DECISIONS.md` ۲۱ · `FINN-AUDIT-LOOP.md` ۱۸ · `CHECKLIST.md` ۸ · `status.json` ۷؛
+نمونه‌ها `cf33ad8` ×۶، `9024f44` ×۵، `e57a992` ×۴). هر سه روش در ruleset مجازند
+(‏`allowed_merge_methods: [merge, squash, rebase]`) ولی:
+- ‏`--squash` ⇒ همهٔ کامیت‌ها یکی می‌شوند و آن ۱۳۲ sha از main قابلِ استناد نمی‌مانند ⇒ **زنجیرهٔ شاهدِ ممیزی می‌شکند**.
+- ‏`--rebase` ⇒ shaها بازنویسی می‌شوند ⇒ همان خرابی + نقضِ «بازنویسیِ تاریخ ممنوع».
+- ‏`--merge` ⇒ shaهای اصلی روی main زنده می‌مانند ⇒ شاهد دست‌نخورده.
+
+**ساختارِ پروتکل:** ۶ پیش‌سنجه (یکسانیِ tipِ شاخه و headِ PR · `mergeable_state=clean` · هر ۸ check روی **full sha** ·
+نبودِ run/suite در جریان · `behind_by=0` و درختِ تمیز · تأییدیهٔ ممیز با tipِ موردانتظار) ⇒ یک فرمانِ
+`gh pr merge 24 --merge` بدونِ هیچ پرچمِ دیگر و بدونِ pipe/redirect (تا کدِ خروج دیده شود؛ حداکثر یک تلاشِ دوباره) ⇒
+۷ پس‌سنجه (‏`closed/true/merged_at/merge_commit_sha` · parentهای merge commit = `662ff88` + tip ·
+reachable بودنِ shaهای نقل‌شده · CI روی main تا سبزیِ هر ۸ job · انتقالِ `evidence/` و `.gitleaksignore` ·
+**حذفِ شاخه ممنوع** · ثبتِ همهٔ اعداد در EXECUTION-LOG) ⇒ ۷ توقفِ سخت (‏۴۰۳، هر `mergeable_state` غیرِ clean،
+‏`behind_by>0`، checkِ قرمز/در جریان/غایب، تفاوتِ tip، قرمزیِ CI روی main بدونِ حقِ revert/force، و هر وسوسهٔ squash/rebase/auto/admin/delete-branch).
+
+**هم‌زمان بندِ «merge ممنوع» در `MP-BUILDER-BATCH-DIRECTIVE-2026-11-22.txt` اصلاح شد** (3,840 بایت / `3396a086eac7…`)
+تا دو سند با هم تناقض نکنند؛ و `MP-PENDING-TRIGGERS.md` (8,955 بایت / `b6b6ebdee38b…`) در T‑2/T‑3 و «قولِ ۲» به‌روز شد.
+---
+
+## داوریِ پنج کامیتِ گزارش‌نشده (‏`338abb3` ⇒ tip ‏`efa20d0`) = MATCH ✅ با دو اصلاح
+
+بیلدر بی‌اطلاعِ مالک پنج مرحله را پشتِ سر انجام داده بود: WP 3.5 · سه کامیتِ WP 4.1 · و commitِ شواهدِ اجرای کامل + BATCH-SUMMARY.
+مجموع: ‏`compare` ⇒ `status=ahead`, `ahead_by=5`, **`behind_by=0`** (بدونِ force-push)، ۱۰ فایل، +۱۱٬۸۵۵/−۶۵
+(‏۱۱٬۴۰۲ خطِ آن یک fixture طلاییِ ۶۰۰ نمونه‌ای است: `tests/regression/fixtures/wp41_config_golden.json`).
+
+### الف) جدولِ داوری
+
+| ادعا | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| بک‌اند کامل سبز | `PATH=/tmp/v24/bin:$PATH bash scripts/coverage_run.sh` روی checkout ‏`efa20d0` ⇒ **`1305 passed, 2 skipped in 398.39s`، EXIT=0**، TOTAL coverage **۹۱٪**، گیتِ per-directory **PASS** | ✅ دقیقاً همان عدد |
+| هیچ تستی حذف/skip نشده | node-id ها: `7fefb6f` = **۱۲۷۵** · `efa20d0` = **۱۳۰۶** ⇒ **حذف‌شده ۰ · افزوده ۳۱** | ✅ |
+| CI روی `efa20d0` سبز | دو run (‏`push` 45046793184 و `pull_request` 45046798284) هر دو `completed/success`؛ هر ۸ job سبز؛ step ۶ job استودیو («Unit tests (Vitest)») **success** ⇒ `npm test` در CI کامل و سبز | ✅ |
+| `mergeStateStatus=BLOCKED` | **اصلاحِ من:** اکنون GraphQL ⇒ `mergeStateStatus=CLEAN`، `statusCheckRollup=SUCCESS`، `reviewDecision=null`، `mergeable_state=clean`. علتِ BLOCKEDِ او: commit ساعتِ ۱۶:۵۸:۳۲، دو موجِ CI ساخته‌شده ۱۶:۵۸:۳۸ و ۱۶:۵۸:۴۲ و پایان‌یافته ۱۷:۰۵:۲۷ و ۱۷:۰۷:۴۶ ⇒ او در آن پنجرهٔ ~۹ دقیقه‌ای سنجیده. **همان درسِ ثبت‌شدهٔ موجِ دومِ CI** | ✅ (ادعایش لحظه‌ای درست، نتیجه‌گیری‌اش ناقص) |
+| WP 4.1: ‏`validate_production_configuration` از F(54) شکسته شد | radonِ من: در `338abb3` بدترین = `validate_production_configuration` **۵۴ (F)**، میانگین ۱۱.۳، ۷ بلوک · در `efa20d0` بدترین = `_sms_problems` **۱۳ (C)**، میانگین **۵.۴**، ۱۵ بلوک، **بلوکِ ≥D در config.py = ۰** | ✅ |
+| گیتِ طلایی واقعاً گیت است؟ | **آزمونِ جهشِ من:** شرطِ `if self.allow_dev_otp_echo:` را در `config.py` وارون کردم ⇒ `test_outcomes_match_golden` **FAILED** (خطِ ۱۱۸)؛ پس از بازگرداندن **2 passed** و `git diff` = ۰. پس tautology نیست | ✅ |
+| WP 3.5: ‏F‑09/F‑25 بازتولید نشد | `status.json` ⇒ هر دو `NOT-REPRODUCED` با سنجه (‏F‑25: **۲۶۰ درخواست** با ۴ شناسهٔ بد × ۳ نقش ⇒ **۰ پاسخِ 2xx**، چون `id_guard` پوشش می‌دهد؛ F‑09: ‏`Rial` با `StrictInt` و `le=MAX_SAFE_RIAL` ⇒ ردِ `2^53`، `2^53+1`، `10^18`، رشته و bool)؛ ۹ گاردِ سبز در `test_wp35_contract_guards.py`؛ `D‑16` ثبت شده | ✅ **دستورِ دائمیِ من رعایت شد** (اول سنجه روی HEAD، بعد فقط ادعایِ آنچه عوض می‌شود) |
+| receiptQueue ناپایدار است، skip/timeout نشد | مکانیسمِ سنجه‌شدهٔ من: فایل ۱۴۳ خط با **۴ تست و ۱۱ `await`/`findBy`/`waitFor` پشتِ‌سرهم** و **هیچ `testTimeout` صریحی** در `vitest.config.ts` یا خودِ فایل ⇒ بودجهٔ پیش‌فرضِ ۵۰۰۰ms هر تست؛ fetch با `vi.stubGlobal` stub شده (هیچ I/O واقعی نیست) ⇒ زیرِ بار، زمانِ تجمعیِ polling از بودجه می‌گذرد. در CI همان تست **سبز** است. پس نقصِ محصول نیست، بودجهٔ هارنس است | ✅ یافتهٔ باز (نه blocker) |
+| هیچ تغییرِ ممنوعه‌ای نیست | اسکنِ فایل‌های حساس در پنج کامیت ⇒ **هیچ** (`requirements`/`package.json`/`package-lock`/`apiCoverage`/`.gitleaksignore`/`ci.yml`/`eslint.config`/`vitest.config`/ruleset) دست‌نخورده | ✅ |
+| BATCH-SUMMARY نوشته شد | `EXECUTION-LOG.md:682-694` با جدولِ بسته/WP/وضعیت/کامیت/CI-run برای B1…B4 | ✅ |
+
+### ب) دومین اصلاحِ این نوبت — اسکنِ اولِ من ناقص بود
+
+اول `app/ modules/ db/ scripts/` را پیمودم و **F = ۰** دیدم و نوشتم «بدترین F حذف شده». اسکنِ کاملِ `mp-app/backend` (بیرونِ تست‌ها) نشان داد:
+**۱ بلوکِ F باقی است: `prescribe_axis_work` = CC ۴۶ در `engine/axis_prescription.py`** · ۱ بلوکِ E: `next_transfer_state` = ۳۴ در `modules/payments/manual_transfer_policy.py` · **≥D = ۲۵ · ≥C = ۵۱** (از ۱۱۲۳ بلوک).
+پس ادعای بیلدر («F46 باز است») **درست** بود و `F‑15 = FIXED-PARTIAL` صادقانه است. **درس:** پیمایشِ پیچیدگی باید کلِ `mp-app/backend` باشد، نه چهار پوشهٔ دمِ دستی.
+
+### ج) وضعیتِ واقعیِ باقی‌مانده (برای تصمیمِ merge)
+
+| قلم | ماهیت | جمع‌شدنی بدونِ تصمیمِ مالک؟ |
+|---|---|---|
+| WP 4.1 باقی‌مانده | آخرین بلوکِ F (`prescribe_axis_work` ۴۶) + E(۳۴) + ۲۵ بلوکِ ≥D + ۸ کلیدِ کیت | **بله** — با همان روشِ golden-master، بدونِ وابستگیِ تازه |
+| WP 4.2 (جهش‌سنجی ≥۸۰٪) | نیاز به ابزارِ تازه در وابستگی‌ها؛ سنجهٔ پیشینِ ممیز: **۵۷.۸٪** ⇒ شکافِ بزرگ | **نه** — وابستگیِ تازه + کارزارِ بزرگ ⇒ تصمیمِ مالک |
+| WP 4.7 (بارِ پله‌ای) | Docker/Postgres در هیچ سندباکسِ agent نیست؛ بخشِ semgrep-blocking **انجام‌شده** (‏`ci.yml:158-172`) | **نه** — BLOCKED-ENV |
+| ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴ | PARTIAL/BLOCKEDِ مستند (مثلاً F‑12 اوراکلِ `routes.json`، F‑02 پیش‌فرضِ fail-open) | بخشی بله، بخشی تصمیمِ محصول |
+| receiptQueue | بودجهٔ هارنس؛ در CI سبز | **بله** (ثبتِ یافته + اصلاح در فاز P) |
+---
+
+## داوریِ B5-closure (سه کامیت، tip ‏`6c473d0`) = MATCH ✅ + ششمین اصلاحِ سندِ خودم + یک کشفِ سنجه‌شده
+
+### الف) جدولِ داوری
+
+| ادعا | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| سه کامیت، بدونِ force-push | ‏`compare efa20d0...6c473d0` ⇒ `ahead_by=3`, **`behind_by=0`**؛ ۱۱ فایل، +۳۸٬۶۶۷/−۶۳۷ | ✅ |
+| هیچ تغییرِ ممنوعه‌ای نیست | اسکنِ فایل‌های حساس ⇒ **هیچ** (‏`requirements`/`package*.json`/`apiCoverage`/`.gitleaksignore`/`ci.yml`/`eslint`/`vitest`/ruleset/`share/`/`*.png` دست‌نخورده) | ✅ |
+| بک‌اند کامل سبز | اجرای مجددِ `coverage_run.sh` روی checkout ‏`6c473d0` در venvِ خودم ⇒ **`1307 passed, 2 skipped in 432.12s`، EXIT=0**، TOTAL **۹۱٪**، گیتِ per-directory **PASS** | ✅ |
+| تستی حذف نشد | node-id: ‏`efa20d0`=۱۳۰۶ ⇒ `6c473d0`=**۱۳۰۸** · **حذف ۰ · افزوده ۲** (دقیقاً دو تستِ طلاییِ تازه) | ✅ |
+| CI سبز | دو run (‏`push` 45050505792 و `pull_request` 45050511112) هر دو `success`؛ هر **۸ job** سبز؛ PR #24 ⇒ `OPEN`, **`mergeStateStatus=CLEAN`**, `reviewDecision=null`, head `6c473d025` | ✅ |
+| گیتِ طلاییِ تازه واقعی است | **آزمونِ جهشِ من:** ‏`if total > fatigue_budget:` ⇒ `<` در `engine/axis_prescription.py` ⇒ `test_outputs_match_golden` **FAILED**؛ بازگرداندن ⇒ `2 passed` و `git diff`=۰ | ✅ |
+| ‏`prescribe_axis_work` از F(46) به C(13) | radonِ من روی کلِ `mp-app/backend` بیرونِ تست/فیکسچر: ‏`efa20d0` ⇒ **F=1** (`prescribe_axis_work`=۴۶)، E=1، D=10، C=39 · `6c473d0` ⇒ **F=0**، E=1 (`next_transfer_state`=۳۴)، D=10، C=41؛ بدترینِ تابعِ تازه **۱۳(C)** ⇒ **هیچ بلوکِ تازه‌ای بالای CCN 15 نیست** و ≥D از ۱۲ به **۱۱** کاهش یافت | ✅ |
+| ‏`F-30` شمارهٔ آزادِ درست است | diffِ **معناییِ** `findings.json` (نه diffِ متنی): یافته‌ها ۲۹⇒**۳۰**، تازه فقط `F-30`، **۰ یافتهٔ تغییرکرده**، ۰ حذف‌شده ⇒ آن +۵۲۵/−۵۲۰ فقط باز-سری‌سازی است | ✅ |
+| رکوردها کامل‌اند | ‏`status.json[F-30]=OPEN` با سنجه · سرفصلِ CHECKLIST ⇒ «ب) **۳۰** یافته (F-01 … F-30)» · تغییرِ ژنراتور فقط یک خط (`۲۹`⇒`۳۰`) · ردیف‌های لوپ برای ۰.۲/۰.۷/۱.۱/۱.۲/۱.۴/۴.۱/۴.۲/۴.۷ با دلیلِ سنجه‌دار · ‏`build_audit_inventory.py --check` ⇒ **EXIT=0** | ✅ |
+| انحرافِ سه‌کامیتی | علتِ سنجه‌شده: سطرِ ۱۳۵۶ خودِ `INVENTORY.md` **اندازهٔ خودش** را ثبت می‌کند (`1719 خط / 164538 بایت`) ⇒ نقطهٔ ثابت؛ پس همیشه یک ویرایش عقب می‌ماند و amend هم force-push می‌شد | ✅ **پذیرفته** |
+
+### ب) ششمین اصلاحِ سندِ خودم (صریح)
+
+در پیامِ B5-closure نوشتم «بخشِ semgrep-blocking انجام‌شده (`ci.yml:158-172`)». **این نادقیق بود و بیلدر درست اصلاحم کرد.**
+سنجهٔ خودم در `6c473d0`: گامِ **«Semgrep (project rules)» با `--error` و بدونِ `continue-on-error` ⇒ blocking** است،
+ولی گامِ **«Semgrep (harness rules, non-blocking)» در `ci.yml:170-172` هنوز `continue-on-error: true`** دارد و
+کامنتِ خودش می‌گوید «از فاز ۴ مسدودکننده می‌شود». پس آن بخش از WP 4.7 (و WP 0.7) **انجام نشده بود**.
+همچنین عددِ «۱۱ ‏await» من شمارِ ترکیبیِ `await|waitFor|findBy` بود؛ عددِ درستِ خودِ `await` **۱۰** است که او ثبت کرد.
+و دامنهٔ شمارشِ C متفاوت بود: با تست‌ها **۶۸⇒۷۰** (عددِ او)، بدونِ تست‌ها ۳۹⇒۴۱ (عددِ من) — هر دو درست در دامنهٔ خود.
+
+### ج) کشفِ سنجه‌شدهٔ ممیز: آن سه یافتهٔ harness چه هستند (برای تصمیمِ بعدی)
+
+semgrep را در venvِ جدا (`/tmp/sgv2`، نسخهٔ ۱.۱۸۶.۰) با همان فرمانِ CI اجرا کردم:
+
+| پیکربندی | یافته | معنا |
+|---|---|---|
+| ‏`.semgrep/project-rules.yml` (همان گامِ blocking) | **۰** | گامِ blocking واقعاً سبز است ✅ |
+| ‏`.semgrep/mp-harness-rules.yml` (گامِ `continue-on-error`) | **۳** | پس blocking شدنش **امروز CI را قرمز می‌کند** |
+
+و آن سه یافته **نقصِ محصول نیستند**:
+1. **۲× `mp-money-division` در `modules/admin/analytics.py:157` و `:325` = مثبتِ کاذبِ قاعده.** هر دو عبارت
+   `(end - start).total_seconds() / 60.0` است (دقیقه از timedelta، نه ریال). علت: ‏`metavariable-regex` قاعده
+   `(?i).*(rial|amount|price|balance|fee|total|discount).*` است و کلیدواژهٔ **`total`** به `total_seconds`/`total_minutes` می‌چسبد.
+2. **۱× `mp-dart-dynamic-cast` در `client/lib/core/api_client.dart:191` = عمدی و مستند**: تابعِ `_decode` با کامنتِ
+   «تست `api_client_test` این را قفل می‌کند».
+پس آخرین قلمِ ارزان و بدونِ نیاز به تصمیم، **تنگ‌کردنِ همان regex + کنترلِ مثبت + برداشتنِ `continue-on-error`** است، نه دست‌زدن به کدِ محصول.
+
+### د) نکتهٔ وزنِ مخزن (بدونِ اقدام)
+
+‏`tests/unit/fixtures/axis_prescription_golden.json` = **۷۲۷٬۱۸۲ بایت / ۳۷٬۸۶۴ خط** (۲٬۷۶۷ رکورد). به‌عنوانِ golden-master
+مشروع است و گیتش با جهش اثبات شد، ولی PR اکنون +۳۸٬۶۶۷ خط دارد. فقط ثبت می‌شود؛ کاهشِ `SAMPLES` گیت را ضعیف می‌کند ⇒ توصیه نمی‌شود.
+یک ریزهٔ سندِ باز: docstringِ `scripts/build_audit_inventory.py:5` هنوز «۲۹ یافته» می‌گوید در حالی که خطِ ۱۷۰ «۳۰» است.
+---
+
+## داوریِ B6 (دو کامیت، tip ‏`db28a1e`) = MATCH ✅ ⇒ **T‑1 و T‑2 شلیک شد: اجازهٔ merge صادر شد**
+
+### الف) جدولِ داوری
+
+| ادعا | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| دو کامیت، بدونِ force-push | ‏`compare 6c473d0...db28a1e` ⇒ `ahead_by=2`, **`behind_by=0`**؛ ۸ فایل، +۷۵/−۲۸ | ✅ |
+| وابستگی/فایلِ حساس دست‌نخورده | ‏`requirements.txt` و `package.json` ⇒ **۰ فایلِ تغییرکرده** · `.gitleaksignore` ⇒ دست‌نخورده · تنها فایلِ حساسِ دست‌خورده `.semgrep/mp-harness-rules.yml` است (هدفِ خودِ بسته) | ✅ |
+| CI سبز | دو run (‏`push` 45069485431 و `pull_request` 45069489423) هر دو `success` · هر **۸ job** سبز · GraphQL ⇒ `mergeStateStatus=CLEAN`, `rollup=SUCCESS`, `reviewDecision=null` | ✅ |
+| زنجیرهٔ sha256 قاعده | محاسبهٔ خودم با `git show <sha>:… \| sha256sum`: ‏`4066748` = **`d58146b4f372ca82`** · `fe103a4` = **`f9bd5d55c13a2385`** · `6c473d0` = `f9bd5d55c13a2385` · tip = **`07f3475bfaab7683`** ⇒ دقیقاً همان زنجیرهٔ ثبت‌شده در ردیفِ لوپ | ✅ |
+| هر دو پیکربندی صفر یافته | semgrep ‏۱.۱۸۶.۰ با **همان فرمانِ CI**: harness ⇒ `rc=0`، «Ran 17 rules on 350 files: **0 findings**» · project ⇒ `rc=0`, **0** | ✅ |
+| قاعده نکُشته شده (کنترلِ مثبت) | **کنترلِ مستقلِ من** در `/tmp/pc6`: ‏`money_real.py` ⇒ **۳ یافته** در خط‌های ۲/۳/۴ (‏`total_rial / 3`، `amount / count`، `balance / 2`) · `duration_fp.py` ⇒ **۰** (مثبتِ کاذب واقعاً رفع شد) | ✅ |
+| ‏`nosemgrep` دارت بار-بَر است | **آزمونِ جهشِ من:** حذفِ همان یک خط ⇒ **۱ یافته** برمی‌گردد؛ بازگرداندن ⇒ ۰؛ `git diff` = ۰ ⇒ قاعدهٔ dart زنده است و استثنا مستند و باریک (بدونِ استثناگذاریِ پتوییِ client) | ✅ |
+| نامِ jobها عوض نشده | ‏`diff` فهرستِ jobها در `ci.yml` دو نسخه ⇒ **تهی**؛ تغییرات فقط: کامنت، نامِ step به «Semgrep (harness rules)»، و حذفِ `continue-on-error: true` ⇒ هشت contextِ لازمِ ruleset امن است | ✅ |
+| ژنراتور تا نقطهٔ ثابت | حلقهٔ `for _ in range(5)` + `_on_disk_matches` · `--check` با venvِ **دارای وابستگیِ** من ⇒ **EXIT=0** و INVENTORY = **۱۷۱۹ خط** ⇒ فایلِ روی دیسک بایت‌به‌بایت با خروجیِ ژنراتور برابر است (یعنی نسخهٔ کامل با بخشِ API commit شده، نه fallbackِ ۱۵۵۱ خطی) | ✅ |
+| دفترِ کل | ‏`0.7` ⇒ **DONE** با زنجیرهٔ hash · `4.7` ⇒ **PARTIAL** (هر دو فایلِ قاعده blocking و صفر یافته؛ بارِ پله‌ای BLOCKED-ENV) · `status.json` دست‌نخورده چون فقط کلیدِ `F-xx` دارد و ۰.۷/۴.۷ بدونِ F-id هستند · docstringِ ژنراتور ⇒ «۳۰ یافته» · `D‑21`/`D‑22` و بخشِ B6 در LOG | ✅ |
+| بک‌اند کامل روی tipِ merge | اجرای مستقلِ من: **`1307 passed, 2 skipped in 210.77s`، EXIT=0**، coverage **۹۱٪**، گیتِ per-directory **PASS** | ✅ |
+
+### ب) یک یافتهٔ تازهٔ ممیز از دلِ کنترلِ مثبت (باز، بدونِ اثرِ فعلی)
+
+قاعدهٔ **`mp-money-float-cast`** هنوز `total`ِ برهنه در regex دارد و من مثبتِ کاذبش را **بازتولید کردم**:
+‏`float(delta.total_seconds())` ⇒ **یافته می‌دهد** (در فایلِ کنترلِ من، خطِ ۳)، در حالی که `float(total_rial)` هم درست گرفته می‌شود (خطِ ۲).
+امروز در مخزن **صفر** موردِ چنین کدی هست (harness = ۰ یافته)، پس merge را بلوکه نمی‌کند؛ ولی چون گامِ harness اکنون **blocking** است،
+هر کدِ آینده از این دست CI را قرمز می‌کند. ⇒ همان تنگ‌سازیِ `mp-money-division` (حذفِ `total` برهنه، نگاه‌داشتنِ `total_rial|total_amount|total_price`)
+با **کنترلِ مثبتِ اجباری** در **فاز P‑3** انجام شود. بیلدر خودش این را به‌عنوانِ قلمِ باز افشا کرده بود؛ سنجهٔ من آن را از «احتمالی» به «بازتولیدشده» ارتقا داد.
+
+### ج) دو نکتهٔ دقت (بدونِ اثر بر حکم)
+
+1. «۴ یافتهٔ ruff از قبل موجود در `build_audit_inventory.py`» برای من **بازتولید نشد**: روی فایلِ جداشده در هر دو کامیت،
+   هم با قواعدِ پیش‌فرض و هم با گزینشِ CI ⇒ **۰ یافته**؛ `ruff format --check` در هر دو **یکسان rc=1** (پیش‌موجود).
+   پس substanceِ ادعا (پیش‌موجود و بدونِ تغییر در B6 و بیرونِ گیتِ CI) برقرار است، ولی شمارِ ۴ احتمالاً از دامنهٔ دیگری است (‏`ruff check scripts/` به‌طورِ کامل).
+2. بازهم‌ترازیِ سندباکسِ او (‏`D‑22`) را نمی‌توانم از راهِ دور بسنجم (‏`/tmp` او)، ولی نامتغیرِ مهم برقرار است:
+   همهٔ کامیت‌های B5 نیاکانِ tip‌اند (`behind_by=0`) و هیچ فایلی در PR گم نشده (‏۳۱۱ فایلِ PR و ۱۱۹ کامیت).
+
+### د) شلیکِ محرک‌ها
+
+- **T‑1 = FIRED (۲۰۲۶‑۱۱‑۲۲):** همهٔ بسته‌های B1…B6 تمام، BATCH-SUMMARY ثبت، اجرای کاملِ بک‌اند روی tipِ merge با سنجهٔ مستقلِ من سبز (‏۱۳۰۷/۲، ۹۱٪)، استودیو در CI سبز، هر ۸ job سبز، node-id حذف ۰.
+- **T‑2 = FIRED (۲۰۲۶‑۱۱‑۲۲):** اجازهٔ merge به بیلدر صادر شد — tipِ موردانتظار **`db28a1ea07000b34f1acf536be09a573faf8727a`**، فقط `gh pr merge 24 --merge` طبقِ پروتکلِ 11,660 بایتی / `670e287015d4…`.
+- **T‑3 = PENDING:** به‌محضِ merge، راستی‌آزماییِ سنجه‌ای (‏`closed/true/merged_at`, parentها = `662ff88` + tip, reachable بودنِ ۱۳۲ sha, سبزیِ هر ۸ job روی main, انتقالِ `evidence/` و `.gitleaksignore`) و سپس توصیهٔ **فاز P**.
+
+### هـ) اقلامِ بازِ پذیرفته‌شده در لحظهٔ merge (صادقانه، با دلیلِ سنجه‌دار)
+
+WP 4.1 = PARTIAL (‏`next_transfer_state` E۳۴، ۱۰ بلوکِ D، ۸ کلیدِ کیت) · WP 4.2 = DEFERRED (وابستگیِ تازه؛ baseline جهش ۵۷.۸٪ در برابرِ ≥۸۰٪) ·
+WP 4.7 = PARTIAL (بارِ پله‌ای BLOCKED-ENV) · **F‑30 OPEN** (ناپایداریِ receiptQueue؛ در CI سبز) · مثبتِ کاذبِ نهفتهٔ `mp-money-float-cast` ·
+گامِ ruff lint در `ci.yml` همچنان `continue-on-error` · ۰.۲ BLOCKED · ۱.۱/۱.۲/۱.۴ PARTIAL. هیچ‌کدام نقصِ correctness/امنیتِ فعال نیستند و همه در دفترِ کل ثبت‌اند.
+
+---
+
+## راستی‌آزماییِ merge (‏T‑3) = **انجام شد و سبز** ✅ — PR #24 روی `main` نشست، با **سه تصحیحِ سنجهٔ خودم**
+
+**تاریخ:** ۲۰۲۶‑۱۱‑۲۲ · **سنجه‌ها همه با `gh api` و `git` در کلونِ scratch خودم (`/tmp/mp2`) گرفته شده‌اند، نه از گزارشِ بیلدر.**
+
+### الف) حکمِ عددی
+
+| سنجه | مقدارِ اندازه‌گیری‌شده | نتیجه |
+|---|---|---|
+| `pulls/24` | `state=closed` · `merged=true` · `merged_at=2026-11-22T21:34:50Z` · `merge_commit_sha=35d4b35184b4148c658b415bd009fc076bf24e00` · ۱۲۲ کامیت · ۳۱۵ فایل · ‎+155,060/−1,071 | ✅ |
+| parentهای merge commit (هم API و هم `git rev-parse origin/main^1/^2`) | `^1=662ff8815add6f3a5be5e90432968a033e86e95d` · `^2=db28a1ea07000b34f1acf536be09a573faf8727a` | ✅ merge commitِ واقعی، نه fast-forward و نه squash |
+| `branches/main` | `35d4b35184b4…` · `protected=true` | ✅ |
+| **برابریِ درختِ `main` با tipِ داوری‌شده** | `tree(main)=tree(db28a1e)=6209967df90a6201ae3cb2fa08639bde5f64dfc7` · `git diff --shortstat` = ۰ خط | ✅ **مهم‌ترین سنجه:** اجرای کاملِ مستقلِ من در `db28a1e` (‏`1307 passed, 2 skipped in 210.77 s`، EXIT=0، coverage ۹۱٪، گیت PASS) **کلمه‌به‌کلمه برای `main` هم معتبر است** |
+| `compare/main...db28a1e` | `status=behind ahead_by=0 behind_by=1` | ✅ |
+| **زنجیرهٔ شاهد** | از **۱۲۲** کامیتِ فهرست‌شده در PR #24، **۱۲۲ تا** در فهرستِ ۲۶۸ کامیتِ `main` هستند ⇒ **۰ بیرون** | ✅ هدفِ `--merge` کامل محقق شد |
+| ارجاع‌های sha در اسنادِ ممیزی | از **۱۹۳** توکنِ هگز، **۷۲** توکن commitِ واقعی‌اند و **هر ۷۲ تا روی `main`** (تطابقِ مبهم = ۰)؛ ۱۲۱ توکنِ باقی commit نیستند (hashِ فایل مانند `07f3475b…`، عدد مانند `1500000`، شناسهٔ blob) | ✅ **۰ commitِ نقل‌شده بیرون از `main`** |
+| CI روی merge commit | run `45072898424` (‏`mp-ci`, push, `35d4b35`) = `completed/success` با **۸ از ۸ job سبز**؛ هر ۸ contextِ لازم در `check-runs` خودِ merge commit = `success`؛ `client-format-fix` run `45072898402` = `skipped` (به‌دستِ تریگرهای خودش)؛ `Graph Update` `45072899575` = `success` | ✅ |
+| چیزِ در جریان روی `main` | `in_progress=0` · `queued=0` (دو runِ در جریانِ مخزن روی دو شاخهٔ دیگرند) | ✅ |
+| ruleset `27826883` | `enforcement=active` · `updated_at=2026-11-22T09:02:29Z` (**پیش از merge ⇒ دست‌نخورده**) · ۸ context · `strict_required_status_checks_policy` · روش‌های merge `[merge, squash, rebase]` · approvals = ۰ | ✅ |
+| شواهد روی `main` | `docs/MuscleParadise/audit/evidence/` = ۱۱ مدخل (‏`after` ۳۴ مدخل، `before` ۱۸ مدخل، `bandit.json` 84,377 بایت، `detect-secrets.json` 53,680 بایت، `pip-audit.json`، `radon-cc.txt`، `radon-mi.txt`، `lizard-warnings.txt`، `requirements-freeze.txt`، `vulture.txt`) · `.gitleaksignore` = **60,102 بایت** | ✅ |
+| شاخهٔ کاری | `arena/5a1e37b3-mp` زنده در `33df26d` (فقط سندی: `EXECUTION-LOG.md` ‎+32 و سه تصحیحِ شمارِ خودِ `INVENTORY.md`) · **روی `main` نیست** · `INVENTORY.md` روی `main` = **۱۷۱۹ خط** | ✅ |
+
+### ب) آیا کاری در بازسازیِ شاخه گم شد؟ — سنجهٔ محتوایی، نه sha
+
+خطِ تاریخچه‌ای که پیش از بازسازی رها شد (‏`9bfc99d6f`، «WP 2.4») با `main` مقایسه شد:
+
+- `git diff --name-status 9bfc99d6f..main` = **۴۹ فایل: ۲۰ افزوده، ۲۸ تغییریافته، ۱ حذف‌شده**.
+- آن **یک** حذف = `.github/workflows/apk.yml` ⇒ **خودِ AD‑21** (حذفِ عمدیِ owner-approved، ‎−180 خط).
+- سرشماریِ node-id تست‌ها: **۱۲۷۵ ⇒ ۱۳۰۸** (‏۱ حذف، ۳۴ افزوده). آن یک حذف = `test_release_signing_policy.py::test_release_build_is_guarded_and_audits_all_output_apks` که **روی همان `apk.yml` ادعا می‌کرد** ⇒ پیامدِ ناگزیرِ AD‑21، نه پوششِ ازدست‌رفته.
+- هر فایلِ خط‌ازدست‌داده توضیحِ سنجه‌دار دارد: `findings.json` ‎−520/+525 (بازserialسازی؛ diffِ معناییِ پیش‌تر فقط `F-30` را نشان داد)، `axis_prescription.py` ‎−98/+135 (‏B5: ‏`prescribe_axis_work` 46(F)⇒13(C))، `config.py` ‎−45/+83 (54(F)⇒13(C))، `INVENTORY.md`/interaction-map (بازتولید)، `ci.yml` ‎−7/+10 (نامِ گام و حذفِ `continue-on-error`).
+- وارسیِ موردیِ گیت‌های WP روی `main` در venvِ مستقلِ خودم: ‏`test_wp25_scrape_errors_ready` · `test_wp32_error_envelope` · `test_wp25_silent_failures` · `test_wp32_detail_preserved` · `test_wp36_shop_today` ⇒ **۱۵ passed**. (دو تای اول در `tests/integration/` هستند نه `tests/regression/` — خطای دامنهٔ grepِ خودم.)
+
+**نتیجه: هیچ کاری گم نشده است.**
+
+### ج) سه تصحیحِ سنجهٔ خودم (بدونِ این‌ها حکمِ بالا غلط از آب درمی‌آمد)
+
+1. **کلونِ scratch من shallow بود** (`git rev-parse --is-shallow-repository` = `true`، ۲۶۵ آبجکت، ۲۱۸ کامیت در برابر **۲۶۸** کامیتِ واقعیِ `main`). به همین دلیل نخستین پاسِ من گفت «۲۶ shaِ نقل‌شده از `main` قابلِ دستیابی نیست» و «از ۱۲۲ کامیتِ PR فقط ۷۲ تا روی `main` نشستند». **هر دو غلط بود** — با فهرستِ کاملِ API از نو سنجیدم: **۰ sha و ۰ کامیتِ بیرون از `main`**. درس: در کلونِ shallow، `git merge-base --is-ancestor` برای کامیت‌های قدیمی **بی‌اعتبار** است؛ یا `--unshallow` یا فهرستِ API.
+2. **باگِ پارسِ خطا در اسکریپتِ خودم:** `gh api` در حالتِ خطا بدنهٔ JSON را روی stdout می‌ریزد و من کدِ خروج را نگرفته بودم ⇒ ۱۲۱ توکنِ غیرcommit به‌غلط «COMMIT / NOT-ON-MAIN» شمرده شدند. با `rc=$?` اصلاح شد: آن ۱۲۱ توکن `HTTP 422 «No commit found for SHA»` می‌دهند.
+3. **کلیدِ اشتباه در خوانشِ ruleset:** پارامتر `strict` نیست، `strict_required_status_checks_policy` است (نخستین تلاش `KeyError` داد).
+
+همچنین عددِ «۱۳۲ shaِ نقل‌شده» که پیش‌تر مبنای تصمیمِ `--merge` بود، با روشِ امروز **۷۲ commitِ قابلِ حل** است (از ۱۹۳ توکن). **مغزِ استدلال دست‌نخورده باقی است و با سنجه تأیید شد:** با squash، `main` به‌جای ۱۲۲ کامیت **یک** کامیت داشت و **هیچ‌کدام** از آن ۷۲ ارجاع از `main` قابلِ دستیابی نبود؛ با `--merge` **هر ۱۲۲ کامیت و هر ۷۲ ارجاع** زنده‌اند.
+
+### د) اقدامِ T‑3 (همان لحظه، بی‌درخواست) و شلیکِ T‑4
+
+- به مالک داده شد: بلوکِ بازیابیِ پلنِ فاز P با `curl` روی `handoff/MP-PRODUCTION-PLAN-P-2026-11-22.md` (‏۲۳٬۸۲۹ بایت / sha256 `f525a5143ebe8a3a607012788be0275b2cd12db4352f55e67464f78f767f32fc`) + سه تذکر: شروع با **P‑A = P‑1 ساعتِ استودیو** (‏P‑2 به آن تکیه می‌کند)، **P‑7 و P‑8 فقط با تأییدِ صریحِ مالک**، و **jobِ تازهٔ CI ممنوع + ویرایشِ ruleset `27826883` ممنوع**. قلمِ تازهٔ P‑3 (تنگ‌سازیِ `mp-money-float-cast` با کنترلِ مثبتِ اجباری) هم ضمیمه شد.
+- **T‑3 = FIRED (۲۰۲۶‑۱۱‑۲۲)** و چون شرطِ **T‑4** هم برقرار شد (‏T‑3 ‏FIRED **و** هر ۸ job روی merge commit ‏`success`) ⇒ **T‑4 = FIRED**: توصیهٔ اختیاریِ «آزمایشِ محلیِ code-only ابزارِ Graphify» با تذکرِ fitnessِ پایین، به مالک داده شد. هیچ محرکِ `PENDING` جز رویداد-محورها (‏T‑5/T‑6/T‑7) باقی نمانده است.
+
+### هـ) دو مشاهدهٔ جانبی در مخزنِ MP (سنجه‌شده، بدونِ اقدامِ من)
+
+1. شاخهٔ `arena/cfb2687f-mp` در `f9738f213` (‏۲۰۲۶‑۱۱‑۲۲T21:41:40Z) از **نشستِ دیگری** است و فقط `Amirreza-Piray-Training-Program.pdf` را به ریشهٔ مخزن افزوده: `diverged, ahead=1, behind=123`. یک **باینریِ نامرتبط با ممیزی** در ریشهٔ مخزن است و ۱۲۳ کامیت عقب ⇒ اگر روزی merge شود، گیتِ بهداشتِ مخزن و قاعدهٔ «باینری commit نشود» را نقض می‌کند. **توصیهٔ من: merge نشود؛** اگر مالک آن پرونده را می‌خواهد، بیرون از این مخزن نگه داشته شود.
+2. شاخهٔ `arena/da474b65-mp` در `9bfc99d6f` = همان خطِ رهاشدهٔ پیش از بازسازی: `behind, ahead=0, behind=77, files=0` ⇒ **کاملاً درونِ `main`** است و نگه‌داشتنش ارزشِ شاهدی ندارد (هرچونک sha‌هایش هنوز با refهای PR زنده‌اند). PRِ باز در مخزن = **۰**.
+
+---
+
+## داوریِ P‑A (بستهٔ نخستِ فاز P = P‑1 ساعتِ یکتای استودیو، شاخهٔ `arena/ff32c436-mp`) = **MATCH ✅** با چهار نکتهٔ سنجه‌دار
+
+**تاریخ:** ۲۰۲۶‑۱۱‑۲۲ · **tip:** `b3e2b29b4a84ffb692263ffc37c42a85dcee6c89` · **ahead ۲ / behind ۰** · ۱۹ فایل ‎+216/−63 · **۰ PR باز**
+**کامیت‌ها:** `eafb335` (۱۴ فایل: ‏`src/lib/clock.ts` تازه، `tests/clock.test.ts`، `eslint.config.mjs`، ۱۱ محلِ مصرف) + `b3e2b29` (۵ سند). شاخهٔ `arena/5a1e37b3-mp` دست‌نخورده؛ شاخه از `35d4b35` (= main) است.
+
+### الف) بازتولیدِ مستقلِ هر ادعا (همه در sandbox خودم، با `npm ci` از lock)
+
+| ادعای بیلدر | سنجهٔ مستقلِ من | نتیجه |
+|---|---|---|
+| `npm run lint` ⇒ rc 0، خروجی خالی | `npm ci` (‏۵۴۰ بسته) سپس `npm run lint` ⇒ **rc 0، بدونِ هیچ خروجی** | ✅ |
+| `tsc -b` ⇒ rc 0 | `npx tsc -b` ⇒ **rc 0** | ✅ |
+| `npm run build` ⇒ rc 0 | `npm run build` ⇒ **rc 0، `✓ built in 8.43s`**؛ `dist` را خودم پاک کردم (‏۰ مورد در `git status`) | ✅ |
+| تستِ ساعت ⇒ ۷ passed | `npx vitest run tests/clock.test.ts` ⇒ **۷ passed** | ✅ |
+| کلِ استودیو ⇒ ۴۷ فایل/۳۰۶ passed/۹ skipped (۳۱۵) | `npm test` ⇒ **`Test Files 47 passed | 1 skipped (48)` · `Tests 306 passed | 9 skipped (315)` · exit 0 · ۱۱۱٫۵۹ ثانیه** (او ۱۷۴ ثانیه؛ شمارها یکسان) | ✅ |
+| C3 ⇒ ۰ موردِ `new Date(`/`Date.now(` بیرونِ `clock.ts` | `src` ⇒ **۰** · `electron` ⇒ **۰** · `scripts` ⇒ **۰** · `tests` ⇒ **۱** (‏`tests/jp7Trend.test.tsx:15`، تاریخِ ثابت و بیرونِ دامنهٔ قاعده) · `eslint.config.mjs:34` فقط درونِ توضیح | ✅ |
+| C4 ⇒ probe قاعده ۲ خطا می‌دهد | **probe مستقلِ خودم:** `src/__mp_probe_tmp.ts` با `new Date()` و `Date.now()` ⇒ `✖ 2 problems (2 errors, 0 warnings)` با `no-restricted-syntax` و همان دو پیام؛ سپس حذف ⇒ `git status` **۰** مورد. وارونه‌سنجی: `npx eslint src/lib/clock.ts` ⇒ **rc 0** (یعنی استثنا واقعاً فقط همان فایل است، نه کلِ `src`) | ✅ |
+| C5 ⇒ مرزِ نیمه‌شبِ تهران | خودم حساب کردم: ‏`2026-03-20T20:30:00Z` + ۳:۳۰ (‏IRST بدون DST از ۲۰۲۲) = دقیقاً `00:00` روزِ بعد ⇒ `2026-03-21` درست است؛ `20:00Z` ⇒ `23:30` همان روز؛ `23:50Z` ⇒ `03:20` روزِ بعد. هر سه تست با `setClock` ⇒ **بدونِ وابستگی به منطقهٔ دستگاهِ اجرا** | ✅ |
+| F‑28 نیمهٔ بک‌اند | `date.today()` در کدِ محصول = **۰** · `datetime.now()` بی‌tz = **۰** · `datetime.utcnow()` = **۰**؛ همهٔ ~۹۰ محل `datetime.now(UTC)`‌اند | ✅ |
+| بدونِ وابستگی/CI/ruleset تازه | `git diff --name-only main..tip | grep -cE 'package.json|package-lock|requirements.txt|\.github/|\.semgrep/|Dockerfile|compose'` ⇒ **۰** | ✅ |
+| INVENTORY با محیطِ کامل | `build_audit_inventory.py --check` با venvِ پُروابستگیِ خودم ⇒ **rc 0 «فهرست‌ها هم‌خوان‌اند»**؛ **۱۷۱۹ ⇒ ۱۷۲۱ خط**؛ شمارِ `/api/v1` در هر دو **۱۶۶** ⇒ بخشِ API واقعی است نه fallback؛ شمارِ فایل‌های استودیو ۱۲۲ ⇒ ۱۲۴ | ✅ |
+| CI روی full sha | run `45076479241` = `completed/success` و هر **۸** check-run روی `b3e2b29…` = `completed/success` (موجِ push-only چون PR نیست) | ✅ |
+
+**سنجهٔ تکمیلیِ من (حفره‌های قاعده):** راهِ دیگری برای گرفتنِ «اکنون» در `src` نمانده است ⇒ `.format()` بدون آرگومان = **۰**، `dayjs(`/`moment(` = **۰**، `Date.parse` = **۰**. `isoFromLocal` هم **مرده نیست** (‏`JalaliDateField.tsx:62` و `tests/jalaliDate.test.tsx:26`).
+
+### ب) نکتهٔ ۱ — D‑23: معیارِ «خواندنِ منطقه از API» برآورده نشد، ولی **شدنی بود** (سنجه)
+
+دلیلِ بیلدر: «منطقهٔ بک‌اند فقط در پاسخِ فروشگاه دیده می‌شود؛ خواندنش برای هر «امروز» یک وابستگیِ ناهمگام و یک نقطهٔ شکست تازه می‌سازد.» بخشِ دومِ دلیل **مهندسیِ درست** است (‏`today()` همگام است و نمی‌تواند `await` کند)، ولی بخشِ اول ناقص است:
+
+- ‏`GET /shop/status` همین حالا `"timezone": settings.shop_timezone` را برمی‌گرداند (‏`modules/shop/service.py:83`).
+- استودیو **همین حالا** آن را دارد: `ShopStatus.timezone: string` و `fetchShopStatus()` در `src/lib/api.ts:1401-1414` ⇒ **بدونِ endpoint تازه و بدونِ وابستگیِ تازه** قابلِ خواندن است (یک bootstrap یک‌بار در شروعِ برنامه، با همان ثابت به‌عنوانِ fallback).
+- ریسکِ واقعی سنجه شد: `MP_SHOP_TIMEZONE` یک تنظیمِ env-پذیرِ مستند است (‏`mp-app/backend/.env.example:42` و `docs/architecture/repowise/PROJECT-HANDOFF.md:353`) و اعتبارسنجش **هر منطقهٔ IANA** را می‌پذیرد (‏`app/config.py:100-108` با `ZoneInfo(value)`)، در حالی که پیش‌فرض `Asia/Tehran` است (‏`app/config.py:67`).
+- **اما** هیچ‌جای مخزن (compose/infra/Dockerfile) مقدارِ غیرپیش‌فرض تنظیم نمی‌کند ⇒ **واگرایی بالقوه است، نه باگِ زنده**. برای استقرارِ امروز صفر اثر دارد.
+
+**حکم:** برای P‑A پذیرفته است؛ ولی قلم باید **بسته** شود، نه ساکت رها: در **P‑C** یا bootstrap از `/shop/status` پیاده شود (با fallback و یک تست) یا یک `D‑25` صریح با دلیلِ مالک نوشته شود.
+
+### ج) نکتهٔ ۲ — D‑24: تغییرِ رفتارِ چهار پنل **هیچ تستی آن را پین نکرده است**
+
+- چهار محل از منطقهٔ محلیِ دستگاه به منطقهٔ فروشگاه رفت: `AdaptiveNutritionPanel` · `Nutrition` · `PeriodReportPanel` · `Expenses` (‏`isoDay(offset)` ⇒ `shiftIsoDay(today(), offset)`).
+- سنجه: فراخوانیِ `today(`/`shiftIsoDay(` بیرونِ `tests/clock.test.ts` = **۰**، در حالی که تستِ هر چهار صفحه موجود است (‏`adaptivePanel` · `nutritionPage` · `expensesPage` · `periodReportPanel`).
+- **فرضیهٔ «CI بسته به ساعتِ روز قرمز می‌شود» تأیید نشد** (این را صریح می‌گویم چون خودم مطرحش کردم): آن چهار تست فقط تاریخِ ثابتِ fixture دارند (`2026-03-15`، `2026-11-15`، …) و هرگز مقدارِ پیش‌فرضِ فیلد را ادعا نمی‌کنند ⇒ وابستگیِ به TZ در CI ساخته نشده. سوئیتِ کامل هم در sandbox من سبز بود.
+- همچنین یک نکتهٔ مستندی: در `Nutrition` توضیحِ «تاریخ محلی، نه UTC — «امروز» برای کاربر یعنی امروز» **حذف** شد، یعنی جهتِ طراحیِ پیشین عمداً وارونه شده است. substanceِ تغییر دفاع‌پذیر است (بک‌اند `logged_for_date or today_in_shop_zone()` را مصرف می‌کند و تاریخِ ارسالی را **رد نمی‌کند**، پس خطرِ ۴۰۹ نبود؛ ولی هم‌راستاییِ پیش‌فرضِ کلاینت با «امروزِ» سرور معنا دارد و برای دستگاهِ UTC+3:30 صفر تفاوت است).
+- **الزامِ P‑B:** با خودِ درایور (که `clock` آن طبقِ C3 از `clock.ts` عبور می‌کند) مقدارِ پیش‌فرضِ تاریخ در این چهار صفحه پین شود؛ نمونهٔ قطعی: `clock 2026-03-20T20:30:00Z` ⇒ انتظارِ `2026-03-21` در state — مستقل از منطقهٔ دستگاهِ CI.
+
+### د) نکتهٔ ۳ — گاردریلِ ناقص: `setClock` در دسترسِ کدِ محصول است
+
+`setClock` از `src/lib/clock.ts` export می‌شود و قاعدهٔ تازه فقط `new Date`/`Date.now` را منع می‌کند ⇒ هر فایلِ `src` می‌تواند ساعت را **فریز** کند. امروز **۰** فراخوانی در `src` بیرونِ `clock.ts` دارد (سنجه شد)، پس باگِ زنده نیست؛ ولی گاردش ارزان است: یک `no-restricted-imports` (یا selector) که `setClock` را بیرونِ تست ممنوع کند + یک probe. ⇒ قلمِ **P‑C**.
+
+### هـ) نکتهٔ ۴ — T‑7 شلیک شد: شش ردیفِ دفترِ وضعیت با واقعیتِ `main` هم‌خوان نیست
+
+برای هر ردیفِ `OPEN` در `CHECKLIST.md` وجودِ کامیتِ پیاده‌سازی و تستِ سبز را سنجم:
+
+| ردیف | وضعیتِ فعلی | شاهدِ سنجه‌شده | باید |
+|---|---|---|---|
+| **F‑05** | OPEN | کامیت `9bfc99d` «WP 2.4: RBAC decision cache + numeric-id normalisation + lock (F‑05)» · ۳ فایلِ تستِ ارجاع‌دهنده · `test_wp24_rbac_decision_cache.py` سبز | FIXED-PARTIAL/FIXED |
+| **F‑07** | OPEN | کامیت `20c3173` «WP 0.4 (F‑07): per-directory coverage gate…» | IN-PROGRESS/PARTIAL |
+| **F‑16** | OPEN | کامیت `fe103a4` «WP 4.6: no member_id=-1 sentinel…» · سنجهٔ من: `member_id == -1` در کدِ محصول = **۰** مورد | FIXED |
+| **F‑17** | OPEN | کامیت `0afd240` «WP 2.5 (F‑17): silent except -> log + counter…» · `test_wp25_silent_failures.py` سبز | FIXED-PARTIAL |
+| **F‑26** | OPEN | کامیت `8926fcd` «WP 3.2 (F‑26): one error envelope…» · ۲ فایلِ تست · `test_wp32_error_envelope.py` + `test_wp32_detail_preserved.py` سبز · slice-A: ‏`fastapi_default_detail` ‏۷۰⇒۰ روی ۸۷۲ سلول | FIXED |
+| **F‑27** | OPEN | کامیت `fc402a8` «WP 3.4: member_profile_required 409…» · ۲ فایلِ تست · `member_profile_required` در `modules/shop/service.py` موجود | FIXED |
+
+اجرای من روی `main`: ‏`test_wp24_rbac_decision_cache` + `test_wp25_silent_failures` + `test_wp32_error_envelope` + `test_wp32_detail_preserved` ⇒ **۱۶ passed**.
+درست‌هایِ دفتر: **F‑11** (‏۰ کامیت، ۰ تست) و **F‑30** (flake، OPENِ مستند) واقعاً بازند؛ **F‑23** مبهم است (تنها کامیتِ اشاره‌کننده `38a41a1 feat(phase8)` یک کامیتِ feature قدیمی است، نه رفع) ⇒ نیازمندِ تصمیم، نه حدس.
+
+### و) راستی‌آزماییِ تکمیلیِ merge (پس از unshallow) — تصحیحِ هفتم doubly confirmed
+
+کلونِ scratch را کامل کردم (`git fetch --unshallow` ⇒ `is-shallow-repository=false`، ۲۷۲ آبجکت). حالا **مستقل از API** هم همان نتیجه: هر **۱۲۲ از ۱۲۲** کامیتِ فهرست‌شدهٔ PR #24 نیاکانِ `main`‌اند و `9bfc99d6f` (نوکِ خطِ رهاشده) **هم** نیاکانِ `main` است. ⇒ یافتهٔ «۲۶ sha غیرقابلِ دستیابی / ۵۰ کامیتِ بیرون» که در گزارشِ نخستِ همین نوبت دادم، **کاملاً artefactِ shallow clone بود** و باطل است.
+
+### ز) اقلامِ بستهٔ بعد (P‑B) که با این داوری صادر شد
+
+**P‑B = P‑2 (درایورِ قطعیِ UI، `mp-app/studio/scripts/agent_drive.mjs`)** با C1…C8 پلن + **P‑B‑1** (پینِ مقدارِ پیش‌فرضِ تاریخِ همان چهار صفحه با خودِ درایور، مستقل از TZ). سپس **P‑C = P‑3** + چهار carry-over: (۱) تنگ‌سازیِ `mp-money-float-cast` با کنترلِ مثبتِ اجباری، (۲) گاردِ `setClock` + probe، (۳) bootstrap منطقه از `/shop/status` یا `D‑25` صریح، (۴) اصلاحِ شش ردیفِ کهنهٔ دفتر (فقط سند، با sha‌های بالا).
+
+---
+
+## بخشِ ۲۰۲۶‑۱۱‑۲۳ · داوریِ بستهٔ P‑B (درایورِ قطعیِ UI) — «کد: MATCH · سند: MISMATCH»
+
+**محرک:** ‏T‑8 (بیلدر بستهٔ فاز P را تحویل داد) · **شاخه:** `arena/ff32c436-mp` · **tip:** `6ff268530b2fbc63b848582342d4ad8711a70481`
+
+### الف) وضعیتِ زندهٔ GitHub (نخستین سنجهٔ نوبت، پیش از هر داوری)
+
+| سنجه | مقدارِ اندازه‌گیری‌شده | فرمان/منبع |
+|---|---|---|
+| tip شاخه | `6ff268530b2f…` | `gh api repos/yousefghorbanian98-create/MP/branches/arena/ff32c436-mp` |
+| `main` | `35d4b35184b4148c658b415bd009fc076bf24e00` (دست‌نخورده) | همان API |
+| ahead/behind | **ahead ۴ / behind ۰** | `gh api .../compare/main...arena/ff32c436-mp` ⇒ `status="ahead"` |
+| ترتیبِ کامیت‌ها | `eafb335` (P‑1) → `b3e2b29` (سندِ P‑A) → `b2810f12a…` (کدِ P‑B) → `6ff2685` (سندِ P‑B) | `git log --oneline` |
+| بازنویسیِ تاریخ؟ | **خیر** — `compare eafb335...tip` = ahead ۳ و `b3e2b29...tip` = ahead ۲ ⇒ fast-forward | همان |
+| CI | run `45106817970` = **success** · ۸/۸ check-run سبز روی full sha | `gh api .../actions/runs` + `check-runs` |
+| PR باز | **۰** | `gh api .../pulls?state=open` |
+| diff کل (`main...tip`) | **24 files changed, 657 insertions(+), 64 deletions(-)** | `git diff --shortstat` (دو-نقطه و سه-نقطه هر دو) + API compare |
+| diff فقطِ P‑B (`b3e2b29..tip`) | **7 files, +445/−5** | `git diff --shortstat` |
+| فایل‌های ترک‌شده | ۱۳۵۲ (main) ⇒ **۱۳۵۸** (tip) | `git ls-tree -r --name-only | wc -l` |
+
+مجموعهٔ ۷ فایلیِ P‑B: ‏`M docs/…/EXECUTION-LOG.md` · `M docs/…/INVENTORY.md` · `M mp-app/studio/package.json` · `A scripts/agent_drive.mjs` (۲۴۵ سطر) · `A tests/driver/{cli.test.tsx (۱۰)، driver.test.tsx (۹۸)، pins.test.tsx (۴۹)}`.
+**۰ فایلِ ممنوع:** بدونِ lockfile، requirements، `.github/`، `.semgrep/`، Dockerfile/compose، `eslint.config.mjs`، PNG/رسید، `dist/`. تنها تغییرِ `package.json` یک خط است: `"drive": "node scripts/agent_drive.mjs"` ⇒ **بدونِ وابستگیِ تازه** (AD‑24 رعایت شده؛ ماژول‌ها با `import()` پویا بار می‌شوند تا `node` خالی هم CLI را اجرا کند).
+
+### ب) جدولِ داوری: ادعا در برابرِ سنجهٔ مستقل
+
+| # | ادعای بیلدر | سنجهٔ ممیز (فرمانِ خودم) | نتیجه |
+|---|---|---|---|
+| ۱ | lint rc 0، خروجی خالی | `npm run lint` ⇒ rc=0، **۳۶ بایت** (فقط هدرِ npm) | هم‌خوان |
+| ۲ | `tsc -b` rc 0 | rc=0، **۰ بایت** | هم‌خوان |
+| ۳ | `npm test` = ۴۹ فایل / ۳۲۳ پاس / ۲ skip | **۴۹ passed \| ۲ skipped (۵۱) · ۳۲۳ passed \| ۱۰ skipped (۳۳۳) · ۱۲۲٫۱۶ ثانیه · FULL_EXIT=0** | هم‌خوان |
+| ۴ | `tests/driver` = ۲ فایل/۱۷ تست + ۱ skip | همان، و **در سه TZ** یکسان: ‏`UTC` · `America/Los_Angeles` · `Pacific/Kiritimati` | هم‌خوان |
+| ۵ | دو اجرای CLI با sha256 `4e2aa2b6…` | دو اجرا ⇒ هر دو **۲۴۸ بایت** و sha256 = `4e2aa2b68d54dadce4aa973b9967d652715df3d882428aba07e42b2b7fdac2a7` · `cmp` یکسان | هم‌خوان |
+| ۶ | اجرای CLI حدود ۳–۴ ثانیه | **۲٫۸۹** و **۲٫۹۱** ثانیه (`EPOCHREALTIME`) ⇒ C6 (≤۳۰ ثانیه) با فاصلهٔ زیاد | هم‌خوان |
+| ۷ | «یک تستِ CLI به‌علتِ **نبودِ npm** skip شد» | علتِ واقعی: ‏`it.skipIf(!process.env.MP_DRIVE_ARGV)` در `tests/driver/cli.test.tsx:6` — و npm **هست** (`/usr/local/bin/npm`). در خودِ LOG درست نوشته بود | **ناهم‌خوان در گزارش** (در LOG درست) |
+| ۸ | `git diff --stat main...HEAD` = ۲۴ فایل، **+619/−63** | **۲۴ فایل، +657/−64** (هم `git` و هم API compare) | **ناهم‌خوان (CO‑2)** |
+| ۹ | INVENTORY `--check` ⇒ **rc 0** «فهرست‌ها هم‌خوان‌اند» | روی tip ⇒ **rc=1 «کهنه: INVENTORY.md»** | **ناهم‌خوان (CO‑1)** |
+| ۱۰ | ردیف‌های `/api/v1` = ۱۶۶ | ۱۶۶ در هر سه ref (main / `b3e2b29` / tip)؛ سطرها ۱۷۱۹ → ۱۷۲۱ → **۱۷۲۵** | هم‌خوان |
+| ۱۱ | «۱۳۵۴ ⇒ ۱۳۵۸ فایل، ۴ فایلِ تازه» | ۱۳۵۸ در tip؛ ردیفِ committedِ INVENTORY هم ۱۳۵۸ | هم‌خوان |
+
+**نتیجه: کدِ P‑B = MATCH** (هر ۸ معیارِ C1…C8 بازتولید شد) · **سندِ P‑B = MISMATCH** در دو ادعا (ردیفِ ۸ و ۹). هیچ revert لازم نیست؛ tip همان پایهٔ P‑C است.
+
+### ج) دو ناهم‌خوانی و علتِ ریشه‌ایِ واحد
+
+هر دو از یک خطای ترتیب می‌آیند: **بازتولیدِ INVENTORY و گرفتنِ diff stat پیش از نشستنِ متنِ نهاییِ بخشِ LOG** انجام شده (بخشِ P‑B در LOG = **۳۳ سطر**: ‏۷۵۳ → ۷۸۶).
+شاهدِ قطعی: ردیفِ committedِ INVENTORY هنوز می‌گوید `| مستندات | docs/MuscleParadise/audit/EXECUTION-LOG.md | 753 | 119428 |` در حالی که فایلِ tip **۷۸۶ سطر / ۱۲۶٬۸۳۸ بایت** است؛ ‏۷۵۳ دقیقاً عددِ P‑A است.
+diffِ بازتولیدِ تازه فقط **۳ سطر** است و هر سه خودارجاع:
+`خطوط متنی 306342 → 306375` · `| مستندات | 319 | 109602 → 109635 |` · `EXECUTION-LOG.md | 753 | 119428 → 786 | 126838`.
+**همگراییِ راه‌حل سنجه شد:** دو بازتولیدِ پشتِ‌سرهم ⇒ هر دو ۱۷۲۵ سطر با sha256 یکسان `3d782e2266e03f5c33f0872ab6b24fc9848d3d19df6de44228ea4d635c28336e` (نقطهٔ ثابت) و سپس `--check` ⇒ rc 0. یعنی **یک** بازتولیدِ درست در جایِ درست، هر دو ناهم‌خوانی را می‌بندد.
+یادداشتِ روشیِ ممیز: ‏`/home/user/venv-mp` برای من هم ناپدید شده بود؛ با venv کاملِ `/tmp/v24` (Python 3.11.2 · fastapi 0.165.0 · sqlalchemy 2.1.9) همان سنجه‌ها reproduce شد ⇒ اختلاف از interpreter نیست. همچنین `scripts/build_audit_inventory.py` پرچمِ `--help` **ندارد** و `--help` دادن باعثِ **بازنویسیِ درجا** می‌شود (‏CHECKLIST ۱۵۰ + INVENTORY ۱۷۲۵ سطر) — تلهٔ تازهٔ ثبت‌شده.
+
+### د) معیارهای P‑B که با خواندنِ کد و اجرای مستقل تأیید شد
+
+- **C1** افعال و arity: ‏`VERBS = {render, clock, type, tap, state, snapshot}` · `ARITY {render:1, clock:1, type:2, tap:1, snapshot:1, state:0}` · `parseArgv`/`runSteps` export شده‌اند.
+- **C2** قطعیّت: ‏`state = sortKeys({...})` و دو خروجی بایت‌به‌بایت یکسان (سنجهٔ بالا).
+- **C3** ساعت از خودِ محصول: ‏`await import("../src/lib/clock.ts")` + `setClock(next)` و `setClock(null)` در `finally` ⇒ **نه** `vi.setSystemTime`ِ jsdom.
+- **C4** خروجیِ متنی، نه باینری: ‏`snapshot` = ‏`document.body.textContent` نرمال‌شده.
+- **C5** خطاهای شناسه‌دار: ‏`DRV-001…DRV-005` با `{code, step, message, hint}` — اجرای واقعیِ من: صفحهٔ ناشناخته ⇒ `DRV-002` با فهرستِ پنج صفحه؛ فعلِ ناشناخته ⇒ `DRV-001`.
+- **C6** زمان: ‏۲٫۸۹ ثانیه.
+- **C7** بدونِ وابستگی و بدونِ دست زدن به `eslint.config.mjs` (با هدرِ `/* global process, document, localStorage, Response, Headers, URL, setTimeout */`).
+- **C8** پوششِ صفحه‌های واقعی: ‏`PAGES` = Shop · Nutrition · Expenses · PeriodReportPanel · AdaptiveNutritionPanel(props `memberId:7`) ⇒ پنج صفحه، از جمله **صفحهٔ فرم‌دار**.
+- **P‑B‑1 (carry-overِ P‑A: پینِ «امروز» در منطقهٔ فروشگاه)** — هر چهار پنل با دو زمانِ مرزی:
+  ‏`20:30Z ⇒ /daily?date=2026-03-21` و `20:00Z ⇒ date=2026-03-20` (مرزِ IRST=UTC+3:30) · `PeriodReportPanel ⇒ anchor=2026-03-21` · `Expenses ⇒ to=2026-03-21 و from=2026-02-19` (پنجرهٔ ۳۰ روزه) · `AdaptiveNutritionPanel ⇒ POST /weight-logs` با بدنهٔ حاوی `2026-03-21`.
+
+### هـ) دو probe مستقلِ ممیز (چیزی که بیلدر گزارش نکرده بود)
+
+1. **probe جهش (آیا پین‌ها باربرند؟):** در scratch، ‏`SHOP_TIMEZONE = "Asia/Tehran"` را به `"UTC"` تغییر دادم ⇒ `TZ=UTC npx vitest run tests/driver` ⇒ **1 failed | 4 failed | 13 passed | 1 skipped** (هر ۴ پین قرمز). سپس از backup بازگرداندم: ‏`git diff --stat` ⇒ **۰ خط** و اجرای دوباره ⇒ ۲ فایل/۱۷ تست سبز. ⇒ پین‌ها تزئینی نیستند؛ دقیقاً همان چیزی را می‌گیرند که D‑24 می‌خواست.
+2. **کنترلِ بدونِ پین (آیا درایور تاریخِ واقعی را هم درست می‌دهد؟):** ‏`render Expenses state` بدونِ `clock` ⇒ `GET /api/v1/expenses?from=2026-10-24&to=2026-11-23` = تاریخِ واقعیِ محیطِ اجرا؛ با `clock 2026-03-20T20:30:00Z` ⇒ `from=2026-02-19&to=2026-03-21`. ⇒ پین‌ها به fixture چسبیده‌اند نه به ساعتِ دستگاه.
+3. **اجرای تستِ skip‌شده:** با `MP_DRIVE_ARGV='["clock","2026-03-20T20:30:00Z","render","Expenses","state"]'` و `MP_DRIVE_OUT=/tmp/cli_out.json` ⇒ **3 files passed · 18 tests passed** و فایلِ خروجی ۲۴۸ بایت با **همان sha256** و `cmp` یکسان با `npm run drive`. ⇒ آن تست سالم است، فقط conditionally gated (و در CI هیچ‌وقت اجرا نمی‌شود).
+
+### و) اقلامِ صادرشده از این داوری
+
+- **CO‑1 (الزامی):** بازتولیدِ INVENTORY به‌عنوانِ **آخرین گام پس از متنِ نهاییِ LOG** در P‑C؛ سپس `--check` ⇒ rc 0. اگر کهنه ماند، در کامیتِ بعدی — **هرگز amend**.
+- **CO‑2 (الزامی):** اصلاحیهٔ عددی در LOG: ‏`main...HEAD` روی tipِ P‑B = **24 files, +657/−64** (نه ۶۱۹/۶۳).
+- **CO‑3 (پیشنهادی، غیرمسدودکننده):** تستِ `cli.test.tsx` در CI هرگز اجرا نمی‌شود چون `MP_DRIVE_ARGV` تنظیم نمی‌شود؛ اگر روزی خواستیم پوششِ CI بگیرد، باید یک step با آن env اضافه شود ⇒ **خارجِ دامنهٔ فاز P** (‏`.github/` ممنوع). فقط ثبت شد تا گم نشود.
+- **CO‑4 (ثبتِ روشیِ ممیز):** «دلیلِ skip» را همیشه از خودِ کد بخوان، نه از گزارشِ بیلدر (۱۲مین تصحیحِ خودم: نخست به‌غلط `isToolAvailable`/`src/test/harness` را از حافظه نقل کردم که **اصلاً وجود ندارند**؛ سنجه نشان داد علت `MP_DRIVE_ARGV` است).
+- **مجوزِ P‑C صادر شد:** ‏`handoff/MP-BUILDER-PC-AUTHORIZATION-2026-11-23.txt` — دامنه فقط P‑3 پلن + CO‑1/CO‑2 + شش ردیفِ کهنهٔ `status.json`. دو قلمِ باقی‌ماندهٔ carry-over صریحاً **مجوز نگرفتند**: تنگ‌سازیِ `mp-money-float-cast` (‏P‑F) و گاردِ `setClock` (‏P‑D) و bootstrap منطقهٔ فروشگاه/‏D‑25 (‏P‑F).
+- **سنجهٔ تازهٔ ممیز برای P‑C:** ‏`scripts/docs_gate.py` امروز دقیقاً **۱۸ فایل** را اسکن می‌کند و `docs/MuscleParadise/audit/` در `CORE_MARKDOWN_FILES` **نیست** ⇒ بدونِ افزودنِ `GATE-CODES.md` به آن فهرست، معیارِ C7 پلن بی‌معنا می‌ماند. baseline‌های سبز: ‏docs_gate rc=0 (‏۱۸ md/۲۷۶ لینک/۱۵ Mermaid، sorted-sha `1730e4d9b55c800ae48adad3…`) · `interaction_map.py --check` rc=0 (‏۳۱ سطح/۱۶۳ مسیر/رانش صفر، sorted-sha `29261bdef03b3369718ccf79…`) · `repo_hygiene_gate.py` rc=0 (sorted-sha `e7635353f6757cbc756c4d26…`).
+- **علتِ ریشه‌ایِ شش ردیفِ کهنهٔ دفتر سنجه شد:** ‏`docs/MuscleParadise/audit/status.json` (‏۲۴ کلید، ۱۰٬۶۱۶ بایت) هیچ کلیدی برای F‑05/F‑07/F‑16/F‑17/F‑26/F‑27 ندارد و `build_audit_inventory.py:178` کلیدِ غایب را `OPEN` می‌گذارد ⇒ راهِ حل، افزودنِ شش کلید به **status.json** است نه دست‌کاریِ `CHECKLIST.md` (که تولیدی است و خودش می‌نویسد «دستی ویرایش نکنید»).
+
+---
+
+## بخشِ ۲۰۲۶‑۱۱‑۲۳ · داوریِ بستهٔ P‑C (کدهای پایدارِ گیت‌ها = P‑3) = **MATCH ✅**
+
+**شاخه/tip:** ‏`arena/ff32c436-mp` ⇒ **`5720e5a48cd89abe8c4bea1daf3e045cf3af0258`** (با `gh api …/branches/arena/ff32c436-mp` خوانده شد، نه از گزارشِ بیلدر).
+**CI:** run **`45111202901`** ⇒ `completed/success`؛ check-runs = **۸** و نتیجه‌های یکتا = **فقط `success`**.
+**سرشماری:** ‏`main` = `35d4b3518` (بدونِ تغییر)؛ ahead **۶** / behind **۰**؛ PR باز = **۰**؛ کلونِ ممیز `shallow=false` با ۲۷۴ کامیتِ دیدنی.
+**مجموعهٔ P‑C (‏`6ff2685..5720e5a`):** ۸ فایل، **`+512/−62`**؛ کلِ شاخه ۲۸ فایل `+1163/−120`؛ فایل‌های ترک‌شده **۱۳۵۸⇒۱۳۶۰** (دقیقاً دو فایلِ تازهٔ مجاز).
+**مسیرِ ممنوع:** **صفر**. کدِ محصول (`backend/app/`، `studio/src/`، `client/`): **صفر**. `agent_drive.mjs` و `clock.ts` دست‌نخورده.
+**اندازهٔ دو اسکریپت:** ‏`scripts/docs_gate.py` ‏۲۱۲⇒۲۷۶ سطر؛ `scripts/interaction_map.py` ‏۴۰۵⇒۴۷۹ سطر.
+**معیارها (همه با venvِ کاملِ `/tmp/v3` و `fastapi 0.165.0`):**
+| معیار | سنجهٔ ممیز | حکم |
+|---|---|---|
+| **C1** کدهای پایدار | `DOC-001…DOC-009` + `MAP-001…MAP-003` در اسکریپت‌ها؛ ۱۷ کد در `GATE-CODES.md` (۶۵ سطر / ۵۱۰۶ بایت) شاملِ `DRV-001…DRV-005` که ریشه‌شان `b2810f1` (‏P‑B) است و درایور در P‑C دست نخورد | ✅ |
+| **C2** قالبِ واحد | `DOC-002 <path>:3: trailing whitespace ← فاصلهٔ انتهای سطر را حذف کنید.` و خطِ ناشناخته = `-` (‏`MAP-002 …:-:`) | ✅ |
+| **C3** سقفِ ۲۰ در هر دسته | probeِ ۵۶‌سطریِ من ⇒ ۲۰×`DOC-002` + `+5 موردِ دیگر (DOC-002)`، ۲۰×`DOC-006` + `+5`، ۱×`DOC-003`، ۱×`DOC-005`؛ ۴۲ سطر چاپ‌شده از **۵۲** یافته؛ گیت در نخستین خطا نمی‌ایستد | ✅ |
+| **C4** دلتای افزودنی | `18 Markdown files, 276 local links` ⇒ **`19 … 280 …`** (‏N=4 = چهار لینکِ خودِ سند، همه resolve)؛ **Mermaid ثابت ۱۵**؛ sha نقشه `29261bdef03b3369…` و hygiene `e7635353f6757cbc…` **بدونِ تغییر** | ✅ |
+| **C5** exit codeها | سبز: ۰/۰/۰ و `inventory --check` ⇒ **۰** («فهرست‌ها هم‌خوان‌اند»)؛ قرمز: ‏۱؛ `--json` بدونِ `--check` ⇒ **۲** با پیامِ argparse | ✅ |
+| **C6** ‏`--json` | قرمز: rc 1، آرایهٔ ۵۲ موردی با کلیدهای `code/path/line/message/suggestion`، **۰** بار خلاصه روی stdout؛ سبز: `[]` + خلاصه روی **stderr** | ✅ |
+| **C7** دامنهٔ گیت | `Path("docs/MuscleParadise/audit/GATE-CODES.md")` به `CORE_MARKDOWN_FILES` افزوده شد؛ حذفش ⇒ `docs_gate` rc 1 با `DOC-001` | ✅ |
+| **C8** red-firstِ واقعی | تاریخ را نمی‌توان بازپخش کرد ⇒ با **دو جهش** ثابت شد: `PER_CODE_LIMIT` ‏۲۰⇒۲۵ ⇒ `FAILED test_per_code_cap_is_20_then_plus_n` (‏۱ failed / ۹ passed)؛ حذفِ `GATE-CODES.md` ⇒ **۳ failed / ۷ passed**. دو باگِ تست (‏`sys.modules` برای dataclasses و `chdir` برای حلِ لینک نسبت به cwd) در **خودِ تست** اصلاح شد، نه با سست‌کردنِ گیت | ✅ |
+| **C9** جای تست | `mp-app/backend/tests/integration/test_gate_codes.py` با **`parents[4]`** ⇒ **۱۰ passed** در ۱٫۳۳ ثانیه؛ ruff با انتخابِ CI ⇒ `All checks passed!`؛ با `test_ci_artifacts.py` ⇒ ۱۹ passed | ✅ |
+| **C10** بودجه | **۲ کامیت** (`b7ed4ae` کد، `5720e5a` مستندات)، **۱ بخشِ LOG** (سطر ۷۸۸)، **۱ push**، بدونِ PR/merge/amend/force-push | ✅ |
+
+**اثباتِ «بازتولید، نه دست‌کاری»:** هر دو generator را با venvِ کامل دوباره اجرا کردم و byte-مقایسه کردم ⇒ `CHECKLIST.md`، `INVENTORY.md` و `interaction-map-2026-11-19.md` هر سه **یکسان**؛ پس از آن ۰ فایلِ تغییریافته / ۰ untracked و `--check` ⇒ rc 0. **این همان چیزی است که CO‑1 را می‌بندد** (در tipِ P‑B همین `--check` ‏rc 1 «کهنه» می‌داد).
+**شش ردیفِ `status.json` (همه با شاهدِ سنجیده):** ‏`F-05` FIXED (`9bfc99d` «WP 2.4: RBAC decision cache …») · `F-07` **IN-PROGRESS** (`20c3173` «WP 0.4 …») · `F-16` FIXED (`fe103a4` «WP 4.6: no member_id=-1 sentinel …») · `F-17` FIXED (`0afd240` «WP 2.5 …») · `F-26` FIXED (`8926fcd` «WP 3.2: one error envelope …») · `F-27` FIXED (`fc402a8` «WP 3.4 …») — هر شش `git cat-file -t` ⇒ `commit` و هر شش جدِ tip. `F-11` و `F-30` دست‌نخورده **OPEN**؛ `F-23` دست‌نخورده.
+**ردیف‌های INVENTORY با واقعیتِ روی دیسک چک شد:** سطر ۱۰ «کل فایل‌های ترک‌شده: **1360** (خطوط متنی: 306825)»؛ سطر ۹۶۸ `test_gate_codes.py` ‏۱۷۱/۶۲۲۱؛ سطر ۱۳۶۱ `EXECUTION-LOG.md` ‏۸۳۶/۱۳۷۵۲۷ (خودم هم ۸۳۶ سطر / ۱۳۷۵۲۷ بایت اندازه گرفتم)؛ سطر ۱۳۶۳ `GATE-CODES.md` ‏۶۵/۵۱۰۶؛ ردیف‌های `/api/v1` = **۱۶۶** (بدونِ تغییر از P‑B).
+**CO‑1 بسته ✅ · CO‑2 بسته ✅** (اصلاحیهٔ P‑B در LOG: عددِ `619/63` پیش از فرودِ متنِ نهایی گرفته شده بود؛ عددِ راست `24 files / +657 / −64`) · CO‑3/CO‑4 بدونِ اقدام.
+**سه یادداشتِ غیرِمسدودکننده:** OBS‑1 (hardcode بودنِ فهرستِ کدها در تستِ جدول) · OBS‑2 (نامتقارن بودنِ stream: ‏`docs_gate.py:143` stderr در برابر `interaction_map.py:457` stdout) · OBS‑3 (قراردادِ exit code در سند نیامده). هیچ‌کدام نقصِ P‑C نیستند و در بستهٔ بعد سخت‌کاری می‌شوند.
+**F‑23 ⇒ تصمیمِ مالک** (سه گزینه: غیرِمسئله / OPEN بماند / بستهٔ جدا با تستِ پذیرش). **P‑D و P‑F هنوز BLOCKED** تا مجوزِ داور صادر شود؛ برچسبِ «P‑F» در فایلِ طرح نیست (این کارها **T‑10/T‑11**‌اند).
+**بازگشتِ reset راستی‌آزمایی شد:** «۸ فایل / ۷۴۱ حذف» indexِ کهنه بود؛ `git reset --mixed 5720e5a` درست بود و **هیچ کاری گم نشده است**.
+**تصحیحِ چهاردهمِ ممیز:** دو نوبتِ نخستِ probe باطل (خطای نگارشیِ خودم: `)` به‌جای `]` در heredoc) ⇒ هیچ عددشان نقل نشده؛ نوبتِ سوم با bash سنجه شد.

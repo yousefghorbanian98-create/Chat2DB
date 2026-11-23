@@ -1,0 +1,163 @@
+مجوزِ بستهٔ P‑C — فاز P (پس از داوریِ P‑B)
+====================================================
+صادرکننده: ممیز (داور) · تاریخ: ۲۰۲۶‑۱۱‑۲۳ · شاخهٔ کاری: arena/ff32c436-mp در مخزن MP
+این فایل تنها منبعِ اختیارِ توست. هر مسیر یا کاری که در §۲ نیامده باشد مجوز ندارد.
+
+§۰ · وضعیتِ پایه — سنجهٔ ممیز، نه ادعا
+----------------------------------------------------
+tip  = 6ff268530b2fbc63b848582342d4ad8711a70481  («P-B docs: EXECUTION-LOG P-B section; regen INVENTORY»)
+main = 35d4b35184b4148c658b415bd009fc076bf24e00  (دست‌نخورده)
+ترتیبِ کامیت‌ها: eafb335 (P‑1) → b3e2b29b4a84ffb692263ffc37c42a85dcee6c89 (سندِ P‑A) →
+               b2810f12a56d78f3ccf1f852a5123ab7aecb2d57 (کدِ P‑B) → 6ff2685 (سندِ P‑B)
+ahead ۴ / behind ۰ · fast-forward · بدون force-push · ۰ PR باز · ruleset 27826883 بدون تغییر (۸ context، strict=true)
+CI: run 45106817970 = success · ۸/۸ check-run سبز روی full sha.
+
+بازیابیِ این فایل (اگر سندباکس reset شد):
+curl -sL -H "Accept: application/vnd.github.raw" \
+  "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-BUILDER-PC-AUTHORIZATION-2026-11-23.txt?ref=arena/2cde32d6-chat2db" \
+  -o /tmp/PC-AUTH.txt
+# اندازه و sha256ِ موردانتظار در پیامِ ممیز به مالک می‌آید؛ اگر یکی نبود هیچ کاری نکن و hard-stop بده.
+
+بازیابیِ پلن:
+curl -sL -H "Accept: application/vnd.github.raw" \
+  "https://api.github.com/repos/yousefghorbanian98-create/Chat2DB/contents/handoff/MP-PRODUCTION-PLAN-P-2026-11-22.md?ref=arena/2cde32d6-chat2db" \
+  -o /tmp/PLAN-P.md
+# موردانتظار: ۲۳٬۸۲۹ بایت · sha256 = f525a5143ebe8a3a607012788be0275b2cd12db4352f55e67464f78f767f32fc
+
+§۱ · داوریِ P‑B = «کد: MATCH · سند: MISMATCH (۲ ادعا)»
+----------------------------------------------------
+| ادعای بیلدر | سنجهٔ مستقلِ ممیز | نتیجه |
+| tip = 6ff2685 | gh api branches + git rev-parse ⇒ 6ff268530b2f… | هم‌خوان |
+| ahead ۴ / behind ۰ | همان | هم‌خوان |
+| `git diff --stat main...HEAD` = 24 files، +619/−63 | **24 files changed, 657 insertions(+), 64 deletions(-)** | ناهم‌خوان (CO‑2) |
+| lint rc 0 / خروجی خالی | rc=0، ۳۶ بایت (فقط هدرِ npm) | هم‌خوان |
+| `tsc -b` rc 0 | rc=0، ۰ بایت | هم‌خوان |
+| `npm test` = 49 فایل / 323 passed / 2 skipped | 49 passed | 2 skipped (51) · 323 passed | 10 skipped (333) · 122.16s · FULL_EXIT=0 | هم‌خوان |
+| `tests/driver` = 2 passed | 1 skipped، 17 passed | 1 skipped | همان در TZ=UTC و America/Los_Angeles و Pacific/Kiritimati | هم‌خوان |
+| دو اجرای CLI با sha256 یکسان 4e2aa2b68d54dadc… | دو اجرا، هر دو ۲۴۸ بایت، sha256 = 4e2aa2b68d54dadce4aa973b9967d652715df3d882428aba07e42b2b7fdac2a7 | هم‌خوان |
+| اجرای CLI حدود ۳–۴ ثانیه | ۲٫۸۹ و ۲٫۹۱ ثانیه | هم‌خوان |
+| علتِ skipِ تستِ CLI | `it.skipIf(!process.env.MP_DRIVE_ARGV)` در tests/driver/cli.test.tsx:6 (در LOG درست نوشته‌ای؛ در گزارشت «نبودِ npm» گفته بودی که نادرست است) | LOG درست، گزارش نادرست |
+| INVENTORY `--check` ⇒ rc 0 «فهرست‌ها هم‌خوان‌اند» | **rc=1 · «کهنه: INVENTORY.md»** | ناهم‌خوان (CO‑1) |
+| ردیف‌های `/api/v1` = ۱۶۶ | ۱۶۶ در هر سه ref (main / b3e2b29 / tip) | هم‌خوان |
+| هیچ فایلِ ممنوع | diffِ P‑B = ۷ فایل؛ ۰ مورد از lockfile/requirements/.github/.semgrep/Dockerfile/compose/eslint.config؛ ۰ PNG/رسید/dist | هم‌خوان |
+| بدونِ وابستگیِ تازه | package.json Δ = ۱ خطِ `"drive"`؛ lockfile دست‌نخورده | هم‌خوان |
+
+سنجه‌های افزودهٔ ممیز (خودت گزارش نکردی، من سنجیدم و تأیید شد):
+- probe جهش: `SHOP_TIMEZONE = "UTC"` در src/lib/clock.ts ⇒ **هر ۴ پین قرمز** (4 failed | 13 passed | 1 skipped)؛ پس از بازگردانی (`git diff` = ۰ خط) دوباره 17 passed ⇒ پین‌ها **باربر**ند، نه تزئینی.
+- کنترلِ بدونِ پین: `render Expenses state` بدونِ `clock` ⇒ `from=2026-10-24&to=2026-11-23` (تاریخِ واقعیِ محیط)؛ با `clock 2026-03-20T20:30:00Z` ⇒ `from=2026-02-19&to=2026-03-21`.
+- تستِ skip‌شدهٔ CLI را با `MP_DRIVE_ARGV`/`MP_DRIVE_OUT` اجرا کردم ⇒ 3 files passed، 18 tests passed، و خروجی‌اش **بایت‌به‌بایت** با `npm run drive` یکسان (۲۴۸ بایت، همان sha256).
+- شکلِ خطاها: `DRV-002` با step/message/hint برای صفحهٔ ناشناخته؛ `DRV-001` برای فعلِ ناشناخته ⇒ C5 تأیید.
+
+نتیجهٔ داوری: **کدِ P‑B پذیرفته است** (پایهٔ P‑C همین tip است؛ هیچ revert لازم نیست). دو ناهم‌خوانی فقط در سند است و با §۴ بسته می‌شود.
+علتِ ریشه‌ایِ هر دو: بازتولیدِ INVENTORY و گرفتنِ diff stat **پیش از** نشستنِ متنِ نهاییِ بخشِ LOG (۳۳ سطر) انجام شده. شاهد: ردیفِ committed می‌گوید `EXECUTION-LOG.md | 753 | 119428` در حالی که فایلِ tip **۷۸۶ سطر / ۱۲۶٬۸۳۸ بایت** است (۷۵۳ = عددِ P‑A).
+
+§۲ · دامنهٔ مجازِ P‑C — فقط همین ۶ مسیر
+----------------------------------------------------
+P‑C = P‑3 پلن (کدگذاریِ گیت‌ها) + دو carry-over سند از §۴.
+  1. scripts/docs_gate.py                                (۲۱۲ سطر) — کدهای DOC-###
+  2. scripts/interaction_map.py                          (۴۰۵ سطر) — کدهای MAP-###
+  3. docs/MuscleParadise/audit/GATE-CODES.md             (تازه) — جدولِ مرجعِ کدهای فعال
+  4. mp-app/backend/tests/integration/test_gate_codes.py (تازه) — تستِ red-first
+  5. docs/MuscleParadise/audit/status.json               (فقط ۶ کلیدِ تازه؛ §۶ گامِ ۹)
+  6. docs/MuscleParadise/audit/EXECUTION-LOG.md          (یک بخشِ P‑C) + بازتولیدِ CHECKLIST.md و INVENTORY.md
+
+§۳ · ممنوع‌های مطلق (تخطی = ردِ بسته، بی‌داوری)
+----------------------------------------------------
+- .github/** (هیچ job، step، workflow) · .semgrep/** · هر lockfile · requirements* · Dockerfile/compose
+- mp-app/studio/eslint.config.mjs · ruleset · هر آستانه/تست/skip موجود
+- کدِ محصول: app/**، src/**، mp-app/client/**، scripts/agent_drive.mjs، src/lib/clock.ts
+- share/** · mp-app/backend/var/receipts/** · هر PNG/JPG/PDF/باینری · dist/** · mp.db*
+- وابستگیِ تازه (pip یا npm) — AD‑24: هیچ bump/نصب
+- PR، merge، force-push، amend، history rewrite، push به هر شاخهٔ دیگر
+- «تنگ‌سازیِ `mp-money-float-cast`»، «گاردِ setClock»، «bootstrap منطقه از `/shop/status` (D‑25)» در این بسته **مجوز ندارند** (به ترتیب در P‑F، P‑D، P‑F).
+
+§۴ · دو carry-over الزامی از داوریِ P‑B
+----------------------------------------------------
+CO‑1 (INVENTORY کهنه): در §۶ گام‌های ۱۰→۱۱ ترتیب را رعایت کن: **نخست** متنِ نهاییِ LOG، **سپس** بازتولیدِ INVENTORY/CHECKLIST، **سپس** commit، و بعد `--check` روی درخت ⇒ rc 0.
+    سنجهٔ ممیز برایِ همگرایی: یک بازتولیدِ تازه از tipِ P‑B، INVENTORY را به ۱۷۲۵ سطر با sha256 = 3d782e2266e03f5c33f0872ab6b24fc9848d3d19df6de44228ea4d635c28336e می‌رساند و اجرایِ دوم **همان hash** را می‌دهد (نقطهٔ ثابت)؛ `--check` ⇒ rc 0 «فهرست‌ها هم‌خوان‌اند». سه سطری که تصحیح می‌شوند:
+      «کل فایل‌های ترک‌شده: 1358 (خطوط متنی: 306342 → 306375)» · «| مستندات | 319 | 109602 → 109635 |» · «| مستندات | EXECUTION-LOG.md | 753 | 119428 → 786 | 126838 |»
+CO‑2 (اصلاحیهٔ عددی): در بخشِ P‑Cِ LOG یک سطرِ «اصلاحیهٔ P‑B» بگذار:
+      `git diff --shortstat main...HEAD` روی tipِ P‑B = **24 files changed, 657 insertions(+), 64 deletions(-)** (گزارشِ پیشین ۶۱۹/۶۳ بود، پیش از متنِ نهاییِ LOG گرفته شده).
+    کامیت‌های قبلی را amend نکن؛ اصلاحیه فقط در متنِ تازه.
+
+§۵ · معیارهای پذیرش C1…C10 (هر کدام با سنجهٔ قابلِ بازتولید)
+----------------------------------------------------
+C1  شناسهٔ پایدار: هر تشخیصِ docs_gate ⇒ `DOC-###`، هر تشخیصِ interaction_map ⇒ `MAP-###`. کدهای `DRV-001…DRV-005` (که در P‑B ساخته‌ای) فقط در GATE-CODES.md **ثبت** شوند — بدونِ دست زدن به agent_drive.mjs.
+C2  فرمتِ واحدِ خروجی: `CODE path:line: پیام ← پیشنهاد`. سنجه: نمونهٔ خروجیِ red-first در LOG.
+C3  دسته‌بندیِ کامل (نه fail-fast) با **سقفِ ۲۰ تشخیص در هر دسته** و سپس `+N موردِ دیگر`.
+C4  **معنی عوض نشود.** سنجهٔ الزامی در LOG: خروجیِ هر دو گیت پیش از تغییر و پس از آن، با `sort` و `diff`.
+    تنها تفاوت‌های مجاز: (الف) افزودنِ کد/پیشنهاد به سطرهای تشخیص — که امروز صفر است چون هر دو گیت **سبز**ند و تشخیصی ندارند؛ (ب) سطرِ خلاصهٔ docs_gate: «18 Markdown files, 276 local links» ⇒ «19 Markdown files, 276+N local links» که N = تعدادِ لینک‌های محلیِ داخلِ GATE-CODES.md (باید در LOG عددش را بنویسی).
+    «15 Mermaid diagram block(s)» باید **۱۵ بماند** ⇒ در GATE-CODES.md بلوکِ Mermaid نگذار.
+    هر تفاوتِ دیگر ⇒ hard-stop.
+C5  exit codeها دقیقاً همان بمانند: docs_gate دو مسیر دارد (`raise SystemExit(1)` خطِ ۸۵ · `return 0` خطِ ۲۰۸ · `raise SystemExit(main())` خطِ ۲۱۲) و interaction_map یک مسیر (`sys.exit(main())` خطِ ۴۰۵). سنجه: rc=0 در حالتِ سبزِ واقعی + rc=1 در حالتِ قرمزِ **ساختگی** (سندِ خرابِ موقت در tmp_path که هرگز commit نشود).
+C6  پرچمِ `--json` با کلیدهای `code/path/line/message/suggestion` (آرایه؛ در حالتِ سبز آرایهٔ خالی به‌همراهِ خلاصه). مسیرهای `--check` و `--write-baseline` در interaction_map دست‌نخورده بمانند.
+C7  GATE-CODES.md به `CORE_MARKDOWN_FILES` در docs_gate.py افزوده شود — سنجهٔ ممیز: امروز دامنهٔ گیت **۱۸ فایل** است (`len(CORE_MARKDOWN_FILES) + len(_module_docs()) = 18`) و `docs/MuscleParadise/audit/` در آن فهرست **نیست**، پس بدونِ این افزودن، سندِ تازه اصلاً سنجیده نمی‌شود. همهٔ لینک‌های محلیِ آن باید resolve شوند.
+C8  **red-first:** نخست تست، با قرمزِ واقعیِ محتوایی (انتظارِ `DOC-###` مشخص + فرمتِ C2 روی سندِ خرابِ موقت). قرمزِ ناشی از نبودِ node_modules/venv یا خطای پیکربندی، قرمزِ معتبر **نیست** (درسِ ثبت‌شدهٔ P‑B).
+C9  ترتیبِ سند: بازتولیدِ INVENTORY/CHECKLIST **پس از** متنِ نهاییِ LOG و **پیش از** commit؛ سپس `--check` ⇒ rc 0. اگر کهنه ماند، در کامیتِ بعدی اصلاح کن — هرگز amend.
+C10 بودجه: **≤۲ کامیت + ۱ بخشِ LOG + ۱ push.** کامیتِ ۱ = مواردِ ۱–۴ِ §۲ (کد + تست + سندِ مرجع). کامیتِ ۲ = status.json + بخشِ LOG + بازتولیدِ CHECKLIST.md و INVENTORY.md.
+
+§۶ · ترتیبِ اجرایی (گام‌به‌گام؛ خروجیِ هر گام در LOG)
+----------------------------------------------------
+ 1. `git fetch origin` · `git checkout arena/ff32c436-mp` · اگر شاخهٔ محلی عقب بود `git reset --mixed origin/arena/ff32c436-mp` (بدون force). تأیید: `git rev-parse HEAD` = 6ff268530b2fbc63b848582342d4ad8711a70481.
+ 2. محیطِ python: اگر `/home/user/venv-mp` نبود یک بار بساز:
+      `python3.11 -m venv /home/user/venv-mp && /home/user/venv-mp/bin/pip install -c mp-app/backend/requirements.txt -e 'mp-app/backend[dev]' && /home/user/venv-mp/bin/pip check`
+    انتظار: `No broken requirements found.` و fastapi 0.165.0 / Python 3.11.2. (ممیز هم venvش ناپدید شده بود و با venv کاملِ وابستگی همین سنجه‌ها را گرفت.)
+ 3. **baseline پیش از هر تغییر** (خروجیِ خام + rc در LOG):
+      `python3 scripts/docs_gate.py; echo rc=$?`
+        ⇒ انتظار: rc=0 · یک سطر: `Documentation gate passed: 18 Markdown files, 276 local links, 15 Mermaid diagram block(s), handoff headings, README entrypoints, SVG XML.`
+      `python3 scripts/interaction_map.py --check; echo rc=$?`
+        ⇒ انتظار: rc=0 · یک سطر: `Interaction map gate passed: 31 سطح، 163 مسیر قرارداد، رانش صفر.`
+      `python3 scripts/repo_hygiene_gate.py; echo rc=$?` ⇒ انتظار: rc=0
+      `sort <output> | sha256sum` — موردانتظارِ ممیز (۲۴ کاراکترِ اول):
+        docs_gate = 1730e4d9b55c800ae48adad3… · interaction_map(--check) = 29261bdef03b3369718ccf79… · repo_hygiene = e7635353f6757cbc756c4d26…
+    اگر این hashها در محیطِ تو نیامدند: دلیل را بسنج (نسخهٔ python، وابستگی) و **hard-stop** بده؛ خودسرانه ادامه نده.
+    هشدارِ ممیز: `scripts/interaction_map.py` **بدونِ** `--check` فایلِ نقشه را درجا می‌نویسد (`نقشه نوشته شد: docs/MuscleParadise/architecture/interaction-map-2026-11-19.md`) ⇒ برای سنجش فقط `--check` بزن، وگرنه درخت کثیف می‌شود. همچنین `scripts/build_audit_inventory.py` پرچمِ `--help` **ندارد** و `--help` دادن باعثِ بازنویسیِ درجا می‌شود.
+ 4. red-first: `mp-app/backend/tests/integration/test_gate_codes.py` را بنویس.
+      الگویِ ریشه: `ROOT = Path(__file__).resolve().parents[4]` (سنجهٔ ممیز: از `mp-app/backend/tests/integration/` ⇒ parents[2]=backend، parents[3]=mp-app، **parents[4]=ریشهٔ ریپو**)؛ نمونهٔ موجود: `tests/integration/test_ci_artifacts.py:12`.
+      بارگذاریِ گیت با `importlib.util.spec_from_file_location` روی `ROOT/"scripts"/"docs_gate.py"` (الگو: `test_deploy_gate_branches.py`).
+      اجرای محلی: `cd mp-app/backend && python -m pytest tests/integration/test_gate_codes.py -q` ⇒ قرمزِ محتواییِ واقعی.
+ 5. کدگذاریِ docs_gate.py: DOC-###، فرمتِ C2، سقفِ ۲۰، `--json`، افزودنِ `Path("docs/MuscleParadise/audit/GATE-CODES.md")` به `CORE_MARKDOWN_FILES` (C7).
+ 6. کدگذاریِ interaction_map.py: MAP-###، همان فرمت، سقفِ ۲۰، `--json`؛ `--check`/`--write-baseline` و exit codeها دست‌نخورده (C5/C6).
+ 7. `docs/MuscleParadise/audit/GATE-CODES.md`: جدولِ هر کدِ **فعال** با معنی + راهِ حل + یک نمونهٔ خروجی؛ بخشِ DRV برای `DRV-001…DRV-005` (از `mp-app/studio/scripts/agent_drive.mjs` — فقط ثبت).
+ 8. سبز: pytest همان فایل + اجرای مجددِ baseline گامِ ۳ و `diff`ِ خروجی‌های sort‌شده (C4) در LOG.
+ 9. `docs/MuscleParadise/audit/status.json`: شش کلیدِ تازه با شاهدِ کامیت. توجه: کلیدها با **hyphen ASCII** نوشته می‌شوند (`"F-05"`) نه U+2011 (`"F‑05"`)؛ فایل امروز ۲۴ کلید و ۱۰٬۶۱۶ بایت است و کلیدهای غایب به‌صورتِ پیش‌فرض `OPEN` در CHECKLIST می‌نشینند (`status.get(id, {"status": "OPEN", "note": ""})` در `build_audit_inventory.py:178`) — علتِ همان شش ردیفِ کهنه همین است.
+      F-05 ⇒ FIXED · شاهد `9bfc99d` «WP 2.4: RBAC decision cache + numeric-id normalisation + lock» · ۳ فایلِ تست
+      F-07 ⇒ IN-PROGRESS · شاهد `20c3173` «WP 0.4 (F‑07): per-directory coverage gate»
+      F-16 ⇒ FIXED · شاهد `fe103a4` «WP 4.6: no member_id=-1 sentinel»
+      F-17 ⇒ FIXED · شاهد `0afd240` «WP 2.5 (F‑17): silent except -> log + counter» · `test_wp25_silent_failures.py` سبز
+      F-26 ⇒ FIXED · شاهد `8926fcd` «WP 3.2 (F‑26): one error envelope» · `fastapi_default_detail` ۷۰⇒۰ روی ۸۷۲ سلول
+      F-27 ⇒ FIXED · شاهد `fc402a8` «WP 3.4: member_profile_required 409» · ۲ فایلِ تست
+      ممیز روی main: ‏`test_wp24_rbac_decision_cache` + `test_wp25_silent_failures` + `test_wp32_error_envelope` + `test_wp32_default_detail` ⇒ ۱۶ passed.
+      **F‑11 و F‑30 درست OPEN‌اند — دست نزن.** ‏F‑23 مبهم است ⇒ دست نزن، در LOG یک سطر «مبهم» بنویس.
+      `CHECKLIST.md` را **دستی ویرایش نکن** (تولیدی است؛ خودش در سطرِ ۳ نوشته «دستی ویرایش نکنید») — فقط بازتولید.
+10. متنِ **نهاییِ** بخشِ P‑C در EXECUTION-LOG.md (شاملِ CO‑2 و همهٔ اعدادِ بالا).
+11. بازتولید: `python scripts/build_audit_inventory.py` (با venvِ کامل) ⇒ سپس `--check` ⇒ rc 0.
+      انتظاراتِ ممیز: ردیف‌های `/api/v1` = **۱۶۶** (نه کمتر — اگر کمتر شد یعنی interpreter وابستگی‌کامل نبوده، همان تلهٔ ثبت‌شدهٔ ۱۷۱۹⇒۱۵۵۱) · ردیفِ `EXECUTION-LOG.md` برابرِ اندازهٔ **نهاییِ** همان فایل · `GATE-CODES.md` و `test_gate_codes.py` به فهرستِ فایل‌ها افزوده شده باشند ⇒ «کل فایل‌های ترک‌شده» از ۱۳۵۸ به ۱۳۶۰ می‌رود (اگر دقیقاً دو فایلِ تازه اضافه کنی).
+12. دو کامیت طبقِ C10 و **یک** push به `arena/ff32c436-mp`. هیچ شاخهٔ دیگر، هیچ PR.
+13. CI: ‏۸/۸ سبز روی full sha. اگر job `docs` قرمز شد ⇒ همان کامیت را `git revert` کن و گزارش بده؛ **آستانه را شل نکن.**
+
+§۷ · قالبِ شواهد (بدونِ این، بسته برگشت می‌خورد)
+----------------------------------------------------
+هر عدد = فرمان + خروجیِ خام. نمونه:
+  - فرمان: `python3 scripts/docs_gate.py` ⇒ خروجی: `Documentation gate passed: 19 Markdown files, …` ⇒ rc=0
+  - سنجهٔ زمان/قطعیّت: دو اجرای پشتِ‌سرهم + `sha256sum` هر دو.
+  - برای هر «انتظار»: هم عددِ پیش از تغییر و هم پس از آن.
+
+§۸ · hard-stop — فوراً توقف کن و گزارش بده (خودسرانه تصمیم نگیر)
+----------------------------------------------------
+- هر قرمزی در jobهای CI که با یک `revert` هم برنگشت
+- هر تفاوتِ غیرمنتظره در exit code، شمارِ تشخیص‌ها، یا خلاصهٔ گیت‌ها بیرونِ §۵ C4
+- hashهای baseline گامِ ۳ در محیطِ تو نیامدند
+- نبودِ ابزار/venv پس از یک تلاشِ بازسازی
+- هر پیشنهادِ bump یا نصبِ وابستگی (AD‑24)
+- هر درخواستِ PR/merge/force-push
+
+§۹ · قالبِ گزارشِ پایانی به مالک
+----------------------------------------------------
+SUMMARY P‑C: tip=<sha کامل> · کامیت‌ها=<n> · `git diff --shortstat main...HEAD` = <files> files، +<ins>/−<del> · run=<id> با ۸/۸ ·
+ docs_gate rc=<0> و خلاصهٔ تازه=<…> · interaction_map --check rc=<0> · repo_hygiene rc=<0> ·
+ pytest test_gate_codes ⇒ <n> passed · diffِ sort‌شدهٔ baseline پیش/پس = <فقط خلاصه> ·
+ INVENTORY: `--check` rc=0 · سطرها=<n> · `/api/v1`=۱۶۶ · ردیفِ EXECUTION-LOG=<n>/<bytes> · کل فایل‌های ترک‌شده=<n> ·
+ CO‑1 انجام شد (بله/خیر) · CO‑2 درج شد (بله/خیر) · تخطی‌ها: <فهرست یا «هیچ»>.
+
+— پایانِ مجوزِ P‑C —
