@@ -1,0 +1,33 @@
+// EXAMPLE ONLY. Configure and prove with positive/negative fixtures in PWA-01.
+const features = [
+  'assessment14', 'auth', 'bodycomp', 'chat', 'checkin', 'classes',
+  'feedback', 'home', 'intake', 'notifications', 'nutrition', 'profile',
+  'progress', 'shell', 'shop', 'today', 'wallet',
+];
+module.exports = {
+  forbidden: [
+    {
+      name: 'no-circular',
+      severity: 'error',
+      from: { path: '^src/' },
+      to: { circular: true },
+    },
+    {
+      name: 'no-node-core-in-browser',
+      severity: 'error',
+      from: { path: '^src/' },
+      to: { dependencyTypes: ['core'] },
+    },
+    ...features.map((feature) => ({
+      name: `feature-boundary-${feature}`,
+      severity: 'error',
+      from: { path: `^src/features/${feature}/` },
+      to: { path: `^src/features/(?!${feature}/)` },
+    })),
+  ],
+  options: {
+    doNotFollow: { path: 'node_modules' },
+    tsConfig: { fileName: 'tsconfig.json' },
+    enhancedResolveOptions: { exportsFields: ['exports'], conditionNames: ['import', 'browser', 'default'] },
+  },
+};

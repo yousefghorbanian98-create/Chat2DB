@@ -1,0 +1,37 @@
+%%{init: {"theme":"neutral","themeVariables":{"fontFamily":"DejaVu Sans, sans-serif","fontSize":"19px"},"flowchart":{"htmlLabels":true,"nodeSpacing":42,"rankSpacing":64,"curve":"basis"}}}%%
+flowchart LR
+  subgraph PREP["گام صفر — آماده‌سازی"]
+    direction TB
+    START([شروع زنجیره]) --> P00["PWA-00: دامنه و خط مبنا<br/>کد موجود، معیار موفقیت، D-01…D-11<br/>حفظ Flutter / Android"]
+    P00 --> OWNER{"تصمیم ضروری مالک<br/>ثبت شده؟"}
+    OWNER -->|بله| SCOPE["تعریف micro-loop جاری<br/>هدف و معیار قبولی<br/>فایل‌های مجاز و وابستگی‌ها"]
+    OWNER -->|خیر| BLOCK0["وابستگی نیازمند تصمیم<br/>BLOCKED؛ micro-loop مستقل<br/>انتخاب و اجرا شود"]
+    BLOCK0 --> SCOPE
+  end
+
+  subgraph LOOP["تکرار کنترل‌شده برای هر PWA-xx"]
+    direction TB
+    ARENA["Arena — کدنویس اصلی<br/>بررسی الگوهای موجود<br/>تغییر کوچک در worktree ایزوله"]
+    QA["۶ کنترل متناسب با مرحله<br/>۱ Semgrep + lint/type-check: دریفت و قواعد<br/>۲ dependency-cruiser: اتصال، تداخل و چرخه<br/>۳ Knip: کد/فایل/dependency بلااستفاده<br/>۴ Playwright: دکمه، فرم، داده و خروجی<br/>۵ k6: کاربران مجازی و بار در staging<br/>۶ اسکن امنیت و وابستگی‌ها"]
+    REVIEW["بازبینی مستقل — OpenHands<br/>عیب‌یابی و بازتولید خطا<br/>بررسی توابع؛ ساده‌سازی/بهینه‌سازی<br/>ترمیم فقط ایزوله و قابل‌آزمون"]
+    GATE{"معیارها PASS و<br/>شواهد کامل‌اند؟"}
+    FIX["یافته دارد؟ اصلاح محدود<br/>تلاش/زمان سقف دارد<br/>سپس اجرای مجدد کنترل‌ها"]
+    STOP["UNKNOWN یا سقف تلاش؟<br/>BLOCKED — نه PASS<br/>وابسته‌ها متوقف؛ مستقل‌ها ادامه"]
+    ARENA --> QA --> REVIEW --> GATE
+    GATE -->|یافته| FIX --> QA
+    GATE -->|نامعلوم / سقف تمام| STOP
+  end
+
+  subgraph NEXT["پایان micro-loop و انتشار"]
+    direction TB
+    EVIDENCE["ثبت گزارش و شواهد<br/>تغییرات، آزمون‌ها، ابزارها و یافته‌ها"]
+    HUMAN["تأیید انسانی و merge<br/>گیت امنیت، حریم، مالی، حقوقی و محصول حفظ"]
+    MORE{"PWA دیگری<br/>باقی است؟"}
+    RELEASE["گیت نهایی انتشار<br/>Flutter / Android حفظ می‌شود"]
+    EVIDENCE --> HUMAN --> MORE -->|خیر| RELEASE
+  end
+
+  SCOPE --> ARENA
+  GATE -->|PASS| EVIDENCE
+  MORE -->|بله — micro-loop بعدی| SCOPE
+  STOP --> OWNER

@@ -1,0 +1,964 @@
+{
+  "schema_version": 1,
+  "document_status": "PROPOSED_BREAKDOWN_NOT_IMPLEMENTED",
+  "authored_on": "2026-11-24",
+  "product_repository": "yousefghorbanian98-create/MP",
+  "observed_product_commit": "35d4b35184b4148c658b415bd009fc076bf24e00",
+  "delivery_repository": "yousefghorbanian98-create/Chat2DB",
+  "delivery_branch": "arena/d885a3c9-chat2db",
+  "proposed_pwa_root": "mp-app/pwa-member/",
+  "historical_decision_ids_reserved": [
+    "D-01",
+    "D-02",
+    "D-03",
+    "D-04",
+    "D-05",
+    "D-06",
+    "D-07",
+    "D-08",
+    "D-09",
+    "D-10",
+    "D-11"
+  ],
+  "default_budget": {
+    "total_attempts": 3,
+    "retries": 2,
+    "wall_clock_minutes": 90,
+    "max_handwritten_files_before_split": 8,
+    "max_handwritten_changed_lines_before_split": 400,
+    "external_side_effect_retries": "inspect_remote_state_first"
+  },
+  "mandatory_domain_gates": [
+    "security",
+    "privacy",
+    "finance",
+    "legal",
+    "product"
+  ],
+  "plan": [
+    {
+      "id": "PWA-00",
+      "title_fa": "خط مبنا، دامنه و تصمیم‌ها",
+      "status": "PROPOSED",
+      "depends_on": [],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "AGENTS.md",
+        "README.md",
+        "docs/MuscleParadise/OWNER-DECISIONS.md",
+        "docs/MuscleParadise/RELEASE-CHECKLIST.md",
+        "mp-app/client/lib/features/",
+        "mp-app/backend/api/routes.json"
+      ],
+      "proposed_output_root": "docs/MuscleParadise/pwa/",
+      "acceptance_fa": [
+        "هویت MP و شاخهٔ مجاز و SHA و تغییرهای قبلی ثبت شود؛ در Chat2DB کد محصول ساخته نشود.",
+        "ماتریس برابری ۱۷ حوزه با API/داده/تست و ریسک تهیه شود؛ عدد ۱۶۳ از نو سنجیده شود.",
+        "تعارض baseline وب/Android و تصمیم‌های باز با منبع/مالک/تاریخ ثبت شود؛ فقط بررسی مستقل از تصمیم ادامه یابد.",
+        "ریسک امنیت، حریم، مالی، حقوقی و محصول برای همهٔ برش‌ها تعیین و بستهٔ تصمیم مالک آماده شود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-01",
+      "title_fa": "ابزارهای قطعی و گیت پایه",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-00"
+      ],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "mp-app/backend/pyproject.toml",
+        "mp-app/backend/requirements.txt",
+        "mp-app/studio/package.json",
+        ".github/workflows/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "محیط ابزار از runtime برنامه جدا و نسخه‌ها/مجوزها/lock ثبت شود.",
+        "lint/type-check، گراف وابستگی، dead-code و SAST با کنترل مثبت و منفی روی fixture بی‌خطر اثبات شوند.",
+        "گیت‌های موجود ضعیف نشوند؛ بدهی قبلی جدا از regression جدید با owner ثبت شود.",
+        "نبود مرورگر/دسترسی پایگاه CVE/بازبین به‌صورت UNKNOWN یا BLOCKED ثبت شود، نه PASS."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-02",
+      "title_fa": "اسکلت React/TS و shell فارسی",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-00",
+        "PWA-01"
+      ],
+      "requires_owner_questions": [
+        "Q-01",
+        "Q-02"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/",
+        "mp-app/shared/design-tokens.json",
+        "mp-app/client/lib/features/shell/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "مسیر جدید پس از ADR ایجاد شود؛ Studio و Flutter جابه‌جا یا حذف نشوند.",
+        "routing، layout، RTL، Vazirmatn، خطای عمومی، loading و empty state واقعی باشند.",
+        "TypeScript و build و واحد با شمار غیرصفر سبز؛ هر route deep-link قابل بازکردن باشد.",
+        "مرزهای features/shared/services روشن و وابستگی چرخه‌ای جدید صفر باشد."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-03",
+      "title_fa": "قرارداد OpenAPI و لایهٔ API",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-01",
+        "PWA-02"
+      ],
+      "requires_owner_questions": [
+        "Q-03"
+      ],
+      "source_paths": [
+        "mp-app/backend/api/routes.json",
+        "mp-app/backend/app/main.py",
+        "mp-app/backend/app/security/route_policy.py"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "OpenAPI واقعی از بک‌اند تست همان SHA صادر و hash شود؛ routes.json جای schema نیست.",
+        "types و در صورت تصویب client تولید شوند؛ فایل تولیدی دستی ویرایش نشود و generation drift صفر باشد.",
+        "base URL مرورگر relative باشد؛ در preview، proxy سمت Vite و در production reverse proxy استفاده شود.",
+        "خطاهای ۴۰۱/۴۰۳/۴۰۴/۴۰۹/۴۲۲/۴۲۹/۵۰۳ و timeout/abort طبق قرارداد تست شوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-04",
+      "title_fa": "auth و ورود OTP",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-03"
+      ],
+      "requires_owner_questions": [
+        "Q-03"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/auth/",
+        "mp-app/client/lib/core/session.dart",
+        "mp-app/backend/modules/auth/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "ورود/refresh/خروج با قرارداد فعلی و هویت واقعی تست انجام شود؛ dev OTP در production نمایش داده نشود.",
+        "OTP اشتباه/منقضی/تکراری، rate-limit و refresh همزمان آزمون شوند.",
+        "member دادهٔ کاربر دیگر را نبیند؛ redirect داخلی پس از ورود معتبر باشد.",
+        "پس از انقضای نشست یا قطع شبکه موفقیت جعلی و redirect loop ایجاد نشود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-05",
+      "title_fa": "profile و مدیریت نشست",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-04"
+      ],
+      "requires_owner_questions": [
+        "Q-03"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/profile/",
+        "mp-app/client/lib/core/session.dart",
+        "mp-app/backend/modules/auth/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "خواندن/ویرایش مجاز پروفایل، نشست‌ها و خروج از همه طبق API موجود مهاجرت کنند.",
+        "تغییر شماره، دو OTP و ابطال نشست با ترتیب سرور حفظ شود.",
+        "پروفایل کاربر دیگر، role نامجاز و خطاهای validation تست منفی داشته باشند.",
+        "logout/logout-all داده و کش متعلق به نشست قبلی را طبق سیاست مصوب پاک کند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-06",
+      "title_fa": "manifest، service worker و آپدیت امن",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-02",
+        "PWA-03",
+        "PWA-04"
+      ],
+      "requires_owner_questions": [
+        "Q-04",
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/shared/",
+        "mp-app/client/lib/core/updater/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "manifest، iconها، scope/start_url و standalone در مرورگر هدف بررسی شوند؛ قابلیت نصب روی دستگاه واقعاً تست شود.",
+        "پیش‌فرض طرح: فقط app-shell و دارایی عمومی؛ cache کردن API احراز‌شده، OTP، QR و فیش ممنوع تا تصمیم صریح.",
+        "logout، account-switch و 401 کش حساس را باقی نگذارند؛ تست با دو کاربر مصنوعی انجام شود.",
+        "آپدیت نسخه و rollback استاتیک، دادهٔ فرم را بی‌اجازه دور نریزد؛ staging HTTPS برای service worker لازم است."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-07",
+      "title_fa": "home و عضویت",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-04",
+        "PWA-06"
+      ],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/home/",
+        "mp-app/client/lib/core/membership.dart",
+        "mp-app/backend/modules/membership/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "وضعیت/تاریخ انقضای عضویت از API، نه شمارندهٔ نمایشی، خوانده شود.",
+        "عضو فعال/منقضی/بدون اشتراک و مرز روز با ساعت سرور آزمون شوند.",
+        "میان‌برها به قابلیت واقعی و مجاز متصل و loading/empty/error قابل تشخیص باشند.",
+        "برابری با تست‌های home و membership موجود ثبت شود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-08",
+      "title_fa": "today و تمرین امروز",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-07"
+      ],
+      "requires_owner_questions": [
+        "Q-04"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/today/",
+        "mp-app/backend/modules/programs/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "برنامهٔ تأییدشده، ست/تکرار/بار و volume/readiness فقط از قرارداد سرور نمایش یابند.",
+        "اعداد از LLM یا محاسبهٔ تازهٔ مرورگر ساخته نشوند و نسخهٔ برنامه معلوم باشد.",
+        "برنامهٔ خالی، هنوز تأییدنشده، تغییر برنامه و قطع شبکه تست شوند.",
+        "ثبت عمل وابسته به سرور فقط پس از پاسخ معتبر موفق گزارش شود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-09",
+      "title_fa": "checkin و QR",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-07"
+      ],
+      "requires_owner_questions": [
+        "Q-06",
+        "Q-07"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/checkin/",
+        "mp-app/backend/modules/face_id/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "QR امضاشدهٔ کوتاه‌عمر، انقضا و تاریخچه با رفتار موجود تطبیق داشته باشند؛ cache آفلاین نشوند.",
+        "بازپخش QR، عضو دیگر، QR منقضی و عدم دسترسی سرور/دوربین تست شوند.",
+        "قفل دستگاه با بیومتریک سروری یکی فرض نشود؛ PWA بدون سنجهٔ دستگاه ادعای برابری local_auth نکند.",
+        "اسکنر پذیرش/کیوسک فقط در دامنهٔ مصوب؛ نقش جدید kiosk در backend اختراع نشود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-10",
+      "title_fa": "progress و پیشرفت",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-08"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/progress/",
+        "mp-app/backend/modules/reporting/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "نمودارها از دادهٔ واقعی و واحد/زمان معلوم باشند؛ دادهٔ نمونه به نام عضو نمایش نیابد.",
+        "تاریخچهٔ خالی، نقطهٔ نامعتبر، بازهٔ جلالی و پاسخ خطادار تست شوند.",
+        "عکس بدن/دادهٔ سلامت بدون رضایت و سیاست نگهداری مصوب cache یا تکثیر نشود.",
+        "member فقط دادهٔ خودش را ببیند؛ گزارش و خروجی به مجوز سمت سرور متکی بمانند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-11",
+      "title_fa": "nutrition و ثبت غذا",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-08"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/nutrition/",
+        "mp-app/backend/modules/nutrition/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "وعده/ثبت غذا و کارت تطبیقی از مسیرهای واقعی موجود استفاده کنند؛ منشأ پیشنهاد روشن باشد.",
+        "هدف کالری/ماکرو و ایمنی تغذیه در سرور باقی بماند؛ توصیهٔ پزشکی تازه ساخته نشود.",
+        "مقادیر نامعتبر/منفی، تکرار submit، روز خالی و timeout تست شوند.",
+        "واحد، تاریخ سرور، مالکیت و حالت آفلاین صریح باشند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-12",
+      "title_fa": "assessment14 و غربالگری",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-08"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/assessment14/",
+        "mp-app/backend/modules/axis_assessment/",
+        "mp-app/backend/modules/assessment/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "پرسشنامه/نتیجه فقط بر اساس قرارداد و قواعد فعلی بازسازی شود، نه تفسیر تازهٔ علمی.",
+        "ورودی ناقص/مرزی و محدودیت جمعیتی طبق backend گیت شوند.",
+        "پیام راهنمای تمرین و عدم جایگزینی پزشک حفظ شود؛ تأیید انسانی سلامت حذف نشود.",
+        "تست مالکیت و عدم نشت پاسخ سلامت در log/cache/URL الزامی باشد."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-13",
+      "title_fa": "bodycomp و JP7",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-10",
+        "PWA-12"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/bodycomp/",
+        "mp-app/backend/modules/assessment/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "اندازه‌گیری/نمودار از دادهٔ فعلی و واحد معتبر سرور خوانده شود.",
+        "هیچ معادله یا ضریب تازه بدون مرجع و تأیید علمی اجرا نشود.",
+        "دادهٔ ناقص، دامنهٔ نامجاز، خطای تاریخ/واحد و عضو دیگر تست شوند.",
+        "برابری نتیجه با API و تست‌های موجود به‌صورت fixture مصنوعی ثبت شود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-14",
+      "title_fa": "classes و رزرو/لغو",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-07"
+      ],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/classes/",
+        "mp-app/backend/modules/classes/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "لیست/رزرو/لغو و وضعیت رزرو خود عضو با رفتار فعلی برابر باشند.",
+        "ظرفیت تکمیل، رزرو تکراری، لغو دوباره، موعد گذشته و دو درخواست همزمان تست شوند.",
+        "ملاک زمان و ظرفیت backend باشد؛ خطای ۴۰۹ با پیام قابل اقدام نمایش یابد.",
+        "غیرفعال‌شدن دکمه جای بررسی مالکیت و ظرفیت سمت سرور را نگیرد."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-15",
+      "title_fa": "intake و نتیجهٔ برنامه",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-12"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/intake/",
+        "mp-app/backend/modules/programs/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "ورودی هدف/محدودیت و نمایش نتیجه با قرارداد و محدودیت‌های موجود برابر باشد.",
+        "بدون تأیید مربی، پیشنهاد به‌عنوان برنامهٔ قطعیِ مجاز نمایش داده نشود.",
+        "فرم نیمه‌کاره/ردشده، دادهٔ نامعتبر و خطای شبکه تست شوند.",
+        "ایمنی آسیب/محدودیت و کنترل جمعیت از backend دور زده نشوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-16",
+      "title_fa": "feedback و صف آفلاین محدود",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-08"
+      ],
+      "requires_owner_questions": [
+        "Q-04",
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/feedback/",
+        "mp-app/client/lib/core/offline_feedback_outbox.dart",
+        "mp-app/backend/modules/programs/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "وزن/تکرار اختیاری و بازخورد ست با رفتار موجود تست شود.",
+        "اگر صف آفلاین تصویب شد: فقط همین نوع عمل، شناسهٔ dedupe، سقف تعداد/عمر و وضعیت pending صریح داشته باشد.",
+        "قطع وسط درخواست، تکرار ارسال، پاسخ مبهم و account-switch آزمون شوند؛ ثبت تکراری نشود.",
+        "بدون پشتیبانی idempotency سرور، replay خودکار mutation فعال نشود؛ پرداخت/QR هرگز وارد صف نشوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-17",
+      "title_fa": "notifications و inbox",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-04",
+        "PWA-07"
+      ],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/notifications/",
+        "mp-app/backend/modules/notification/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "inbox و خوانده‌شدن با مسیرهای member-scoped موجود برابر باشند.",
+        "دسترسی به اعلان دیگران، صفحه‌بندی، حالت خالی و خطای شبکه تست شوند.",
+        "عدم پشتیبانی push مرورگر به‌صورت صریح نمایش یابد؛ permission خودکار درخواست نشود.",
+        "push/SMS/n8n واقعی خارج از این مهاجرت، مگر مصوبهٔ جدا باشد."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-18",
+      "title_fa": "chat عضو",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-04",
+        "PWA-07"
+      ],
+      "requires_owner_questions": [
+        "Q-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/chat/",
+        "mp-app/backend/modules/admin/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "مکالمهٔ واقعی و طرف مقابل واقعی نمایش یابند؛ نبود مکالمه empty state باشد.",
+        "برای member مربی یا گفتگوی خودباخود ساختگی ایجاد نشود.",
+        "خواندن/ارسال، عضو دیگر، پیام تکراری و قطع شبکه با API موجود تست شوند.",
+        "متن پیام/توکن در log، analytics یا cache عمومی ذخیره نشود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-19",
+      "title_fa": "wallet، عضویت و فیش خصوصی",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-05",
+        "PWA-07",
+        "PWA-16"
+      ],
+      "requires_owner_questions": [
+        "Q-08"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/wallet/",
+        "mp-app/backend/modules/payments/",
+        "mp-app/backend/modules/membership/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "مبلغ ریالی دقیق و واحد روشن باشد؛ integer ناامن در JS و float برای پول ممنوع، قرارداد bigint/string حفظ شود.",
+        "فیش خصوصی، وضعیت pending/تأیید/رد و مالکیت با API فعلی برابر باشند؛ تصویر فیش موفقیت بانکی محسوب نشود.",
+        "تأیید مستقل انسانی بانک و فعال‌سازی سروری عضویت حفظ شود؛ member مجوز کادر نگیرد.",
+        "دوبارکلیک، replay، مبلغ مرزی، timeout مبهم، عضو دیگر و فیش عمومی تست شوند؛ هیچ پرداخت واقعی اجرا نشود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-20",
+      "title_fa": "shop و سفارش/رسید",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-19"
+      ],
+      "requires_owner_questions": [
+        "Q-08"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/shop/",
+        "mp-app/backend/modules/shop/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "کاتالوگ/ساعت کاری/سفارش و رسید با قابلیت واقعاً مجاز API برابر باشند.",
+        "خرید آنلاین که در baseline با پرچم خاموش است خودکار روشن نشود؛ UI خلاف سیاست فعلی قول خرید ندهد.",
+        "قیمت و جمع از سرور، رسید فقط برای مالک، ساعت کاری از timezone سرور باشد.",
+        "رقابت موجودی، سفارش تکراری، خطای ۴۰۹، لغو و مالکیت رسید با دادهٔ مصنوعی تست شوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-21",
+      "title_fa": "ممیزی یکپارچهٔ حریم و چرخهٔ نشست",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-05",
+        "PWA-06",
+        "PWA-09",
+        "PWA-10",
+        "PWA-11",
+        "PWA-12",
+        "PWA-13",
+        "PWA-15",
+        "PWA-16",
+        "PWA-17",
+        "PWA-18",
+        "PWA-19",
+        "PWA-20"
+      ],
+      "requires_owner_questions": [
+        "Q-04",
+        "Q-05",
+        "Q-06",
+        "Q-07",
+        "Q-08"
+      ],
+      "source_paths": [
+        "mp-app/backend/modules/privacy/",
+        "mp-app/backend/modules/auth/",
+        "mp-app/client/lib/core/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "مرور همهٔ cookie/storage/CacheStorage/IndexedDB/URL/logها با دو عضو مصنوعی انجام شود.",
+        "logout، ابطال نشست، account-switch، پاک‌کردن داده و دورهٔ نگهداری آزمون شوند.",
+        "رضایت لحظهٔ ثبت و مدت انتخابی عضو برای عکس حفظ شود؛ retention تازه حدس زده نشود.",
+        "هیچ دادهٔ حقیقی/چهره/فیش/توکن در Git و evidence و ابزار بازبینی وجود نداشته باشد."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-22",
+      "title_fa": "دسترس‌پذیری، RTL و دستگاه‌ها",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-06",
+        "PWA-07",
+        "PWA-08",
+        "PWA-09",
+        "PWA-10",
+        "PWA-11",
+        "PWA-12",
+        "PWA-13",
+        "PWA-14",
+        "PWA-15",
+        "PWA-16",
+        "PWA-17",
+        "PWA-18",
+        "PWA-19",
+        "PWA-20"
+      ],
+      "requires_owner_questions": [
+        "Q-09"
+      ],
+      "source_paths": [
+        "mp-app/shared/design-tokens.json",
+        "mp-app/studio/src/styles/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "کیبورد، focus، label/error، contrast و reduced-motion با axe + بررسی انسانی تست شوند.",
+        "نصب PWA و QR/دوربین در مرورگر و دستگاه هدف با HTTPS واقعاً آزموده شود.",
+        "نمای موبایل و تبلت، فونت فارسی، تاریخ جلالی و جهت اعداد/ریال بررسی شوند.",
+        "اسکرین‌شات fixture بصری فقط شاهد ظاهر است، نه شاهد کارکرد یا مجوز."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-23",
+      "title_fa": "برابری ۱۷ حوزه و E2E نقش‌ها",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-14",
+        "PWA-15",
+        "PWA-21",
+        "PWA-22"
+      ],
+      "requires_owner_questions": [],
+      "source_paths": [
+        "mp-app/backend/api/routes.json",
+        "mp-app/backend/security/rbac.py",
+        "mp-app/backend/app/security/route_policy.py",
+        "mp-app/client/test/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "۱۷ از ۱۷ حوزه در ماتریس به API/مدل/تست/شاهد مشخص متصل باشند؛ درصد پیشرفت نمایشی ممنوع.",
+        "برای شش نقش + anonymous، دسترسی مجاز/ممنوع و مالکیت منابع از سمت سرور تست شوند.",
+        "E2E روی بک‌اند تست واقعی و دادهٔ مصنوعی اجرا شود؛ mock-only پایان مهاجرت نیست.",
+        "کلیدهای ۴۰۱/۴۰۳/خطای قرارداد و regression Studio و Flutter طبق مصوبه اثبات شوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-24",
+      "title_fa": "بار و کارایی هدفمند",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-23"
+      ],
+      "requires_owner_questions": [
+        "Q-09"
+      ],
+      "source_paths": [
+        "mp-app/backend/tests/load/",
+        "mp-app/backend/modules/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "سناریو، همزمانی/مدت و p95/p99/نرخ خطا قبل از اجرا با مالک ثبت شوند.",
+        "k6 فقط روی staging مصوب با دادهٔ مصنوعی و سقف فشار اجرا شود؛ OTP/SMS/پول واقعی ممنوع.",
+        "خطای مالی دوبل، نشت cross-user، 5xx و rate-limit جدا از latency سنجیده شوند.",
+        "benchmark روی SQLite به Postgres تعمیم داده نشود؛ محیط/SHA/نسخه‌ها در گزارش باشند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-25",
+      "title_fa": "رگرسیون و حفظ Flutter/Android",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-23"
+      ],
+      "requires_owner_questions": [
+        "Q-01"
+      ],
+      "source_paths": [
+        "mp-app/client/",
+        ".github/workflows/",
+        "mp-app/studio/"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "هیچ کد، تست، workflow و منبع Flutter/Android برای سبزشدن PWA پاک یا skip نشود.",
+        "تست/تحلیل/بیلد و آزمون دستگاه طبق baseline مصوب و SHA مربوط گزارش شود.",
+        "اگر ابزار/کلید/دستگاه موجود نیست نتیجه UNKNOWN/BLOCKED بماند، نه استنتاج از وب.",
+        "تغییر بیرون از PWA فقط با نیاز روشن و قرارداد و مجوز همان دامنه انجام شود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-26",
+      "title_fa": "staging وب و تمرین آپدیت/rollback",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-24",
+        "PWA-25"
+      ],
+      "requires_owner_questions": [
+        "Q-01",
+        "Q-11"
+      ],
+      "source_paths": [
+        "mp-app/infra/",
+        ".github/workflows/",
+        "docs/MuscleParadise/RELEASE-CHECKLIST.md"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "دامنه/TLS/مقصد/مجوز deploy صریح باشند؛ انتشار ZIP مستندات چنین مجوزی نیست.",
+        "serve شدن app-shell، deep link، API relative و service worker روی staging واقعی تست شوند.",
+        "bundle/hash/SBOM و artifact همان SHA ثبت؛ secretها از مسیر امن و بیرون ZIP تزریق شوند.",
+        "آپدیت و rollback بدون موفقیت جعلی عملیات مالی و بدون نشت کش تست شوند."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    },
+    {
+      "id": "PWA-27",
+      "title_fa": "گیت نهایی و تحویل محصول",
+      "status": "PROPOSED",
+      "depends_on": [
+        "PWA-26"
+      ],
+      "requires_owner_questions": [
+        "Q-01",
+        "Q-10",
+        "Q-11"
+      ],
+      "source_paths": [
+        "docs/MuscleParadise/RELEASE-CHECKLIST.md",
+        "docs/MuscleParadise/SESSION_HANDOFF.md"
+      ],
+      "proposed_output_root": "mp-app/pwa-member/",
+      "acceptance_fa": [
+        "همهٔ گیت‌های لازم PASS و N/A فقط با دلیل و تأیید؛ UNKNOWN مانع انتشار است.",
+        "تأیید امنیت/حریم/مالی/حقوقی/محصول و بازبینی مستقل واقعی ثبت شوند.",
+        "تأیید انسانی و merge طبق سیاست مصوب؛ نسخه/شاخه/CI/شاهد و ریسک باقی‌مانده معلوم باشند.",
+        "هیچ حذف Flutter/Android یا deploy/پرداخت واقعی از مجوز handoff استنتاج نشود."
+      ],
+      "required_domain_gates": [
+        "security",
+        "privacy",
+        "finance",
+        "legal",
+        "product"
+      ],
+      "evidence_status": "NOT_RUN",
+      "completion_claim": false
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "status": "OPEN_NOT_OWNER_APPROVED",
+  "historical_namespace": "PWA-conversation-unrecovered",
+  "warning_fa": "متن و نگاشت D-01..D-11 تأیید نشده است؛ شماره‌ها رزرو هستند و با D-1 یا D-001 مخزن یکی نیستند. Q-nهای جدیدِ این بسته نگاشت تاریخی ندارند.",
+  "historical_decisions": [
+    {
+      "id": "D-01",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-02",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-03",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-04",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-05",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-06",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-07",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-08",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-09",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-10",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    },
+    {
+      "id": "D-11",
+      "namespace": "PWA-conversation-unrecovered",
+      "status": "BLOCKED",
+      "original_text": null,
+      "source": null,
+      "mapping_verified": false,
+      "owner_decision": null,
+      "reason": "ORIGINAL_TEXT_AND_MAPPING_NOT_VERIFIED",
+      "blocks": "ONLY_WORK_DEPENDENT_ON_THIS_DECISION"
+    }
+  ],
+  "new_questions": [
+    {
+      "id": "Q-01",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "baseline انتشار وب/Android؛ حفظ native در هر حالت",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-02",
+        "PWA-25",
+        "PWA-26",
+        "PWA-27"
+      ]
+    },
+    {
+      "id": "Q-02",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "مسیر PWA و مرز با Studio",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-02"
+      ]
+    },
+    {
+      "id": "Q-03",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "transport نشست و قرارداد API",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-03",
+        "PWA-04",
+        "PWA-05"
+      ]
+    },
+    {
+      "id": "Q-04",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "دامنهٔ آفلاین و outbox محدود",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-06",
+        "PWA-08",
+        "PWA-16",
+        "PWA-21"
+      ]
+    },
+    {
+      "id": "Q-05",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "cache/رضایت/retention دادهٔ حساس",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-06",
+        "PWA-10",
+        "PWA-11",
+        "PWA-12",
+        "PWA-13",
+        "PWA-15",
+        "PWA-16",
+        "PWA-18",
+        "PWA-21"
+      ]
+    },
+    {
+      "id": "Q-06",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "اثبات گیت دستگاه برای QR در مرورگر",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-09",
+        "PWA-21"
+      ]
+    },
+    {
+      "id": "Q-07",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "scope کیوسک و حریم دستگاه مشترک",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-09",
+        "PWA-21"
+      ]
+    },
+    {
+      "id": "Q-08",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "عرضهٔ wallet/manual transfer/shop بدون گسترش اختیار",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-19",
+        "PWA-20",
+        "PWA-21"
+      ]
+    },
+    {
+      "id": "Q-09",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "دستگاه/مرورگر/SLO/فشار staging",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-22",
+        "PWA-24"
+      ]
+    },
+    {
+      "id": "Q-10",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "بازبین مستقل واقعاً موجود و مجاز",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-27"
+      ]
+    },
+    {
+      "id": "Q-11",
+      "namespace": "handoff-1.0.0",
+      "status": "PROPOSED",
+      "question_fa": "دامنه/TLS/مقصد و مجوز اثر خارجی",
+      "historical_mapping": null,
+      "owner_response": null,
+      "source": null,
+      "blocks": [
+        "PWA-26",
+        "PWA-27"
+      ]
+    }
+  ]
+}

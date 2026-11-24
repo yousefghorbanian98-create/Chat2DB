@@ -1,0 +1,11 @@
+# Authored local sample, not a complete security ruleset or an executed gate.
+# Run against approved browser src only, and prove positive/negative controls.
+rules:
+  - id: pwa-browser-no-loopback-url-example
+    languages: [generic]
+    severity: ERROR
+    message: Browser-facing loopback URLs reach the user's device; use an approved relative API URL and server-side proxy.
+    pattern-regex: 'https?://(?:localhost|127[.]0[.]0[.]1)(?::[0-9]+)?'
+    metadata:
+      status: example-not-validated
+      license: MIT

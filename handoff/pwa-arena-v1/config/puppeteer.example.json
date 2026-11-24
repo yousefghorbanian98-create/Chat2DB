@@ -1,0 +1,5 @@
+{
+  "executablePath": "/absolute/path/to/approved/chromium",
+  "headless": true,
+  "args": []
+}

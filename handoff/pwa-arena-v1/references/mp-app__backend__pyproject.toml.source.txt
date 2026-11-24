@@ -1,0 +1,138 @@
+[build-system]
+requires = ["setuptools>=84.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mp-backend"
+version = "0.1.0"
+description = "Muscle Paradise — FastAPI backend (modular monolith)"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "PyJWT>=2.8",
+    "pyotp>=2.9",
+    "casbin>=1.30",
+    "structlog>=24.1",
+    "APScheduler>=3.10",
+    "slowapi>=0.1.10,<0.2",
+    "limits[redis]>=5.8,<6",
+    "redis>=5,<8",
+    "prometheus-client>=0.26,<1",
+    "asgi-correlation-id>=5.0.1,<6",
+    "pynacl>=1.5",
+    "httpx>=0.27",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "setuptools>=84.1",   # PYSEC-2026-3447 / GHSA-xmj3-9gf7-h52w
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "pytest-asyncio>=0.23",
+    "ruff==0.17.6",  # A1.3: اعداد گیت‌ها با 0.17.x اندازه‌گیری شده‌اند؛ bump فقط با تصمیم مالک
+    "bandit>=1.7,<2",
+    "pip-audit>=2.7",
+    "faker>=24.0",
+    # F‑21 (WP 4.5): scripts/dast.py به hypothesis وابسته است؛ قبلاً فقط در محیط توسعه بود.
+    "hypothesis>=6.100",
+    "pyyaml>=6.0",
+    # فقط برای scripts/build_exercise_gifs.py (ساخت دارایی، نه اجرای API).
+    # تست API به آن وابسته نیست: شمارش فریم GIF با پارس بایت‌ها انجام می‌شود.
+    "Pillow>=10.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "api*", "modules*", "db*", "security*", "jobs*", "cache*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"  # WP 0.6: هشدار PytestDeprecationWarning (رفتار فعلی همین است)
+
+# پیکربندی ruff — مبنا: الحاقیهٔ A1.3 §۵ (sha256 6bafdba1…)
+[tool.ruff]
+
+line-length = 100
+extend-exclude = [".venv"]
+target-version = "py311"
+
+
+[tool.ruff.lint]
+select = [
+  # ── آنچه امروز روشن است و درست کار می‌کند ──────────────────────
+  "E", "W", "F", "I", "N", "UP", "B", "SIM",
+
+  # ── باگ‌یاب‌های واقعی که امروز خاموش‌اند ────────────────────────
+  "DTZ",    # datetime بدون timezone ← ۳ باگ واقعی (تهران در برابر UTC)
+  "ASYNC",  # فراخوانی مسدودکننده داخل تابع async
+  "S",      # flake8-bandit داخل ruff (S105/S110/S112/S310/S603/S607/S608/S311)
+  "BLE",    # except کور
+  "TRY",    # tryceratops (TRY400 = از دست رفتن traceback)
+  "LOG", "G",  # خطاهای لاگ‌کردن و قالب لاگ
+  "C90",    # پیچیدگی mccabe ← جایگزین radon/lizard در گیتِ CI
+  "FAST",   # قوانین اختصاصی FastAPI (FAST002 = وابستگی بدون Annotated)
+  "SLF",    # دسترسی به عضو خصوصی (limiter._storage)
+  "FBT",    # تلهٔ بولی در امضا — ۲۱ مورد، سه‌تایش در مسیرِ پول/سبد خرید:
+           # modules/payments/router.py:329,362,364,366 · modules/payments/service.py:254
+           # · modules/shop/router.py:126. توجه: bank_verified در
+           # modules/payments/manual_transfer_policy.py:52 پشتِ * است (keyword-only)
+           # ⇒ FBT آن را نمی‌گیرد و آن هسته پیشاپیس درست طراحی شده است.
+  "ERA",    # کد کامنت‌شده (مرده) — ولی ۱۱/۱۱ یافته‌اش روی این کدبیس کاذب است:
+           # security/rbac.py:146,161 و modules/population/gates.py:11 کامنتِ فارسی‌اند،
+           # db/models/content.py:73 و modules/assessment/equations.py:14-19 مستندِ شکلِ داده.
+           # در WP 0.9 این خانواده را به ignore منتقل کن ⇒ ۴۳۰ به ۴۱۹ می‌رسد.
+  "T20",    # print
+  "A",      # سایه‌زدن builtin
+  "PERF", "PIE", "RET", "RSE", "FURB", "PTH", "SLOT",
+  "PLC", "PLE", "PLW",   # pylint (عمداً بدون PLR2004 = magic-value)
+  "TC", "ARG", "Q", "ISC", "EXE", "PGH", "YTT", "T10", "FIX", "TD",
+  "RUF",    # شامل RUF100 = noqa‌های بلااثر
+
+  # ── عمداً روشن نشدند (فاز ۲، اگر خواستی) ──────────────────────
+  # "D"    → ۱٬۴۹۹ یافتهٔ docstring؛ ارزش دارد ولی یک پروژهٔ جداست
+  # "ANN"  → ۱٬۲۵۹ یافتهٔ type-hint؛ mypy/pyright بهتر این کار را می‌کند
+  # "PLR"  → ۹۴۴ مورد PLR2004 (magic value) بیشترش در تست‌ها
+  # "COM"  → با `ruff format` تضاد دارد
+  # "CPY"  → کپی‌رایت؛ بی‌ربط
+  # "D"/"DOC" → مستندسازی؛ اختیاری
+]
+ignore = [
+  "E501",                    # طول خط را formatter مدیریت می‌کند (همان تصمیم فعلی پروژه)
+  "COM812", "ISC001",        # با `ruff format` تضاد رسمی دارند — هرگز همزمان روشن نشوند
+  "RUF001", "RUF002", "RUF003",  # «ambiguous unicode»: ۱٬۴۹۵ یافتهٔ کاذب از متن فارسیِ پروژه
+  "TRY003", "EM101", "EM102",    # پیامِ خطای فارسیِ inline الگوی عمدی پروژه است (۳۶۰+۳۰۹+۵۱ = ۷۲۰ یافتهٔ نویز)
+  "PLC0415",                     # import تنبل؛ ۹۸۸ مورد، الگوی رایج و بی‌ضرر در این کدبیس
+  "D203", "D213",                  # (اگر روزی "D" روشن شد) تضادهای شناخته‌شده
+  "ERA001",                        # A1.3 گام ۲: ۱۱ یافته روی کدبیس کامنت فارسی مستندساز است (نه کد)، تک‌تک راستی‌آزمایی شد
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10     # امروز ۱۵ تابع بالای این سقف‌اند؛ بدترین ۲۸
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**"          = ["S101", "SLF001", "ARG001", "ARG002", "FBT001", "S311", "PLR2004", "TD", "FIX", "S603", "S607", "S105", "S106"]  # WP 4.5 (S): اجرای دستور محلی مورد اعتماد و رشته‌های fixture در تست‌ها
+"scripts/**"        = ["T201", "S603", "S607", "S310", "FIX", "TD"]
+"db/migrations/**"  = ["ERA001", "E402"]   # F‑22 (WP 4.5): S608 از این لیست حذف شد؛ SQL ساخته‌شده از رشته در migration نیست
+"eval/**"           = ["T201", "S310", "S603"]
+"devtools/**"       = ["T201", "S310", "FAST002"]
+"tests/load/**"     = ["S311", "T201", "PLR2004"]
+
+# isort — چرا این بخش صریح است (باگ CI 2026-11-15):
+# ruff «first-party» را از نصب‌بودن پکیج حدس می‌زند. محلی `mp-backend` با
+# `pip install -e` نصب است، در CI هم نصب می‌شود ولی ترتیب importهای
+# `app.*` و `db.*` یکی درنمی‌آمد: محلی سبز، CI قرمز با یک I001.
+# با تعیین صریح، نتیجه مستقل از محیط می‌شود — همان چیزی که گیت لازم دارد.
+[tool.ruff.lint.isort]
+# همان تصمیم درستِ فعلی پروژه (باگ CI ۲۰۲۶‑۱۱‑۱۵): صریح بماند تا نتیجه مستقل از محیط باشد
+known-first-party = ["app", "api", "db", "engine", "modules", "security", "cache", "jobs", "eval"]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["tests/*", "*/tests/*"]

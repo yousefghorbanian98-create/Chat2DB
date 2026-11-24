@@ -1,0 +1,229 @@
+{
+  "name": "MP-PWA-Arena-Handoff-v1.0.0",
+  "version": "1.0.0",
+  "date_utc": "2026-11-24",
+  "purpose": "Documentation handoff, not an implemented PWA or product release",
+  "product_source_snapshot": "35d4b35184b4148c658b415bd009fc076bf24e00",
+  "delivery_base_commit": "ded065ebaa4cb9430338889cdea3b0ed1ad57836",
+  "excluded_from_this_manifest_to_avoid_self_reference": [
+    "MANIFEST.sha256",
+    "PACKAGE_MANIFEST.json"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 127,
+      "sha256": "a4321862e8ac5af57ffe969c2d901ef7d3c8b01c287261800a2fef69044290a0"
+    },
+    {
+      "path": ".node-version",
+      "bytes": 8,
+      "sha256": "9c579c4eab1d526e689fe7cda201a0ab2f39070304043bb55c459a3d90954250"
+    },
+    {
+      "path": "HANDOFF.fa.html",
+      "bytes": 359392,
+      "sha256": "85617e4955237b9ff1c1a505150393aec822ba736b576bc6d4e98ab54c684c78"
+    },
+    {
+      "path": "HANDOFF.fa.md",
+      "bytes": 88291,
+      "sha256": "2e7f293f7beaa81fe5edf139950f5dc044095802693ba65c344d1616dcd28efa"
+    },
+    {
+      "path": "PWA_PLAN.json",
+      "bytes": 35679,
+      "sha256": "4f290621bec84a04eb6653667047162923f7d6785ea75cff2883d4778b885f7e"
+    },
+    {
+      "path": "README_FIRST.fa.txt",
+      "bytes": 1611,
+      "sha256": "5cce68c4c939ebb6d488f39e605ae46526e1a39ff8ab744380462f8503474a01"
+    },
+    {
+      "path": "VERIFICATION.fa.md",
+      "bytes": 5819,
+      "sha256": "8ec9d6a1c9ea1b360eb53880cc255730ead63540d159cac6a6ed13533290855c"
+    },
+    {
+      "path": "config/README.fa.md",
+      "bytes": 1954,
+      "sha256": "49fc7cbc1422074b01087f41eeb2a60220130fcc0f1e18061977148f858c408f"
+    },
+    {
+      "path": "config/dependency-cruiser.cjs.example",
+      "bytes": 1043,
+      "sha256": "b5ae8e147985c57f8248a5b98a48baad9ed8c26f9be711c6f9a5aa0ca19d206a"
+    },
+    {
+      "path": "config/puppeteer.example.json",
+      "bytes": 96,
+      "sha256": "257415371336a1740d399322a29c5eef5143e1542f93cb48428a79a25ed79dea"
+    },
+    {
+      "path": "config/semgrep-pwa.example.yml",
+      "bytes": 517,
+      "sha256": "54969b4de7cae5f9f3598a991aeb74a3fbf9164a8e432d3df81012d7dc0ae5b8"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.md",
+      "bytes": 1558,
+      "sha256": "80374771c17d3cf4e9f5ed185f20e5eeccb39a09f1dfa198d27f2b95791e6b55"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.mmd",
+      "bytes": 2824,
+      "sha256": "4c55acd57e9bbffbf8e20e5f9de3d5c1036b77ef69912165d50b4e0589daf284"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.png",
+      "bytes": 190709,
+      "sha256": "f266ef4a7aa4a615c586fd7cfd2838fe6969c6eae0b01c6417d775c6f6d005a9"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.svg",
+      "bytes": 81850,
+      "sha256": "657756b5a5fb6f430310fbbd2244db706455104036e152105d405bc25ad519cd"
+    },
+    {
+      "path": "references/LICENSE.source.txt",
+      "bytes": 1637,
+      "sha256": "62a4307987fa8eb0538773f80595ab25bc498a3a72a18d9069376e26147c67f3"
+    },
+    {
+      "path": "references/MP_API_OPERATIONS.csv",
+      "bytes": 29158,
+      "sha256": "caad18a829c809fc0ed68214f6cd9442c2ee2c55c94c955c329edf5820e6255d"
+    },
+    {
+      "path": "references/MP_SOURCE_INVENTORY.json",
+      "bytes": 7758,
+      "sha256": "f749a22d446fe76f4e369d56a2c2459e4ae2f9127866be604323b0f1a2467502"
+    },
+    {
+      "path": "references/README.fa.md",
+      "bytes": 4194,
+      "sha256": "a71c663dcbe31ff64ba6583679d4a2a013fe476861c5f009c1f7f4820a732e1a"
+    },
+    {
+      "path": "references/SOURCE_MANIFEST.json",
+      "bytes": 3006,
+      "sha256": "1d64edbd35efd0eeb7a1dfa7b1b34e6568d542ba774c13df7f769f6c00c03cd3"
+    },
+    {
+      "path": "references/binary-releases.json",
+      "bytes": 7133,
+      "sha256": "d50050bf8b71c11aa78e1580febbd33be8e41f5778fc96c8ccbd5df9f6fd7362"
+    },
+    {
+      "path": "references/github-tool-catalog.json",
+      "bytes": 5623,
+      "sha256": "a482d43af97930390b06e71b063712b759a371f4a0edbd966bc339b4a341bc61"
+    },
+    {
+      "path": "references/mp-api-routes.snapshot.json",
+      "bytes": 74480,
+      "sha256": "b31f05d21508245490359f7733642d813e220792e63dd2725d906827687e60d4"
+    },
+    {
+      "path": "references/mp-app__backend__pyproject.toml.source.txt",
+      "bytes": 7597,
+      "sha256": "5cefc0a33fc6b8a8ffd5e4e4327dbc00c0b4b9bd39206cd745f8755a65132cce"
+    },
+    {
+      "path": "references/mp-app__backend__requirements.txt.source.txt",
+      "bytes": 1686,
+      "sha256": "65494cfc58e5c6c8af91d9b452cc6660d584e0c103b2c27134b18f4106232719"
+    },
+    {
+      "path": "references/mp-app__client__pubspec.yaml.source.txt",
+      "bytes": 1265,
+      "sha256": "2a6199d61ea9c2f5957e9644fd889df8c28829a3e5cbc60dc0b07d4cc81b3166"
+    },
+    {
+      "path": "references/mp-app__studio__package.json.source.txt",
+      "bytes": 1397,
+      "sha256": "3c1e808471bf897e18bab073fbb748206031a5329367b912401b7513b69567d6"
+    },
+    {
+      "path": "references/npm-tool-catalog.json",
+      "bytes": 3129,
+      "sha256": "7173d455f7102e151e9b9cbc6b2512c77601fbd9adddac82516aa9ede8c4ddbb"
+    },
+    {
+      "path": "references/python-tool-catalog.json",
+      "bytes": 225,
+      "sha256": "a1c9bfa3600348e59f151682f77a7739652d7ec5c311899ff348ca4d48d2a05b"
+    },
+    {
+      "path": "scripts/preflight.py",
+      "bytes": 7256,
+      "sha256": "8828a2aed53b22f914b02a6bb2f705efaede87eda8d9f41b3516628eee873e96"
+    },
+    {
+      "path": "scripts/render_diagram.mjs",
+      "bytes": 2269,
+      "sha256": "e409852caaf8075a316bc618474f77e2185a89383c7adb79a02848e593ccb7dd"
+    },
+    {
+      "path": "templates/ADR_TEMPLATE.fa.md",
+      "bytes": 1670,
+      "sha256": "348e9b13325e7e07d003f33c08eac096a5a87384fb09042a50e2fad650be4c23"
+    },
+    {
+      "path": "templates/DECISION_REGISTER.json",
+      "bytes": 7877,
+      "sha256": "3a57220f43604b2a8224a30b0bcce619e56708e23299eed2a82527e5f8693640"
+    },
+    {
+      "path": "templates/EVIDENCE_TEMPLATE.fa.md",
+      "bytes": 2584,
+      "sha256": "17e77fd48aabebf86a3d9a9bf6bc3de6a2fdda4b2cf898924dc2f5ef1786826b"
+    },
+    {
+      "path": "templates/FEATURE_PARITY.csv",
+      "bytes": 3194,
+      "sha256": "03066a5016e7f2fdeda139985dc43dd57a363ad2b4e447b2d553c425c15f809d"
+    },
+    {
+      "path": "templates/INTERACTION_MATRIX.csv",
+      "bytes": 401,
+      "sha256": "9d5c308566a965ddd196b302d078fe081db42954b3b617cd5d5caa883ecb3235"
+    },
+    {
+      "path": "templates/MICROTASK_TEMPLATE.fa.md",
+      "bytes": 2779,
+      "sha256": "34472aa5cc8d81a3675eb9d5e74f997bada032eb232f5e2f25d9d0bb5507e467"
+    },
+    {
+      "path": "templates/RESUME_PROMPT.fa.txt",
+      "bytes": 1218,
+      "sha256": "5f6f3097117d830e8911cc149175145998f1d8ec86a18c58de23277baa242bc2"
+    },
+    {
+      "path": "tooling/diagram/package-lock.json",
+      "bytes": 92485,
+      "sha256": "a01757fb5828f4c98dc2efa198cdec047b78933e328c07b078778577666907c0"
+    },
+    {
+      "path": "tooling/diagram/package.json",
+      "bytes": 308,
+      "sha256": "8eb9f03b1b502d32c2872ecc7a27b488c7e8795a774ef345b0a3abc1f3306320"
+    },
+    {
+      "path": "tooling/node/package-lock.json",
+      "bytes": 68744,
+      "sha256": "c1beeb9ffa950ecd8c834c472478ebe32b68e3f0c240f6e3b9382648613ac632"
+    },
+    {
+      "path": "tooling/node/package.json",
+      "bytes": 460,
+      "sha256": "25e90cb09d145bbeac52c2ade31ef7c19ccdd80aded2286451a126233a904971"
+    },
+    {
+      "path": "tooling/requirements-audit.txt",
+      "bytes": 89,
+      "sha256": "9daa9c4379f9e1a47c5e2bce94629e0a9450888528f90d5e7c971f67fae18849"
+    }
+  ]
+}

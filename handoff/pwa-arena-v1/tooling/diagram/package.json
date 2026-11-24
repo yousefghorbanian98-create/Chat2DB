@@ -1,0 +1,13 @@
+{
+  "name": "mp-pwa-handoff-diagram-tools",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Documentation rendering only; no product dependency",
+  "engines": {
+    "node": ">=22.19.0 <23"
+  },
+  "packageManager": "npm@10.9.8",
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0"
+  }
+}

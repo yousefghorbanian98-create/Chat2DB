@@ -1,0 +1,206 @@
+{
+  "repository": "yousefghorbanian98-create/MP",
+  "commit": "35d4b35184b4148c658b415bd009fc076bf24e00",
+  "observed_on": "2026-11-24",
+  "source_only": true,
+  "checkout_available_in_delivery_repo": false,
+  "features": {
+    "assessment14": [
+      "mp-app/client/lib/features/assessment14/assessment14_page.dart",
+      "mp-app/client/lib/features/assessment14/assessment14_providers.dart"
+    ],
+    "auth": [
+      "mp-app/client/lib/features/auth/otp_page.dart"
+    ],
+    "bodycomp": [
+      "mp-app/client/lib/features/bodycomp/bodycomp_page.dart"
+    ],
+    "chat": [
+      "mp-app/client/lib/features/chat/member_chat_data.dart",
+      "mp-app/client/lib/features/chat/member_chat_page.dart"
+    ],
+    "checkin": [
+      "mp-app/client/lib/features/checkin/checkin_page.dart",
+      "mp-app/client/lib/features/checkin/member_checkin_history.dart"
+    ],
+    "classes": [
+      "mp-app/client/lib/features/classes/classes_page.dart"
+    ],
+    "feedback": [
+      "mp-app/client/lib/features/feedback/feedback_providers.dart",
+      "mp-app/client/lib/features/feedback/offline_feedback_queue_card.dart",
+      "mp-app/client/lib/features/feedback/set_feedback_sheet.dart"
+    ],
+    "home": [
+      "mp-app/client/lib/features/home/home_page.dart"
+    ],
+    "intake": [
+      "mp-app/client/lib/features/intake/intake_page.dart",
+      "mp-app/client/lib/features/intake/program_result.dart"
+    ],
+    "notifications": [
+      "mp-app/client/lib/features/notifications/notifications_page.dart"
+    ],
+    "nutrition": [
+      "mp-app/client/lib/features/nutrition/adaptive_nutrition_card.dart",
+      "mp-app/client/lib/features/nutrition/nutrition_page.dart"
+    ],
+    "profile": [
+      "mp-app/client/lib/features/profile/phone_change_dialog.dart",
+      "mp-app/client/lib/features/profile/profile_page.dart"
+    ],
+    "progress": [
+      "mp-app/client/lib/features/progress/progress_page.dart"
+    ],
+    "shell": [
+      "mp-app/client/lib/features/shell/app_shell.dart"
+    ],
+    "shop": [
+      "mp-app/client/lib/features/shop/my_orders_sheet.dart",
+      "mp-app/client/lib/features/shop/order_receipt_sheet.dart",
+      "mp-app/client/lib/features/shop/shop_page.dart"
+    ],
+    "today": [
+      "mp-app/client/lib/features/today/readiness_card.dart",
+      "mp-app/client/lib/features/today/today_controller.dart",
+      "mp-app/client/lib/features/today/today_page.dart",
+      "mp-app/client/lib/features/today/volume_card.dart"
+    ],
+    "wallet": [
+      "mp-app/client/lib/features/wallet/wallet_ledger.dart",
+      "mp-app/client/lib/features/wallet/wallet_page.dart"
+    ]
+  },
+  "flutter_test_paths": [
+    "mp-app/client/test/adaptive_nutrition_test.dart",
+    "mp-app/client/test/api_client_test.dart",
+    "mp-app/client/test/assessment14_page_test.dart",
+    "mp-app/client/test/bodycomp_real_data_test.dart",
+    "mp-app/client/test/classes_cancel_test.dart",
+    "mp-app/client/test/face_consent_gate_test.dart",
+    "mp-app/client/test/haptics_recorder.dart",
+    "mp-app/client/test/home_banner_test.dart",
+    "mp-app/client/test/home_page_test.dart",
+    "mp-app/client/test/logout_button_test.dart",
+    "mp-app/client/test/logout_test.dart",
+    "mp-app/client/test/member_chat_page_test.dart",
+    "mp-app/client/test/member_checkin_history_test.dart",
+    "mp-app/client/test/membership_test.dart",
+    "mp-app/client/test/motion_haptics_test.dart",
+    "mp-app/client/test/notifications_page_test.dart",
+    "mp-app/client/test/nutrition_food_log_test.dart",
+    "mp-app/client/test/offline_feedback_outbox_test.dart",
+    "mp-app/client/test/phone_change_dialog_test.dart",
+    "mp-app/client/test/qr_biometric_gate_test.dart",
+    "mp-app/client/test/readiness_card_test.dart",
+    "mp-app/client/test/session_refresh_test.dart",
+    "mp-app/client/test/set_feedback_sheet_test.dart",
+    "mp-app/client/test/shop_orders_receipt_test.dart",
+    "mp-app/client/test/shop_page_test.dart",
+    "mp-app/client/test/today_controller_test.dart",
+    "mp-app/client/test/today_page_test.dart",
+    "mp-app/client/test/volume_card_test.dart",
+    "mp-app/client/test/wallet_history_test.dart"
+  ],
+  "backend_modules": [
+    "admin",
+    "ai",
+    "ai_engine",
+    "assessment",
+    "auth",
+    "axis_assessment",
+    "classes",
+    "content",
+    "exercises",
+    "expenses",
+    "face_id",
+    "membership",
+    "notification",
+    "nutrition",
+    "outbox",
+    "payments",
+    "population",
+    "privacy",
+    "programs",
+    "reporting",
+    "reports",
+    "shop",
+    "updates"
+  ],
+  "reference_paths": [
+    "AGENTS.md",
+    "README.md",
+    "docs/MuscleParadise/HANDOFF-PROJECT-2026-11-18.md",
+    "docs/MuscleParadise/OWNER-DECISIONS.md",
+    "docs/MuscleParadise/PLAN-MANUAL-TRANSFER.md",
+    "docs/MuscleParadise/PRD.md",
+    "docs/MuscleParadise/RELEASE-CHECKLIST.md",
+    "docs/MuscleParadise/TODO-CLOUD-FINANCE-ACCESS.md",
+    "docs/MuscleParadise/audit/DECISIONS.md",
+    "mp-app/backend/app/security/route_policy.py",
+    "mp-app/backend/security/rbac.py",
+    "mp-app/studio/vite.config.ts"
+  ],
+  "verified_plan_source_paths": {
+    "AGENTS.md": true,
+    "README.md": true,
+    "docs/MuscleParadise/OWNER-DECISIONS.md": true,
+    "docs/MuscleParadise/RELEASE-CHECKLIST.md": true,
+    "mp-app/client/lib/features/": true,
+    "mp-app/backend/api/routes.json": true,
+    "mp-app/backend/pyproject.toml": true,
+    "mp-app/backend/requirements.txt": true,
+    "mp-app/studio/package.json": true,
+    ".github/workflows/": true,
+    "mp-app/studio/src/": true,
+    "mp-app/shared/design-tokens.json": true,
+    "mp-app/client/lib/features/shell/": true,
+    "mp-app/backend/app/main.py": true,
+    "mp-app/backend/app/security/route_policy.py": true,
+    "mp-app/client/lib/features/auth/": true,
+    "mp-app/client/lib/core/session.dart": true,
+    "mp-app/backend/modules/auth/": true,
+    "mp-app/client/lib/features/profile/": true,
+    "mp-app/shared/": true,
+    "mp-app/client/lib/core/updater/": true,
+    "mp-app/client/lib/features/home/": true,
+    "mp-app/client/lib/core/membership.dart": true,
+    "mp-app/backend/modules/membership/": true,
+    "mp-app/client/lib/features/today/": true,
+    "mp-app/backend/modules/programs/": true,
+    "mp-app/client/lib/features/checkin/": true,
+    "mp-app/backend/modules/face_id/": true,
+    "mp-app/client/lib/features/progress/": true,
+    "mp-app/backend/modules/reporting/": true,
+    "mp-app/client/lib/features/nutrition/": true,
+    "mp-app/backend/modules/nutrition/": true,
+    "mp-app/client/lib/features/assessment14/": true,
+    "mp-app/backend/modules/axis_assessment/": true,
+    "mp-app/backend/modules/assessment/": true,
+    "mp-app/client/lib/features/bodycomp/": true,
+    "mp-app/client/lib/features/classes/": true,
+    "mp-app/backend/modules/classes/": true,
+    "mp-app/client/lib/features/intake/": true,
+    "mp-app/client/lib/features/feedback/": true,
+    "mp-app/client/lib/core/offline_feedback_outbox.dart": true,
+    "mp-app/client/lib/features/notifications/": true,
+    "mp-app/backend/modules/notification/": true,
+    "mp-app/client/lib/features/chat/": true,
+    "mp-app/backend/modules/admin/": true,
+    "mp-app/client/lib/features/wallet/": true,
+    "mp-app/backend/modules/payments/": true,
+    "mp-app/client/lib/features/shop/": true,
+    "mp-app/backend/modules/shop/": true,
+    "mp-app/backend/modules/privacy/": true,
+    "mp-app/client/lib/core/": true,
+    "mp-app/studio/src/styles/": true,
+    "mp-app/backend/security/rbac.py": true,
+    "mp-app/client/test/": true,
+    "mp-app/backend/tests/load/": true,
+    "mp-app/backend/modules/": true,
+    "mp-app/client/": true,
+    "mp-app/studio/": true,
+    "mp-app/infra/": true,
+    "docs/MuscleParadise/SESSION_HANDOFF.md": true
+  }
+}

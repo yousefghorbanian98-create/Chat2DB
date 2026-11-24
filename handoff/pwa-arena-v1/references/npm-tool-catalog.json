@@ -1,0 +1,106 @@
+[
+  {
+    "name": "@mermaid-js/mermaid-cli",
+    "version": "12.2.0",
+    "engines": {
+      "node": ">=22.13.0"
+    },
+    "license": "MIT",
+    "dist_integrity": "sha512-oPfUxf4ly4MEf2wIgJh7DvtCz5mQFn9KFqCOZv5k2Vo7AtCAXO3NULy3W3UpNHDrP05Lbld7Gn6XeUgUWVpA2g==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "dependency-cruiser",
+    "version": "18.9.0",
+    "engines": {
+      "node": "^22||^24||>=26"
+    },
+    "license": "MIT",
+    "dist_integrity": "sha512-b6fjm/8OI0HYRW3Mo/y6GlUMPk//3LPBxd0CsEaPNDJXospJDYG8rpyoz/Izk5xTkfYWEMYl8cTQWupgpmkBOg==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "knip",
+    "version": "6.48.0",
+    "engines": {
+      "node": "^20.19.0 || >=22.12.0"
+    },
+    "license": "ISC",
+    "dist_integrity": "sha512-v+Gfp6uiOeXaaj+Khk2Z7/fTTZYWLnDwxZapQUyy8WoQFLYXiUHXqRdFJTwRnrKNA1gPXTPi5NGTKKLXyImVrg==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@playwright/test",
+    "version": "1.65.1",
+    "engines": {
+      "node": ">=20"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-y+NCIRm2LvY4slUVWvGh1nujJ8RF/hEisIsq2mtUPgdQC4L701bq5hZGMhrpeXjACvwvO9tj5dJqhvM6TP9lbw==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@axe-core/playwright",
+    "version": "4.14.0",
+    "engines": {
+      "node": ">=22.12.0"
+    },
+    "license": "MPL-2.0",
+    "dist_integrity": "sha512-SGUhG5PIHd2eMdpgBF2PyQLOhX+qyDR2PT4cmoS4Qk2ak+jX/rrSvst9l0PGv5WTHolKpUMvVmoHpr4cZgf1RQ==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "openapi-typescript",
+    "version": "7.13.0",
+    "engines": {},
+    "license": "MIT",
+    "dist_integrity": "sha512-EFP392gcqXS7ntPvbhBzbF8TyBA+baIYEm791Hy5YkjDYKTnk/Tn5OQeKm5BIZvJihpp8Zzr4hzx0Irde1LNGQ==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "typescript",
+    "version": "7.0.2",
+    "engines": {
+      "node": ">=16.20.0"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "vite-plugin-pwa",
+    "version": "2.0.0",
+    "engines": {
+      "node": ">=20.19.0"
+    },
+    "license": "MIT",
+    "dist_integrity": "sha512-6G9dsPKT9QKYpeTuTLJM28zZL3HsXUTUM/QUZBEgQk2jbfrPJDq2i8gTewAKqi1c9Mt6MiidrL4SFI+HthiQMg==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "workbox-window",
+    "version": "7.4.1",
+    "engines": {},
+    "license": "MIT",
+    "dist_integrity": "sha512-notZDH2u8VXaqyuD7xaqIfEFi6SRM4SUSd7ewe9PDsVqADuepxX2ZMY3uvuZGxzY5ZOsGC/vD3A/3smFtJt4/A==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "openapi-fetch",
+    "version": "0.17.0",
+    "engines": {},
+    "license": "MIT",
+    "dist_integrity": "sha512-PsbZR1wAPcG91eEthKhN+Zn92FMHxv+/faECIwjXdxfTODGSGegYv0sc1Olz+HYPvKOuoXfp+0pA2XVt2cI0Ig==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@lhci/cli",
+    "version": "0.16.1",
+    "engines": {
+      "node": ">=22.19.0"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-Vh3z9Xkcs4ULrl62NTF9a+c9HL9teyD+dq3TueG4p4oo9ypYbPBb3Ht4YvxHzOyr31rFaiuHqdphpnVZs5SXQw==",
+    "verified_on": "2026-11-24"
+  }
+]

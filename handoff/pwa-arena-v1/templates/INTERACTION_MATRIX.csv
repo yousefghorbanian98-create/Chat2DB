@@ -1,0 +1,2 @@
+interaction_id,pwa_phase,feature,control,role_and_owner,route,event,api_method,api_path,payload_contract,backend_data_effect,loading_state,empty_state,error_state,offline_state,positive_test,negative_ownership_test,evidence,status
+EXAMPLE_NOT_IMPLEMENTED,PWA-xx.n,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,NOT_RUN,PROPOSED
