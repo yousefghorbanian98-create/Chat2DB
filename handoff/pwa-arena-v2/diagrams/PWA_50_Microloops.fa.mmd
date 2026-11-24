@@ -1,0 +1,74 @@
+flowchart TB
+  %% All 50 user-supplied parent IDs. Edges between phase headers are orientation, not the exact DAG.
+  subgraph phase0["فاز 0 · 6 کارت · تثبیت تصمیم و خط مبنا"]
+    direction TB
+    pwa_00["PWA-00 — ثبت تصمیم پلتفرم"]
+    pwa_01["PWA-01 — ممیزی و crosswalk قابلیت‌ها"]
+    pwa_02["PWA-02 — تصویب ماتریس نقش و مجوز"]
+    pwa_03["PWA-03 — سیاست نشست و آفلاین"]
+    pwa_04["PWA-04 — baseline CI و شواهد"]
+    pwa_05["PWA-05 — نقشهٔ محافظت از آثار Flutter/Android"]
+  end
+  subgraph phase1["فاز 1 · 8 کارت · تبدیل Studio به پوستهٔ PWA مشترک"]
+    direction TB
+    pwa_10["PWA-10 — تعیین مرز اپ React"]
+    pwa_11["PWA-11 — مسیرهای URL و deep link"]
+    pwa_12["PWA-12 — shell نقش‌محور و responsive"]
+    pwa_13["PWA-13 — RTL، فارسی و دسترس‌پذیری پایه"]
+    pwa_14["PWA-14 — بازبینی manifest و نصب‌پذیری"]
+    pwa_15["PWA-15 — سیاست ایمن Service Worker"]
+    pwa_16["PWA-16 — به‌روزرسانی PWA"]
+    pwa_17["PWA-17 — fallback مسیرهای SPA در وب‌سرور"]
+  end
+  subgraph phase2["فاز 2 · 5 کارت · هویت، نشست و امنیت دسترسی"]
+    direction TB
+    pwa_20["PWA-20 — ورود OTP مشترک"]
+    pwa_21["PWA-21 — بازیابی و پایان نشست"]
+    pwa_22["PWA-22 — هویت کاربر از سرور"]
+    pwa_23["PWA-23 — route guard و منوی fail-closed"]
+    pwa_24["PWA-24 — ماتریس آزمون منفی API"]
+  end
+  subgraph phase3["فاز 3 · 16 کارت · انتقال تجربه‌های عضو از Flutter به React"]
+    direction TB
+    pwa_30["PWA-30 — shell عضو"]
+    pwa_31["PWA-31 — حساب و عضویت"]
+    pwa_32["PWA-32 — تغییر شماره و نشست‌های دستگاه"]
+    pwa_33["PWA-33 — خانه و برنامهٔ امروز"]
+    pwa_34["PWA-34 — ثبت اجرای تمرین و feedback"]
+    pwa_35["PWA-35 — intake و gate برنامه"]
+    pwa_36["PWA-36 — ارزیابی و روندها"]
+    pwa_37["PWA-37 — تغذیه و ثبت غذا"]
+    pwa_38["PWA-38 — کلاس و رزرو"]
+    pwa_39["PWA-39 — QR حضور"]
+    pwa_3A["PWA-3A — کیف پول و تاریخچه"]
+    pwa_3B["PWA-3B — پرداخت دستی/فیش"]
+    pwa_3C["PWA-3C — فروشگاه عضو"]
+    pwa_3D["PWA-3D — چت"]
+    pwa_3E["PWA-3E — صندوق اعلان"]
+    pwa_3F["PWA-3F — feedback آفلاین، فقط در صورت تصویب"]
+  end
+  subgraph phase4["فاز 4 · 8 کارت · تجربهٔ کارکنان در همان PWA"]
+    direction TB
+    pwa_40["PWA-40 — نگاشت صفحه‌های فعلی Studio به مسیرهای جدید"]
+    pwa_41["PWA-41 — اعضا و پروفایل کارکنان"]
+    pwa_42["PWA-42 — بازبینی برنامه توسط مربی"]
+    pwa_43["PWA-43 — کلاس و check-in کارکنان"]
+    pwa_44["PWA-44 — پرداخت و رسید کارکنان"]
+    pwa_45["PWA-45 — گزارش مالی و هزینه"]
+    pwa_46["PWA-46 — تنظیمات، grants و audit"]
+    pwa_47["PWA-47 — responsive و تعامل‌های کارکنان"]
+  end
+  subgraph phase5["فاز 5 · 7 کارت · آزمون یکپارچه و انتشار محدود"]
+    direction TB
+    pwa_50["PWA-50 — browser E2E با دادهٔ مصنوعی"]
+    pwa_51["PWA-51 — نصب و Service Worker واقعی"]
+    pwa_52["PWA-52 — سازگاری و دسترس‌پذیری"]
+    pwa_53["PWA-53 — حملات نقش/مالکیت و persistence"]
+    pwa_54["PWA-54 — build و انتشار staging"]
+    pwa_55["PWA-55 — آزمون رگرسیون حفظ Flutter/Android"]
+    pwa_56["PWA-56 — Go/No-Go"]
+  end
+  phase0 -.-> phase1 -.-> phase2 -.-> phase3 -.-> phase4 -.-> phase5
+  classDef conditional fill:#fff0d7,stroke:#d58a25,color:#163244;
+  class pwa_3F conditional;
+  %% PWA-3F BLOCKED until explicit offline security/sync/conflict approval; never silently omitted.

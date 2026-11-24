@@ -1,0 +1,4217 @@
+{
+ "paths": [
+  "/api/v1/admin/analytics/churn-risk",
+  "/api/v1/admin/analytics/leaderboards",
+  "/api/v1/admin/attendance",
+  "/api/v1/admin/audit",
+  "/api/v1/admin/checkins",
+  "/api/v1/admin/flags",
+  "/api/v1/admin/flags/{key}",
+  "/api/v1/admin/kpis",
+  "/api/v1/admin/members-summary",
+  "/api/v1/admin/permissions",
+  "/api/v1/admin/permissions/known",
+  "/api/v1/admin/permissions/{grant_id}",
+  "/api/v1/admin/retention",
+  "/api/v1/admin/retention/run",
+  "/api/v1/admin/users",
+  "/api/v1/admin/users/{user_id}/role",
+  "/api/v1/ai/nutrition/generate",
+  "/api/v1/ai/program/generate",
+  "/api/v1/ai/suggest-weight",
+  "/api/v1/assessments",
+  "/api/v1/assessments/jp7",
+  "/api/v1/assessments/jp7/member/{member_id}/trend",
+  "/api/v1/assessments/limb",
+  "/api/v1/assessments/limb/member/{member_id}/report",
+  "/api/v1/assessments/member/{member_id}",
+  "/api/v1/assessments/{assessment_id}",
+  "/api/v1/auth/logout",
+  "/api/v1/auth/logout-all",
+  "/api/v1/auth/otp/request",
+  "/api/v1/auth/otp/verify",
+  "/api/v1/auth/phone-change/confirm",
+  "/api/v1/auth/phone-change/request",
+  "/api/v1/auth/phone-change/verify-old",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/sessions",
+  "/api/v1/auth/sessions/{session_id}",
+  "/api/v1/axis-assessments",
+  "/api/v1/axis-assessments/member/{member_id}",
+  "/api/v1/axis-assessments/{assessment_id}/matrix",
+  "/api/v1/axis-assessments/{assessment_id}/review",
+  "/api/v1/chat/conversations",
+  "/api/v1/chat/conversations/{conversation_id}/messages",
+  "/api/v1/chat/conversations/{conversation_id}/read",
+  "/api/v1/classes",
+  "/api/v1/classes/book",
+  "/api/v1/classes/cancel",
+  "/api/v1/expenses",
+  "/api/v1/expenses/{expense_id}",
+  "/api/v1/expenses/{expense_id}/receipt",
+  "/api/v1/face/checkin",
+  "/api/v1/face/checkin-qr",
+  "/api/v1/face/checkins/{checkin_id}/exit",
+  "/api/v1/face/consent",
+  "/api/v1/face/consent/revoke",
+  "/api/v1/face/deep-status",
+  "/api/v1/face/enroll",
+  "/api/v1/face/enroll/{member_id}",
+  "/api/v1/face/privacy-notice",
+  "/api/v1/face/qr-token",
+  "/api/v1/finance/reports/daily/{run_date}",
+  "/api/v1/finance/reports/period",
+  "/api/v1/finance/reports/schedule",
+  "/api/v1/finance/reports/schedule/{job_key}/run",
+  "/api/v1/health/ready",
+  "/api/v1/library/exercises",
+  "/api/v1/library/exercises/{exercise_id}",
+  "/api/v1/members",
+  "/api/v1/members/me",
+  "/api/v1/members/me/checkins",
+  "/api/v1/members/me/face-consent",
+  "/api/v1/members/memberships",
+  "/api/v1/members/memberships/from-plan",
+  "/api/v1/members/memberships/plans",
+  "/api/v1/members/memberships/{membership_id}/invoice",
+  "/api/v1/members/{member_id}",
+  "/api/v1/members/{member_id}/memberships",
+  "/api/v1/metrics",
+  "/api/v1/notifications",
+  "/api/v1/notifications/member/{member_id}",
+  "/api/v1/notifications/reminders/member/{member_id}",
+  "/api/v1/notifications/{notification_id}/read",
+  "/api/v1/nutrition/food-logs",
+  "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+  "/api/v1/nutrition/foods",
+  "/api/v1/nutrition/member/{member_id}/adaptive",
+  "/api/v1/nutrition/plans",
+  "/api/v1/nutrition/plans/member/{member_id}",
+  "/api/v1/nutrition/plans/{plan_id}/approve",
+  "/api/v1/nutrition/weight-logs",
+  "/api/v1/payments",
+  "/api/v1/payments/coupons",
+  "/api/v1/payments/finance/commission",
+  "/api/v1/payments/finance/export.csv",
+  "/api/v1/payments/finance/summary",
+  "/api/v1/payments/invoice/{member_id}",
+  "/api/v1/payments/ledger/{entry_id}/reverse",
+  "/api/v1/payments/ledger/{member_id}",
+  "/api/v1/payments/wallet/charge",
+  "/api/v1/payments/wallet/pay",
+  "/api/v1/payments/wallet/{member_id}",
+  "/api/v1/payments/wallet/{member_id}/transactions",
+  "/api/v1/payments/{payment_id}/approve",
+  "/api/v1/payments/{payment_id}/callback",
+  "/api/v1/payments/{payment_id}/fail",
+  "/api/v1/payments/{payment_id}/gateway-return",
+  "/api/v1/payments/{payment_id}/receipt",
+  "/api/v1/payments/{payment_id}/refund",
+  "/api/v1/payments/{payment_id}/reject",
+  "/api/v1/payments/{payment_id}/start",
+  "/api/v1/payments/{payment_id}/verify",
+  "/api/v1/population/gate-check",
+  "/api/v1/population/intake/next",
+  "/api/v1/population/paths",
+  "/api/v1/programs",
+  "/api/v1/programs/from-engine",
+  "/api/v1/programs/member/{member_id}",
+  "/api/v1/programs/member/{member_id}/readiness",
+  "/api/v1/programs/member/{member_id}/volume",
+  "/api/v1/programs/set-feedback",
+  "/api/v1/programs/sync/set-feedback",
+  "/api/v1/programs/{program_id}",
+  "/api/v1/programs/{program_id}/approve",
+  "/api/v1/programs/{program_id}/reject",
+  "/api/v1/reports/confidential/{member_id}",
+  "/api/v1/shop/cart",
+  "/api/v1/shop/cart/{item_id}",
+  "/api/v1/shop/categories",
+  "/api/v1/shop/change-requests",
+  "/api/v1/shop/change-requests/{request_id}/review",
+  "/api/v1/shop/checkout",
+  "/api/v1/shop/gateways",
+  "/api/v1/shop/gateways/{gateway_id}",
+  "/api/v1/shop/orders",
+  "/api/v1/shop/orders/{order_id}",
+  "/api/v1/shop/orders/{order_id}/receipt",
+  "/api/v1/shop/prices",
+  "/api/v1/shop/products",
+  "/api/v1/shop/products/{product_id}",
+  "/api/v1/shop/status",
+  "/api/v1/updates/manifest",
+  "/health"
+ ],
+ "operations": [
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/analytics/churn-risk",
+   "operationId": "_churn_risk_api_v1_admin_analytics_churn_risk_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/analytics/leaderboards",
+   "operationId": "_leaderboards_api_v1_admin_analytics_leaderboards_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/attendance",
+   "operationId": "attendance_api_v1_admin_attendance_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/audit",
+   "operationId": "list_audit_api_v1_admin_audit_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/checkins",
+   "operationId": "checkins_api_v1_admin_checkins_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/flags",
+   "operationId": "list_flags_api_v1_admin_flags_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PUT",
+   "path": "/api/v1/admin/flags",
+   "operationId": "set_flag_api_v1_admin_flags_put",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/flags/{key}",
+   "operationId": "get_flag_api_v1_admin_flags__key__get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/kpis",
+   "operationId": "_kpis_api_v1_admin_kpis_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/members-summary",
+   "operationId": "members_summary_api_v1_admin_members_summary_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/permissions",
+   "operationId": "permissions_list_api_v1_admin_permissions_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/admin/permissions",
+   "operationId": "permissions_grant_api_v1_admin_permissions_post",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/permissions/known",
+   "operationId": "permissions_known_api_v1_admin_permissions_known_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/admin/permissions/{grant_id}",
+   "operationId": "permissions_revoke_api_v1_admin_permissions__grant_id__delete",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/retention",
+   "operationId": "preview_api_v1_admin_retention_get",
+   "tags": [
+    "privacy"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/admin/retention/run",
+   "operationId": "run_api_v1_admin_retention_run_post",
+   "tags": [
+    "privacy"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/admin/users",
+   "operationId": "users_list_api_v1_admin_users_get",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/admin/users/{user_id}/role",
+   "operationId": "revoke_role_api_v1_admin_users__user_id__role_delete",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/admin/users/{user_id}/role",
+   "operationId": "grant_role_api_v1_admin_users__user_id__role_post",
+   "tags": [
+    "admin"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/ai/nutrition/generate",
+   "operationId": "generate_nutrition_api_v1_ai_nutrition_generate_post",
+   "tags": [
+    "ai-engine"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/ai/program/generate",
+   "operationId": "generate_program_api_v1_ai_program_generate_post",
+   "tags": [
+    "ai-engine"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/ai/suggest-weight",
+   "operationId": "suggest_weight_api_v1_ai_suggest_weight_post",
+   "tags": [
+    "ai"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/assessments",
+   "operationId": "create_assessment_api_v1_assessments_post",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/assessments/jp7",
+   "operationId": "record_jp7_api_v1_assessments_jp7_post",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/assessments/jp7/member/{member_id}/trend",
+   "operationId": "jp7_trend_api_v1_assessments_jp7_member__member_id__trend_get",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/assessments/limb",
+   "operationId": "record_limb_api_v1_assessments_limb_post",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/assessments/limb/member/{member_id}/report",
+   "operationId": "segmental_report_api_v1_assessments_limb_member__member_id__report_get",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/assessments/member/{member_id}",
+   "operationId": "list_member_assessments_api_v1_assessments_member__member_id__get",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/assessments/{assessment_id}",
+   "operationId": "get_assessment_api_v1_assessments__assessment_id__get",
+   "tags": [
+    "assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/logout",
+   "operationId": "logout_api_v1_auth_logout_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/logout-all",
+   "operationId": "logout_all_api_v1_auth_logout_all_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/otp/request",
+   "operationId": "otp_request_api_v1_auth_otp_request_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/otp/verify",
+   "operationId": "otp_verify_api_v1_auth_otp_verify_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/phone-change/confirm",
+   "operationId": "phone_change_confirm_api_v1_auth_phone_change_confirm_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/phone-change/request",
+   "operationId": "phone_change_request_api_v1_auth_phone_change_request_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/phone-change/verify-old",
+   "operationId": "phone_change_verify_old_api_v1_auth_phone_change_verify_old_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/auth/refresh",
+   "operationId": "refresh_api_v1_auth_refresh_post",
+   "tags": [
+    "auth"
+   ],
+   "guards": [],
+   "scopes": [
+    "body_credential"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "may"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/auth/sessions",
+   "operationId": "sessions_api_v1_auth_sessions_get",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/auth/sessions/{session_id}",
+   "operationId": "revoke_session_api_v1_auth_sessions__session_id__delete",
+   "tags": [
+    "auth"
+   ],
+   "guards": [
+    "authenticated"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/axis-assessments",
+   "operationId": "create_assessment_api_v1_axis_assessments_post",
+   "tags": [
+    "axis-assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/axis-assessments/member/{member_id}",
+   "operationId": "list_member_history_api_v1_axis_assessments_member__member_id__get",
+   "tags": [
+    "axis-assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/axis-assessments/{assessment_id}/matrix",
+   "operationId": "get_matrix_api_v1_axis_assessments__assessment_id__matrix_get",
+   "tags": [
+    "axis-assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/axis-assessments/{assessment_id}/review",
+   "operationId": "review_assessment_api_v1_axis_assessments__assessment_id__review_post",
+   "tags": [
+    "axis-assessment"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/chat/conversations",
+   "operationId": "list_conversations_api_v1_chat_conversations_get",
+   "tags": [
+    "chat"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/chat/conversations",
+   "operationId": "open_conversation_api_v1_chat_conversations_post",
+   "tags": [
+    "chat"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+   "operationId": "list_messages_api_v1_chat_conversations__conversation_id__messages_get",
+   "tags": [
+    "chat"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/chat/conversations/{conversation_id}/messages",
+   "operationId": "send_message_api_v1_chat_conversations__conversation_id__messages_post",
+   "tags": [
+    "chat"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/chat/conversations/{conversation_id}/read",
+   "operationId": "mark_read_api_v1_chat_conversations__conversation_id__read_post",
+   "tags": [
+    "chat"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/classes",
+   "operationId": "list_classes_api_v1_classes_get",
+   "tags": [
+    "classes"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/classes",
+   "operationId": "create_class_api_v1_classes_post",
+   "tags": [
+    "classes"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/classes/book",
+   "operationId": "book_api_v1_classes_book_post",
+   "tags": [
+    "classes"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/classes/cancel",
+   "operationId": "cancel_api_v1_classes_cancel_post",
+   "tags": [
+    "classes"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/expenses",
+   "operationId": "list_expenses_api_v1_expenses_get",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.read",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/expenses",
+   "operationId": "create_expense_api_v1_expenses_post",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/expenses/{expense_id}",
+   "operationId": "delete_expense_api_v1_expenses__expense_id__delete",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PATCH",
+   "path": "/api/v1/expenses/{expense_id}",
+   "operationId": "update_expense_api_v1_expenses__expense_id__patch",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/expenses/{expense_id}/receipt",
+   "operationId": "read_expense_receipt_api_v1_expenses__expense_id__receipt_get",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.read",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/expenses/{expense_id}/receipt",
+   "operationId": "upload_expense_receipt_api_v1_expenses__expense_id__receipt_post",
+   "tags": [
+    "expenses"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/checkin",
+   "operationId": "check_in_api_v1_face_checkin_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/checkin-qr",
+   "operationId": "checkin_qr_api_v1_face_checkin_qr_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/checkins/{checkin_id}/exit",
+   "operationId": "checkin_exit_api_v1_face_checkins__checkin_id__exit_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/consent",
+   "operationId": "grant_consent_api_v1_face_consent_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/consent/revoke",
+   "operationId": "revoke_consent_api_v1_face_consent_revoke_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/face/deep-status",
+   "operationId": "deep_status_api_v1_face_deep_status_get",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/face/enroll",
+   "operationId": "enroll_api_v1_face_enroll_post",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/face/enroll/{member_id}",
+   "operationId": "delete_face_api_v1_face_enroll__member_id__delete",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/face/privacy-notice",
+   "operationId": "privacy_notice_api_v1_face_privacy_notice_get",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/face/qr-token",
+   "operationId": "qr_token_api_v1_face_qr_token_get",
+   "tags": [
+    "face-id"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/finance/reports/daily/{run_date}",
+   "operationId": "daily_api_v1_finance_reports_daily__run_date__get",
+   "tags": [
+    "reports"
+   ],
+   "guards": [
+    "grant:finance.read",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/finance/reports/period",
+   "operationId": "period_api_v1_finance_reports_period_get",
+   "tags": [
+    "reports"
+   ],
+   "guards": [
+    "grant:finance.read",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/finance/reports/schedule",
+   "operationId": "schedule_status_api_v1_finance_reports_schedule_get",
+   "tags": [
+    "reports"
+   ],
+   "guards": [
+    "grant:finance.read",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/finance/reports/schedule/{job_key}/run",
+   "operationId": "run_job_api_v1_finance_reports_schedule__job_key__run_post",
+   "tags": [
+    "reports"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/health/ready",
+   "operationId": "ready_api_v1_health_ready_get",
+   "tags": [
+    "health"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/library/exercises",
+   "operationId": "list_exercises_api_v1_library_exercises_get",
+   "tags": [
+    "library"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/library/exercises/{exercise_id}",
+   "operationId": "get_exercise_api_v1_library_exercises__exercise_id__get",
+   "tags": [
+    "library"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members",
+   "operationId": "list_members_api_v1_members_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/members",
+   "operationId": "create_member_api_v1_members_post",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/me",
+   "operationId": "get_me_api_v1_members_me_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PUT",
+   "path": "/api/v1/members/me",
+   "operationId": "update_me_api_v1_members_me_put",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/me/checkins",
+   "operationId": "my_checkins_api_v1_members_me_checkins_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/me/face-consent",
+   "operationId": "my_face_consent_api_v1_members_me_face_consent_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/members/memberships",
+   "operationId": "create_membership_api_v1_members_memberships_post",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/members/memberships/from-plan",
+   "operationId": "create_from_plan_api_v1_members_memberships_from_plan_post",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/memberships/plans",
+   "operationId": "list_plans_api_v1_members_memberships_plans_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/memberships/{membership_id}/invoice",
+   "operationId": "get_invoice_api_v1_members_memberships__membership_id__invoice_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/{member_id}",
+   "operationId": "get_member_api_v1_members__member_id__get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "PATCH",
+   "path": "/api/v1/members/{member_id}",
+   "operationId": "update_member_api_v1_members__member_id__patch",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/members/{member_id}/memberships",
+   "operationId": "member_memberships_api_v1_members__member_id__memberships_get",
+   "tags": [
+    "members"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/metrics",
+   "operationId": "prometheus_metrics_api_v1_metrics_get",
+   "tags": [
+    "health"
+   ],
+   "guards": [
+    "metrics_token"
+   ],
+   "scopes": [],
+   "roles": [],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/notifications",
+   "operationId": "send_api_v1_notifications_post",
+   "tags": [
+    "notifications"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/notifications/member/{member_id}",
+   "operationId": "list_notifications_api_v1_notifications_member__member_id__get",
+   "tags": [
+    "notifications"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/notifications/reminders/member/{member_id}",
+   "operationId": "member_reminders_api_v1_notifications_reminders_member__member_id__get",
+   "tags": [
+    "notifications"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/notifications/{notification_id}/read",
+   "operationId": "mark_read_api_v1_notifications__notification_id__read_post",
+   "tags": [
+    "notifications"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/nutrition/food-logs",
+   "operationId": "log_food_api_v1_nutrition_food_logs_post",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+   "operationId": "daily_summary_api_v1_nutrition_food_logs_member__member_id__daily_get",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/nutrition/foods",
+   "operationId": "search_foods_api_v1_nutrition_foods_get",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/nutrition/member/{member_id}/adaptive",
+   "operationId": "adaptive_report_api_v1_nutrition_member__member_id__adaptive_get",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/nutrition/plans",
+   "operationId": "create_plan_api_v1_nutrition_plans_post",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/nutrition/plans/member/{member_id}",
+   "operationId": "list_member_plans_api_v1_nutrition_plans_member__member_id__get",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/nutrition/plans/{plan_id}/approve",
+   "operationId": "approve_plan_api_v1_nutrition_plans__plan_id__approve_post",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/nutrition/weight-logs",
+   "operationId": "log_weight_api_v1_nutrition_weight_logs_post",
+   "tags": [
+    "nutrition"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments",
+   "operationId": "list_payments_api_v1_payments_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments",
+   "operationId": "create_payment_api_v1_payments_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/coupons",
+   "operationId": "list_coupons_api_v1_payments_coupons_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/coupons",
+   "operationId": "create_coupon_api_v1_payments_coupons_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/finance/commission",
+   "operationId": "_commission_api_v1_payments_finance_commission_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/finance/export.csv",
+   "operationId": "_finance_csv_api_v1_payments_finance_export_csv_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/finance/summary",
+   "operationId": "_finance_summary_api_v1_payments_finance_summary_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/invoice/{member_id}",
+   "operationId": "invoice_api_v1_payments_invoice__member_id__get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/ledger/{entry_id}/reverse",
+   "operationId": "ledger_reverse_api_v1_payments_ledger__entry_id__reverse_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/ledger/{member_id}",
+   "operationId": "ledger_list_api_v1_payments_ledger__member_id__get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/wallet/charge",
+   "operationId": "wallet_charge_api_v1_payments_wallet_charge_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/wallet/pay",
+   "operationId": "wallet_pay_api_v1_payments_wallet_pay_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/wallet/{member_id}",
+   "operationId": "wallet_balance_api_v1_payments_wallet__member_id__get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/wallet/{member_id}/transactions",
+   "operationId": "wallet_transactions_api_v1_payments_wallet__member_id__transactions_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/approve",
+   "operationId": "approve_receipt_api_v1_payments__payment_id__approve_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/callback",
+   "operationId": "gateway_callback_api_v1_payments__payment_id__callback_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/fail",
+   "operationId": "fail_payment_api_v1_payments__payment_id__fail_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/{payment_id}/gateway-return",
+   "operationId": "gateway_return_api_v1_payments__payment_id__gateway_return_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/payments/{payment_id}/receipt",
+   "operationId": "receipt_api_v1_payments__payment_id__receipt_get",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/receipt",
+   "operationId": "upload_receipt_api_v1_payments__payment_id__receipt_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/refund",
+   "operationId": "refund_payment_endpoint_api_v1_payments__payment_id__refund_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission",
+    "roles"
+   ],
+   "scopes": [],
+   "roles": [
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/reject",
+   "operationId": "reject_receipt_api_v1_payments__payment_id__reject_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/start",
+   "operationId": "start_payment_api_v1_payments__payment_id__start_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/payments/{payment_id}/verify",
+   "operationId": "verify_payment_api_v1_payments__payment_id__verify_post",
+   "tags": [
+    "payments"
+   ],
+   "guards": [
+    "grant:finance.write",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/population/gate-check",
+   "operationId": "gate_check_api_v1_population_gate_check_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/population/intake/next",
+   "operationId": "intake_next_api_v1_population_intake_next_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/population/paths",
+   "operationId": "paths_api_v1_population_paths_get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/programs",
+   "operationId": "list_programs_api_v1_programs_get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/programs/from-engine",
+   "operationId": "create_from_engine_api_v1_programs_from_engine_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/programs/member/{member_id}",
+   "operationId": "list_member_programs_api_v1_programs_member__member_id__get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/programs/member/{member_id}/readiness",
+   "operationId": "member_readiness_api_v1_programs_member__member_id__readiness_get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/programs/member/{member_id}/volume",
+   "operationId": "member_volume_api_v1_programs_member__member_id__volume_get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/programs/set-feedback",
+   "operationId": "set_feedback_api_v1_programs_set_feedback_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/programs/sync/set-feedback",
+   "operationId": "sync_set_feedback_api_v1_programs_sync_set_feedback_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "owner_scope"
+   ],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/programs/{program_id}",
+   "operationId": "get_program_api_v1_programs__program_id__get",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/programs/{program_id}/approve",
+   "operationId": "approve_program_api_v1_programs__program_id__approve_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/programs/{program_id}/reject",
+   "operationId": "reject_program_api_v1_programs__program_id__reject_post",
+   "tags": [
+    "programs"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/reports/confidential/{member_id}",
+   "operationId": "confidential_report_api_v1_reports_confidential__member_id__get",
+   "tags": [
+    "reports"
+   ],
+   "guards": [
+    "grant:reports.confidential",
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "coach",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "coach",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/cart",
+   "operationId": "cart_api_v1_shop_cart_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/cart",
+   "operationId": "cart_add_api_v1_shop_cart_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "DELETE",
+   "path": "/api/v1/shop/cart/{item_id}",
+   "operationId": "cart_remove_api_v1_shop_cart__item_id__delete",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PATCH",
+   "path": "/api/v1/shop/cart/{item_id}",
+   "operationId": "cart_update_api_v1_shop_cart__item_id__patch",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/categories",
+   "operationId": "categories_api_v1_shop_categories_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/change-requests",
+   "operationId": "change_requests_api_v1_shop_change_requests_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/change-requests",
+   "operationId": "change_request_create_api_v1_shop_change_requests_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/change-requests/{request_id}/review",
+   "operationId": "change_request_review_api_v1_shop_change_requests__request_id__review_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/checkout",
+   "operationId": "checkout_api_v1_shop_checkout_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/gateways",
+   "operationId": "gateways_api_v1_shop_gateways_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/gateways",
+   "operationId": "gateway_create_api_v1_shop_gateways_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PUT",
+   "path": "/api/v1/shop/gateways/{gateway_id}",
+   "operationId": "gateway_update_api_v1_shop_gateways__gateway_id__put",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/orders",
+   "operationId": "orders_api_v1_shop_orders_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PATCH",
+   "path": "/api/v1/shop/orders/{order_id}",
+   "operationId": "order_status_api_v1_shop_orders__order_id__patch",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/orders/{order_id}/receipt",
+   "operationId": "order_receipt_api_v1_shop_orders__order_id__receipt_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/prices",
+   "operationId": "prices_api_v1_shop_prices_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/prices",
+   "operationId": "price_upsert_api_v1_shop_prices_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/products",
+   "operationId": "products_api_v1_shop_products_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "POST",
+   "path": "/api/v1/shop/products",
+   "operationId": "create_product_api_v1_shop_products_post",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/products/{product_id}",
+   "operationId": "product_detail_api_v1_shop_products__product_id__get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "PATCH",
+   "path": "/api/v1/shop/products/{product_id}",
+   "operationId": "update_product_api_v1_shop_products__product_id__patch",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [
+    "super_admin_only"
+   ],
+   "roles": [
+    "super_admin"
+   ],
+   "always_roles": [
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/shop/status",
+   "operationId": "status_api_v1_shop_status_get",
+   "tags": [
+    "shop"
+   ],
+   "guards": [
+    "permission"
+   ],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "never"
+  },
+  {
+   "method": "GET",
+   "path": "/api/v1/updates/manifest",
+   "operationId": "manifest_api_v1_updates_manifest_get",
+   "tags": [
+    "updates"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  },
+  {
+   "method": "GET",
+   "path": "/health",
+   "operationId": "health_health_get",
+   "tags": [
+    "health"
+   ],
+   "guards": [],
+   "scopes": [],
+   "roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "always_roles": [
+    "member",
+    "coach",
+    "reception",
+    "manager",
+    "admin",
+    "super_admin"
+   ],
+   "anonymous": "always"
+  }
+ ]
+}

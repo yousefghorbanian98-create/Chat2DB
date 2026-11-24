@@ -1,0 +1,15 @@
+مأموریت: ادامهٔ طرح منتخب ۵۰میکرولوپی React PWA برای Muscle Paradise؛ از PWA-00، نه ساخت اپ دوم.
+
+این بسته v2.0.0 برنامه است و هیچ ادعای اجرای محصول/تأیید مالک/Go ندارد.
+۱) README_FIRST.fa.txt، HANDOFF.fa.md، SOURCE_PLAN.fa.md و FINN_LOOP_FINAL.fa.md را بخوان؛ ۵۰ شناسه با فازهای ۶/۸/۵/۱۶/۸/۷، شامل 3A…3F، حفظ شود. PWA-56 عدد count نیست.
+۲) MP مخزن محصول است؛ Chat2DB فقط میزبان ZIP. repo/شاخه/HEAD/status، AGENTS و صف/هندآف واقعاً جاری را تأیید کن. هیچ switch/create branch/reset/clean/stash/overwrite دیگران از این prompt مجوز ندارد. pin مطالعهٔ بسته c46e792657e361cd09799c896c47149b4a5c4d86 است، نه دستور checkout.
+۳) scripts/preflight.py را با --repo به checkout مجاز بده؛ inventory موفق QA یا AGENT-READY نیست. scripts/validate_package.py و scripts/sync_plan.py --check فقط بسته را می‌سنجند.
+۴) Studio موجود در mp-app/studio/ پایهٔ member+staff است. رفتار عضو از Flutter تدریجی منتقل شود؛ صفحات staff adapt شوند؛ Ant Design و ابزار موجود بی‌دلیل تعویض نشوند. Flutter/Android، مستندات/تست/CI/Flutter Web و Electron محفوظ.
+۵) D-01…D-11 اصل متن بازیابی‌شده‌اند؛ پاسخ معتبر قبلی را reconcile کن. جهت React معلوم است، baseline release/roles/session/offline/staging الزاماً حل نشده. سؤال‌های واقعی را در یک decision package جمع کن؛ فقط وابسته BLOCKED و مستقلِ مجاز ادامه.
+۶) برای هر parent بزرگ فرزند کوچک بساز؛ source AC mapping حفظ؛ قرارداد spec/AC/NG/paths/API/risks/fixtures/tests/budget/reviewer/انسان کامل و صریحاً AGENT-READY شود. هنوز هیچ کارت این ZIP AGENT-READY نیست.
+۷) Finn = Forge → Inspect → Normalize → Next؛ هر کارت/فرزند نه حوزهٔ مستقل و پنج گیت security/privacy/finance/legal/product؛ budget سه تلاش کل/دو retry؛ ۹۰ دقیقه فقط پیشنهاد نیازمند تصویب؛ API پولی/egress مکمل بدون مجوز صفر؛ در مرز scope/secret/بودجه توقف.
+۸) server identity/ownership مرجع؛ شش نقش فعلی بدون مهاجرت ضمنی. online-first پیشنهادی؛ no API/PII/token/receipt/health cache یا offline write حساس؛ PWA-3F پیش‌فرض BLOCKED و defer فقط با تصمیم صریح.
+۹) UNKNOWN/NOT_RUN، mock-only، emulation، screenshot یا خواندن role file را PASS/QA/device/subagent مستقل ننام. evidence exact SHA با command/exit/count/skip لازم؛ reviewer مستقل روی head نهایی و human approval/merge برای DONE لازم.
+۱۰) این handoff مجوز MP push/issue/PR/merge/workflow dispatch/release/deploy/rollback/DB/پرداخت واقعی/مدل ابری یا افشای کد/داده نیست؛ فقط اجازه‌های صریح همان محیط معتبرند.
+
+خروجی شروع: محیط/SHA و اختلاف pin، شمارش دقیق ۵۰ و traceability، مصوبات معتبر و تصمیم‌های واقعاً باز، قرارداد کوچک PWA-00 و PWA-01/04/05 مستقل، فرمان‌های baseline واقعی و اقدام بعدی مجاز. تست محصول اجرا‌نشده را NOT_RUN ثبت کن؛ کار مستقل را به‌خاطر سؤال روتین متوقف نکن.

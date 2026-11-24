@@ -1,0 +1,127 @@
+[
+  {
+    "name": "dependency-cruiser",
+    "version": "18.9.0",
+    "engines": {
+      "node": "^22||^24||>=26"
+    },
+    "license": "MIT",
+    "dist_integrity": "sha512-b6fjm/8OI0HYRW3Mo/y6GlUMPk//3LPBxd0CsEaPNDJXospJDYG8rpyoz/Izk5xTkfYWEMYl8cTQWupgpmkBOg==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "knip",
+    "version": "6.48.0",
+    "engines": {
+      "node": "^20.19.0 || >=22.12.0"
+    },
+    "license": "ISC",
+    "dist_integrity": "sha512-v+Gfp6uiOeXaaj+Khk2Z7/fTTZYWLnDwxZapQUyy8WoQFLYXiUHXqRdFJTwRnrKNA1gPXTPi5NGTKKLXyImVrg==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@playwright/test",
+    "version": "1.65.1",
+    "engines": {
+      "node": ">=20"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-y+NCIRm2LvY4slUVWvGh1nujJ8RF/hEisIsq2mtUPgdQC4L701bq5hZGMhrpeXjACvwvO9tj5dJqhvM6TP9lbw==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@axe-core/playwright",
+    "version": "4.14.0",
+    "engines": {
+      "node": ">=22.12.0"
+    },
+    "license": "MPL-2.0",
+    "dist_integrity": "sha512-SGUhG5PIHd2eMdpgBF2PyQLOhX+qyDR2PT4cmoS4Qk2ak+jX/rrSvst9l0PGv5WTHolKpUMvVmoHpr4cZgf1RQ==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "openapi-typescript",
+    "version": "7.13.0",
+    "engines": {},
+    "license": "MIT",
+    "dist_integrity": "sha512-EFP392gcqXS7ntPvbhBzbF8TyBA+baIYEm791Hy5YkjDYKTnk/Tn5OQeKm5BIZvJihpp8Zzr4hzx0Irde1LNGQ==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "typescript",
+    "version": "7.0.2",
+    "engines": {
+      "node": ">=16.20.0"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@lhci/cli",
+    "version": "0.16.1",
+    "engines": {
+      "node": ">=22.19.0"
+    },
+    "license": "Apache-2.0",
+    "dist_integrity": "sha512-Vh3z9Xkcs4ULrl62NTF9a+c9HL9teyD+dq3TueG4p4oo9ypYbPBb3Ht4YvxHzOyr31rFaiuHqdphpnVZs5SXQw==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@viz-js/viz",
+    "version": "3.31.0",
+    "engines": {},
+    "license": "MIT",
+    "repository": {
+      "url": "git+https://github.com/mdaines/viz-js.git",
+      "type": "git",
+      "directory": "packages/viz"
+    },
+    "dist_integrity": "sha512-r7zlQdRvcwvIpjHGgs+KNWHeE/P5/Dq7k8ZAKaMCbZqomxCBJV78gVuQYaHzFVca+kB0mX0fMW9UFevCOBG50A==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "sharp",
+    "version": "0.35.5",
+    "engines": {
+      "node": ">=20.9.0"
+    },
+    "license": "Apache-2.0",
+    "repository": {
+      "url": "git+https://github.com/lovell/sharp.git",
+      "type": "git"
+    },
+    "dist_integrity": "sha512-Ywn4OnzGukp7CDMrp08RQ50YKmuwG47brZgIVPTvBaaAfQlRlygrRqSrxdCiL9M+LlzLBiJ68IR1QqvzHyjC7g==",
+    "verified_on": "2026-11-24"
+  },
+  {
+    "name": "@sparticuz/chromium",
+    "version": "153.0.0",
+    "engines": {
+      "node": "^22.17.0 || >=24.0.0"
+    },
+    "license": "MIT",
+    "repository": {
+      "url": "git://github.com/Sparticuz/chromium.git",
+      "type": "git"
+    },
+    "dist_integrity": "sha512-jiGWqSvPMdu4+P9TilYqAR7yEGPEHINx+lCvE/NqNO/EHYzF/x1hUiI5T6ioVIt7dEy7n88byyT0vk+dnsgQwA==",
+    "verified_on": "2026-11-24",
+    "use": "TEMPORARY_HANDOFF_HTML_SMOKE_ONLY_NOT_PRODUCT_DEPENDENCIES"
+  },
+  {
+    "name": "playwright-core",
+    "version": "1.65.1",
+    "engines": {
+      "node": ">=20"
+    },
+    "license": "Apache-2.0",
+    "repository": {
+      "url": "git+https://github.com/microsoft/playwright.git",
+      "type": "git"
+    },
+    "dist_integrity": "sha512-hqPpz7blSMPxWVdoeE1yiBSzXsKiVOd2k+kjCvmUywD2GPO2Dd9HfcWnq9NN0GHbNZDFgZ9JfBFr+X5/BLo0qw==",
+    "verified_on": "2026-11-24",
+    "use": "TEMPORARY_HANDOFF_HTML_SMOKE_ONLY_NOT_PRODUCT_DEPENDENCIES"
+  }
+]

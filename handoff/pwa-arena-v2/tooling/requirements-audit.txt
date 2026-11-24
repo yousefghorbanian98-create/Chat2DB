@@ -1,0 +1,2 @@
+# Isolated optional SAST environment. Backend uses its own constraints.
+semgrep==1.186.0

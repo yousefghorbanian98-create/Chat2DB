@@ -1,0 +1,85 @@
+# Muscle Paradise — نسخهٔ وب اپ عضو (Flutter Web).
+# بدون secret و بدون امضا؛ فقط build و artifact. پلتفرم web در CI ساخته می‌شود
+# (مثل apk.yml برای اندروید)، تا پوشهٔ web/ در Git نیاز نباشد.
+name: mp-web
+
+on:
+  workflow_dispatch:
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version + pub get
+        run: |
+          set -o pipefail
+          cd mp-app/client
+          flutter --version
+          flutter pub get
+
+      - name: Analyze
+        run: |
+          set -o pipefail
+          cd mp-app/client
+          flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: |
+          set -o pipefail
+          cd mp-app/client
+          flutter test
+
+      - name: Scaffold web platform (idempotent)
+        run: |
+          set -o pipefail
+          cd mp-app/client
+          if [ ! -d web ]; then
+            flutter create --platforms=web --org ir.muscleparadise --project-name mp_client .
+          fi
+
+      - name: Build web (release)
+        run: |
+          set -o pipefail
+          cd mp-app/client
+          flutter build web --release --base-href / 2>&1 | tee /tmp/step-web-build.txt
+
+      - name: Upload web build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: muscleparadise-web
+          path: mp-app/client/build/web
+          retention-days: 14
+          if-no-files-found: error
+
+      - name: Collect web build diagnostics on failure
+        if: failure()
+        run: |
+          mkdir -p /tmp/web-diag
+          cp /tmp/step-web-build.txt /tmp/web-diag/ 2>/dev/null || echo "no build log" > /tmp/web-diag/none.txt
+          # خطاهای کامپایلر به‌صورت annotation (قابل خواندن از API) هم منتشر می‌شوند.
+          grep -E "Error|error|\.dart:[0-9]+" /tmp/step-web-build.txt 2>/dev/null | head -40 | while IFS= read -r line; do
+            echo "::error::${line}"
+          done
+          tail -n 25 /tmp/step-web-build.txt 2>/dev/null | while IFS= read -r line; do
+            echo "::warning::${line}"
+          done
+
+      - name: Upload web build diagnostics on failure
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: mp-web-diagnostics
+          path: /tmp/web-diag
+          retention-days: 3
+          if-no-files-found: warn

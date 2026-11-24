@@ -1,0 +1,1020 @@
+{
+  "schema_version": 2,
+  "tasks": {
+    "PWA-00": {
+      "depends_on": [],
+      "owner_decisions": [
+        "D-01",
+        "D-10"
+      ],
+      "source_paths": [
+        "docs/MuscleParadise/OWNER-DECISIONS.md",
+        "docs/MuscleParadise/RELEASE-CHECKLIST.md"
+      ],
+      "verification_focus_fa": "ADR مسیر React/Studio، baseline انتشار و فهرست آثار محفوظ؛ بدون تغییر محصول.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-01": {
+      "depends_on": [],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/",
+        "mp-app/client/test/",
+        "mp-app/studio/src/pages/",
+        "mp-app/backend/api/routes.json"
+      ],
+      "verification_focus_fa": "crosswalk رفتاری ۱۷ حوزهٔ عضو و صفحه‌های کارکنان؛ هر ردیف source/API/مالکیت/test/evidence یا GAP معلوم داشته باشد.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-02": {
+      "depends_on": [
+        "PWA-01"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/backend/security/rbac.py",
+        "mp-app/backend/app/security/route_policy.py",
+        "mp-app/studio/src/lib/roleNav.ts"
+      ],
+      "verification_focus_fa": "ماتریس هر operation و شش نقش + anonymous و ownership؛ مدل سه‌نقشی بدون ADR اجرا نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-03": {
+      "depends_on": [
+        "PWA-01"
+      ],
+      "owner_decisions": [
+        "D-06",
+        "D-08"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/lib/session.ts",
+        "mp-app/studio/public/sw.js",
+        "mp-app/client/lib/core/offline_feedback_outbox.dart"
+      ],
+      "verification_focus_fa": "سیاست نشست/XSS/کش/آفلاین ثبت؛ دادهٔ API و نوشتن حساس تا تصویب cache/replay نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-04": {
+      "depends_on": [],
+      "owner_decisions": [],
+      "source_paths": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/web.yml",
+        "mp-app/studio/package.json",
+        "mp-app/backend/requirements.txt"
+      ],
+      "verification_focus_fa": "command/cwd/version/SHA/count/skip و CI جاری ثبت؛ هیچ عدد تاریخی به‌عنوان اجرای تازه کپی نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-05": {
+      "depends_on": [],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/",
+        ".github/workflows/ci.yml",
+        ".github/workflows/web.yml",
+        ".github/workflows/client-format-fix.yml"
+      ],
+      "verification_focus_fa": "فهرست حفاظت و gate رگرسیون؛ حذف/خاموشی Flutter و Flutter Web یا تست‌هایشان ممنوع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-10": {
+      "depends_on": [
+        "PWA-00",
+        "PWA-01",
+        "PWA-04",
+        "PWA-05"
+      ],
+      "owner_decisions": [
+        "D-01"
+      ],
+      "source_paths": [
+        "mp-app/studio/package.json",
+        "mp-app/studio/src/App.tsx",
+        "mp-app/studio/electron/"
+      ],
+      "verification_focus_fa": "Studio موجود گسترش یابد؛ اپ React دوم ساخته نشود؛ مرز browser/Electron تست و ابزار ترسیم خارج runtime باشد.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-11": {
+      "depends_on": [
+        "PWA-10"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/src/App.tsx",
+        "mp-app/studio/src/stores/appStore.ts"
+      ],
+      "verification_focus_fa": "refresh/deep link/back/forward و مسیر محافظت‌شده بدون محتوای حساس آزمون شود؛ routing library فقط با نیاز و سازگاری.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-12": {
+      "depends_on": [
+        "PWA-02",
+        "PWA-10",
+        "PWA-11"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/App.tsx",
+        "mp-app/studio/src/components/Sidebar.tsx",
+        "mp-app/studio/src/components/TopBar.tsx"
+      ],
+      "verification_focus_fa": "shell عضو/کادر و loading/empty/error/403/session expiry با نقش سروری؛ UI guard مرز امنیت نیست.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-13": {
+      "depends_on": [
+        "PWA-10"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/index.html",
+        "mp-app/studio/src/styles/",
+        "mp-app/shared/design-tokens.json"
+      ],
+      "verification_focus_fa": "RTL/فونت/تقویم/ریال، focus و reduced-motion با تست خودکار و بررسی انسانی؛ کتابخانهٔ UI عوض نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-14": {
+      "depends_on": [
+        "PWA-10"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/public/manifest.webmanifest",
+        "mp-app/studio/tests/pwa.test.ts",
+        "mp-app/studio/index.html"
+      ],
+      "verification_focus_fa": "manifest و iconها موجودند و بازبینی می‌شوند، نه ایجاد از صفر؛ تست متنی نصب واقعی را ثابت نمی‌کند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-15": {
+      "depends_on": [
+        "PWA-03",
+        "PWA-10"
+      ],
+      "owner_decisions": [
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/studio/public/sw.js",
+        "mp-app/studio/tests/pwa.test.ts"
+      ],
+      "verification_focus_fa": "GET/same-origin/allowlist دارایی؛ cache API/POST/نشست/فیش/سلامت ممنوع و cacheهای بی‌ربط origin باقی بمانند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-16": {
+      "depends_on": [
+        "PWA-14",
+        "PWA-15"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/public/sw.js",
+        "mp-app/studio/src/components/UpdateBanner.tsx"
+      ],
+      "verification_focus_fa": "نسخهٔ قدیمی/جدید، waiting/activation، فرم کثیف و reload کنترل‌شده در browser؛ skipWaiting خودکار سالم فرض نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-17": {
+      "depends_on": [
+        "PWA-11"
+      ],
+      "owner_decisions": [
+        "D-02"
+      ],
+      "source_paths": [
+        "mp-app/studio/nginx.conf",
+        "mp-app/studio/Dockerfile",
+        "mp-app/studio/vite.config.ts"
+      ],
+      "verification_focus_fa": "Nginx از قبل SPA fallback و proxy دارد؛ deep link/API/content-type در کانفیگ و staging مصوب تست شود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-20": {
+      "depends_on": [
+        "PWA-02",
+        "PWA-03",
+        "PWA-10"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/auth/AuthContext.tsx",
+        "mp-app/studio/src/pages/Login.tsx",
+        "mp-app/studio/src/lib/session.ts",
+        "mp-app/backend/modules/auth/"
+      ],
+      "verification_focus_fa": "STUDIO_ROLES فعلی member را نمی‌پذیرد؛ ورود مشترک با نشست موجود، OTP منقضی/نامعتبر و rate-limit و بدون dev_code تولید.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-21": {
+      "depends_on": [
+        "PWA-20"
+      ],
+      "owner_decisions": [
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/auth/AuthContext.tsx",
+        "mp-app/studio/src/lib/session.ts",
+        "mp-app/client/lib/core/session.dart"
+      ],
+      "verification_focus_fa": "رقابت refresh/logout، revoke-all، پاسخ دیررس و قطع شبکه؛ پنهان‌شدن UI از revoke سرور تفکیک شود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-22": {
+      "depends_on": [
+        "PWA-20"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/auth/AuthContext.tsx",
+        "mp-app/studio/src/lib/roleNav.ts",
+        "mp-app/backend/modules/auth/"
+      ],
+      "verification_focus_fa": "هویت/مجوز از قرارداد سرور؛ decode مرورگر مجوز نیست؛ نقش نامعلوم deny شود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-23": {
+      "depends_on": [
+        "PWA-11",
+        "PWA-12",
+        "PWA-21",
+        "PWA-22"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/App.tsx",
+        "mp-app/studio/src/lib/roleNav.ts",
+        "mp-app/backend/app/security/route_policy.py"
+      ],
+      "verification_focus_fa": "مسیر مستقیم، role نامعلوم، member A/B و 401/403 fail-closed؛ دوباره از سرور اثبات شود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-24": {
+      "depends_on": [
+        "PWA-02",
+        "PWA-21",
+        "PWA-22",
+        "PWA-23"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/backend/api/routes.json",
+        "mp-app/backend/security/rbac.py",
+        "mp-app/backend/app/security/route_policy.py"
+      ],
+      "verification_focus_fa": "ماتریس مجاز/ممنوع شش نقش+anonymous، revoke و ownership؛ export متادیتا جای runtime authorization نیست.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-30": {
+      "depends_on": [
+        "PWA-11",
+        "PWA-12",
+        "PWA-13",
+        "PWA-23"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/shell/",
+        "mp-app/client/lib/core/router.dart",
+        "mp-app/studio/src/App.tsx"
+      ],
+      "verification_focus_fa": "ناوبری member و back/forward روی موبایل؛ staff pages و deep-link موجود regression نداشته باشند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-31": {
+      "depends_on": [
+        "PWA-21",
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/profile/",
+        "mp-app/client/lib/core/membership.dart",
+        "mp-app/backend/modules/membership/"
+      ],
+      "verification_focus_fa": "خود عضو/عضو دیگر، اشتراک خالی/منقضی و timezone سرور؛ دادهٔ نمونه ممنوع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-32": {
+      "depends_on": [
+        "PWA-21",
+        "PWA-31"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/profile/phone_change_dialog.dart",
+        "mp-app/backend/modules/auth/"
+      ],
+      "verification_focus_fa": "دو چالش/OTP و revoke، انقضا و پاسخ دیررس؛ حفظ قرارداد بدون endpoint فرضی.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-33": {
+      "depends_on": [
+        "PWA-30",
+        "PWA-31"
+      ],
+      "owner_decisions": [
+        "D-11"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/home/",
+        "mp-app/client/lib/features/today/",
+        "mp-app/backend/modules/programs/"
+      ],
+      "verification_focus_fa": "برنامهٔ تأییدشده، version و readiness/volume با منشأ؛ بدون ساخت عدد تمرین یا ادعای پزشکی تازه.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-34": {
+      "depends_on": [
+        "PWA-33"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/feedback/",
+        "mp-app/client/lib/features/today/",
+        "mp-app/backend/modules/programs/"
+      ],
+      "verification_focus_fa": "reload و خواندن وضعیت سرور، تکرار submit و timeout مبهم؛ فقط پاسخ معتبر persistence است.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-35": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-11"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/intake/",
+        "mp-app/backend/modules/programs/",
+        "mp-app/backend/modules/assessment/"
+      ],
+      "verification_focus_fa": "unknown/blocked/needs-review اجازهٔ برنامهٔ اجرایی ندهد؛ قاعده و تشخیص جدید ساخته نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-36": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-06",
+        "D-11"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/assessment14/",
+        "mp-app/client/lib/features/bodycomp/",
+        "mp-app/client/lib/features/progress/"
+      ],
+      "verification_focus_fa": "داده/واحد/source/زمان و unknown/missing/stale/not-comparable؛ عکس بدن صریحاً خارج scope است.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-37": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-11"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/nutrition/",
+        "mp-app/backend/modules/nutrition/"
+      ],
+      "verification_focus_fa": "plan/meal/log تفکیک؛ meals خالی وعدهٔ کامل نیست؛ هیچ محاسبهٔ علمی تازه بدون مسئول/مرجع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-38": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/classes/",
+        "mp-app/backend/modules/classes/"
+      ],
+      "verification_focus_fa": "ظرفیت، رزرو تکراری، cancel و race از backend سنجیده شوند، نه فقط disabled button.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-39": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-06",
+        "D-10"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/checkin/",
+        "mp-app/backend/modules/face_id/"
+      ],
+      "verification_focus_fa": "QR امضاشدهٔ کوتاه‌عمر/انقضا/replay/عضو دیگر/duplicate؛ قفل دستگاه و بیومتریک یکی فرض نشوند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3A": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-31"
+      ],
+      "owner_decisions": [
+        "D-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/wallet/",
+        "mp-app/backend/modules/payments/"
+      ],
+      "verification_focus_fa": "ریال دقیق از canonical server، pagination/ترتیب و member A/B؛ float و integer ناامن JavaScript ممنوع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3B": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-31"
+      ],
+      "owner_decisions": [
+        "D-05",
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/backend/modules/payments/manual_transfer_policy.py",
+        "mp-app/client/lib/features/wallet/"
+      ],
+      "verification_focus_fa": "رسید private/pending و بازبینی انسانی؛ نه gateway واقعی، نه معادل‌کردن submit با بانک و نه فرض فعال‌سازی خودکار.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3C": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-05"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/shop/",
+        "mp-app/backend/modules/shop/"
+      ],
+      "verification_focus_fa": "فقط نمایش محصول/قیمت؛ checkout و ایجاد سفارش عضو فعال نشوند؛ قابلیت قدیمی Flutter به scope این کارت تحمیل نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3D": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/features/chat/",
+        "mp-app/studio/src/pages/Chat.tsx"
+      ],
+      "verification_focus_fa": "طرف مجاز، retry/duplicate و خطای شبکه؛ عدم مکالمه empty state، نه گفتگوی خودساخته.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3E": {
+      "depends_on": [
+        "PWA-23",
+        "PWA-30"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/client/lib/features/notifications/",
+        "mp-app/backend/modules/notification/"
+      ],
+      "verification_focus_fa": "اعلان داخلی و read با مالکیت؛ push/SMS واقعی یا تحویل پیام از موجودبودن inbox استنتاج نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-3F": {
+      "depends_on": [
+        "PWA-03",
+        "PWA-34"
+      ],
+      "owner_decisions": [
+        "D-06",
+        "D-08"
+      ],
+      "source_paths": [
+        "mp-app/client/lib/core/offline_feedback_outbox.dart",
+        "mp-app/client/lib/features/feedback/"
+      ],
+      "verification_focus_fa": "CONDITIONAL: BLOCKED تا تصمیم امنیت/رمز/لغو/sync/تعارض؛ idempotency/TTL/سقف/پاکسازی لازم و پول/QR هرگز replay نشوند.",
+      "status": "BLOCKED",
+      "conditional": true,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-40": {
+      "depends_on": [
+        "PWA-11",
+        "PWA-12",
+        "PWA-13",
+        "PWA-23"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/src/App.tsx",
+        "mp-app/studio/src/pages/"
+      ],
+      "verification_focus_fa": "هر صفحهٔ موجود staff به route/role/API/test وصل شود؛ به‌جای بازنویسی، gap مشخص اصلاح شود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-41": {
+      "depends_on": [
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/Members.tsx",
+        "mp-app/backend/modules/admin/"
+      ],
+      "verification_focus_fa": "جست‌وجو/فیلتر/ویرایش با API واقعی و مجوز سرور؛ sentinel/mock به‌عنوان دادهٔ زنده ممنوع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-42": {
+      "depends_on": [
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03",
+        "D-11"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/Programs.tsx",
+        "mp-app/studio/src/pages/Assessment.tsx",
+        "mp-app/backend/modules/programs/"
+      ],
+      "verification_focus_fa": "approve/reject با actor/reason/version، همان نسخه برای عضو؛ LLM مسئول عدد تمرین نشود.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-43": {
+      "depends_on": [
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/CheckIn.tsx",
+        "mp-app/backend/modules/classes/",
+        "mp-app/backend/modules/face_id/"
+      ],
+      "verification_focus_fa": "کلاس و حضور staff با ظرفیت/فهرست/QR واقعی؛ تست API مجاز/ممنوع مستقل از منو.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-44": {
+      "depends_on": [
+        "PWA-3B",
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03",
+        "D-05",
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/Finance.tsx",
+        "mp-app/backend/modules/payments/"
+      ],
+      "verification_focus_fa": "بازبینی انسانی مستقل، receipt private، actor و audit؛ تأیید/رد با grant، بدون فعال‌سازی فرضی.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-45": {
+      "depends_on": [
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03",
+        "D-05"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/Finance.tsx",
+        "mp-app/studio/src/pages/Expenses.tsx",
+        "mp-app/studio/src/pages/Analytics.tsx"
+      ],
+      "verification_focus_fa": "unknown و دادهٔ ناقص به صفر یا سود قطعی تبدیل نشوند؛ ریال/تاریخ/refund و منبع گزارش روشن.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-46": {
+      "depends_on": [
+        "PWA-02",
+        "PWA-24",
+        "PWA-40"
+      ],
+      "owner_decisions": [
+        "D-03"
+      ],
+      "source_paths": [
+        "mp-app/studio/src/pages/Settings.tsx",
+        "mp-app/backend/modules/admin/roles.py",
+        "mp-app/backend/security/rbac.py"
+      ],
+      "verification_focus_fa": "admin به خود/دیگری اختیار ندهد؛ owner-only grant/revoke با audit و تست منفی؛ مهاجرت نقش ضمنی ممنوع.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-47": {
+      "depends_on": [
+        "PWA-40",
+        "PWA-41",
+        "PWA-42",
+        "PWA-43",
+        "PWA-44",
+        "PWA-45",
+        "PWA-46"
+      ],
+      "owner_decisions": [],
+      "source_paths": [
+        "mp-app/studio/src/components/",
+        "mp-app/studio/src/pages/"
+      ],
+      "verification_focus_fa": "فرم/جدول/dialog staff در موبایل/دسکتاپ، focus/keyboard/RTL و reduced motion.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-50": {
+      "depends_on": [
+        "PWA-24",
+        "PWA-30",
+        "PWA-31",
+        "PWA-32",
+        "PWA-33",
+        "PWA-34",
+        "PWA-35",
+        "PWA-36",
+        "PWA-37",
+        "PWA-38",
+        "PWA-39",
+        "PWA-3A",
+        "PWA-3B",
+        "PWA-3C",
+        "PWA-3D",
+        "PWA-3E",
+        "PWA-40",
+        "PWA-41",
+        "PWA-42",
+        "PWA-43",
+        "PWA-44",
+        "PWA-45",
+        "PWA-46",
+        "PWA-47"
+      ],
+      "owner_decisions": [
+        "D-10"
+      ],
+      "source_paths": [
+        "mp-app/studio/",
+        "mp-app/backend/tests/"
+      ],
+      "verification_focus_fa": "سفرهای پنج‌گانه با backend واقعی تست و fixture مصنوعی؛ mock-only و screenshot-only کافی نیست.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-51": {
+      "depends_on": [
+        "PWA-14",
+        "PWA-15",
+        "PWA-16",
+        "PWA-17",
+        "PWA-21",
+        "PWA-50"
+      ],
+      "owner_decisions": [
+        "D-06",
+        "D-10"
+      ],
+      "source_paths": [
+        "mp-app/studio/public/sw.js",
+        "mp-app/studio/public/manifest.webmanifest",
+        "mp-app/studio/tests/pwa.test.ts"
+      ],
+      "verification_focus_fa": "browser واقعی با دو عضو و cache بی‌ربط، نصب/update/logout؛ API/PII/فیش/health قابل‌بازیابی نباشند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-52": {
+      "depends_on": [
+        "PWA-13",
+        "PWA-47",
+        "PWA-50"
+      ],
+      "owner_decisions": [
+        "D-10"
+      ],
+      "source_paths": [
+        "mp-app/studio/",
+        "mp-app/shared/design-tokens.json"
+      ],
+      "verification_focus_fa": "Android Chrome و desktop/هدف با دستگاه واقعی؛ emulation و axe به‌تنهایی تأیید دستگاه/دسترس‌پذیری نیستند.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-53": {
+      "depends_on": [
+        "PWA-24",
+        "PWA-39",
+        "PWA-46",
+        "PWA-50",
+        "PWA-51"
+      ],
+      "owner_decisions": [
+        "D-03",
+        "D-06"
+      ],
+      "source_paths": [
+        "mp-app/backend/security/rbac.py",
+        "mp-app/backend/app/security/route_policy.py",
+        "mp-app/studio/public/sw.js"
+      ],
+      "verification_focus_fa": "route/API مستقیم، مالکیت A/B، revoke، QR replay، نشست stale و cache پس از logout؛ reviewer مستقل روی head نهایی.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-54": {
+      "depends_on": [
+        "PWA-17",
+        "PWA-50",
+        "PWA-51",
+        "PWA-52",
+        "PWA-53"
+      ],
+      "owner_decisions": [
+        "D-01",
+        "D-02",
+        "D-09",
+        "D-10"
+      ],
+      "source_paths": [
+        "mp-app/studio/Dockerfile",
+        "mp-app/studio/nginx.conf",
+        ".github/workflows/ci.yml",
+        ".github/workflows/web.yml"
+      ],
+      "verification_focus_fa": "React از Studio build شود؛ web.yml موجود Flutter Web بماند؛ staging فقط با مجوز محدود و artifact همان SHA.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-55": {
+      "depends_on": [
+        "PWA-04",
+        "PWA-05",
+        "PWA-50"
+      ],
+      "owner_decisions": [
+        "D-01"
+      ],
+      "source_paths": [
+        "mp-app/client/",
+        ".github/workflows/ci.yml",
+        ".github/workflows/web.yml",
+        ".github/workflows/client-format-fix.yml"
+      ],
+      "verification_focus_fa": "Flutter/Android source و گیت‌ها حفظ؛ نبود SDK/device/CI = UNKNOWN نه حذف/skip گیت.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    },
+    "PWA-56": {
+      "depends_on": [
+        "PWA-51",
+        "PWA-52",
+        "PWA-53",
+        "PWA-54",
+        "PWA-55"
+      ],
+      "owner_decisions": [
+        "D-01",
+        "D-03",
+        "D-05",
+        "D-06",
+        "D-09",
+        "D-10",
+        "D-11"
+      ],
+      "source_paths": [
+        "docs/MuscleParadise/RELEASE-CHECKLIST.md",
+        "docs/MuscleParadise/SESSION_HANDOFF.md"
+      ],
+      "verification_focus_fa": "Go/No-Go انسانی با evidence همان SHA؛ 3F باید انجام‌شده یا defer مصوب با دلیل باشد؛ UNKNOWN اصلی مانع اعلام تکمیل است.",
+      "status": "PROPOSED",
+      "conditional": false,
+      "dependency_graph_status": "PROPOSED_REVIEW_IN_PWA00",
+      "evidence_status": "NOT_RUN"
+    }
+  },
+  "source_snapshot": {
+    "repository": "yousefghorbanian98-create/MP",
+    "reference_branch": "arena/5e0f64cf-mp",
+    "commit": "c46e792657e361cd09799c896c47149b4a5c4d86",
+    "inspection": "SOURCE_ONLY_NOT_RUNTIME_QA"
+  },
+  "gates_per_task": {
+    "finn": [
+      "G1-spec",
+      "G2-isolation",
+      "G3-tool-scope",
+      "G4-tests-security",
+      "G5-branch-protection",
+      "G6-evidence",
+      "G7-human-approval",
+      "G8-budget",
+      "G9-adversarial-review"
+    ],
+    "domain": [
+      "security",
+      "privacy",
+      "finance",
+      "legal",
+      "product"
+    ]
+  },
+  "budget": {
+    "max_total_attempts": 3,
+    "max_retries": 2,
+    "wall_clock_minutes_proposal": 90,
+    "wall_clock_approval": "REQUIRES_OWNER_BEFORE_AGENT_READY",
+    "paid_model_calls_without_approval": 0,
+    "external_effect_retries": "INSPECT_REMOTE_FIRST",
+    "attempt_limit_source": "MP FINN_LOOP.md G4 at pinned reference: textual maximum of 3 attempts, not runtime enforcement evidence."
+  },
+  "product_root": "mp-app/studio/",
+  "forbidden_second_product_root": "mp-app/pwa-member/",
+  "conditional_completion": "PWA-3F requires implementation evidence or explicit owner-approved deferral; BLOCKED is never PASS.",
+  "conditional_decision_dependencies": [
+    {
+      "decision": "D-04",
+      "affected_tasks": [
+        "PWA-01",
+        "PWA-24",
+        "PWA-53"
+      ],
+      "trigger": "Any proposed tenant/club scope change or uncertain ownership boundary. No automatic multi-tenant migration."
+    },
+    {
+      "decision": "D-07",
+      "affected_tasks": [
+        "PWA-04",
+        "PWA-24",
+        "PWA-54"
+      ],
+      "trigger": "Only a documented database-related backend gap requiring a separate approved microtask. No automatic DB migration."
+    }
+  ]
+}

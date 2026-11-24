@@ -1,0 +1,14 @@
+{
+  "name": "mp-graphviz-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline Graphviz DOT to SVG/PNG tool for architecture diagrams; not a product dependency.",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "@viz-js/viz": "3.31.0",
+    "sharp": "0.35.5"
+  }
+}

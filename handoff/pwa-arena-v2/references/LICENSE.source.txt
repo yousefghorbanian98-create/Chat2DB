@@ -1,0 +1,36 @@
+MuscleParadise — Proprietary Software License
+Copyright (c) 2026 MuscleParadise. All rights reserved.
+
+1. GRANT
+   The software in this repository ("MuscleParadise") is proprietary.
+   A single named organization (the "Licensee") is granted a non-exclusive,
+   non-transferable, perpetual license to install and operate the software
+   for its own gym-management business.
+
+2. RESTRICTIONS
+   - No redistribution, sublicensing, resale, or publication of the source
+     or binary forms, in whole or in part.
+   - No hosting of the software as a service for third parties.
+   - No removal of copyright or license notices.
+
+3. THIRD-PARTY COMPONENTS
+   Free/open-source components used by the software retain their own
+   licenses (see NOTICE-THIRD-PARTY.md). Nothing in this license restricts
+   rights granted by those licenses to those components.
+
+4. MODELS AND DATA
+   - Trained model weights (e.g., face-recognition models) are NOT covered
+     by this license; each model's own license must be obtained separately
+     before deployment ("model_lock" policy, D-008).
+   - Athlete data processed by the software belongs to the Licensee and the
+     athletes; the software vendor claims no rights over it (see
+     docs/MuscleParadise/DATA-RETENTION.md).
+
+5. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+6. TERMINATION
+   Breach of this license terminates the grant automatically. Upon
+   termination the Licensee must cease use and destroy all copies.

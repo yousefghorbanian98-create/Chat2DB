@@ -27,7 +27,8 @@ def load_module(name: str, path: Path):
 
 
 preflight = load_module("handoff_preflight", PAYLOAD / "scripts/preflight.py")
-builder = load_module("handoff_builder", BASE / "build_pwa_handoff.py")
+# Historical v1 remains byte-frozen; its tests do not validate v2 source coverage.
+builder = load_module("handoff_builder", BASE / "build_pwa_handoff.py").Bundle("1.0.0")
 
 
 def fixture(root: Path) -> None:
@@ -218,10 +219,13 @@ class PackageTests(unittest.TestCase):
                 self.assertRegex(version, r"^\d+\.\d+\.\d+$")
                 self.assertEqual(lock["packages"]["node_modules/" + name]["version"], version)
 
-    def test_selected_flowchart_was_preserved(self):
-        for extension in ("md", "mmd", "png", "svg"):
-            name = "PWA_Finn_Loop_Flow.fa." + extension
-            self.assertEqual((PAYLOAD / "diagrams" / name).read_bytes(), (ROOT / "docs" / name).read_bytes())
+    def test_historical_flowchart_matches_frozen_v1_archive(self):
+        # docs/ now publishes the revised v2 diagram; v1 is the historical oracle.
+        archive = BASE / "releases" / (builder.NAME + ".zip")
+        with zipfile.ZipFile(archive) as bundle:
+            for extension in ("md", "mmd", "png", "svg"):
+                name = "diagrams/PWA_Finn_Loop_Flow.fa." + extension
+                self.assertEqual((PAYLOAD / name).read_bytes(), bundle.read(builder.NAME + "/" + name))
 
     def test_local_markdown_links_resolve(self):
         for file in PAYLOAD.rglob("*.md"):

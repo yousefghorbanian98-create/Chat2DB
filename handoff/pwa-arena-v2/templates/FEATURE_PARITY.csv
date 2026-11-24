@@ -1,0 +1,18 @@
+feature,source_directory,pwa_ids,react_existing_or_gap,api_operations,ownership,tests,evidence,status,scope_note
+assessment14,mp-app/client/lib/features/assessment14/,PWA-35;PWA-36,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+auth,mp-app/client/lib/features/auth/,PWA-20;PWA-21;PWA-22;PWA-23,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+bodycomp,mp-app/client/lib/features/bodycomp/,PWA-36,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,no body-progress photos
+chat,mp-app/client/lib/features/chat/,PWA-3D,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+checkin,mp-app/client/lib/features/checkin/,PWA-39,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+classes,mp-app/client/lib/features/classes/,PWA-38,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+feedback,mp-app/client/lib/features/feedback/,PWA-34;PWA-3F,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,conditional; offline not presumed
+home,mp-app/client/lib/features/home/,PWA-31;PWA-33,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+intake,mp-app/client/lib/features/intake/,PWA-35,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+notifications,mp-app/client/lib/features/notifications/,PWA-3E,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+nutrition,mp-app/client/lib/features/nutrition/,PWA-37,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+profile,mp-app/client/lib/features/profile/,PWA-31;PWA-32,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+progress,mp-app/client/lib/features/progress/,PWA-36,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,no body-progress photos
+shell,mp-app/client/lib/features/shell/,PWA-30,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+shop,mp-app/client/lib/features/shop/,PWA-3C,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,catalog only; no checkout/order creation
+today,mp-app/client/lib/features/today/,PWA-33;PWA-34,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"
+wallet,mp-app/client/lib/features/wallet/,PWA-3A;PWA-3B,CURRENT-VERIFY_OR_GAP,UNKNOWN,UNKNOWN,NOT_RUN,NOT_RUN,PROPOSED,"behavior parity, not copying Dart files"

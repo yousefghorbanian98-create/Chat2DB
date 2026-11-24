@@ -1,0 +1,209 @@
+{
+  "repository": "yousefghorbanian98-create/MP",
+  "commit": "c46e792657e361cd09799c896c47149b4a5c4d86",
+  "reference_branch": "arena/5e0f64cf-mp",
+  "source_only": true,
+  "observed_on": "2026-11-24",
+  "product_root": "mp-app/studio/",
+  "features": {
+    "assessment14": [
+      "mp-app/client/lib/features/assessment14/assessment14_page.dart",
+      "mp-app/client/lib/features/assessment14/assessment14_providers.dart"
+    ],
+    "auth": [
+      "mp-app/client/lib/features/auth/otp_page.dart"
+    ],
+    "bodycomp": [
+      "mp-app/client/lib/features/bodycomp/bodycomp_page.dart"
+    ],
+    "chat": [
+      "mp-app/client/lib/features/chat/member_chat_data.dart",
+      "mp-app/client/lib/features/chat/member_chat_page.dart"
+    ],
+    "checkin": [
+      "mp-app/client/lib/features/checkin/checkin_page.dart",
+      "mp-app/client/lib/features/checkin/member_checkin_history.dart"
+    ],
+    "classes": [
+      "mp-app/client/lib/features/classes/classes_page.dart"
+    ],
+    "feedback": [
+      "mp-app/client/lib/features/feedback/feedback_providers.dart",
+      "mp-app/client/lib/features/feedback/offline_feedback_queue_card.dart",
+      "mp-app/client/lib/features/feedback/set_feedback_sheet.dart"
+    ],
+    "home": [
+      "mp-app/client/lib/features/home/home_page.dart"
+    ],
+    "intake": [
+      "mp-app/client/lib/features/intake/intake_page.dart",
+      "mp-app/client/lib/features/intake/program_result.dart"
+    ],
+    "notifications": [
+      "mp-app/client/lib/features/notifications/notifications_page.dart"
+    ],
+    "nutrition": [
+      "mp-app/client/lib/features/nutrition/adaptive_nutrition_card.dart",
+      "mp-app/client/lib/features/nutrition/nutrition_page.dart"
+    ],
+    "profile": [
+      "mp-app/client/lib/features/profile/phone_change_dialog.dart",
+      "mp-app/client/lib/features/profile/profile_page.dart"
+    ],
+    "progress": [
+      "mp-app/client/lib/features/progress/progress_page.dart"
+    ],
+    "shell": [
+      "mp-app/client/lib/features/shell/app_shell.dart"
+    ],
+    "shop": [
+      "mp-app/client/lib/features/shop/my_orders_sheet.dart",
+      "mp-app/client/lib/features/shop/order_receipt_sheet.dart",
+      "mp-app/client/lib/features/shop/shop_page.dart"
+    ],
+    "today": [
+      "mp-app/client/lib/features/today/readiness_card.dart",
+      "mp-app/client/lib/features/today/today_controller.dart",
+      "mp-app/client/lib/features/today/today_page.dart",
+      "mp-app/client/lib/features/today/volume_card.dart"
+    ],
+    "wallet": [
+      "mp-app/client/lib/features/wallet/wallet_ledger.dart",
+      "mp-app/client/lib/features/wallet/wallet_page.dart"
+    ]
+  },
+  "staff_page_paths": [
+    "mp-app/studio/src/pages/Analytics.tsx",
+    "mp-app/studio/src/pages/Assessment.tsx",
+    "mp-app/studio/src/pages/Chat.tsx",
+    "mp-app/studio/src/pages/CheckIn.tsx",
+    "mp-app/studio/src/pages/Dashboard.tsx",
+    "mp-app/studio/src/pages/Expenses.tsx",
+    "mp-app/studio/src/pages/Finance.tsx",
+    "mp-app/studio/src/pages/Login.tsx",
+    "mp-app/studio/src/pages/Members.tsx",
+    "mp-app/studio/src/pages/Nutrition.tsx",
+    "mp-app/studio/src/pages/Programs.tsx",
+    "mp-app/studio/src/pages/Settings.tsx",
+    "mp-app/studio/src/pages/Shop.tsx"
+  ],
+  "flutter_test_paths": [
+    "mp-app/client/test/adaptive_nutrition_test.dart",
+    "mp-app/client/test/api_client_test.dart",
+    "mp-app/client/test/assessment14_page_test.dart",
+    "mp-app/client/test/bodycomp_real_data_test.dart",
+    "mp-app/client/test/classes_cancel_test.dart",
+    "mp-app/client/test/face_consent_gate_test.dart",
+    "mp-app/client/test/haptics_recorder.dart",
+    "mp-app/client/test/home_banner_test.dart",
+    "mp-app/client/test/home_page_test.dart",
+    "mp-app/client/test/logout_button_test.dart",
+    "mp-app/client/test/logout_test.dart",
+    "mp-app/client/test/member_chat_page_test.dart",
+    "mp-app/client/test/member_checkin_history_test.dart",
+    "mp-app/client/test/membership_test.dart",
+    "mp-app/client/test/motion_haptics_test.dart",
+    "mp-app/client/test/notifications_page_test.dart",
+    "mp-app/client/test/nutrition_food_log_test.dart",
+    "mp-app/client/test/offline_feedback_outbox_test.dart",
+    "mp-app/client/test/phone_change_dialog_test.dart",
+    "mp-app/client/test/qr_biometric_gate_test.dart",
+    "mp-app/client/test/readiness_card_test.dart",
+    "mp-app/client/test/session_refresh_test.dart",
+    "mp-app/client/test/set_feedback_sheet_test.dart",
+    "mp-app/client/test/shop_orders_receipt_test.dart",
+    "mp-app/client/test/shop_page_test.dart",
+    "mp-app/client/test/today_controller_test.dart",
+    "mp-app/client/test/today_page_test.dart",
+    "mp-app/client/test/volume_card_test.dart",
+    "mp-app/client/test/wallet_history_test.dart"
+  ],
+  "pwa_asset_paths": [
+    "mp-app/studio/public/icon-192.png",
+    "mp-app/studio/public/icon-512.png",
+    "mp-app/studio/public/manifest.webmanifest",
+    "mp-app/studio/public/sw.js"
+  ],
+  "verified_plan_source_paths": {
+    "docs/MuscleParadise/OWNER-DECISIONS.md": true,
+    "docs/MuscleParadise/RELEASE-CHECKLIST.md": true,
+    "mp-app/client/lib/features/": true,
+    "mp-app/client/test/": true,
+    "mp-app/studio/src/pages/": true,
+    "mp-app/backend/api/routes.json": true,
+    "mp-app/backend/security/rbac.py": true,
+    "mp-app/backend/app/security/route_policy.py": true,
+    "mp-app/studio/src/lib/roleNav.ts": true,
+    "mp-app/studio/src/lib/session.ts": true,
+    "mp-app/studio/public/sw.js": true,
+    "mp-app/client/lib/core/offline_feedback_outbox.dart": true,
+    ".github/workflows/ci.yml": true,
+    ".github/workflows/web.yml": true,
+    "mp-app/studio/package.json": true,
+    "mp-app/backend/requirements.txt": true,
+    "mp-app/client/": true,
+    ".github/workflows/client-format-fix.yml": true,
+    "mp-app/studio/src/App.tsx": true,
+    "mp-app/studio/electron/": true,
+    "mp-app/studio/src/stores/appStore.ts": true,
+    "mp-app/studio/src/components/Sidebar.tsx": true,
+    "mp-app/studio/src/components/TopBar.tsx": true,
+    "mp-app/studio/index.html": true,
+    "mp-app/studio/src/styles/": true,
+    "mp-app/shared/design-tokens.json": true,
+    "mp-app/studio/public/manifest.webmanifest": true,
+    "mp-app/studio/tests/pwa.test.ts": true,
+    "mp-app/studio/src/components/UpdateBanner.tsx": true,
+    "mp-app/studio/nginx.conf": true,
+    "mp-app/studio/Dockerfile": true,
+    "mp-app/studio/vite.config.ts": true,
+    "mp-app/studio/src/auth/AuthContext.tsx": true,
+    "mp-app/studio/src/pages/Login.tsx": true,
+    "mp-app/backend/modules/auth/": true,
+    "mp-app/client/lib/core/session.dart": true,
+    "mp-app/client/lib/features/shell/": true,
+    "mp-app/client/lib/core/router.dart": true,
+    "mp-app/client/lib/features/profile/": true,
+    "mp-app/client/lib/core/membership.dart": true,
+    "mp-app/backend/modules/membership/": true,
+    "mp-app/client/lib/features/profile/phone_change_dialog.dart": true,
+    "mp-app/client/lib/features/home/": true,
+    "mp-app/client/lib/features/today/": true,
+    "mp-app/backend/modules/programs/": true,
+    "mp-app/client/lib/features/feedback/": true,
+    "mp-app/client/lib/features/intake/": true,
+    "mp-app/backend/modules/assessment/": true,
+    "mp-app/client/lib/features/assessment14/": true,
+    "mp-app/client/lib/features/bodycomp/": true,
+    "mp-app/client/lib/features/progress/": true,
+    "mp-app/client/lib/features/nutrition/": true,
+    "mp-app/backend/modules/nutrition/": true,
+    "mp-app/client/lib/features/classes/": true,
+    "mp-app/backend/modules/classes/": true,
+    "mp-app/client/lib/features/checkin/": true,
+    "mp-app/backend/modules/face_id/": true,
+    "mp-app/client/lib/features/wallet/": true,
+    "mp-app/backend/modules/payments/": true,
+    "mp-app/backend/modules/payments/manual_transfer_policy.py": true,
+    "mp-app/client/lib/features/shop/": true,
+    "mp-app/backend/modules/shop/": true,
+    "mp-app/client/lib/features/chat/": true,
+    "mp-app/studio/src/pages/Chat.tsx": true,
+    "mp-app/client/lib/features/notifications/": true,
+    "mp-app/backend/modules/notification/": true,
+    "mp-app/studio/src/pages/Members.tsx": true,
+    "mp-app/backend/modules/admin/": true,
+    "mp-app/studio/src/pages/Programs.tsx": true,
+    "mp-app/studio/src/pages/Assessment.tsx": true,
+    "mp-app/studio/src/pages/CheckIn.tsx": true,
+    "mp-app/studio/src/pages/Finance.tsx": true,
+    "mp-app/studio/src/pages/Expenses.tsx": true,
+    "mp-app/studio/src/pages/Analytics.tsx": true,
+    "mp-app/studio/src/pages/Settings.tsx": true,
+    "mp-app/backend/modules/admin/roles.py": true,
+    "mp-app/studio/src/components/": true,
+    "mp-app/studio/": true,
+    "mp-app/backend/tests/": true,
+    "docs/MuscleParadise/SESSION_HANDOFF.md": true
+  }
+}

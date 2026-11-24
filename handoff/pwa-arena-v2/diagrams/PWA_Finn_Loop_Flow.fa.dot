@@ -1,0 +1,52 @@
+digraph FinnPWA {
+  graph [rankdir=TB, newrank=true, bgcolor="#f7fafc", pad="0.45", nodesep="0.32", ranksep="0.40", fontname="DejaVu Sans", fontsize=26, labelloc=t,
+    label="MUSCLE PARADISE · ARENA HANDOFF 2.0.0 · 2026-11-24\nFinn برای هر کارت از طرح ۵۰میکرولوپی؛ برنامهٔ اجرا، نه گزارش PASS محصول"];
+  node [shape=box, style="rounded,filled", fillcolor="#ffffff", color="#a4bdc9", fontcolor="#163244", fontname="DejaVu Sans", fontsize=19, margin="0.22,0.16"];
+  edge [color="#597d90", fontname="DejaVu Sans", fontsize=14, arrowsize=0.8];
+
+  start [label="محیط مجاز را تأیید کن\nrepo / branch / SHA / AGENTS / صف جاری\nبدون reset، تغییر شاخه یا overwrite دیگران", fillcolor="#123e50", color="#123e50", fontcolor="#ffffff"];
+  select [label="از PWA-00 آغاز؛ یک parent/فرزند مستقل انتخاب کن\n۵۰ شناسه و AC اصلی محفوظ؛ DAG و تصمیم‌ها را بررسی کن\nStudio موجود، نه اپ React دوم", fillcolor="#e9f4fa"];
+  contract [label="قرارداد کوچک و قابل‌آزمون\nAC/NG + API/ownership + test + مسیر/اثر مجاز\nREADY-FOR-OWNER، سپس تصویب صریح spec"];
+  ready [shape=diamond, label="پیش‌نیاز، کنترل آغاز،\nمجوز و budget مصوب؟", fillcolor="#e5f4ec", color="#4c9170"];
+  blocked [label="فقط کارت وابسته BLOCKED / DECISION\nسؤال‌های واقعی مالک در یک بسته؛ UNKNOWN ≠ PASS\nکار مستقلِ مجاز ادامه؛ نه توقف کل صف", fillcolor="#fff0d7", color="#d58a25"];
+  budget [label="G8 از قبل و در تمام F/I/N/N\n۳ تلاش کل = اولیه + ۲ retry\n۹۰ دقیقه پیشنهادِ نیازمند تصویب؛ هزینه/egress مکمل بدون اذن صفر\nسقف/secret/خروج scope ⇒ توقف؛ اثر مبهم ⇒ اول بررسی state", fillcolor="#fff0d7", color="#d58a25"];
+
+  subgraph cluster_finn {
+    label="فقط AGENT-READY وارد اجرا می‌شود · یک نتیجهٔ کوچک در هر issue/PR";
+    style="rounded,filled"; fillcolor="#eef7f7"; color="#9cc5c1"; fontsize=21;
+    forge [label="F · Forge\nتست رفتاری و رگرسیون + ساخت محدود\nfixture مصنوعی؛ reuse Studio", fillcolor="#d9eee9", color="#39947e"];
+    inspect [label="I · Inspect\nCI/test/API مثبت و منفی\nexit + count + skip + security", fillcolor="#d9eee9", color="#39947e"];
+    normalize [label="N · Normalize\nاصلاح محدود + اجرای دوبارهٔ gateهای متأثر\nتضعیف تست یا حذف native ممنوع", fillcolor="#d9eee9", color="#39947e"];
+    next [label="N · Next\nشاهد SHA-bound + state/ledger/decisions\nآمادهٔ review نهایی و تصمیم انسان", fillcolor="#d9eee9", color="#39947e"];
+    { rank=same; forge; inspect; normalize; next; }
+    forge -> inspect -> normalize -> next;
+  }
+
+  gates [label="۹ حوزه برای هر کارت/فرزند، نه یک‌بار برای فاز\nG1-spec · G2-isolation · G3-tool/scope\nG4-tests/security · G5-branch protection · G6-evidence\nG7-human approval · G8-budget · G9-adversarial review\nوجود workflow/نصب ابزار ≠ enforcement", fillcolor="#edf1fa", color="#8c9dc4"];
+  domains [label="۵ گیت دامنه‌ایِ مستقل برای هر کارت\nsecurity · privacy · finance · legal · product\nPASS/FAIL/UNKNOWN/NOT_RUN؛ N/A فقط با دلیل و تصویب\nشش نقش فعلی؛ سرور مرجع مجوز و persistence", fillcolor="#edf1fa", color="#8c9dc4"];
+  review [label="بازبینی مستقل واقعی روی head نهایی\nحملات role/ownership، prompt/scope و cache/logout\nself-review یا roleplay مستقل نیست\nتغییر head ⇒ review/check متأثر دوباره", fillcolor="#e9f4fa"];
+  pass [shape=diamond, label="AC و gateهای فنی شاهد دارند؟\nreview مستقل بی‌یافتهٔ باز؟", fillcolor="#e5f4ec", color="#4c9170"];
+  stop [shape=diamond, label="تلاش/زمان/هزینهٔ مصوب باقی است\nو اصلاح هنوز در scope است؟", fillcolor="#fff0d7", color="#d58a25"];
+  owner [label="OWNER-REVIEW\napproval انسانی همان head + required checks\nG7 تا تصمیم و merge واقعی باز است\nانتظار انسان: کار مستقلِ مجاز ادامه", fillcolor="#e9f4fa"];
+  merge [label="merge انسانی در baseline مصوب\nفقط با مجوز صریح؛ نه auto-merge یا bypass\nثبت approval / merge SHA / CI و evidence", fillcolor="#e5f4ec", color="#4c9170"];
+  done [label="DONE همین کارت، نه کل محصول\n۹ حوزه + ۵ گیت بسته؛ parent فقط پس از همهٔ AC/فرزندها\ndependency فقط پس از merge معتبر باز می‌شود", fillcolor="#123e50", color="#123e50", fontcolor="#ffffff"];
+  release [label="PWA-50…56: پنج سفر جدا + browser/device + security/CI همان SHA\nنصب/SW/update و حفظ Flutter/Android + Go/No-Go انسانی\nPWA-3F شرطی و BLOCKED؛ defer فقط با تصمیم مالک، نه PASS\nهیچ مجوز خودکار production، پول واقعی، DB یا egress", fillcolor="#ffffff", color="#597d90"];
+
+  start -> select -> contract -> ready;
+  ready -> forge [label="AGENT-READY"];
+  ready -> blocked [label="خیر"];
+  independent [label="بازگشت به صف: فقط کارت مستقل AGENT-READY\nکارت BLOCKED/منتظر انسان بسته نمی‌شود", fillcolor="#fff0d7", color="#d58a25"];
+  blocked -> independent [style=dashed];
+  budget -> ready [style=dashed, arrowhead=none];
+  gates -> contract [style=dashed, arrowhead=none];
+  domains -> review [style=dashed, arrowhead=none];
+  { rank=same; budget; ready; gates; }
+  next -> review -> pass;
+  pass -> owner [label="بله"];
+  pass -> stop [label="خیر"];
+  stop -> forge [label="بله؛ retry ثبت‌شده", constraint=false];
+  stop -> blocked [label="خیر؛ FAIL/BLOCKED", constraint=false];
+  owner -> merge -> done -> release;
+  owner -> independent [label="انتظار انسان", style=dashed, constraint=false];
+  { rank=same; domains; review; stop; }
+}

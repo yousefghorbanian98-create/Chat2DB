@@ -1,0 +1,2 @@
+interaction_id,parent_pwa_id,child_task_id,feature,existing_flutter_behavior,react_control,role_and_owner,route,event,api_method,api_path,payload_contract,server_data_effect,loading_state,empty_state,error_state,offline_state,positive_test,negative_role_ownership_test,persistence_reload_test,evidence_sha,status
+TEMPLATE_NOT_IMPLEMENTED,PWA-00,UNASSIGNED,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,ONLINE_FIRST_PROPOSED,NOT_RUN,NOT_RUN,NOT_RUN,NOT_RUN,PROPOSED

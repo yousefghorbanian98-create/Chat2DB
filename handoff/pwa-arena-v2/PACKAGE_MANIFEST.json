@@ -1,0 +1,456 @@
+{
+  "name": "MP-PWA-Arena-Handoff-v2.0.0",
+  "version": "2.0.0",
+  "date_utc": "2026-11-24",
+  "purpose": "Documentation handoff, not implemented PWA, independent review or product release",
+  "task_count": 50,
+  "phase_counts": [
+    6,
+    8,
+    5,
+    16,
+    8,
+    7
+  ],
+  "source_inventory": "SOURCE_PLAN.fa.md",
+  "product_source_snapshot": "c46e792657e361cd09799c896c47149b4a5c4d86",
+  "product_source_reference_branch": "arena/5e0f64cf-mp",
+  "delivery_base_commit": "ded065ebaa4cb9430338889cdea3b0ed1ad57836",
+  "supersedes_handoff_delivery_commit": "be46f1c8773f249db75665eefd6d0c0db478a325",
+  "excluded_from_this_manifest_to_avoid_self_reference": [
+    "MANIFEST.sha256",
+    "PACKAGE_MANIFEST.json"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 127,
+      "sha256": "a4321862e8ac5af57ffe969c2d901ef7d3c8b01c287261800a2fef69044290a0"
+    },
+    {
+      "path": ".node-version",
+      "bytes": 8,
+      "sha256": "9c579c4eab1d526e689fe7cda201a0ab2f39070304043bb55c459a3d90954250"
+    },
+    {
+      "path": "COMPARISON_AND_CHANGELOG.fa.md",
+      "bytes": 7554,
+      "sha256": "df962b68924e20414d1ad07bfdfea4eff86e1dd200884f3663545895e7585721"
+    },
+    {
+      "path": "DECISION_PACKAGE.fa.md",
+      "bytes": 7730,
+      "sha256": "06d829e0389ee17856e266155a4a69d24b557226a75a98dc559f61678411400f"
+    },
+    {
+      "path": "FINN_LOOP_FINAL.fa.md",
+      "bytes": 16908,
+      "sha256": "f32764f992746c86d608cff08dddc97d0f21fb47f5e1daee4a30ba5440b983f3"
+    },
+    {
+      "path": "HANDOFF.fa.html",
+      "bytes": 2861204,
+      "sha256": "9101c1981d4db2ad5104d303064489c83bab340e302a213be7b5803ee706599c"
+    },
+    {
+      "path": "HANDOFF.fa.md",
+      "bytes": 23112,
+      "sha256": "86f9dbf98cdc332918c0c636f6d97737eb591ae78de11bae6a6b932a2817761f"
+    },
+    {
+      "path": "MICROLOOPS.fa.md",
+      "bytes": 75229,
+      "sha256": "5c9018b338b67b8d00cf33dc63e145dcc73f124de475390954d27bb4d4288ef9"
+    },
+    {
+      "path": "PLAN_DETAILS.json",
+      "bytes": 33404,
+      "sha256": "1e0ddde6b17ae1bbe09ddcfe7aa195d242f3ae6967bddb5ec99a771b623b1bf5"
+    },
+    {
+      "path": "PLAN_IDENTITY.json",
+      "bytes": 1104,
+      "sha256": "710fd7ee05b22f9bb39223b977850034d0003bb5d41c6c7f6e7f0fa46d8f4dee"
+    },
+    {
+      "path": "PWA_PLAN.json",
+      "bytes": 122051,
+      "sha256": "94bd1bcf8b27dfd642a434c00dc08aa637c847d515db4f2cab57c3a069d938e3"
+    },
+    {
+      "path": "README_FIRST.fa.txt",
+      "bytes": 4194,
+      "sha256": "f9208dbca6f7baf487843d36eb170dafa4dc66954340c51e149592e4180805d7"
+    },
+    {
+      "path": "SOURCE_PLAN.fa.md",
+      "bytes": 19050,
+      "sha256": "f05412e24d5faea5df8af73f324ec22958990688fdd3ae0917d001b09dbf9583"
+    },
+    {
+      "path": "TASK_TRACEABILITY.csv",
+      "bytes": 5816,
+      "sha256": "ab8247d1b4abaeae79854042c15f1de09a47eaf277cb44707cdece54ab97cc25"
+    },
+    {
+      "path": "TOOLCHAIN.fa.md",
+      "bytes": 17921,
+      "sha256": "c8825cc53cbab7eda740e050fcb579bb0f111493934357b06e11aaf03e95ab7b"
+    },
+    {
+      "path": "VERIFICATION.fa.md",
+      "bytes": 11699,
+      "sha256": "c8522de6aa3dba6d914281c29acc08d8432433ccec91a20981a4f50ed4cf7c8f"
+    },
+    {
+      "path": "config/README.fa.md",
+      "bytes": 1625,
+      "sha256": "1d1e18d93d94dbc9bcbfe0f5da8de392a458400a16a5024a6c22aa8da7bf88fa"
+    },
+    {
+      "path": "config/dependency-cruiser.cjs",
+      "bytes": 954,
+      "sha256": "fc77d24bf58de6f95822a875cb7bf1539b4e56b1ab61a3bfde1e04bac5575973"
+    },
+    {
+      "path": "config/knip.example.json",
+      "bytes": 191,
+      "sha256": "bced4a457632834b5a282eb7b6073e9c77f2254e336d87bce9198da7a5494944"
+    },
+    {
+      "path": "config/semgrep-pwa.example.yml",
+      "bytes": 517,
+      "sha256": "54969b4de7cae5f9f3598a991aeb74a3fbf9164a8e432d3df81012d7dc0ae5b8"
+    },
+    {
+      "path": "diagrams/PWA_50_Microloops.fa.dot",
+      "bytes": 8238,
+      "sha256": "9ad8c4611503eced03272603f1c0c4d33c4c4addec47a892b17c350068528d55"
+    },
+    {
+      "path": "diagrams/PWA_50_Microloops.fa.mmd",
+      "bytes": 4127,
+      "sha256": "ef1be7374f730345ea90b02266c5c8ca2ec60e6207c6452478901d1d248122fe"
+    },
+    {
+      "path": "diagrams/PWA_50_Microloops.fa.png",
+      "bytes": 930183,
+      "sha256": "78c199cec2998eb731b0c4f886650e45a4a5da9c481678466fb1b99dc248810e"
+    },
+    {
+      "path": "diagrams/PWA_50_Microloops.fa.svg",
+      "bytes": 56066,
+      "sha256": "bf192bfe661209d85e3fd262f3ac7632502c41803efeb90bb47da98f6eddb455"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.dot",
+      "bytes": 6271,
+      "sha256": "fd5862dd17d62bcf9b086d71ce0307242e2d16df6d629fe31bde81d2ad5e8e20"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.md",
+      "bytes": 4026,
+      "sha256": "0a3c059608b6efb8cb44a77930b2f8fdb8f16aeb54a2ee2e8463c0e7240d1e52"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.mmd",
+      "bytes": 3289,
+      "sha256": "0c377879c8bc68421d239d04b24e8ed566cc6a0fbea06a175e55a7a7414adf13"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.png",
+      "bytes": 1075075,
+      "sha256": "9ed29da1eec00d810df1a5e05c5fd3edd97a898eda88751f9977fe0099ea338e"
+    },
+    {
+      "path": "diagrams/PWA_Finn_Loop_Flow.fa.svg",
+      "bytes": 34285,
+      "sha256": "ef6d77ba533fd5d12e12a4872c2bb72082d41650a307070859be3b1fb4398086"
+    },
+    {
+      "path": "references/.github__workflows__ci.yml.source.txt",
+      "bytes": 32026,
+      "sha256": "a2aa7a87ca26fd0795ca58a8e19a3e89995b0cec591de2a1b966a42d2535fcc0"
+    },
+    {
+      "path": "references/.github__workflows__web.yml.source.txt",
+      "bytes": 2811,
+      "sha256": "665138fab16a8402893d943422619e81688789f7d6037b388382673ea14e5890"
+    },
+    {
+      "path": "references/AGENTS.md.source.txt",
+      "bytes": 9199,
+      "sha256": "82bf2fab27cd36c93905925d2962a137b501d2c91ab819950997dc091b8f5dad"
+    },
+    {
+      "path": "references/HANDOFF_HTML_SMOKE.json",
+      "bytes": 2441,
+      "sha256": "9dd3b2517ad9f795485a61d09dbc17ef01e0b62886d68c6d0fff59954dd44edc"
+    },
+    {
+      "path": "references/HANDOFF_HTML_SMOKE.recipe.mjs.txt",
+      "bytes": 4486,
+      "sha256": "1d000535ad53d8cd251d87811d83c78f569e0df6ea04cd7e38ba10963f33c628"
+    },
+    {
+      "path": "references/LICENSE.source.txt",
+      "bytes": 1637,
+      "sha256": "62a4307987fa8eb0538773f80595ab25bc498a3a72a18d9069376e26147c67f3"
+    },
+    {
+      "path": "references/MP_API_OPERATIONS.csv",
+      "bytes": 29150,
+      "sha256": "748f0342fa726ea7abdcb79176ac4f636127f019e5a55c0de1e7acbf6aeadc72"
+    },
+    {
+      "path": "references/MP_SOURCE_COMMIT.json",
+      "bytes": 438,
+      "sha256": "13d1937c53b2566949feedb60ae60f10e5b83875760a292cf5b926d0ff62824c"
+    },
+    {
+      "path": "references/MP_SOURCE_INVENTORY.json",
+      "bytes": 8772,
+      "sha256": "0424c27776e5e2f16758ad249fc3ed611ad364914a52c8fd666f2ab9dc63d86e"
+    },
+    {
+      "path": "references/README.fa.md",
+      "bytes": 6895,
+      "sha256": "c4e06102739db67c6b29fb6152353d02fb42194dfe0e80b198b7e637f3a8a879"
+    },
+    {
+      "path": "references/SOURCE_MANIFEST.json",
+      "bytes": 13929,
+      "sha256": "ae3578459025ade297351d0953743eb264aa8a5e83cbf902cec1df238c211495"
+    },
+    {
+      "path": "references/binary-releases.json",
+      "bytes": 7133,
+      "sha256": "d50050bf8b71c11aa78e1580febbd33be8e41f5778fc96c8ccbd5df9f6fd7362"
+    },
+    {
+      "path": "references/docs__MuscleParadise__FINN_LOOP.md.source.txt",
+      "bytes": 40958,
+      "sha256": "e937d083427f6bef9a50cce34aca9a59e837d79216b48a0702c6c12c184a3b61"
+    },
+    {
+      "path": "references/docs__MuscleParadise__PLAN-MANUAL-TRANSFER.md.source.txt",
+      "bytes": 13304,
+      "sha256": "141b11d741fcfeeb4a9650598a36dd89e28e27dcc2666e7db15abd57a26c7377"
+    },
+    {
+      "path": "references/docs__MuscleParadise__RELEASE-CHECKLIST.md.source.txt",
+      "bytes": 5629,
+      "sha256": "fa89964591065b5319259e70b69e4736e33625acf414d8a4b32323b2064fa1ef"
+    },
+    {
+      "path": "references/docs__MuscleParadise__architecture__finn-loop-microtask-backlog-draft-v1-2026-11-23.md.source.txt",
+      "bytes": 90932,
+      "sha256": "d85762e8fc872ed324a7a2755b8979ec6fa1a0476cfae1ec72994ab24a6edaca"
+    },
+    {
+      "path": "references/docs__MuscleParadise__architecture__muscle-paradise-final-pwa-access-flow-v1-2026-11-23.md.source.txt",
+      "bytes": 5759,
+      "sha256": "1c23b1ef96926cbdd780557d650c3166e53d05140f1992e9953a0622c77b7e69"
+    },
+    {
+      "path": "references/github-tool-catalog.json",
+      "bytes": 5623,
+      "sha256": "a482d43af97930390b06e71b063712b759a371f4a0edbd966bc339b4a341bc61"
+    },
+    {
+      "path": "references/mp-api-routes.snapshot.json",
+      "bytes": 88248,
+      "sha256": "e43cee007a9393acc8d9db1509e29e7ea51867c26b8a9de725633f21603bf04a"
+    },
+    {
+      "path": "references/mp-app__backend__api__routes.json.source.txt",
+      "bytes": 74458,
+      "sha256": "7f0333dfb92a5bb56514b7e003cc78370fc7e8fabe3a9a8b5342ccaab9a84cf8"
+    },
+    {
+      "path": "references/mp-app__backend__app__security__route_policy.py.source.txt",
+      "bytes": 7660,
+      "sha256": "d512ac2d23d61fd347f69b910a90cc8e0f92dd2cdd49ba4b370587548a12ad1a"
+    },
+    {
+      "path": "references/mp-app__backend__pyproject.toml.source.txt",
+      "bytes": 7597,
+      "sha256": "5cefc0a33fc6b8a8ffd5e4e4327dbc00c0b4b9bd39206cd745f8755a65132cce"
+    },
+    {
+      "path": "references/mp-app__backend__requirements.txt.source.txt",
+      "bytes": 1686,
+      "sha256": "65494cfc58e5c6c8af91d9b452cc6660d584e0c103b2c27134b18f4106232719"
+    },
+    {
+      "path": "references/mp-app__backend__security__rbac.py.source.txt",
+      "bytes": 16731,
+      "sha256": "a8740f75b33e864e1a3990f4d77e2fa781f0c2105c133d9892a41ce63fdf9d2c"
+    },
+    {
+      "path": "references/mp-app__client__pubspec.yaml.source.txt",
+      "bytes": 1265,
+      "sha256": "2a6199d61ea9c2f5957e9644fd889df8c28829a3e5cbc60dc0b07d4cc81b3166"
+    },
+    {
+      "path": "references/mp-app__studio__Dockerfile.source.txt",
+      "bytes": 412,
+      "sha256": "aeebf86e42efef89304e8d5315e56bbb3fb4e53c28ef00594949719879f24799"
+    },
+    {
+      "path": "references/mp-app__studio__nginx.conf.source.txt",
+      "bytes": 808,
+      "sha256": "6aa6830e90b7758efc1ca8b90d9d0851f9c24dd4713fa855e8e3d49afbaaf4df"
+    },
+    {
+      "path": "references/mp-app__studio__package.json.source.txt",
+      "bytes": 1397,
+      "sha256": "3c1e808471bf897e18bab073fbb748206031a5329367b912401b7513b69567d6"
+    },
+    {
+      "path": "references/mp-app__studio__public__manifest.webmanifest.source.txt",
+      "bytes": 692,
+      "sha256": "ae10710c471cb55a1b58a6ddbc7e9c8fbf1d202d261c72dd2e601810bdfe6baf"
+    },
+    {
+      "path": "references/mp-app__studio__public__sw.js.source.txt",
+      "bytes": 1800,
+      "sha256": "c5cae5b476624bfdf3209d0c6f3d9bc98ce02046aae2a73a4f98802f8d2da6a9"
+    },
+    {
+      "path": "references/mp-app__studio__src__App.tsx.source.txt",
+      "bytes": 3229,
+      "sha256": "4dcdc6749ac6fb7fe2b92bbf47a542a5e6f43693a9f98224f04833d7f1d05007"
+    },
+    {
+      "path": "references/mp-app__studio__src__auth__AuthContext.tsx.source.txt",
+      "bytes": 3361,
+      "sha256": "43b396641effa11d5436092b86e476ec4690b429d532d9c7d65800fb577a2324"
+    },
+    {
+      "path": "references/mp-app__studio__src__lib__roleNav.ts.source.txt",
+      "bytes": 6548,
+      "sha256": "650ff74343af6e25010f6a07bab4de477d2ffefcee94be3923a200ed05d53220"
+    },
+    {
+      "path": "references/mp-app__studio__src__lib__session.ts.source.txt",
+      "bytes": 12162,
+      "sha256": "a13843e6c24c32c0a760d3c564767629fe32a4544bac4e1ad55022805cc894f7"
+    },
+    {
+      "path": "references/mp-app__studio__tests__pwa.test.ts.source.txt",
+      "bytes": 3558,
+      "sha256": "14676bc2cbb437d8ec639f6430ec28c000d8702d45da6e563b65812e781d9571"
+    },
+    {
+      "path": "references/mp-app__studio__vite.config.ts.source.txt",
+      "bytes": 2320,
+      "sha256": "8ca102ab6714b6aee3246e87e21a3fd8837c6eebc5a2e106feaeb4c0675f65a6"
+    },
+    {
+      "path": "references/npm-tool-catalog.json",
+      "bytes": 3770,
+      "sha256": "05120b7da2e6504e14e687a051992ef87aba4154583135c7943802c6f7012552"
+    },
+    {
+      "path": "references/python-tool-catalog.json",
+      "bytes": 225,
+      "sha256": "a1c9bfa3600348e59f151682f77a7739652d7ec5c311899ff348ca4d48d2a05b"
+    },
+    {
+      "path": "references/tools__graphviz-renderer__package.json.source.txt",
+      "bytes": 336,
+      "sha256": "8d9a9b5dbe1805ef6c5b29886c79deb80f56f3c9ab58fd70e4f67978569ffd73"
+    },
+    {
+      "path": "scripts/make_roadmap.py",
+      "bytes": 4704,
+      "sha256": "59237c2e319f5b31e7aabc567ad8087a2f716b83da76c1e1db085d6dc5659495"
+    },
+    {
+      "path": "scripts/preflight.py",
+      "bytes": 8230,
+      "sha256": "b06c66ed352ee17a3492934b9c4fb8a724605c852cf6acae80e5a509fed1dd09"
+    },
+    {
+      "path": "scripts/render_diagram.mjs",
+      "bytes": 3105,
+      "sha256": "36774444d3f3bf4b19473960a733d89c06f4431bae36f659868bac38a63595c4"
+    },
+    {
+      "path": "scripts/sync_plan.py",
+      "bytes": 8546,
+      "sha256": "fa86c4e67f437ef469e5a73777bbf06683b79b007973f6db3239d73804c3ae35"
+    },
+    {
+      "path": "scripts/validate_package.py",
+      "bytes": 9187,
+      "sha256": "2ed5a4807cf7df06456ccdf8558a93dd6219d611946b57813390ca978983b327"
+    },
+    {
+      "path": "templates/ADR_TEMPLATE.fa.md",
+      "bytes": 2016,
+      "sha256": "cd5755992f18cf4f399312075cb9da31838dfe8368b900800201d4edfdab7d72"
+    },
+    {
+      "path": "templates/DECISION_REGISTER.json",
+      "bytes": 11082,
+      "sha256": "54bc23e703039c4ce24fa4d8d7d91bbc27994e818311852ff811e0297fdc87d1"
+    },
+    {
+      "path": "templates/EVIDENCE_TEMPLATE.fa.md",
+      "bytes": 3586,
+      "sha256": "fdb10a84930277ec3f86191ba5cd7c5f85246ec7d7016dc4a50cab8f48e881f7"
+    },
+    {
+      "path": "templates/FEATURE_PARITY.csv",
+      "bytes": 2779,
+      "sha256": "5ecd95aa977e8a003991f43bf4658d4750185bd6d068a8d841bfb06af25664f8"
+    },
+    {
+      "path": "templates/INTERACTION_MATRIX.csv",
+      "bytes": 523,
+      "sha256": "d638998c706c4b6e75a862aefc7a69ddf0c6a830cc9ac140bb89618436cf9b9b"
+    },
+    {
+      "path": "templates/MICROTASK_TEMPLATE.fa.md",
+      "bytes": 5103,
+      "sha256": "1f106ae76068931c2608599a9b6dcf57a52ffad71bb58ec0c9e53056351518a1"
+    },
+    {
+      "path": "templates/RESUME_PROMPT.fa.txt",
+      "bytes": 3683,
+      "sha256": "5f0194c5ad59ed4354e153441277d1fbd3e98fd6c8454daa7913f31d32124691"
+    },
+    {
+      "path": "templates/STATE_AND_LEDGER.fa.md",
+      "bytes": 2019,
+      "sha256": "085bdd6ff1e95014d780467ea41db5e27292dff15a885cf693e7ab681802ceda"
+    },
+    {
+      "path": "tooling/diagram/package-lock.json",
+      "bytes": 19857,
+      "sha256": "9e32be8bb5626af63a7fca41c37e76ebee7c02afcd12db02d7f43ce99e3ab767"
+    },
+    {
+      "path": "tooling/diagram/package.json",
+      "bytes": 371,
+      "sha256": "04c7aafad58e457ea71e25789050bc6f99b44d7cfcc4bcadc9409f2758dc720a"
+    },
+    {
+      "path": "tooling/node/package-lock.json",
+      "bytes": 68748,
+      "sha256": "5df5ddfcd4ecf93a86410d0d273fbe01a7d795c9a2605730242ab40a7ecbe80a"
+    },
+    {
+      "path": "tooling/node/package.json",
+      "bytes": 462,
+      "sha256": "7ff13ce5f9080a0100da733c5975ccbb3d7f5d060640780a2eb46dbf8c6f1651"
+    },
+    {
+      "path": "tooling/requirements-audit.txt",
+      "bytes": 89,
+      "sha256": "9daa9c4379f9e1a47c5e2bce94629e0a9450888528f90d5e7c971f67fae18849"
+    }
+  ]
+}

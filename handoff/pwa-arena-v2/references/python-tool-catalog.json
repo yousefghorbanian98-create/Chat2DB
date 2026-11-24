@@ -1,0 +1,12 @@
+{
+  "semgrep": {
+    "version": "1.186.0",
+    "requires_python": ">=3.10",
+    "verified_on": "2026-11-24"
+  },
+  "Markdown": {
+    "version": "3.11.3",
+    "requires_python": ">=3.11",
+    "verified_on": "2026-11-24"
+  }
+}

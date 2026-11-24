@@ -1,0 +1,94 @@
+{
+  "date_utc": "2026-11-24",
+  "scope": "Local offline handoff HTML only; NOT MP app, PWA installation, real-device, accessibility certification, security audit or independent review.",
+  "document": "HANDOFF.fa.html",
+  "recipe_sha256": "1d000535ad53d8cd251d87811d83c78f569e0df6ea04cd7e38ba10963f33c628",
+  "document_sha256": "9101c1981d4db2ad5104d303064489c83bab340e302a213be7b5803ee706599c",
+  "browser": "153.0.8010.0",
+  "tool_versions": {
+    "@sparticuz/chromium": "153.0.0",
+    "playwright-core": "1.65.1"
+  },
+  "isolated_tooling": "temporary scratch; not product dependencies or bundled binaries",
+  "controls": "Offline context, HTTP routes abort, local generated trusted HTML only; no-sandbox is a sandbox smoke limitation, not production policy",
+  "results": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 920
+      },
+      "direction": "rtl",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "taskHeadings": 50,
+      "images": [
+        {
+          "complete": true,
+          "width": 4200,
+          "source": "embedded-png"
+        },
+        {
+          "complete": true,
+          "width": 5200,
+          "source": "embedded-png"
+        }
+      ],
+      "uniqueAnchors": true,
+      "ownScripts": 0,
+      "status": "PASS_DOCUMENT_ONLY"
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "direction": "rtl",
+      "width": 390,
+      "scrollWidth": 390,
+      "taskHeadings": 50,
+      "images": [
+        {
+          "complete": true,
+          "width": 4200,
+          "source": "embedded-png"
+        },
+        {
+          "complete": true,
+          "width": 5200,
+          "source": "embedded-png"
+        }
+      ],
+      "uniqueAnchors": true,
+      "ownScripts": 0,
+      "status": "PASS_DOCUMENT_ONLY"
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 780
+      },
+      "direction": "rtl",
+      "width": 320,
+      "scrollWidth": 320,
+      "taskHeadings": 50,
+      "images": [
+        {
+          "complete": true,
+          "width": 4200,
+          "source": "embedded-png"
+        },
+        {
+          "complete": true,
+          "width": 5200,
+          "source": "embedded-png"
+        }
+      ],
+      "uniqueAnchors": true,
+      "ownScripts": 0,
+      "status": "PASS_DOCUMENT_ONLY"
+    }
+  ],
+  "external_request_count": 0,
+  "page_error_count": 0,
+  "status": "PASS_DOCUMENT_ONLY_NOT_PRODUCT_QA"
+}

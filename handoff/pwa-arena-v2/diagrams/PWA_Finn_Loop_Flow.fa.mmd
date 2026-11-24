@@ -1,0 +1,40 @@
+flowchart TB
+  start["محیط مجاز: repo / branch / SHA / AGENTS / صف جاری؛ بدون reset یا switch"]
+  select["از PWA-00؛ انتخاب یک کارت/فرزند مستقل از ۵۰ parent؛ Studio موجود نه اپ دوم"]
+  contract["قرارداد AC/NG/API/ownership/test؛ READY-FOR-OWNER و تصویب انسانی spec"]
+  ready{"پیش‌نیاز، کنترل آغاز، مجوز و budget مصوب؟"}
+  blocked["فقط وابسته BLOCKED / DECISION؛ سؤال‌ها یک‌جا؛ UNKNOWN ≠ PASS"]
+  budget["G8 همیشگی: ۳ تلاش کل = اولیه + ۲ retry؛ ۹۰ دقیقه پیشنهاد نیازمند تصویب؛ هزینه/egress مکمل بدون اذن صفر"]
+  gates["۹ حوزهٔ هر کارت/فرزند: G1-spec / G2-isolation / G3-tool-scope / G4-tests-security / G5-branch-protection / G6-evidence / G7-human-approval / G8-budget / G9-adversarial-review"]
+  domains["۵ گیت مستقل: security / privacy / finance / legal / product؛ N/A فقط با دلیل و انسان"]
+  subgraph finn["فقط AGENT-READY؛ Forge → Inspect → Normalize → Next"]
+    direction LR
+    forge["F · Forge: تست رفتاری و ساخت محدود؛ fixture مصنوعی؛ reuse"]
+    inspect["I · Inspect: CI/test/API مثبت و منفی؛ exit/count/skip/security"]
+    normalize["N · Normalize: اصلاح محدود؛ gateهای متأثر دوباره؛ بدون تضعیف تست/native"]
+    next["N · Next: evidence همان SHA و state/ledger/decisions؛ آمادهٔ review نهایی"]
+    forge --> inspect --> normalize --> next
+  end
+  review["review مستقل واقعی روی head نهایی؛ role/ownership/prompt/scope/cache؛ self-review مستقل نیست؛ تغییر head نیازمند review/check دوباره"]
+  pass{"AC/gateهای فنی شاهد دارند و review مستقل بی‌یافتهٔ باز است؟"}
+  retry{"بودجه باقی و اصلاح در scope است؟"}
+  owner["OWNER-REVIEW: approval انسان روی head + required checks؛ G7 تا merge باز؛ کار مستقل ادامه"]
+  merge["merge انسانی در baseline مصوب با مجوز صریح؛ نه auto-merge/bypass؛ ثبت approval/merge SHA/CI"]
+  done["DONE همین کارت؛ ۹+۵ حوزه بسته؛ parent پس از همه AC/فرزندها؛ dependency پس از merge معتبر"]
+  release["PWA-50…56: پنج سفر جدا، browser/device/PWA/SW/update/security/CI همان SHA، native محفوظ، Go/No-Go انسانی؛ PWA-3F شرطی BLOCKED، defer مالک نه PASS؛ no production/live money/DB/egress خودکار"]
+  start --> select --> contract --> ready
+  gates -.- contract
+  budget -.- ready
+  domains -.- review
+  ready -- AGENT-READY --> forge
+  ready -- خیر --> blocked
+  blocked -. فقط کار مستقل .-> select
+  next --> review --> pass
+  pass -- بله --> owner --> merge --> done --> release
+  pass -- خیر --> retry
+  retry -- بله، retry ثبت‌شده --> forge
+  retry -- خیر، FAIL/BLOCKED --> blocked
+  owner -. انتظار انسان، کار مستقل آماده .-> select
+  done -. کارت بعدی مجاز .-> select
+  classDef blockedStyle fill:#fff0d7,stroke:#d58a25,color:#163244;
+  class blocked,budget,retry blockedStyle;

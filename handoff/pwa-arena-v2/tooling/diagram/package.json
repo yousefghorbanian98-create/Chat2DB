@@ -1,0 +1,15 @@
+{
+  "name": "mp-pwa-handoff-diagram-tools",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Documentation-only Graphviz WASM + SVG/PNG renderer; aligned with MP reference tooling",
+  "engines": {
+    "node": ">=22.19.0 <23"
+  },
+  "packageManager": "npm@10.9.8",
+  "dependencies": {
+    "@viz-js/viz": "3.31.0",
+    "sharp": "0.35.5"
+  }
+}

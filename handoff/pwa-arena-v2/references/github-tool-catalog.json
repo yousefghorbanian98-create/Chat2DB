@@ -1,0 +1,173 @@
+[
+  {
+    "requested": "mermaid-js/mermaid-cli",
+    "repository": "mermaid-js/mermaid-cli",
+    "url": "https://github.com/mermaid-js/mermaid-cli",
+    "license_spdx": "MIT",
+    "source_commit": "1423a0d7967d275a9d360ba0617f569550827c8b",
+    "verified_on": "2026-11-24",
+    "default_branch": "master"
+  },
+  {
+    "requested": "semgrep/semgrep",
+    "repository": "semgrep/semgrep",
+    "url": "https://github.com/semgrep/semgrep",
+    "license_spdx": "LGPL-2.1",
+    "source_commit": "c4dbe9ee2fc6d0022ba02ef6b97c5954ed9549e3",
+    "verified_on": "2026-11-24",
+    "default_branch": "develop"
+  },
+  {
+    "requested": "sverweij/dependency-cruiser",
+    "repository": "sverweij/dependency-cruiser",
+    "url": "https://github.com/sverweij/dependency-cruiser",
+    "license_spdx": "MIT",
+    "source_commit": "65ae57fe4afaf18aa9e9cc29df7fabdbc658cba7",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "webpro-nl/knip",
+    "repository": "webpro-nl/knip",
+    "url": "https://github.com/webpro-nl/knip",
+    "license_spdx": "ISC",
+    "source_commit": "74c07a6361e720ee31ac2e428c6b6648f5598210",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "microsoft/playwright",
+    "repository": "microsoft/playwright",
+    "url": "https://github.com/microsoft/playwright",
+    "license_spdx": "Apache-2.0",
+    "source_commit": "d70f422f491cfb875dd5dc05f01c61207e7382b4",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "grafana/k6",
+    "repository": "grafana/k6",
+    "url": "https://github.com/grafana/k6",
+    "license_spdx": "AGPL-3.0",
+    "source_commit": "6d021433ff6b5de0ff78dfa44dc9f332a0f13087",
+    "verified_on": "2026-11-24",
+    "default_branch": "master"
+  },
+  {
+    "requested": "OpenHands/OpenHands",
+    "repository": "OpenHands/OpenHands",
+    "url": "https://github.com/OpenHands/OpenHands",
+    "license_spdx": "MIT",
+    "source_commit": "47eed012171230b059c3f5cbf3798bded74ea248",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "google/osv-scanner",
+    "repository": "google/osv-scanner",
+    "url": "https://github.com/google/osv-scanner",
+    "license_spdx": "Apache-2.0",
+    "source_commit": "66586f4a200a7b08f0e202ac1894bc7670424ede",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "gitleaks/gitleaks",
+    "repository": "gitleaks/gitleaks",
+    "url": "https://github.com/gitleaks/gitleaks",
+    "license_spdx": "MIT",
+    "source_commit": "5f6ec56cfa6f8c67648d863582c7ae2f206d5c1c",
+    "verified_on": "2026-11-24",
+    "default_branch": "master"
+  },
+  {
+    "requested": "astral-sh/ruff",
+    "repository": "astral-sh/ruff",
+    "url": "https://github.com/astral-sh/ruff",
+    "license_spdx": "MIT",
+    "source_commit": "32669b2743b45fb364aa4741b82e98443155ca3c",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "pypa/pip-audit",
+    "repository": "pypa/pip-audit",
+    "url": "https://github.com/pypa/pip-audit",
+    "license_spdx": "Apache-2.0",
+    "source_commit": "864264baeb9a9e30115a0f2838fe4769cf5a0840",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "PyCQA/bandit",
+    "repository": "PyCQA/bandit",
+    "url": "https://github.com/PyCQA/bandit",
+    "license_spdx": "Apache-2.0",
+    "source_commit": "2d5467c45c3189f4d7d07e8022276bc73a478abd",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "openapi-ts/openapi-typescript",
+    "repository": "openapi-ts/openapi-typescript",
+    "url": "https://github.com/openapi-ts/openapi-typescript",
+    "license_spdx": "MIT",
+    "source_commit": "d46a319ae2efab30e135ba9b223a3cffd1a67eab",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "vite-pwa/vite-plugin-pwa",
+    "repository": "vite-pwa/vite-plugin-pwa",
+    "url": "https://github.com/vite-pwa/vite-plugin-pwa",
+    "license_spdx": "MIT",
+    "source_commit": "355cf3dd283ca50da3ac4759501e9c3312a3da91",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "GoogleChrome/workbox",
+    "repository": "GoogleChrome/workbox",
+    "url": "https://github.com/GoogleChrome/workbox",
+    "license_spdx": "MIT",
+    "source_commit": "4ea3138a120fd2c87389b54130e25f47e0fd7089",
+    "verified_on": "2026-11-24",
+    "default_branch": "v7"
+  },
+  {
+    "requested": "dequelabs/axe-core",
+    "repository": "dequelabs/axe-core",
+    "url": "https://github.com/dequelabs/axe-core",
+    "license_spdx": "MPL-2.0",
+    "source_commit": "32d9bd503128d4b52d818ca89140c1debe5d70d5",
+    "verified_on": "2026-11-24",
+    "default_branch": "develop"
+  },
+  {
+    "requested": "finna/Finn-loop",
+    "repository": "finna/Finn-loop",
+    "url": "https://github.com/finna/Finn-loop",
+    "license_spdx": "MIT",
+    "source_commit": "7941b62c946154d15c11b7f24931bb8b6e155f01",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "vitejs/vite",
+    "repository": "vitejs/vite",
+    "url": "https://github.com/vitejs/vite",
+    "license_spdx": "MIT",
+    "source_commit": "e16ca5a13d74dddd005763df9d4db9fa01c74a4d",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  },
+  {
+    "requested": "vitest-dev/vitest",
+    "repository": "vitest-dev/vitest",
+    "url": "https://github.com/vitest-dev/vitest",
+    "license_spdx": "MIT",
+    "source_commit": "ff6b4275fd760184955713c940f7bbeba5f30be7",
+    "verified_on": "2026-11-24",
+    "default_branch": "main"
+  }
+]

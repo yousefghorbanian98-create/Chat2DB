@@ -1,0 +1,191 @@
+{
+  "grafana/k6": {
+    "tag": "v2.4.0",
+    "url": "https://github.com/grafana/k6/releases/tag/v2.4.0",
+    "assets": [
+      {
+        "name": "k6-v2.4.0-checksums.txt",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-checksums.txt",
+        "size": 746
+      },
+      {
+        "name": "k6-v2.4.0-linux-amd64.deb",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-linux-amd64.deb",
+        "size": 29627076
+      },
+      {
+        "name": "k6-v2.4.0-linux-amd64.rpm",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-linux-amd64.rpm",
+        "size": 32437582
+      },
+      {
+        "name": "k6-v2.4.0-linux-amd64.tar.gz",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-linux-amd64.tar.gz",
+        "size": 31274392
+      },
+      {
+        "name": "k6-v2.4.0-linux-arm64.tar.gz",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-linux-arm64.tar.gz",
+        "size": 28735796
+      },
+      {
+        "name": "k6-v2.4.0-macos-amd64.zip",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-macos-amd64.zip",
+        "size": 32431447
+      },
+      {
+        "name": "k6-v2.4.0-macos-arm64.zip",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-macos-arm64.zip",
+        "size": 30571659
+      },
+      {
+        "name": "k6-v2.4.0-spdx.json",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-spdx.json",
+        "size": 487550
+      },
+      {
+        "name": "k6-v2.4.0-windows-amd64.msi",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-windows-amd64.msi",
+        "size": 32108544
+      },
+      {
+        "name": "k6-v2.4.0-windows-amd64.zip",
+        "url": "https://github.com/grafana/k6/releases/download/v2.4.0/k6-v2.4.0-windows-amd64.zip",
+        "size": 32143920
+      }
+    ]
+  },
+  "google/osv-scanner": {
+    "tag": "v2.7.1",
+    "url": "https://github.com/google/osv-scanner/releases/tag/v2.7.1",
+    "assets": [
+      {
+        "name": "multiple.intoto.jsonl",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/multiple.intoto.jsonl",
+        "size": 23299
+      },
+      {
+        "name": "osv-scanner_darwin_amd64",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_darwin_amd64",
+        "size": 59352784
+      },
+      {
+        "name": "osv-scanner_darwin_arm64",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_darwin_arm64",
+        "size": 55745714
+      },
+      {
+        "name": "osv-scanner_linux_amd64",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_linux_amd64",
+        "size": 58187936
+      },
+      {
+        "name": "osv-scanner_linux_arm64",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_linux_arm64",
+        "size": 54198432
+      },
+      {
+        "name": "osv-scanner_SHA256SUMS",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_SHA256SUMS",
+        "size": 554
+      },
+      {
+        "name": "osv-scanner_windows_amd64.exe",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_windows_amd64.exe",
+        "size": 59462656
+      },
+      {
+        "name": "osv-scanner_windows_arm64.exe",
+        "url": "https://github.com/google/osv-scanner/releases/download/v2.7.1/osv-scanner_windows_arm64.exe",
+        "size": 54770176
+      }
+    ]
+  },
+  "gitleaks/gitleaks": {
+    "tag": "v8.30.1",
+    "url": "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1",
+    "assets": [
+      {
+        "name": "gitleaks_8.30.1_checksums.txt",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_checksums.txt",
+        "size": 999
+      },
+      {
+        "name": "gitleaks_8.30.1_darwin_arm64.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_darwin_arm64.tar.gz",
+        "size": 7897593
+      },
+      {
+        "name": "gitleaks_8.30.1_darwin_x64.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_darwin_x64.tar.gz",
+        "size": 8359235
+      },
+      {
+        "name": "gitleaks_8.30.1_linux_arm64.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_arm64.tar.gz",
+        "size": 7601421
+      },
+      {
+        "name": "gitleaks_8.30.1_linux_armv6.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_armv6.tar.gz",
+        "size": 7515485
+      },
+      {
+        "name": "gitleaks_8.30.1_linux_armv7.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_armv7.tar.gz",
+        "size": 7501622
+      },
+      {
+        "name": "gitleaks_8.30.1_linux_x32.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x32.tar.gz",
+        "size": 7634107
+      },
+      {
+        "name": "gitleaks_8.30.1_linux_x64.tar.gz",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz",
+        "size": 8230402
+      },
+      {
+        "name": "gitleaks_8.30.1_windows_arm64.zip",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_arm64.zip",
+        "size": 7701820
+      },
+      {
+        "name": "gitleaks_8.30.1_windows_x32.zip",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x32.zip",
+        "size": 7912746
+      },
+      {
+        "name": "gitleaks_8.30.1_windows_x64.zip",
+        "url": "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_windows_x64.zip",
+        "size": 8438883
+      }
+    ]
+  },
+  "OpenHands/OpenHands": {
+    "tag": "v1.45.0",
+    "url": "https://github.com/OpenHands/OpenHands/releases/tag/v1.45.0",
+    "assets": [
+      {
+        "name": "agent-canvas_1.45.0_amd64.deb",
+        "url": "https://github.com/OpenHands/OpenHands/releases/download/v1.45.0/agent-canvas_1.45.0_amd64.deb",
+        "size": 157610440
+      },
+      {
+        "name": "OpenHands-Agent-Canvas-1.45.0-universal.dmg",
+        "url": "https://github.com/OpenHands/OpenHands/releases/download/v1.45.0/OpenHands-Agent-Canvas-1.45.0-universal.dmg",
+        "size": 349723944
+      },
+      {
+        "name": "OpenHands-Agent-Canvas-Setup-1.45.0.exe",
+        "url": "https://github.com/OpenHands/OpenHands/releases/download/v1.45.0/OpenHands-Agent-Canvas-Setup-1.45.0.exe",
+        "size": 168721585
+      },
+      {
+        "name": "OpenHands.Agent.Canvas-1.45.0.AppImage",
+        "url": "https://github.com/OpenHands/OpenHands/releases/download/v1.45.0/OpenHands.Agent.Canvas-1.45.0.AppImage",
+        "size": 200550258
+      }
+    ]
+  }
+}

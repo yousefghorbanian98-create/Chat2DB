@@ -1,0 +1,596 @@
+# Muscle Paradise — CI: lint → test → build → scan
+name: mp-ci
+
+on:
+  push:
+    branches: [main, "arena/**"]
+  pull_request:
+
+# The CI pipeline only needs to read source; failure diagnostics are artifacts,
+# not commits back into whichever branch triggered this run.
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      # Use the MIT Gitleaks CLI, not gitleaks/gitleaks-action (its repository
+      # does not declare a licence). Verify the official release checksum and
+      # redact findings so a discovered credential is never printed to logs.
+      - name: Install verified Gitleaks CLI
+        run: |
+          set -euo pipefail
+          version=8.30.1
+          archive="gitleaks_${version}_linux_x64.tar.gz"
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${version}"
+          curl -fsSL "$base/$archive" -o "/tmp/$archive"
+          curl -fsSL "$base/gitleaks_${version}_checksums.txt" -o /tmp/gitleaks-checksums.txt
+          (cd /tmp && grep "  $archive$" gitleaks-checksums.txt | sha256sum --check)
+          mkdir -p /tmp/gitleaks
+          tar -xzf "/tmp/$archive" -C /tmp/gitleaks gitleaks
+          /tmp/gitleaks/gitleaks version
+      - name: Verify exact signing exceptions with synthetic secrets
+        env:
+          GITLEAKS: /tmp/gitleaks/gitleaks
+        run: python3 scripts/test_retired_signing_scan.py
+      - name: Scan full Git history (redacted metadata)
+        run: |
+          set +e
+          /tmp/gitleaks/gitleaks git --redact --no-banner --log-level=error \
+            --report-format=json --report-path=/tmp/gitleaks-report.json .
+          scan_status=$?
+          set -e
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = Path("/tmp/gitleaks-report.json")
+          findings = []
+          if report.is_file():
+              try:
+                  parsed = json.loads(report.read_text(encoding="utf-8"))
+                  findings = parsed if isinstance(parsed, list) else []
+              except (OSError, json.JSONDecodeError):
+                  findings = []
+
+          def escape_command_value(value: object) -> str:
+              return (
+                  str(value)
+                  .replace("%", "%25")
+                  .replace("\r", "%0D")
+                  .replace("\n", "%0A")
+                  .replace(":", "%3A")
+                  .replace(",", "%2C")
+              )
+
+          summary = ["### Gitleaks scan (redacted metadata)"]
+          summary.append(f"Potential findings: {len(findings)}. Secret values are never included.")
+          for finding in findings[:40]:
+              path = finding.get("File", "unknown path")
+              rule = finding.get("RuleID", "unknown rule")
+              line = finding.get("StartLine", 0)
+              commit = str(finding.get("Commit", ""))[:12]
+              message = f"Potential secret match ({rule}); value withheld; commit {commit or 'unknown'}."
+              print(
+                  f"::error file={escape_command_value(path)},line={line},title=Gitleaks finding::"
+                  f"{escape_command_value(message)}"
+              )
+              summary.append(f"- `{path}:{line}` — `{rule}`; commit `{commit or 'unknown'}` (value withheld).")
+          if not report.is_file():
+              summary.append("No JSON report was produced; inspect the scanner step output after checking access restrictions.")
+              print("::error::Gitleaks failed without a readable JSON report; no secret values were emitted by this summary.")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as stream:
+                  stream.write("\n".join(summary) + "\n")
+          PY
+          exit "$scan_status"
+
+  docs:
+    name: Documentation links and handoff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.11"
+      - name: Validate agent docs, diagrams, and local links
+        run: python3 scripts/docs_gate.py
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "22"
+      - name: Interaction map gate (contract drift + stale map)
+        run: python3 scripts/interaction_map.py --check
+      - name: Mermaid syntax gate (official parser, headless — no browser)
+        run: cd tools/mermaid-check && npm ci --no-audit --no-fund && node check.mjs
+      - name: Repository hygiene (no tool index, no .claude/, no agent git hook)
+        run: python3 scripts/repo_hygiene_gate.py
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.11"
+      - name: Install backend deps
+        run: pip install -c mp-app/backend/requirements.txt -e "mp-app/backend[dev]"
+      - name: "Lint (ruff) — بلوکینگ (A1.3 گام ۵)"
+        # زیرمجموعهٔ خانواده‌های پاک‌شده + قالب‌بندی. هر خانواده‌ای که پاک شد به این لیست اضافه می‌شود:
+        # DTZ پس از WP 3.6 · TRY400 پس از WP 2.6 · S پس از WP 4.5 · C90 پس از F‑15 · بقیه پس از رفع.
+        # TRY به‌صورت کد دقیق (TRY400) آمده: خانوادهٔ TRY در خط فرمان TRY003 را هم برمی‌گرداند،
+        # که در pyproject عمداً ignore است (پیام فارسی inline).
+        run: |
+          cd mp-app/backend
+          ruff check --select E,F,W,I,N,UP,B,SIM,DTZ,TRY400,S --ignore E501 .
+          ruff format --check .
+      - name: "Lint (ruff) — غیرمسدودکننده: پیکربندی کامل (یافته‌های باز تا فازهای ۲–۴)"
+        continue-on-error: true
+        run: |
+          cd mp-app/backend
+          ruff check .
+      # WP 0.4 (F‑07): پوشش per-directory با آستانه‌های جدا برای هر پوشه
+      # (scripts/coverage_gate.py). کد خروج غیرصفر = شکست CI؛ هیچ آستانه‌ای کاهش نمی‌یابد.
+      - name: Test (pytest + per-directory coverage gate)
+        run: |
+          cd mp-app/backend
+          bash scripts/coverage_run.sh
+      - name: Upload backend coverage XML
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: backend-coverage-xml
+          path: |
+            mp-app/backend/coverage.xml
+            mp-app/backend/coverage-by-dir.json
+          if-no-files-found: warn
+      - name: Security scan (bandit + pip-audit)
+        run: |
+          pip install -U "setuptools>=84.1"   # رفع آسیب‌پذیری‌های PYSEC-2026-3447/GHSA-xmj3
+          cd mp-app/backend
+          bandit -r . -ll -q
+          pip-audit
+      # قواعد پروژه‌ای semgrep (`.semgrep/project-rules.yml`) — بدون نیاز به
+      # semgrep.dev؛ همان قواعدی که یافتهٔ «تأیید پرداخت بدون درگاه» را داد.
+      - name: Semgrep (project rules)
+        # semgrep در venv مجزا نصب می‌شود: در venv پروژه با opentelemetry
+        # تعارض می‌کند و با ImportError کرش می‌کند (یک بار در CI همین شد).
+        run: |
+          python -m venv /tmp/sgvenv
+          /tmp/sgvenv/bin/pip install -q semgrep
+          /tmp/sgvenv/bin/semgrep --config=.semgrep/project-rules.yml --error \
+            --exclude=.venv --exclude=node_modules --exclude=__pycache__ mp-app
+      # WP 0.7 (کیت): قواعد harness با semgrep — مسدودکننده (B6: صفر یافته روی mp-app؛
+      # پیش از B6 سه یافته بود: دو FP تقسیم دقیقه و یک نوع dynamic عمدی با nosemgrep).
+      - name: Semgrep (harness rules)
+        run: |
+          /tmp/sgvenv/bin/semgrep --config=.semgrep/mp-harness-rules.yml --error \
+            --exclude=.venv --exclude=node_modules --exclude=__pycache__ mp-app
+
+      - name: Collect backend diagnostics (on failure)
+        if: failure()
+        run: |
+          mkdir -p /tmp/backend-ci
+          cd mp-app/backend
+          ruff check . > /tmp/backend-ci/lint.txt 2>&1 || true
+          ruff format --check . >> /tmp/backend-ci/lint.txt 2>&1 || true
+          bandit -r . -ll -q > /tmp/backend-ci/bandit.txt 2>&1 || true
+          pip-audit > /tmp/backend-ci/pip-audit.txt 2>&1 || true
+          pytest tests -q --tb=short > /tmp/backend-ci/pytest.txt 2>&1 || true
+          printf 'run=%s job=backend\n' '${{ github.run_id }}' > /tmp/backend-ci/RUN.txt
+      - name: Upload backend diagnostics (on failure)
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: backend-diagnostics-${{ github.run_id }}
+          path: /tmp/backend-ci/
+          if-no-files-found: warn
+          retention-days: 7
+
+  studio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "22"
+      - name: Install
+        working-directory: mp-app/studio
+        run: npm ci || npm install
+      - name: Lint (ESLint 9 flat — WP 0.5 / F-10؛ ۰ خطا، ۰ هشدار)
+        working-directory: mp-app/studio
+        run: npm run lint
+      - name: Unit tests (Vitest) — شامل گیت‌های WCAG و sync توکن‌ها
+        working-directory: mp-app/studio
+        run: npm test
+      - name: Build (Vite)
+        working-directory: mp-app/studio
+        run: npm run build
+      - name: Audit (بدون بحرانی)
+        working-directory: mp-app/studio
+        run: |
+          npm audit --audit-level=critical || true
+          npm audit 2>&1 | tee audit.txt
+          ! grep -q "Severity: critical" audit.txt
+
+  client-flutter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2
+        with:
+          channel: stable
+      - name: flutter pub get
+        working-directory: mp-app/client
+        run: flutter pub get
+      - name: flutter analyze (گیت روی error/warning — نه info)
+        working-directory: mp-app/client
+        # `channel: stable` شناور است. Infoها غیرکشنده‌اند تا deprecation noticeهای
+        # SDK جاب را قرمز نکنند؛ error و warning همچنان گیت را fail می‌کنند.
+        run: |
+          set -o pipefail
+          set +e
+          flutter analyze --no-fatal-infos > /tmp/analyze.txt 2>&1
+          analyze_status=$?
+          machine_status=0
+          if [ "$analyze_status" -ne 0 ]; then
+            # Flutter's human-readable analyzer output can change with the floating
+            # stable SDK. Use Dart's documented machine format as a diagnostic
+            # fallback, while retaining flutter analyze as the actual CI gate.
+            dart analyze --format=machine . > /tmp/analyze.machine 2>&1
+            machine_status=$?
+          else
+            : > /tmp/analyze.machine
+          fi
+          set -e
+          tail -n 40 /tmp/analyze.txt
+          ANALYZE_STATUS="$analyze_status" MACHINE_STATUS="$machine_status" python3 - <<'PY'
+          import os
+          import re
+          import sys
+          from pathlib import Path
+
+          analyze_status = int(os.environ["ANALYZE_STATUS"])
+          machine_status = int(os.environ["MACHINE_STATUS"])
+          raw_lines = Path("/tmp/analyze.txt").read_text(encoding="utf-8", errors="replace").splitlines()
+          error_lines = [line for line in raw_lines if re.match(r"^\s*error\s*•", line)]
+          pattern = re.compile(r"^\s*error\s*•\s*(.*?)\s*•\s*(.+?):(\d+):(\d+)\s*•\s*(.*)$")
+          machine_diagnostics = []
+          for line in Path("/tmp/analyze.machine").read_text(encoding="utf-8", errors="replace").splitlines():
+              fields = line.split("|", 7)
+              if len(fields) == 8 and fields[0] in {"ERROR", "WARNING", "INFO"}:
+                  severity, _kind, code, path, line_number, column, _length, message = fields
+                  machine_diagnostics.append((severity, code, path, line_number, column, message))
+          severity_order = {"ERROR": 0, "WARNING": 1, "INFO": 2}
+          machine_diagnostics.sort(
+              key=lambda item: (severity_order[item[0]], item[2], int(item[3]), int(item[4]))
+          )
+
+          def escape(value: str) -> str:
+              return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A").replace(":", "%3A").replace(",", "%2C")
+
+          summary = ["### Flutter analyzer diagnostics"]
+          if analyze_status == 0:
+              print("analyze: no fatal analyzer diagnostics")
+              summary.append("No fatal analyzer diagnostics found.")
+          elif machine_diagnostics:
+              level = {"ERROR": "error", "WARNING": "warning", "INFO": "notice"}
+              print(f"flutter analyze exited {analyze_status}; Dart machine analyzer status {machine_status}.")
+              for severity, code, path, line_number, column, message in machine_diagnostics[:50]:
+                  annotation = level[severity]
+                  safe_message = f"{message} [{code}]" if code else message
+                  print(
+                      f"::{annotation} file={escape(path)},line={line_number},col={column},title=Dart analyzer::"
+                      f"{escape(safe_message)}"
+                  )
+                  summary.append(f"- `{path}:{line_number}:{column}` — {message} (`{code}`; {severity.lower()})")
+              summary.insert(1, f"Machine-format diagnostics: {len(machine_diagnostics)}.")
+          elif error_lines:
+              print("::error::flutter analyze: error diagnostics found; human-format fallback parsed")
+              for line in error_lines[:50]:
+                  match = pattern.match(line)
+                  if match:
+                      message, path, line_number, column, code = match.groups()
+                      safe_message = f"{message} [{code}]" if code else message
+                      print(
+                          f"::error file={escape(path)},line={line_number},col={column},title=Dart analyzer::"
+                          f"{escape(safe_message)}"
+                      )
+                      summary.append(f"- `{path}:{line_number}:{column}` — {message} (`{code}`)")
+                  else:
+                      print("::error::Flutter analyzer reported an error; see the redacted diagnostic artifact.")
+                      summary.append("An analyzer error was reported; its location could not be parsed safely.")
+              summary.insert(1, f"Error diagnostics: {len(error_lines)}.")
+          else:
+              print(f"::error::flutter analyze exited {analyze_status} without a parseable diagnostic")
+              summary.append(
+                  f"Analyzer command failed with exit status {analyze_status}; Dart machine analysis returned {machine_status} without parseable diagnostics."
+              )
+          summary.insert(1, f"Flutter analyzer exit status: {analyze_status}.")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as stream:
+                  stream.write("\n".join(summary) + "\n")
+          sys.exit(1 if analyze_status != 0 else 0)
+          PY
+      # Keep a JSON sidecar so CI can annotate failed test names/locations without
+      # exposing assertion values or stack traces in public check output.
+      - name: flutter test
+        working-directory: mp-app/client
+        run: |
+          mkdir -p /tmp/client-ci
+          set +e
+          flutter test --file-reporter=json:/tmp/client-ci/flutter-test.json > /tmp/client-ci/flutter-test.txt 2>&1
+          test_status=$?
+          set -e
+          # همیشه شمارش را در step summary بنویس: «جاب سبز» با «یک probe skip شد»
+          # یکی نیست، و بدون این خط، سبزیِ M98 (messenger-level haptics) قابل
+          # بازخوانی نبود. مقادیر assertion هرگز منتشر نمی‌شوند.
+          if [ -n "$GITHUB_STEP_SUMMARY" ]; then
+            python3 tools/ci_test_failures.py --summary /tmp/client-ci/flutter-test.json \
+              >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+          if [ "$test_status" -ne 0 ]; then
+            python3 tools/ci_test_failures.py /tmp/client-ci/flutter-test.json
+          fi
+          exit "$test_status"
+
+      # M60 — گیت مانیفست. اجرای 43828454021 نشان داد `android:debuggable="false"`
+      # در سورس، `lintVitalRelease` را می‌شکند و بیلد release را متوقف می‌کند.
+      # آن ویژگی برای «سخت‌کردن» اضافه شده بود، ولی اپ را امن‌تر نمی‌کرد.
+      - name: manifest gate (ویژگی‌های شکست‌دهندهٔ lintVitalRelease)
+        working-directory: mp-app/client
+        run: python3 tools/manifest_gate.py
+
+      - name: Collect client diagnostics (on failure)
+        if: failure()
+        run: |
+          mkdir -p /tmp/client-ci
+          cd mp-app/client
+          flutter analyze --no-fatal-infos > /tmp/client-ci/analyze.txt 2>&1 || true
+          dart analyze --format=machine . > /tmp/client-ci/analyze.machine.txt 2>&1 || true
+          if [ ! -f /tmp/client-ci/flutter-test.json ]; then
+            set +e
+            flutter test --file-reporter=json:/tmp/client-ci/flutter-test.json > /tmp/client-ci/flutter-test.txt 2>&1
+            test_status=$?
+            set -e
+            if [ "$test_status" -ne 0 ]; then
+              python3 tools/ci_test_failures.py /tmp/client-ci/flutter-test.json
+            fi
+          fi
+          printf 'run=%s job=client-flutter\n' '${{ github.run_id }}' > /tmp/client-ci/RUN.txt
+      - name: Upload client diagnostics (on failure)
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: client-diagnostics-${{ github.run_id }}
+          path: /tmp/client-ci/
+          if-no-files-found: warn
+          retention-days: 7
+
+  # اثبات واقعی «فرانت و بک‌اند با هم کار می‌کنند»: کلاینت TypeScript
+  # استودیو روی یک سرور زندهٔ uvicorn اجرا می‌شود. تست‌های mock این را
+  # اثبات نمی‌کنند — یک تغییر نام فیلد در بک‌اند همه‌شان را سبز می‌گذارد
+  # (و همین شد: full_name عدد برمی‌گرداند و هیچ تستی نگرفت).
+  live-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: "22"
+      - name: Install backend
+        run: pip install -c mp-app/backend/requirements.txt -e "mp-app/backend[dev]"
+      - name: Seed + run API
+        # برنامه بدون MP_ENVIRONMENT صریح بالا نمی‌آید (ccf44ce، WP 1.1/1.2): این job
+        # محیط توسعه را صریح می‌دهد، نه پیش‌فرض ضمنی. سرور همچنان اعتبارسنجی می‌شود.
+        env:
+          MP_ENVIRONMENT: development
+        run: |
+          cd mp-app/backend
+          python - <<'EOF'
+          from db.base import init_db, get_session_factory
+          from db.models import Member, User, Exercise
+          from security.crypto import FaceEmbeddingCipher  # noqa: F401
+          init_db()
+          with get_session_factory()() as s:
+              u = User(phone="09120000001", full_name="Admin", role="manager")
+              s.add(u); s.commit()
+              s.add(Member(user_id=u.id, gender="male", goal="hypertrophy", branch_id=1,
+                           emergency_contact=""))
+              s.commit()
+              for i in range(1, 18):
+                  s.add(Exercise(id=i, external_id=f"e{i}", name_fa=f"حرکت {i}",
+                                 name_en=f"ex {i}", muscle_group="legs",
+                                 video_url=f"/static/exercises/{i}_0.jpg"))
+              s.commit()
+          print("seeded")
+          EOF
+          nohup python -m uvicorn app.main:create_app --factory --port 8000 \
+            --host 127.0.0.1 > /tmp/api.log 2>&1 &
+          for i in $(seq 1 40); do
+            curl -sf http://127.0.0.1:8000/health > /dev/null && break || sleep 1
+          done
+          curl -sf http://127.0.0.1:8000/health
+      - name: Install studio
+        working-directory: mp-app/studio
+        run: npm ci || npm install
+      - name: Live contract (studio TS client × real API)
+        working-directory: mp-app/studio
+        run: |
+          TOKEN=$(cd ../backend && python -c "from app.security.jwt import create_access_token; print(create_access_token(1,'manager'))")
+          MP_API_BASE=http://127.0.0.1:8000 MP_TOKEN="$TOKEN" npm test -- tests/liveContract.test.ts
+
+  e2e-api:
+    runs-on: ubuntu-latest
+    needs: [backend]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -c mp-app/backend/requirements.txt -e "mp-app/backend[dev]"
+      - name: E2E مسیرهای حیاتی (ثبت‌نام→پرداخت→چک‌این + تأیید برنامه)
+        run: |
+          cd mp-app/backend
+          pytest tests/integration -q
+
+  # M108 — گیت «SDK پین‌شده + قالب‌بندی + کامپایل اندروید».
+  # چرا در CI و نه فقط Codespace: دو شاهد از اینها هرگز وجود نداشتند — (۱) `dart format`
+  # هیچ‌جا گیت نبود، (۲) Kotlin/Gradle فقط در `apk.yml` (dispatch/تگ) ساخته می‌شد، یعنی
+  # شکستن Android در یک PR بی‌صدا می‌ماند و M87 به همان دلیل `UNKNOWN` بود.
+  # هزینه: حدود ۵–۸ دقیقه رانر در هر push; بهای آن، شاهدی است که هیچ ادعای Client دیگری
+  # روی SDK شناور سنجیده نمی‌شود. (paths-filter بعداً اختیاری است، نه لازم.)
+  # امضای release عمداً این‌جا نیست: `--debug` هیچ keystore‌ای لمس نمی‌کند (SEC-01 باز است).
+  client-pinned:
+    name: Client — pinned SDK · format gate · Android debug compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FLUTTER_ROOT: ${{ github.workspace }}/.flutter-pin-check
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2  # v2
+        with:
+          flutter-version: "3.50.0"   # باید با ARG FLUTTER_VERSION در .devcontainer/Dockerfile یکی بماند
+          architecture: x64
+      - name: Verify the pin matches the devcontainer (no silent drift)
+        run: |
+          set -o pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import re
+          import subprocess
+          import sys
+
+          dockerfile = pathlib.Path(".devcontainer/Dockerfile").read_text(encoding="utf-8")
+
+          def arg(name):
+              match = re.search(rf"^ARG\s+{name}=(\S+)\s*$", dockerfile, flags=re.M)
+              if not match:
+                  raise SystemExit(f"{name} missing from .devcontainer/Dockerfile")
+              return match.group(1)
+
+          expected_version = arg("FLUTTER_VERSION")
+          expected_revision = arg("FLUTTER_REVISION")
+          actual = json.loads(subprocess.run(
+              ["flutter", "--version", "--machine"], capture_output=True, text=True, check=True
+          ).stdout)
+          print(f"CI flutter: {actual.get('frameworkVersion')} ({actual.get('frameworkRevision')})")
+          print(f"devcontainer expects: {expected_version} ({expected_revision})")
+          for field, expected in (("frameworkVersion", expected_version), ("frameworkRevision", expected_revision)):
+              if actual.get(field) != expected:
+                  raise SystemExit(
+                      f"pin drift: {field} is {actual.get(field)!r} in CI but {expected!r} in the "
+                      "devcontainer — the Codespace and CI would be validating different SDKs"
+                  )
+          print("Pinned SDK matches the devcontainer.")
+          PY
+      - name: flutter pub get
+        working-directory: mp-app/client
+        run: flutter pub get
+      - name: flutter analyze (خط/هشدار = شکست)
+        working-directory: mp-app/client
+        run: flutter analyze --no-fatal-infos
+      - name: flutter test + coverage
+        working-directory: mp-app/client
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/client-pinned
+          flutter test --coverage --file-reporter=json:/tmp/client-pinned/flutter-test.json \
+            > /tmp/client-pinned/flutter-test.txt 2>&1
+          status=$?
+          # شمارش از همان گزارش‌گرِ repo خوانده می‌شود (نه از grep روی رنگ‌ها)
+          python3 tools/ci_test_failures.py --summary /tmp/client-pinned/flutter-test.json \
+            | tee /tmp/client-pinned/counts.txt
+          exit "$status"
+      - name: Android debug compile (شاهد Kotlin/Gradle برای M87)
+        working-directory: mp-app/client
+        run: |
+          set -o pipefail
+          flutter build apk --debug 2>&1 | tail -25
+          APK=build/app/outputs/flutter-apk/app-debug.apk
+          test -f "$APK" || { echo "expected $APK after a successful debug build" >&2; exit 1; }
+          du -m "$APK" | tee /tmp/client-pinned/apk-size.txt
+          sha256sum "$APK" | tee /tmp/client-pinned/apk-sha.txt
+      # بدهیِ فرمت: اولین اجرای این گیت (run 44322049209) فایل‌های قدیمیِ unformatted را
+      # پیدا کرد و چون زودتر از بقیه چیده شده بود، analyze/test/apk را skip کرد — یک گیتِ
+      # نو نباید جلوی شاهد اصلی را بگیرد. فعلاً شمارش می‌شود و بلاک نمی‌کند؛ پس از یک
+      # commit مکانیکیِ «dart format lib test tools» در M109 به گیت کشنده برگردانده می‌شود
+      # (بدهی پنهان نمی‌ماند: عدد در annotation و step summary می‌آید).
+      - name: dart format gate (M109 — کشنده)
+        working-directory: mp-app/client
+        run: |
+          set -o pipefail
+          mkdir -p /tmp/client-pinned
+          # M109 (PR #1) این گام را از «audit» به «gate» تبدیل کرد: یک فایلِ فرمت‌نشده
+          # CI را می‌شکند. دو شرطِ ترتیب که نباید بشکنند:
+          #   ۱) `flutter pub get` پیش از این گام اجرا شده باشد — نسخهٔ زبانی که dart
+          #      format به آن فرمت می‌کند از package_config خوانده می‌شود (این مخزن
+          #      `sdk: ">=3.3.0"` ⇒ short style). بی‌آن، formatter سبکِ تازه‌تر می‌دهد و
+          #      گیت ۵۳ فایل را بی‌دلیل قرمز می‌کند (run 44350273742؛ اولین PRِ M109 هم
+          #      برای همین به بازفرمت نیاز داشت).
+          #   ۲) این گام بعد از analyze/test/apk بماند و «Publish the witness» always()
+          #      باشد — شکستِ فرمت نباید شاهد همسایه‌ها را بخورد (R-036).
+          # کشنده‌بودن امن است چون این گام *پس از* analyze/test/apk چیده شده و گام
+          # «Publish the witness» با if: always() شاهد را می‌نویسد — درسی که run
+          # 44322049209 داد (گیت تازه نباید شاهد همسایه‌هایش را بخورد).
+          if dart format --output=none --set-exit-if-changed lib test tools \
+            > /tmp/client-pinned/format.txt 2>&1; then
+            echo "clean" > /tmp/client-pinned/format-status.txt
+          else
+            n=$(grep -c '^Changed' /tmp/client-pinned/format.txt || true)
+            printf '%s unformatted\n' "${n:-?}" > /tmp/client-pinned/format-status.txt
+            printf '%s\n' "$(grep '^Changed' /tmp/client-pinned/format.txt | head -6)" | tr '\n' '|' > /tmp/client-pinned/format-files.txt
+            echo "::error title=flutter format::dart format wants to restyle ${n:-?} file(s) — در \`mp-app/client\` بعد از \`flutter pub get\` اجرا کن: dart format lib test tools | first: $(cat /tmp/client-pinned/format-files.txt)"
+            exit 1
+          fi
+          cat /tmp/client-pinned/format-status.txt
+      - name: Publish the witness (خواندنی از API، نه فقط از لاگ)
+        if: always()
+        working-directory: mp-app/client
+        run: |
+          set -o pipefail
+          python3 - <<'PY'
+          import os
+          import pathlib
+
+          counts = pathlib.Path("/tmp/client-pinned/counts.txt")
+          count_line = counts.read_text(encoding="utf-8").strip() if counts.is_file() else "counts unavailable"
+          cov = "coverage: lcov missing"
+          lcov = pathlib.Path("coverage/lcov.info")
+          if lcov.is_file():
+              text = lcov.read_text(encoding="utf-8", errors="replace").splitlines()
+              found = sum(int(line[3:]) for line in text if line.startswith("LF:"))
+              hit = sum(int(line[3:]) for line in text if line.startswith("LH:"))
+              if found:
+                  cov = f"coverage {100.0 * hit / found:.1f}% ({hit}/{found} lines)"
+          apk = pathlib.Path("/tmp/client-pinned/apk-size.txt")
+          apk_line = apk.read_text(encoding="utf-8").strip() if apk.is_file() else "no apk (build step failed)"
+          fmt = pathlib.Path("/tmp/client-pinned/format-status.txt")
+          format_state = fmt.read_text(encoding="utf-8").strip() if fmt.is_file() else "not measured"
+          message = (
+              f"pinned-SDK witness — {count_line}; {cov}; debug apk: {apk_line}; "
+              f"dart format: {format_state} (fatal gate since M109) "
+              "(values only; no assertion text)"
+          )
+          # `%` (و CR/LF) در workflow command باید escape شود؛ `:` نه — escape کردنش
+          # فقط خروجی را خواندنی‌زدایی می‌کند («Flutter tests%3A 156 passed» در run
+          # 44323120295 دیده شد). پس فقط `%`.
+          safe = message.replace("%", "%25")
+          print(f"::notice title=Client pinned witness::{safe}")
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          if summary_path:
+              with open(summary_path, "a", encoding="utf-8") as stream:
+                  stream.write(f"### Client pinned witness\n\n{message}\n")
+          PY

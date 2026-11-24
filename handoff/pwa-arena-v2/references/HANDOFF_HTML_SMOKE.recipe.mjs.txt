@@ -1,0 +1,44 @@
+import { chromium as playwright } from 'playwright-core';
+import chromium, { inflate, setupLambdaEnvironment } from '@sparticuz/chromium';
+import { createHash } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+const require = createRequire(import.meta.url);
+const packageDir = resolve(dirname(require.resolve('@sparticuz/chromium')), '..');
+// Extract only task-scoped browser libraries; no AWS service or system install.
+await inflate(join(packageDir, 'bin/al2023.tar.br'));
+setupLambdaEnvironment(join(tmpdir(), 'al2023/lib'));
+const binary = await chromium.executablePath();
+if (!process.env.DOC_HANDOFF) throw new Error('Set DOC_HANDOFF to the authorized handoff directory, not the MP app');
+const payload = resolve(process.env.DOC_HANDOFF);
+const document = join(payload, 'HANDOFF.fa.html');
+const externalRequests = [];
+const errors = [];
+const browser = await playwright.launch({ executablePath: binary, headless: true, args: ['--no-sandbox', '--no-zygote', '--single-process', '--disable-gpu', '--disable-dev-shm-usage', '--disable-background-networking', '--no-pings', '--disable-domain-reliability', '--disable-component-update', '--disable-webgl'], env: { ...process.env, FONTCONFIG_PATH: '/etc/fonts' } });
+const results = [];
+try {
+  const context = await browser.newContext({ offline: true, serviceWorkers: 'block' });
+  await context.route(/^https?:/, async route => { externalRequests.push('blocked-network-request'); await route.abort(); });
+  const page = await context.newPage();
+  page.on('pageerror', error => errors.push(error.name));
+  for (const viewport of [{width:1280,height:920}, {width:390,height:844}, {width:320,height:780}]) {
+    await page.setViewportSize(viewport);
+    await page.goto(pathToFileURL(document).href, { waitUntil: 'load', timeout: 30000 });
+    const value = await page.evaluate(async () => {
+      await Promise.all(Array.from(document.images, image => image.decode()));
+      await document.fonts.ready;
+      const ids = Array.from(document.querySelectorAll('[id]'), x => x.id);
+      return { direction: document.documentElement.dir, width: innerWidth, scrollWidth: document.documentElement.scrollWidth, taskHeadings: document.querySelectorAll('#microloops h3').length, images: Array.from(document.images, x => ({ complete: x.complete, width: x.naturalWidth, source: x.src.startsWith('data:image/png;base64,') ? 'embedded-png' : 'unexpected' })), uniqueAnchors: new Set(ids).size === ids.length, ownScripts: document.scripts.length };
+    });
+    const passed = value.direction === 'rtl' && value.scrollWidth <= value.width && value.taskHeadings === 50 && value.images.length === 2 && value.images.every(x=>x.complete && x.width > 0 && x.source==='embedded-png') && value.uniqueAnchors && value.ownScripts===0;
+    results.push({ viewport, ...value, status: passed ? 'PASS_DOCUMENT_ONLY' : 'FAIL_DOCUMENT_ONLY' });
+    if (viewport.width !== 320) await page.screenshot({ path: join(process.cwd(), 'document-' + viewport.width + '.png'), fullPage: false });
+  }
+  const report = { date_utc:'2026-11-24', scope:'Local offline handoff HTML only; NOT MP app, PWA installation, real-device, accessibility certification, security audit or independent review.', document:'HANDOFF.fa.html', recipe_sha256:createHash('sha256').update(await readFile(new URL(import.meta.url))).digest('hex'), document_sha256:createHash('sha256').update(await readFile(document)).digest('hex'), browser:browser.version(), tool_versions:{'@sparticuz/chromium':'153.0.0','playwright-core':'1.65.1'}, isolated_tooling:'temporary scratch; not product dependencies or bundled binaries', controls:'Offline context, HTTP routes abort, local generated trusted HTML only; no-sandbox is a sandbox smoke limitation, not production policy', results, external_request_count:externalRequests.length, page_error_count:errors.length, status: results.every(x=>x.status==='PASS_DOCUMENT_ONLY') && externalRequests.length===0 && errors.length===0 ? 'PASS_DOCUMENT_ONLY_NOT_PRODUCT_QA' : 'FAIL_DOCUMENT_ONLY' };
+  await writeFile(join(payload,'references/HANDOFF_HTML_SMOKE.json'),JSON.stringify(report,null,2)+'\n');
+  console.log(JSON.stringify(report,null,2));
+  if (report.status!=='PASS_DOCUMENT_ONLY_NOT_PRODUCT_QA') process.exitCode=1;
+} finally { await browser.close(); }
