@@ -1,0 +1,167 @@
+دستور اصلاح‌شده — Muscle Paradise (این را کامل کپی کن)
+======================================================
+
+۰) اول: تصحیح یک خطای من، و یک خبر خوب
+────────────────────────────────────────────
+من پیش‌تر گفتم «شاخهٔ arena/5e0f64cf-mp مرده است». **این حرف از نظر فنی درست بود
+ولی نتیجه‌گیری‌ام غلط بود.** دلیلش:
+
+PR #29 با **squash merge** ادغام شد. در squash:
+  • main یک commit تازه می‌گیرد (3527810) با یک والد.
+  • commitهای شاخه (3f26e1d) والدِ main نمی‌شوند — پس «not merged into main»
+    گزارش می‌شوند، هرچند محتوایشان در main هست.
+  • GitHub شاخه را حذف نمی‌کند. شاخه «مرده» نیست؛ فقط **از main عقب افتاده**.
+
+یعنی: ادامه‌دادن روی همان شاخه مجاز و درست است. قفل Arena هم درست می‌گوید.
+منتظر شاخهٔ جدید نمان. مسیر درست:
+
+  ۱) محتوا را از main تازه کن (بدون بازنویسی تاریخچه)
+  ۲) کار v2 و SEC-01 را همان‌جا انجام بده
+  ۳) یک PR تازه به main باز کن
+
+الان main فقط `evidence/m60` دارد و شاخه `evidence/2026-11-23` هم دارد؛ پس
+evidence موجود شما در main نیست و PR تازه واقعاً لازم است. PR باز فعلاً صفر است.
+
+────────────────────────────────────────────
+۱) همگام‌سازی با main (بدون push زورکی، بدون reset)
+────────────────────────────────────────────
+      cd <repo>
+      git fetch origin
+      git status --short --branch          # کار dirty را حفظ کن
+      git merge --no-edit origin/main      # merge عادی، نه rebase، نه force
+
+اگر تعارض بود:
+  - فقط فایل‌های مستندات/STATE را حل کن.
+  - اگر تعارض در `mp-app/**` بود، آن را به من گزارش بده (BLOCKED) و بقیهٔ مسیر را ادامه بده.
+
+اگر merge خطای غیرمنتظره داد و کاربر اجازه داده بود، `git merge --abort` و STOP.
+هرگز: `reset --hard` · `push --force` · بازنویسی تاریخچه.
+
+────────────────────────────────────────────
+۲) STATE را بنویس و push کن (همین حالا، قبل از هر کار دیگر)
+────────────────────────────────────────────
+در `docs/MuscleParadise/PWA-EXECUTION-STATE.md` این پنج خط را بگذار:
+
+      CURRENT_BRANCH=arena/5e0f64cf-mp
+      REMOTE_HAS_MY_COMMIT=yes
+      MAIN_HEAD=<خروجی git rev-parse origin/main>
+      BRANCH_AHEAD_OF_MAIN=<خروجی git rev-list --count origin/main..HEAD>
+      LAST_KNOWN_EVIDENCE=evidence/2026-11-23 (روی شاخه) / evidence/m60 (روی main)
+
+سپس:
+      git add docs/MuscleParadise/PWA-EXECUTION-STATE.md
+      git commit -m "STATE: recover branch after squash-merge confusion — evidence: git ls-remote"
+      git push origin arena/5e0f64cf-mp
+
+این push **مجاز است**: روی همان شاخهٔ نشست، فقط یک commit مستنداتی، بدون force.
+
+────────────────────────────────────────────
+۳) v2 را اجرا کن (فایل‌ها آماده‌اند، دستی تعمیر نکن)
+────────────────────────────────────────────
+      mkdir -p scripts
+      BASE="https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/c1fb460b-chat2db/docs/mp-inv-redo"
+      curl -fsSL "$BASE/crosswalk_v2.py" -o scripts/crosswalk_v2.py
+
+      python3 scripts/crosswalk_v2.py --repo . --kind member --out evidence/$(date -u +%F)/INV-02
+      python3 scripts/crosswalk_v2.py --repo . --kind staff  --out evidence/$(date -u +%F)/INV-03
+
+اگر curl به raw دسترسی نداشت، از این لینک صفحه بگیر و «Download raw file» بزن:
+      https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/c1fb460b-chat2db/docs/mp-inv-redo/crosswalk_v2.py
+
+سه چیزی که v2 حل می‌کند (دستی تعمیر نکن، ابزار کار می‌کند):
+  • `${base}/admin/...` در adminApi.ts → Analytics دیگر false-negative نیست
+  • alias `ALL_STAFF` → ستون نقش خالی نمی‌ماند
+  • مسیر پویا (`${API_BASE}/members/${id}/checkins`) → وضعیت `DYNAMIC_UNCOVERED`،
+    نه GAP کاذب و نه PASS
+
+خروجی مرجع روی main@3527810 برای مقایسهٔ صحت (نه هدف):
+      member → PARTIAL_REVIEW=14  GAP=3
+      staff  → PARTIAL_REVIEW=12  GAP=0
+
+در `review.md` هر پوشه این سه جمله را بنویس:
+  «v1 سه false-negative داشت؛ v2 آن‌ها را رفع کرد.»
+  «v2 همچنان مجوز و مالکیت را اثبات نمی‌کند؛ سقف PARTIAL_REVIEW است.»
+  «تفکیک call-site عضو از پنل کارکنان دستی است و باقی می‌ماند.»
+
+────────────────────────────────────────────
+۴) SEC-01 — سه‌گانهٔ قابل‌اثبات
+────────────────────────────────────────────
+الف) ماتریس کامل، نه نمونه‌ای:
+     برای هر ردیف `mp-app/backend/api/routes.json` و هر شش نقش، تصمیم
+     allow/deny را از `mp-app/backend/security/rbac.py` بخوان و در
+     `evidence/<DATE>/SEC-01/rbac-matrix.txt` بنویس (method × path × role × decision).
+     اگر اجرای کامل سنگین است، حداقل همهٔ مسیرهای مالی/سلامت/فایل/export را کامل بزن
+     و در گزارش بنویس کدام دسته‌ها بیرون مانده‌اند.
+
+ب) تست منفی واقعی روی API (نه unit):
+     عضو A نباید دادهٔ عضو B را بگیرد — روی members / assessments / payments / chat / checkin.
+     اگر 200 گرفتی، همان لحظه BLOCKED بزن و گزارش کن؛ تست را دور نزن.
+
+ج) اجرا روی همان SHA که ادعا می‌کنی:
+     SHA=$(git rev-parse HEAD)
+     echo "tested_sha=$SHA"
+     cd mp-app/backend && python -m pytest -q 2>&1 | tail -5
+     اگر SHA اجرا با SHA ادعا یکی نیست → NOT_RUN بنویس، نه PASS.
+
+سقف: SEC-01 حداکثر PARTIAL. CURRENT نیاز به تست منفی + شاهد اجرا دارد.
+
+────────────────────────────────────────────
+۵) commit + push + تأیید
+────────────────────────────────────────────
+      python3 scripts/docs_gate.py
+      git diff --check
+
+      git add scripts/crosswalk_v2.py \
+              evidence/$(date -u +%F)/INV-02 evidence/$(date -u +%F)/INV-03 \
+              evidence/<DATE>/SEC-01 \
+              docs/MuscleParadise/PWA-EXECUTION-STATE.md \
+              docs/MuscleParadise/SESSION_HANDOFF.md \
+              docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md
+      git commit -m "INV-02/03 v2 + SEC-01 matrix on $(git rev-parse --short HEAD) — evidence: see evidence/<DATE>/"
+      git push origin arena/5e0f64cf-mp
+
+      git ls-remote origin refs/heads/arena/5e0f64cf-mp
+      gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-02?ref=arena/5e0f64cf-mp --jq '.[].name'
+
+نکتهٔ مهم که اشتباه قبلی را رفع می‌کند:
+  آدرس `gh api .../contents/evidence/2026-11-27` بدون `?ref=` از **default branch**
+  خوانده می‌شود و همیشه 404 می‌دهد. همیشه `?ref=arena/5e0f64cf-mp` بگذار.
+
+ممنوع: `git add -A` · `git clean` · `git reset --hard` · `push --force` · کار روی main.
+
+────────────────────────────────────────────
+۶) PR تازه به main (این قدم حیاتی است و قبلاً جا افتاده بود)
+────────────────────────────────────────────
+پس از push موفق:
+
+      gh pr create \
+        --base main \
+        --head arena/5e0f64cf-mp \
+        --draft \
+        --title "PWA: INV-02/03 v2 + SEC-01 evidence (on <sha>)" \
+        --body "Crosswalk v2 (رفع سه false-negative v1) و ماتریس SEC-01.
+SHA اجرا: <sha>
+شواهد: evidence/<DATE>/INV-02, INV-03, SEC-01
+وضعیت‌ها: INV-02/03=PARTIAL/NOT_ACCEPTED · SEC-01=PARTIAL · PWA-01=PROPOSED/NOT_RUN · release=NO-GO"
+
+اگر `gh pr create` خطای permission داد: **push تنها کافی است**، نایست، در STATE بنویس
+`PR_OPEN=blocked_by_permission` و ادامه بده.
+
+پس از باز شدن PR: `gh pr checks <نومر>` را برای همان SHA بخوان و نتیجه را در evidence ثبت کن.
+CI سبز روی SHA دیگر شاهد نیست.
+
+────────────────────────────────────────────
+۷) گزارش پایان (کوتاه)
+────────────────────────────────────────────
+      DONE: STATE · INV-02 v2 · INV-03 v2 · SEC-01 (matrix+negative)
+      SHA: <sha اجرا> — branch: arena/5e0f64cf-mp
+      MERGE: origin/main در شاخه merge شد؟ yes/no + تعداد تعارض
+      اعداد: member PARTIAL_REVIEW=? GAP=? · staff PARTIAL_REVIEW=? GAP=?
+      SEC-01: matrix rows=? · negative pass/fail=?
+      گیت‌ها: docs_gate · diff --check · pytest → pass/fail
+      PR: <شماره یا blocked_by_permission>
+      NEXT: <ID بعدی> — چرا
+      BLOCKED: <IDs + یک خط>
+      PUSHED: <sha> روی arena/5e0f64cf-mp     ← اگر خالی است، کار تمام نشده
+
+بعد از این گزارش، بدون سؤال سراغ WEB-01..11 برو و چرخه را ادامه بده.
