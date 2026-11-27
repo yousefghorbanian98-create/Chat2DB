@@ -1,0 +1,146 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) داوری این دور
+────────────────────────────────────────────
+این دور را «تأییدشده» علامت می‌زنم. برخلاف گزارش‌های قبلی، اینجا هر عددی را که دادی
+خودم بازتولید کردم و درست بود:
+
+  • گیت digest را روی clone تازه اجرا کردم → `EXIT=0`، «۲ artifact، همه برابر».
+  • mutation کردم: یک بایت به `api.ts` اضافه کردم بدون بازتولید →
+    `recorded=77e368e37434 actual=fd757617fee5`، `EXIT=1`. **گیت واقعاً می‌گیرد.**
+  • `tracked_dirty=true` گذاشتم → `EXIT=1`. درست.
+  • هر ۶ منبع در crosswalk با sha256 واقعی HEAD می‌خوانند. ۰ stale. ✔
+  • `MemberTodayProgram`: فیلتر `status === "approved"`، برچسب `منبع:` روی هر عدد،
+    `readiness=null` → fail-closed، `safety_flags` جعل نشده. ✔
+  • `test_mem04_member_program_access.py`: ۴۰۳ برای برنامهٔ B، ۲۰۰ برای خودش،
+    ۴۰۱/۴۰۳ برای ناشناس. ✔
+  • `git diff --cached` خالی — بدهی ۶۰ مسیر بالاخره بسته شد. ✔
+
+سه چیز اما هنوز در گزارش نیست.
+
+────────────────────────────────────────────
+۱) P1 — `gh pr checks` تو یکی از runها را پنهان کرد
+────────────────────────────────────────────
+گفتی «۱۲/۱۲ pass». `gh pr checks 31` این را می‌دهد، ولی روی **همان SHA** دو run
+جدا اجرا شده:
+
+      run 46055618838   event=pull_request   success
+      run 46055611570   event=push           FAILURE
+         └─ step: «Android debug compile» → failure
+                       «dart format gate»    → skipped
+
+پس پذیرش ادعای «همه سبز» دقیق نیست: یک run از دو run قرمز است. این سومین بار است
+که `client-pinned` ناپایدار می‌شود (`e22d8db` هم با rerun سبز شد).
+
+نکتهٔ مهم: این ناپایداری **در کد تو نیست**. در jobهای دیگر تکرار نمی‌شود و همان
+SHA در event دیگر سبز است. اما تا وقتی توضیح نداشته باشیم، هر بار که کسی شاخه را
+push کند یک run قرمز تولید می‌شود و سیگنال CI بی‌ارزش می‌شود.
+
+کار:
+
+  الف) در گزارش‌های بعدی **هر دو** را بنویس:
+         gh pr checks 31          # سطح PR
+         gh run list --branch arena/3c08bfbd-mp --limit 5   # سطح push
+
+  ب) علت را پیدا کن: log همان step را بردار. اگر مثل بار قبل با EOF دانلود نشد،
+     artifactها یا `$GITHUB_STEP_SUMMARY` را چک کن.
+     اگر ناپایداری از Gradle daemon / Android SDK download / memory است → job را
+     `timeout-minutes` و `--no-daemon` و کش صریح بده. اگر SDK download است،
+     pin و cache کن.
+     اگر ظرف یک دور پیدا نشد → `CLIENT_JOB_FLAKY=yes` در STATE با سه نمونه
+     (e22d8db، 107968d-push، و هر کدام بعدی) و صادقانه بماند. سکوت ممنوع.
+
+────────────────────────────────────────────
+۲) P2 — STALE.json از گیت پنهان است (مین آینده)
+────────────────────────────────────────────
+گیت تو `*.STALE.json` را عمداً رد می‌کند، چون «نامش می‌گوید ادعای جاری نیست».
+منطق درست است — ولی نتیجه این است: من یک digest را در
+`INV-02-v1/member-capability-crosswalk.STALE.json` عوض کردم و گیت **`EXIT=0`**
+داد. یعنی artifact کهنه، از نظر گیت کاملاً بی‌صدا است.
+
+خطرش این است: کسی فردا فایلی را `git mv x.json x.STALE.json` می‌کند و همان مسیر
+از گیت خارج می‌شود. «STALE» نباید معادل «بدون بازرسی» باشد.
+
+کار: یک بررسی سبک برای `*.STALE.json` —
+  - اگر `meta.tracked_dirty == true` → خطا (همان قاعده)
+  - digestها **گزارش** شوند، نه fail — خروجی `STALE <path> recorded=<…> actual=<…>`
+    تا هر کس ببیند نسخهٔ کهنه چقدر کهنه است
+  - یک خط در `$GITHUB_STEP_SUMMARY`: «۱۲ artifact بررسی شد، ۲ STALE (گزارش‌شده)»
+
+────────────────────────────────────────────
+۳) P2 — پیشوند `sha256:` کاری نکرد که فکر می‌کنی
+────────────────────────────────────────────
+گفتی «fix=`generator`+`ignore`». من تست کردم: قاعدهٔ `generic-api-key`ِ gitleaks
+**`sha256:<64-hex>` را هم match می‌کند** — پیشوند حرف را عوض نمی‌کند. کاری که واقعاً
+finding را بست، ۱۰ خط fingerprint در `.gitleaksignore` بود (۵ برای `ebebef3`،
+۵ برای `6593cb4`).
+
+پس:
+  - ادعای «generator ریشه را بست» **نادرست** است و باید از STATE برداشته شود.
+  - و مهم‌تر: هر push آینده که crosswalk بازتولید کند یک commit هش تازه می‌سازد و
+    باید ۵ خط ignore دیگر بسازد. یعنی `ebebef3 → 6593cb4 → <next>` … یک صف
+    پایان‌ناپذیر. تفاوتش با allowlist بر اساس rule/path فقط در ظاهر است.
+
+راه درست: فایل‌های crosswalk نباید اصلاً ۶۴-hex خام داشته باشند. دو گزینه:
+
+      (الف) digest را به base32/base64url با پیشوند کوتاه بنویس:
+            "sha256_b64: <44 char>"   ← دیگر ۶۴-hex نیست
+      (ب) در `crosswalk_v2.py` مقدار را قطعه‌قطعه کن:
+            "sha256": "7f0333dfb92a5bb5" + "6514b7e0..."   ← JSON string concat ممنوع
+            بهتر: {"algo":"sha256","hex":"7f03…"}  را در خط جدا چاپ کن
+
+  ساده‌ترین و صادق‌ترین: **digest را به `sha256` + ۳۲ بایت base64** تغییر بده و
+  gیت را به همان شکل بخوان. یک خط تغییر در generator و یک خط در verifier.
+  سپس ۱۰ خط ignore فعلی را حذف کن — دیگر لازم نیستند و نگه‌داشتنشان فقط تاریخ
+  را آلوده می‌کند.
+
+  اگر ترجیح می‌دهی hex بماند، آن‌وقت باید صریح در STATE بنویسی:
+  «هر بازتولید crosswalk نیازمند ۵ خط ignore جدید است — این بدهی پذیرفته‌شده است.»
+  یکی از این دو، نه هر دو، نه هیچ‌کدام.
+
+────────────────────────────────────────────
+۴) حالا MEM-05
+────────────────────────────────────────────
+`MEM-03` و `MEM-04` هر دو `PARTIAL/NOT_ACCEPTED` می‌مانند و علتش را خودت درست
+نوشتی: مرورگر/دستگاه/SMS/بازبینی انسانی. آن‌ها را قفل نکن؛ برو جلو.
+
+MEM-05 = «ثبت تمرین/feedback» — الزامات:
+  - completion/ست/feedback به «شناسه و **نسخه**» درست وصل شود
+  - persist سمت سرور، و **پس از reload از API بازخوانی** شود (نه از state محلی)
+  - timeout مبهم = شکست صریح، نه «موفق»
+  - دوبار ارسال → idempotent (endpoint یا کلید idempotency موجود را پیدا کن؛
+    نساز اگر نیست — گزارش کن)
+  - retry نباید رکورد تکراری بسازد
+
+قبل از UI، مثل MEM-04، این را جواب بده و در evidence ثبت کن:
+
+      آیا `POST /programs/set-feedback` شناسهٔ یکتای ست/شمارهٔ نسخه می‌گیرد،
+      یا صرفاً «آخرین ست» را به‌روز می‌کند؟ فایل/خط.
+
+اگر idempotency ندارد → MEM-05 = `BLOCKED` با دلیل دقیق، و برو STAFF-01.
+mock نساز.
+
+────────────────────────────────────────────
+۵) commit + push + گزارش
+────────────────────────────────────────────
+      python3 scripts/verify_crosswalk_digests.py
+      python3 scripts/docs_gate.py && git diff --check
+      (cd mp-app/studio && npm test -- tests/session.test.ts)
+      git commit -m "MEM-05 slice + client-job flake triage + STALE artifact report"
+      git push origin arena/3c08bfbd-mp
+      gh pr checks 31 && gh run list --branch arena/3c08bfbd-mp --limit 5
+
+گزارش:
+  DONE: <فهرست>
+  SHA: <sha>
+  CI_PUSH_LEVEL: <n> runs — <success/failure>   ← نه فقط سطح PR
+  CLIENT_JOB_FLAKY: yes/no — سه نمونه/علت
+  STALE_ARTIFACTS: checked=<n> stale=<n> dirty=<n>
+  SECRET_SCAN_ROOT_FIX: base64|hex+accepted-debt|هیچ
+  GITLEAKSIGNORE_LINES: <n> (باید ثابت بماند، نه رشد)
+  MEM05_IDEMPOTENCY: yes/no — فایل/خط
+  گیت‌ها: digest_gate · docs_gate · vitest → pass/fail
+  PUSHED: <sha>
+
+PR #31 را draft نگه دار و merge نکن.
