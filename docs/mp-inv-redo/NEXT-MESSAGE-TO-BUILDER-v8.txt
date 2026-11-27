@@ -1,0 +1,149 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) داوری این دور
+────────────────────────────────────────────
+این دور را تأیید می‌زنم. برخلاف دورهای قبل، اینجا من خودم روی `main` تازه‌ای که
+ساختی گیت‌ها را اجرا کردم و همه‌شان درست بودند:
+
+  • `verify_crosswalk_digests.py` روی main → `EXIT=0` با ۴ artifact (۲ جاری + ۲ STALE).
+  • mutation A (STALE.json را `tracked_dirty=true` کردم) → `EXIT=1`،
+    «۱ با tracked_dirty=true». **مین قبلی بسته شد.**
+  • mutation B (یک digest جاری را خراب کردم) → `EXIT=1` با
+    `recorded=000000000000 actual=9f061012e0af`. درست.
+  • قالب تازه: `sha256_b64:` در هر ۶ منبع، **۰ رشتهٔ 64-hex** در فایل جاری. ریشه بسته شد.
+  • `test_mem05_set_feedback_idempotency.py`: چهار تست، شامل
+    «۲ ارسال → ۱ ردیف» و «کلید دستگاه دیگر → ردیف دیگر». قرارداد واقعاً idempotent است.
+  • squash merge تمیز بود: tree SHA هر دو `7efb6323…` — هیچ فایلی گم نشد.
+
+و سه چیز که صادقانه گفتی و درست بودند:
+  - flake کلاینت را علت‌یابی نکردی، ولی `CLIENT_JOB_FLAKY=yes` ثبت کردی و **هر دو**
+    سطح CI را گزارش دادی. این همان چیزی است که خواستم.
+  - ۱۰ خط ignore را حذف نکردی و دلیل فنی‌اش (fingerprint روی تاریخ، نه روی درخت) درست است.
+  - ادعای نادرست قبلی را در STATE **اصلاح** کردی نه پاک. `CORRECTION_2026-11-27` موجود است.
+
+سه ایراد کوچک، و بعد کار بعدی.
+
+────────────────────────────────────────────
+۱) P1 — merge به `main` انجام شد، ولی هیچ‌کس CI روی `main` را ندید
+────────────────────────────────────────────
+`main` = `7c4771f` (squash #31). run `46074253433` روی همان SHA:
+
+      Documentation links and handoff   success
+      backend                           success
+      client-flutter                    success
+      live-contract                     success
+      markdownlint                      success
+      secret-scan                       success   ← مهم: این بار روی main سبز
+      studio                            success
+      e2e-api                           running
+      Client — pinned SDK               running
+
+یعنی هنوز دو job باز است. **`main` شاخهٔ release است؛ CI سبز روی شاخهٔ feature معنی‌اش
+این نیست که `main` سبز است.**
+
+کار: وقتی `46074253433` تمام شد، نتیجه را در evidence ثبت کن و در STATE بنویس.
+اگر قرمز شد، **قبل از هر برش بعدی** آن را رفع کن — روی `main` کار کن، نه روی شاخهٔ
+جدید. اگر سبز شد، یک خط:
+      MAIN_CI=<sha> 9/9 pass (run 46074253433)
+
+────────────────────────────────────────────
+۲) P1 — ارجاع فایلی در گزارش غلط بود
+────────────────────────────────────────────
+نوشتی: «`services.py:584-700` (کلید `device_id:client_id` + `updated_at`، LWW)».
+
+`mp-app/backend/modules/programs/services.py` **وجود ندارد** (404). تابع درست در
+`mp-app/backend/modules/programs/service.py` است (مفرد) و `sync_set_feedback` در
+خط ۵۸۴ همان فایل است، با کلید در خط ۶۰۵/۶۱۷ و `unchanged_keys` در ۶۸۱.
+
+محتوا درست بود، مسیر غلط. اما این دقیقاً همان دسته خطایی است که کل این پروژه با آن
+می‌جنگد: ارجاعی که کسی نمی‌تواند دنبال کند. در STATE هم همین مسیر غلط تکرار شده.
+
+کار: در `PWA-EXECUTION-STATE.md`، `.finn/state/STATE.md` و هر evidence که
+`programs/services.py` را نام می‌برد، به `programs/service.py` اصلاح کن.
+و از این به بعد: هر ارجاع `file:line` باید با یک `grep -n` واقعی تولید شود، نه از حافظه.
+
+────────────────────────────────────────────
+۳) P2 — STALE.json ها هنوز ۶۴-hex خام دارند
+────────────────────────────────────────────
+فایل جاری تمیز شد (`sha256_b64:`)، ولی `INV-02-v1/…STALE.json` هنوز
+**۴ رشتهٔ 64-hex** دارد. گیت این‌ها را فقط گزارش می‌کند، پس در CI سبز است.
+
+خطر: اگر روزی کسی این فایل‌ها را از STALE خارج کند (یا یک ابزار مثل `crosswalk_v2.py`
+روی‌شان اجرا شود)، ۵ خط ignore تازه لازم می‌شود — همان بدهی که می‌خواستی ببندی.
+
+کار: همان تبدیل `hex → sha256_b64:` را روی هر دو `*.STALE.json` هم اجرا کن.
+گیت باید همچنان `STALE … ← کهنه` را گزارش کند (چون digest باید با نسخهٔ فعلی
+فرق داشته باشد — اگر یکی شد، یعنی نام STALE اشتباه است).
+
+────────────────────────────────────────────
+۴) MEM-06 — و اینجا یک یافتهٔ واقعی هست
+────────────────────────────────────────────
+قبل از هر کار، این را بدان: **بخش زیادی از MEM-06 از قبل ساخته شده.**
+
+      mp-app/backend/engine/safety.py                    ← موتور
+      mp-app/backend/tests/integration/test_m56_safety_gate.py  ← ۵ تست
+      mp-app/studio/src/components/SafetyBadge.tsx       ← badge با ۴ وضعیت
+      mp-app/backend/db/migrations/...m56_c1_safety_flags.py
+
+و `test_m56_safety_gate.py` چهار وضعیت را از قبل تضمین می‌کند:
+`blocked` / `clear` / `unknown` / `needs_review`، به‌همراه `safe_to_generate`.
+
+پس endpoint جدید نساز. شکاف واقعی جای دیگری است و من پیدایش کردم:
+
+**`MemberTodayProgram.tsx:203-211`** وضعیت ایمنی را این‌طور نمایش می‌دهد:
+
+      {program.safety_flags !== "{}" ? "غربالگری ایمنی این برنامه خالی نیست…"
+                                     : "غربالگری ایمنی ثبت نشده است…"}
+
+یعنی برای عضو، هر سه وضعیت `blocked`، `needs_review` و `clear` **یک پیام واحد**
+می‌گیرند. برنامه‌ای که موتور `blocked` علامت زده، به عضو می‌گوید «خالی نیست؛ با
+مربی مرور کنید» — نه «این برنامه برای شما ناسازگار است». و `SafetyBadge` که این
+تفکیک را دارد، فقط در `pages/Programs.tsx` (shell کارکنان) استفاده می‌شود.
+
+این نقض مستقیم معیار پذیرش MEM-06 است: «هیچ safety flag صرفاً برای ثبت یا warning
+دور زده نشود».
+
+برش MEM-06:
+
+  الف) `MemberTodayProgram` را به `SafetyBadge` وصل کن (یا معادلش) و سه حالت را
+       **از هم تفکیک کن**:
+         - `blocked` → پیام قرمز + نام محدودیت + حرکات مسدود + جایگزین‌ها،
+                        **و برنامه به‌عنوان «قابل اجرا» ارائه نشود**
+         - `needs_review` → «نیازمند بازبینی» + دلیل
+         - `unknown` (یا `{}`) → «غربالگری نشده»، نه «بی‌خطر»
+         - `clear` → تنها حالتی که می‌تواند «بدون ناسازگاری» بگوید
+
+  ب) تست React که تأیید کند این چهار حالت **متن متفاوت** دارند. اگر تستی بنویسی که
+       فقط وجود متن را چک کند، هیچ‌چیز را تضمین نمی‌کند.
+
+  ج) تست backend که تأیید کند برنامهٔ `blocked` از مسیر عضو هم `blocked` برمی‌گردد
+       (نه فقط از مسیر staff).
+
+  د) قاعدهٔ UI: `safe_to_generate === false` ⇒ دکمهٔ «شروع تمرین» وجود نداشته باشد
+       یا disabled باشد. و **دلیل** کنارش نوشته شود، نه tooltip.
+
+اگر `SafetyBadge` به داده‌ای نیاز دارد که `MemberTodayProgram` نمی‌گیرد، آن را
+گزارش کن و `BLOCKED` بگذار — badge را با دادهٔ ساختگی پر نکن.
+
+────────────────────────────────────────────
+۵) گزارش
+────────────────────────────────────────────
+      python3 scripts/verify_crosswalk_digests.py
+      python3 scripts/docs_gate.py && git diff --check
+      (cd mp-app/studio && npm test -- tests/safetyBadge.test.tsx tests/memberTodayProgram.test.tsx)
+      (cd mp-app/backend && python -m pytest tests/integration/test_m56_safety_gate.py -q)
+
+گزارش:
+  DONE: <فهرست>
+  SHA: <sha>
+  MAIN_CI: <sha> <n>/9 <pass|fail> — run <id>
+  FILE_REF_FIX: <n> ارجاع اصلاح‌شده
+  STALE_HEX_REMAINING: <n> (باید صفر شود)
+  MEM06_SAFETY_STATES: blocked/needs_review/unknown/clear — هر کدام جدا؟
+  MEM06_GATE: safe_to_generate=false ⇒ دکمه غیرفعال؟
+  گیت‌ها: digest_gate · docs_gate · vitest · pytest → pass/fail
+  PUSHED: <sha>
+
+از این به بعد روی شاخهٔ تازه از `main@7c4771f` کار کن و PR تازه باز کن (#32).
+شاخهٔ `arena/3c08bfbd-mp` سوخته است (سابقه‌اش squash شده)؛ روی آن push نکن.
