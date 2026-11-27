@@ -1,0 +1,176 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) ارزیابی صادقانهٔ کارت
+────────────────────────────────────────────
+این دور، بهترین کارت تا امروز بود:
+  • SEC-01 واقعاً از «مشتی تست» به سه‌گانه تبدیل شد: ماتریس ۹۷۸ سطری از
+    enforce() + ۳ تست منفی HTTP واقعی (A→B در پنج حوزه → ۴۰۳) + اجرا روی
+    claimed_sha=tested_sha=f06f2a95 با 1336 passed.
+  • STATE دقیق نوشته شد (BRANCH/SHA/AHEAD) و مرز squash-merge را درست فهمیدی.
+  • PR #30 draft باز است و ۲۰ check روی 5828c94 سبزند.
+  • هیچ ادعای PASS بی‌شاهد نداشتی. این را حفظ کن.
+
+ولی سه ایراد جدی هست که باید همین دور حل شود، نه بعد:
+
+  (۱) WEB-01…WEB-11 همه `PARTIAL` با دلیل «Chromium/Playwright در sandbox نیست».
+      این دلیل **غلط** است. در همین پروژه قبلاً (crosswalk 2026-11-23) همین
+      مرورگر نصب و روی build واقعی Studio اجرا شده و نتیجه هم ثبت شده:
+        Playwright Core + @sparticuz/chromium + axe-core
+        real dist build روی localhost، viewportهای 1440×900 و 390×844
+        Login واقعی: dir=rtl، axe=0، JS error=0، SW controller=true بعد از reload
+      یعنی مسیر موجود است و فقط دوباره اجرا نشده. «نبود ابزار» ادعای پذیرفته‌شده
+      نیست وقتی راه‌حل در همین tracker مستند و آزموده‌شده است.
+
+  (۲) STATE خودت می‌گوید `dynamic_sites=0` و هیچ DYNAMIC_UNCOVERED تولید نشد.
+      یعنی v2 در عمل همان محدودیت regex را دارد. این را صریح در STATE نوشتی و
+      درست بود؛ ولی تا رفع نشود، INV-02 با همان GAP کاذب می‌ماند.
+
+  (۳) ۱۱ commit، ۸۵ فایل، ۹٬۴۹۱ خط evidence، صفر خط کد محصول.
+      حلقه در حال تبدیل‌شدن به «اسنادسازی پیوسته» است. tracker ۹۷ checkbox باز
+      دارد؛ ۵۶ فایل evidence آن‌ها را نمی‌بندد. از این دور، هر چرخه باید
+      **یک تغییر کد یا تست** هم داشته باشد.
+
+────────────────────────────────────────────
+۱) اول: مرورگر را واقعاً راه بینداز (باز کردن قفل WEB)
+────────────────────────────────────────────
+وظیفه: در همین sandbox مرورگر headless را نصب کن و روی build واقعی Studio اجرا کن.
+
+      cd /tmp && mkdir -p mp-browser && cd mp-browser
+      npm init -y >/dev/null
+      npm i playwright-core@latest @sparticuz/chromium@latest axe-core@latest
+
+      # build واقعی Studio
+      cd <repo>/mp-app/studio && npm ci && npm run build
+      npx vite preview --host 0.0.0.0 --port 4173 &
+      # یا: npx serve dist -l 4173
+
+      # اسکریپت اجرا (نمونهٔ حداقلی)
+      cat > /tmp/mp-browser/run.mjs <<'JS'
+      import chromium from "@sparticuz/chromium";
+      import { chromium as pw } from "playwright-core";
+      const exe = await chromium.executablePath();
+      const browser = await pw.launch({ executablePath: exe, args: chromium.args, headless: true });
+      const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+      const errors = [];
+      page.on("pageerror", e => errors.push(String(e)));
+      await page.goto("http://127.0.0.1:4173/login", { waitUntil: "networkidle" });
+      const dir = await page.evaluate(() => document.documentElement.dir);
+      console.log("dir:", dir, "| pageerrors:", errors.length);
+      await browser.close();
+      JS
+      node /tmp/mp-browser/run.mjs
+
+  اگر این کار کرد، برای هر کدام از WEB-02…WEB-11 یک خروجی واقعی بگیر:
+    - WEB-02: `page.goto` مستقیم روی `/staff/analytics` بدون session → باید به
+      `/login` برود و محتوای خصوصی نشان ندهد. سپس back/forward و reload.
+    - WEB-04: axe-core روی همان صفحه؛ گزارش violations با severity.
+    - WEB-08: `navigator.serviceWorker` + خواندن manifest + بررسی icon/scope.
+    - WEB-09: پس از logout و با دو حساب ساختگی، cache را بازرسی کن:
+      هیچ API/PII/receipt در cache نماند.
+    - WEB-10: worker در waiting بماند؛ دکمهٔ update رفتار درست بدهد.
+    - WEB-11: با nginx واقعی (اگر نصب‌شد) یا `vite preview` SPA fallback را
+      برای deep link و `/api` جدا آزمون کن.
+  هر نتیجه را در `evidence/<DATE>/WEB-xx/browser-<view>.txt` بگذار.
+
+  ⚠ اگر نصب یا اجرا واقعاً شکست خورد، متن دقیق خطا را در evidence بنویس
+    (مثلاً `libnspr4.so` missing) و BLOCKED بزن — نه «در sandbox موجود نیست».
+    تفاوت این دو مهم است: یکی شاهد است، یکی فرض.
+
+────────────────────────────────────────────
+۲) STATE را با واقعیت هم‌تراز کن
+────────────────────────────────────────────
+این خطوط را در STATE اصلاح/اضافه کن:
+      BROWSER_AVAILABLE=yes|no  + دلیل دقیق (خطا یا نسخه)
+      WEB_CHECKED_BY_BROWSER=<لیست IDها>
+      CODE_OR_TEST_CHANGED_THIS_CYCLE=yes|no
+و در بخش WEB بنویس: «مرورگر با Playwright/@sparticuz در همین sandbox اجرا شد
+و خروجی در evidence/... است» یا «اجرا شد و شکست خورد با خطای X».
+
+────────────────────────────────────────────
+۳) v2: دو محدودیت باقی‌مانده را با کد حل کن، نه با یادداشت
+────────────────────────────────────────────
+  الف) `dynamic_sites=0` → الگوی regex فعلی در template interpolation می‌شکند.
+       اصلاح لازم: در `crosswalk_v2.py` قبل از regex، template را به یک شکل
+       canonical تبدیل کن:
+         `${API_BASE}/members/${id}/checkins`  →  `/api/v1/members/*/checkins`
+       یعنی هر `${...}` داخلی به `*` تبدیل شود، نه اینکه کل رشته قطع شود.
+       سپس `dynamic_sites` باید > ۰ شود و اگر مسیری با `*` به هیچ route واقعی
+       نخورد، `DYNAMIC_UNCOVERED` تولید شود.
+
+  ب) تفکیک «مصرف‌کنندهٔ عضو» از «پنل کارکنان» دستی مانده.
+       حداقل یک improvement انجام بده: هر call-site را با importهای همان فایل
+       به کامپوننت/صفحه نسبت بده (کدام صفحه این تابع را import می‌کند؟) و ستون
+       `surface=member|staff|shared` اضافه کن. لازم نیست کامل باشد؛ باید
+       تکرارپذیر باشد و در review.md صریح ثبت شود.
+
+  بعد از اصلاح: `crosswalk_v2.py` را دوباره روی همان SHA اجرا کن و تفاوت
+  اعداد v2↔v3 را در STATE ثبت کن. پیوستن به “PARTIAL_REVIEW” بدون تغییر کد
+  کافی نیست.
+
+────────────────────────────────────────────
+۴) SEC-01: دو شکاف را ببند
+────────────────────────────────────────────
+  الف) تست منفی: STATE می‌گوید «۳ تست function» برای پنج حوزه.
+       آیا این سه تابع در مخزن **commit‌شده** هستند یا در /tmp نوشته و اجرا شدند؟
+       اگر commit نشده‌اند، آن‌ها شاهد قابل‌تکرار نیستند. آن‌ها را در
+       `mp-app/backend/tests/integration/test_sec01_negative_owner.py` بگذار و
+       با `python -m pytest` دوباره اجرا کن. هر تست باید:
+         - fixture ساختگی داشته باشد (نه production data)
+         - assert کند 403 دقیقاً برای A→B
+         - یک case مثبت هم داشته باشد (A→A باید 200 بدهد) تا تست بی‌اثر نباشد
+
+  ب) anonymous و grant منقضی در ماتریس نیست. حداقل:
+       - یک ستون `anonymous` برای مسیرهای حساس
+       - یک تست grant منقضی/لغوشده روی یکی از مسیرهای مالی
+       بدون این‌ها SEC-01 بالاتر از PARTIAL نمی‌رود.
+
+────────────────────────────────────────────
+۵) هر چرخه یک تغییر کد یا تست
+────────────────────────────────────────────
+از این به بعد در گزارش، خط اجباری:
+
+      CODE_CHANGED: <فایل‌ها> یا «هیچ»
+
+اگر «هیچ» بود، فقط یک بار مجاز است در دو چرخهٔ متوالی. چرخهٔ سوم باید کد/تست
+داشته باشد، وگرنه STATE را با `LOOP_STALLED=yes` علامت بزن و به WEB/SEC code
+paths برگرد.
+
+────────────────────────────────────────────
+۶) commit و push
+────────────────────────────────────────────
+      python3 scripts/docs_gate.py && git diff --check
+      cd mp-app/backend && python -m pytest tests/integration/test_sec01_negative_owner.py -q 2>&1 | tail -3
+      cd mp-app/studio && npm run lint && npm run build   # اگر اسکریپت مرورگر را اضافه کردی
+
+      git add scripts/crosswalk_v2.py \
+              mp-app/backend/tests/integration/test_sec01_negative_owner.py \
+              evidence/$(date -u +%F) \
+              docs/MuscleParadise/PWA-EXECUTION-STATE.md \
+              docs/MuscleParadise/SESSION_HANDOFF.md
+      git commit -m "WEB browser evidence + SEC-01 committed negative tests + crosswalk v3 <sha>"
+      git push origin arena/5e0f64cf-mp
+
+      # تأیید
+      gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)?ref=arena/5e0f64cf-mp --jq '.[].name'
+      gh pr checks 30
+
+ممنوع: `git add -A` · `git clean` · `git reset --hard` · `push --force` · merge PR بدون درخواست مالک.
+
+────────────────────────────────────────────
+۷) گزارش پایان (کوتاه)
+────────────────────────────────────────────
+      DONE: <IDها>
+      SHA: <sha اجرا> — branch: arena/5e0f64cf-mp
+      CODE_CHANGED: <فایل‌ها|هیچ>
+      BROWSER: ran|blocked — <نسخه، خطا اگر blocked>
+      CROSSWALK: member PARTIAL_REVIEW=?/GAP=? dyn=?  ·  staff PARTIAL_REVIEW=?/GAP=?
+      SEC-01: matrix_rows=? · negative committed=? passed/failed  · anonymous/grant پوشش?
+      گیت‌ها: docs_gate · diff --check · pytest · studio lint/build → pass/fail
+      PR: #30 (draft) — checks=<n> pass/<n> fail
+      NEXT: <ID بعدی>
+      BLOCKED: <IDs + یک خط>
+      PUSHED: <sha> روی arena/5e0f64cf-mp    ← خالی = کار تمام نشده
+
+بعد از این گزارش، بدون سؤال سراغ MEM-01..16 برو. اما ترتیب پیشنهادی:
+  SEC-01 (تکمیل) → WEB (با مرورگر واقعی) → MEM-01..05 → STAFF-01
