@@ -1,5 +1,6 @@
 REPO: yousefghorbanian98-create/MP
 BRANCH: arena/5e0f64cf-mp   (همهٔ commit/push فقط روی همین شاخه؛ شاخهٔ دیگر نساز و عوض نکن)
+BRANCH-LIFECYCLE: اگر این شاخه merge شد یا HEAD ریموت با HEAD محلی تو یکی نبود، شاخهٔ نشست جاری را از main بساز (arena/<session>-mp) و همین متن را ادامه بده؛ هرگز روی main مستقیم commit نکن. WORK-IS-NOT-DONE-UNTIL-PUSHED.
 PRODUCT: یک PWA مشترک (عضو + کادر) روی mp-app/studio — طبق ADR-007. اپ React دوم ساخته نشود.
 TRACKER: docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md   (۱۰۴ checkbox؛ ۱۰۰ باز)
 BACKLOG: docs/MuscleParadise/TODO-2026-11-16.md#pwa-ui-ux-full-backlog-2026-11-23  (۵۰ کارت PWA-00…PWA-56)
@@ -90,7 +91,7 @@ REPORT: فشرده، حداکثر ۱۵ خط در پایان هر چرخه
 4. پیاده‌سازی + تست هم‌زمان (تست منفی هم بنویس؛ سرور منبع مجوز است).
 5. اجرای گیت‌های بند ۸ با دستور واقعی؛ خروجی خام را نگه دار.
 6. ثبت شاهد طبق بند ۱۰؛ به‌روزرسانی ردیف tracker با وضعیت واقعی؛ STATE و بخش جاری HANDOFF.
-7. commit (+ push در چک‌پوینت‌ها) و بی‌درنگ گام ۲ بعدی در همان نوبت.
+7. commit و push در چک‌پوینت‌ها (بدون push، شاهد رسمی نیست) و بی‌درنگ گام ۲ بعدی در همان نوبت.
 
 ۸) گیت‌های واقعی (از ریشهٔ مخزن؛ نسخه‌ها را در evidence بنویس)
 - Studio: cd mp-app/studio && npm ci && npm run lint && npm run build
@@ -107,12 +108,14 @@ REPORT: فشرده، حداکثر ۱۵ خط در پایان هر چرخه
 - بعد از push: gh pr checks و gh run list برای همان SHA؛ نتیجه را در evidence ثبت کن.
   CI سبز روی SHA دیگر یا worktree dirty شاهد این کار نیست.
 
-۹) تعریف انجام‌شده
+۹) تعریف انجام‌شده (DoD)
 PASS فقط وقتی: AC همان کارت رعایت شده + تست/گیت روی همین SHA اجرا شده + خروجی ثبت شده +
 بدون regression (lint/build/test همان حوزه و همسایه‌ها) + مجوز سمت سرور آزموده شده (هرجا نقش دخیل است) +
 سند/handoff به‌روز.
 PASS نیست: mock یا fallback، screenshot تنها، تست skip‌شده، CI روی commit دیگر، «صفحه هست»، «API هست» بدون نقش/مالکیت،
 و هر ادعایی که خودت اجرا نکرده‌ای. وضعیت میانی را PARTIAL بگذار با دلیل باقی‌ماندهٔ دقیق.
+DONE یعنی شاهد در یک commit روی ریموت (push‌شده) وجود دارد؛ «فایل در worktree محلی» DONE نیست.
+اگر evidence/… یا STATE فقط local ماند، همان item PARTIAL است — نه DONE و نه PASS.
 subagent یا review مستقل را ادعا نکن؛ اگر خودت اجرا نکردی بنویس «مرور دستیِ ایجنت اصلی».
 
 ۱۰) قالب ثبت شاهد (برای هر item)
@@ -145,6 +148,8 @@ subagent یا review مستقل را ادعا نکن؛ اگر خودت اجرا 
 ۱۳) حفاظت شواهد
 - خروجی خام گیت‌ها را در evidence/<تاریخ>/<ID>/ نگه دار؛ متن‌ها پالایش‌شده و بدون secret/PII.
 - فایل‌های خصوصی/رسید/دادهٔ واقعی نه در docs باز می‌شوند نه commit.
+- مسیر استاندارد شاهد: evidence/<تاریخ>/<ID>/ (همان تاریخ tracker، مثلاً evidence/2026-11-23/INV-02/).
+- بعد از هر push، وجود شاهد روی ریموت را چک کن (git ls-remote یا API contents) و در STATE بنویس.
 - هر عدد در گزارش باید از خروجی همان اجرا آمده باشد؛ اگر شک داری، «اجرا نشد» بنویس.
 
 ۱۴) گزارش پایان چرخه و شرایط توقف
