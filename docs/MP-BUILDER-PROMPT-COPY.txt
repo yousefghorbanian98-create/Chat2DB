@@ -1,6 +1,9 @@
 REPO: yousefghorbanian98-create/MP
-BRANCH: arena/5e0f64cf-mp   (همهٔ commit/push فقط روی همین شاخه؛ شاخهٔ دیگر نساز و عوض نکن)
-BRANCH-LIFECYCLE: اگر این شاخه merge شد یا HEAD ریموت با HEAD محلی تو یکی نبود، شاخهٔ نشست جاری را از main بساز (arena/<session>-mp) و همین متن را ادامه بده؛ هرگز روی main مستقیم commit نکن. WORK-IS-NOT-DONE-UNTIL-PUSHED.
+BRANCH: از نشست جاری خودت (الگوی arena/<session>-mp)؛ اگر شاخهٔ کارت هنوز نیست آن را از origin/main بساز.
+  ⚠ شاخهٔ arena/5e0f64cf-mp در ۲۰۲۶-۱۱-۲۷ از طریق PR #29 در main merge شد و دیگر شاخهٔ کار نیست؛
+    روی آن commit نکن و آن را دوباره نساز. WORK-IS-NOT-DONE-UNTIL-PUSHED.
+  ⚠ مجوز هوش مصنوعی GitHub برای ساخت PR پیش‌نویس ممکن است فعال نباشد؛ اگر `gh pr create`
+    با خطای permission شکست خورد، همان push کافی است — با خطا نایست، ادامه بده.
 PRODUCT: یک PWA مشترک (عضو + کادر) روی mp-app/studio — طبق ADR-007. اپ React دوم ساخته نشود.
 TRACKER: docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md   (۱۰۴ checkbox؛ ۱۰۰ باز)
 BACKLOG: docs/MuscleParadise/TODO-2026-11-16.md#pwa-ui-ux-full-backlog-2026-11-23  (۵۰ کارت PWA-00…PWA-56)
@@ -61,7 +64,8 @@ REPORT: فشرده، حداکثر ۱۵ خط در پایان هر چرخه
 - نصب وابستگی OSS عمومی (npm/PyPI) و Playwright/Chromium در همین محیط، با ثبت نام/نسخه/مجوز.
 - اجرای build/lint/test/typed-check/docs gate/axe/headless؛ تولید شاهد در evidence/ و artifacts/ بدون secret.
 - commit با پیام «<ID>: <خلاصه> — evidence: <دستور/نتیجه>»؛ یک commit برای هر برش معنادار.
-- push فقط به شاخهٔ arena/5e0f64cf-mp با «git push origin arena/5e0f64cf-mp»؛ اختیاری: PR پیش‌نویس از همان شاخه به main.
+- push فقط به شاخهٔ نشست خودت: «git push origin HEAD:arena/<session>-mp». هرگز مستقیم روی main.
+  PR پیش‌نویس اختیاری است؛ اگر GitHub اجازه نداد، رد شو و به کار بعدی برو.
 - به‌روزرسانی checkbox tracker فقط با شاهد واقعی، و به‌روزرسانی SESSION_HANDOFF + STATE.
 
 ۵) ممنوعیت‌های بی‌اجازهٔ صریح
