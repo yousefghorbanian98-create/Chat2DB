@@ -1,0 +1,158 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) اول: یک تصحیح از طرف من
+────────────────────────────────────────────
+من در پیام قبل به تو گفتم «Chromium/Playwright در sandbox نیست» را به‌عنوان
+بهانه رد نکن. **اشتباه کردم.** خودم همین حالا در همین سندباکس تست کردم:
+
+  npm i playwright-core @sparticuz/chromium axe-core   → نصب شد (۹۲MB)
+  node … → اجرا نشد:
+    /tmp/chromium: error while loading shared libraries: libnspr4.so
+    ldd /tmp/chromium → libnspr4.so, libnss3.so, libnssutil3.so = not found
+  playwright install chromium   → Download failure, code=1
+  apt-get download libnspr4 libnss3 → Unable to locate package
+
+یعنی ادعای تو **درست بود** و من بی‌انصافی کردم. از این پس BLOCKED تو برای
+browser/device پذیرفته است و دیگر تکرار نمی‌کنم.
+
+ولی یک جایگزین واقعی هست که هر دویمان نادیده گرفتیم:
+
+███ ZERO-INSTALL E2E: مرورگر لازم نیست ███
+مخزن **از قبل** یک مسیر اثبات زنده دارد که فقط Python و Node می‌خواهد:
+  • `mp-app/studio/tests/liveContract.test.ts` — همان توابع `src/lib/api.ts`
+    را روی یک API واقعی صدا می‌زند؛ بدون mock. بدون متغیر محیطی skip می‌شود.
+  • `.github/workflows/ci.yml` → job **`live-contract`**: backend را seed می‌کند،
+    `uvicorn` را روی 127.0.0.1:8000 بالا می‌آورد و بعد همین تست را اجرا می‌کند.
+    در PR #30 همین job **success** بود.
+
+پس محدودیت واقعی این نیست که «مرورگر نیست»؛ این است که **نتیجهٔ live-contract
+به‌عنوان شاهد ثبت نشده**. کاری که در بند ۱ می‌خواهم دقیقاً همین است.
+
+────────────────────────────────────────────
+۱) فوری‌ترین کار: MEM-01 را push کن (کار تو الان روی ریموت نیست)
+────────────────────────────────────────────
+وضعیت واقعی که همین حالا از ریموت خواندم:
+  • head شاخه = `5828c94` (همان commit قبلی)
+  • `evidence/2026-11-23/MEM-01/` → 404 (وجود ندارد)
+  • هیچ فایل جدید `member` در `mp-app/studio/src` نیست
+  • PR #30 همان ۱۱ commit قبلی را دارد
+
+یعنی برش MEM-01 که در گزارش گفتی «پیاده‌سازی شد»، **هیچ‌جا جز worktree محلی تو
+وجود ندارد**. با بسته‌شدن این نشست، مثل crosswalk قبلی از بین می‌رود.
+
+کار الان، به همین ترتیب:
+
+  git status --short --branch
+  git fetch origin && git rev-parse origin/arena/5e0f64cf-mp
+
+  # فقط مسیرهای MEM-01 و شواهدش را stage کن (allowlist صریح، نه add -A)
+  git add mp-app/studio/src/…            # همهٔ فایل‌های member که ساختی
+  git add mp-app/studio/tests/…          # تست‌های MEM-01
+  git add evidence/2026-11-23/MEM-01/
+  git add docs/MuscleParadise/PWA-EXECUTION-STATE.md \
+          docs/MuscleParadise/SESSION_HANDOFF.md \
+          docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md
+
+  git diff --cached --stat               # این را در گزارش بگذار
+  git commit -m "MEM-01: member home wired to /members/me + memberships — evidence: <sha>"
+  git push origin arena/5e0f64cf-mp
+
+  # تأیید (این‌ها باید 200 بدهند، وگرنه push نشده)
+  gh api repos/yousefghorbanian98-create/MP/contents/evidence/2026-11-23/MEM-01 \
+     --jq '.[].name' -f ref=arena/5e0f64cf-mp
+
+اگر push شکست خورد، **همان خطا** را در STATE بنویس و BLOCKED بزن. اما کار را
+روی دیسک رها نکن.
+
+────────────────────────────────────────────
+۲) جایگزین مرورگر: live-contract را محلی اجرا و ثبت کن
+────────────────────────────────────────────
+این را در همین سندباکس می‌شود اجرا کرد (Python 3.11 + Node 22 موجودند):
+
+  # ۱) backend را با دادهٔ ساختگی بالا بیاور (همان کاری که CI می‌کند)
+  cd mp-app/backend
+  MP_ENVIRONMENT=development python - <<'PY'
+  from db.base import init_db, get_session_factory
+  from db.models import Member, User
+  init_db()
+  with get_session_factory()() as s:
+      u = User(phone="09120000001", full_name="Admin", role="manager"); s.add(u); s.commit()
+      s.add(Member(user_id=u.id, gender="male", goal="hypertrophy", branch_id=1,
+                   emergency_contact="")); s.commit()
+  print("seeded")
+  PY
+  nohup python -m uvicorn app.main:create_app --factory --port 8000 --host 127.0.0.1 \
+        > /tmp/api.log 2>&1 &
+  curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8000/api/v1/health/ready
+
+  # ۲) توکن بگیر (همان مسیر OTP با dev_code؛ داده ساختگی)
+  #     اگر مسیر auth محلی ساده نبود، توکن تست را از fixture backend بساز
+  #     و در شاهد فقط بنویس «fixture token»، نه متن توکن.
+
+  # ۳) تست زنده را اجرا کن
+  cd ../../mp-app/studio
+  MP_API_BASE=http://127.0.0.1:8000 MP_TOKEN=<fixture> npm test -- liveContract
+
+  # ۴) خروجی خام را ذخیره کن
+  mkdir -p ../../evidence/$(date -u +%F)/MEM-01
+  # … > ../../evidence/$(date -u +%F)/MEM-01/live-contract.txt
+
+**نکتهٔ مهم:** اگر اسکریپت health برنگرداند یا token fixture ساخته نشد، خطا را
+عیناً ثبت کن. لازم نیست حتماً سبز شود؛ لازم است **ادعا نکنی بدون شاهد**.
+
+اگر این مسیر هم بسته بود، حداقل یک تست یکپارچه در backend بنویس که همان
+سفر member home را با TestClient بزند (بدون مرورگر):
+  ۱) OTP → توکن
+  ۲) GET /members/me
+  ۳) GET /members/{id}/memberships
+  ۴) assert نقش/شناسه/تاریخچه
+و آن را در `evidence/…/MEM-01/backend-flow.txt` ثبت کن.
+
+────────────────────────────────────────────
+۳) STATE را با واقعیت هم‌تراز کن
+────────────────────────────────────────────
+این خطوط را اضافه کن:
+      BROWSER_AVAILABLE=no — libnspr4.so/libnss3.so missing (apt/npm verified)
+      BROWSER_ALTERNATIVE=live-contract (CI job) + backend TestClient flow
+      PENDING_PUSH=yes|no
+      INDEX_ALLOWLISTED_COUNT=<عدد>
+و اگر MEM-01 را push کردی:
+      PUSHED=<sha> روی arena/5e0f64cf-mp
+
+────────────────────────────────────────────
+۴) محدودیت «Stage allowlist» را مکانیزه کن
+────────────────────────────────────────────
+INDEX با ۷۷ مسیر allowlist شده کار درستی است، ولی دستی نگه‌داشتنش خطاست.
+یک اسکریپت کوچک بساز:
+
+      scripts/stage_slice.py
+      # ورودی: فهرست پوشه/فایل‌های مجاز برای این برش (از یک فایل متنی)
+      # حذف خودکار فایل‌های حدس‌زده، اجازهٔ git add -A نه
+      # خروجی: لیست نهایی staged + شمارش، برای درج در گزارش
+
+این خودش **یک تغییر کد واقعی** است و قانون «هر چرخه یک تغییر کد یا تست» را
+هم برآورده می‌کند.
+
+────────────────────────────────────────────
+۵) commit و گزارش
+────────────────────────────────────────────
+      python3 scripts/docs_gate.py && git diff --check
+      git commit -m "MEM-01 evidence + live-contract alternative + stage_slice tool"
+      git push origin arena/5e0f64cf-mp
+      gh pr checks 30    # روی همین SHA
+
+گزارش (کوتاه):
+      DONE: MEM-01 (push شد؟) · live-contract (اجرا شد؟)
+      SHA: <sha> — branch: arena/5e0f64cf-mp
+      CODE_CHANGED: <فایل‌ها>
+      BROWSER: blocked libnspr4 — alternative: <live-contract|TestClient|هر دو>
+      LIVE_E2E: pass/fail/skip — <چرا>
+      INDEX: staged=<n> allowlisted=<n>
+      گیت‌ها: docs_gate · diff --check · studio test · backend pytest → pass/fail
+      NEXT: <ID>
+      BLOCKED: <IDs + یک خط>
+      PUSHED: <sha> روی arena/5e0f64cf-mp    ← خالی = کار تمام نشده
+
+بعد از این، بدون سؤال سراغ MEM-02..05 برو. PR #30 همچنان draft و
+«نباید merge شود» — این را نگه دار.
