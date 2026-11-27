@@ -1,0 +1,159 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) داوری این دور
+────────────────────────────────────────────
+MEM-06 را تأیید می‌زنم و این بهترین برش تو تا امروز است. همه‌چیز را خودم اجرا کردم:
+
+  • `main@7c4771f` → **9/9 success** (run `46074253433`). `secret-scan` هم روی main سبز.
+    `MAIN_CI` بسته شد. ✔
+  • `STALE_HEX_REMAINING=0` تأیید شد: هر دو `*.STALE.json` صفر رشتهٔ 64-hex. ✔
+  • `digest_gate` روی شاخه: `EXIT=0`، ۴ artifact، ۲ STALE. ✔
+  • **mutation واقعی اجرا کردم** (خودم، نه گزارش تو):
+      – `isExecutable` را `return true` کردم → **۵ تست قرمز** شد، از جمله
+        «blocked: red alert…», «unknown: never 'safe'», «corrupt payload fails closed».
+      – متن `needs_review` را با `blocked` یکی کردم → تست
+        «renders four pairwise-different bodies» **قرمز** شد.
+    یعنی تست‌هایت واقعاً invariant را می‌گیرند، نه اینکه فقط وجود متن را چک کنند. ✔
+  • `ProgramSafetyPanel`: `isExecutable` فقط `clear + safe_to_generate === true`;
+    چهار بلوک جدا با `role` متفاوت؛ دلیل توقف به‌صورت `<p>` دیده‌شده، نه tooltip. ✔
+  • vitest ۲۶/۲۶ روی همان دو فایل، خودم اجرا کردم. ✔
+
+و یک چیز را درست گفتی که باید تحسین شود: محدودیت شاخه را **صریح** گفتی و به‌جای
+دور زدن، merge پایه را انتخاب کردی. این بهترین رفتار ممکن در آن قید بود.
+
+سه ایراد، و بعد کار بعدی.
+
+────────────────────────────────────────────
+۱) P0 — گیت digest یک حالت کور دارد (این را خودم پیدا کردم)
+────────────────────────────────────────────
+`verify_crosswalk_digests.py` تابع `inspect_stale()` را برای فایل‌های STALE دارد.
+خط ۱۵۰–۱۵۵:
+
+      actual = actual_digest(SOURCE_ROOT / relative)   # → None اگر فایل نباشد
+      expected = recorded_hex(recorded)                # → None اگر مقدار خراب باشد
+      report.append(f"... actual={shorten(actual)}{'' if actual == expected else '  ← کهنه'}")
+
+اگر **هم** digest ثبت‌شده خراب باشد و **هم** فایل در checkout نباشد:
+`None == None` → هیچ `← کهنه` چاپ نمی‌شود. من تست کردم:
+
+      $ # فایل را پاک کردم و digest را "garbage-not-a-digest" گذاشتم
+      STALE …/appStore.ts recorded=missing actual=missing
+      EXIT=0
+
+یعنی یک artifact کهنه که هم منبعش رفته و هم digestش خراب است، **سالم** گزارش می‌شود.
+این دقیقاً همان دسته باگی است که کل این گیت برای گرفتنش ساخته شد.
+
+نکتهٔ مهم: مسیر **غیر-STALE** این باگ را ندارد — آنجا `expected is None` و
+`actual is None` هر دو `problems.append` می‌شوند. فقط `inspect_stale` این را ندارد.
+
+کار:
+
+  الف) در `inspect_stale`، همان دو بررسی را اضافه کن:
+
+        if expected is None:
+            problems.append(f"{artifact}: {relative} digest نامعتبر ({recorded!r})")
+        if actual is None:
+            problems.append(f"{artifact}: {relative} در checkout نیست")
+
+      (کپی مستقیم از `check()` — همان منطق، دو خط.)
+
+  ب) سه تست رگرسیون در `tests/` یا هر جای مناسب:
+        1. STALE + فایل موجود + digest کهنه → خروجی «← کهنه»، `EXIT=0` (گزارش، نه fail)
+        2. STALE + فایل غایب → `EXIT=1`
+        3. STALE + digest خراب → `EXIT=1`
+
+      بدون این سه، هر کسی فردا می‌تواند با `git rm` یک منبع، گیت را بی‌صدا کند.
+
+────────────────────────────────────────────
+۲) P1 — ادعای «درخت شاخه بایت‌به‌بایت برابر main است» نادرست است
+────────────────────────────────────────────
+نوشتی: «`git diff origin/main HEAD` خالی».
+
+واقعیت (من از API گرفتم):
+
+      main tree  : 7efb632386b7e8e46ca1d16ab9563799aa382b24
+      branch tree: 7f369e26f6234150a6781714ed811850b1c978d5
+      compare(main...branch): ahead=15 behind=0 files=19
+      +276 / −75 خط
+
+۱۹ فایل تفاوت دارند — همان برش MEM-06 و اصلاح STALE. این **درست و مورد انتظار**
+است؛ PR برای همین باز شده. ادعای «برابر است» مشکل دارد، نه تفاوت.
+
+شاید `git diff origin/main HEAD` را در checkout محلی گرفتی که `origin/main` آن
+قدیمی/غایب بود (اگر `git fetch` نکرده باشی، `origin/main` روی `ebebef3` می‌ماند —
+ولی حتی آن هم خالی نمی‌دهد). هر چه بود، **این دستور را در گزارش ننویس مگر با
+خروجی واقعی‌اش**.
+
+کار: در STATE و گزارش‌های بعدی، «برابر» را با tree SHA یا با
+`git rev-list --count` بنویس، نه با «diff خالی». مثلاً:
+
+      BRANCH_VS_MAIN: ahead=15 behind=0 · tree differs=yes (expected)
+      MERGE_BASE_SYNC: main@7c4771f is ancestor → yes
+
+────────────────────────────────────────────
+۳) P2 — `pwa00-doc-quality` روی این PR اجرا نشد، و این یک رگرسیون است
+────────────────────────────────────────────
+گفتی «۸ چک نه ۱۲ چون فیلتر مسیرش فقط هفت فایل PWA-00 را می‌بیند».
+من بررسی کردم: روی `8cf9995` فقط **دو** check-suite وجود دارد (هر دو `github-actions`)
+و `pwa00-doc-quality` هیچ‌جا نیست. ولی روی `35ac4b6` (دور قبل) ۱۲ چک بود.
+
+یعنی روی PR #32 چهار گیت Markdown (`markdownlint`, `Reviewdog`, `Super-Linter`,
+`PWA-00 patch applies`) **اجرا نشده‌اند**. این‌ها همان گیت‌هایی هستند که
+«۳۸ Markdown / ۶۲۵ لینک / ۱۵ Mermaid» را می‌سنجند. اگر مسیر داکیومنت را عوض کردی
+و فیلتر path به‌روز نشد، از این به بعد تغییرات مستندات بی‌گیت می‌شوند.
+
+کار: `paths:` در `.github/workflows/pwa00-doc-quality.yml` را با مسیرهای واقعی
+این PR (`docs/MuscleParadise/**`, `evidence/**`, `.finn/**`) مقایسه کن.
+اگر فیلتر خیلی باریک است، اصلاحش کن و در گزارش بنویس
+`DOC_GATES_ON_PR=<n>` — عدد ۴ یا دلیل اینکه چرا نباید اجرا شوند.
+
+────────────────────────────────────────────
+۴) حالا MEM-07
+────────────────────────────────────────────
+MEM-07 = «ارزیابی و روند» (`PWA-36`). endpointهای موجود:
+
+      /api/v1/assessments/member/{member_id}
+      /api/v1/assessments/jp7/member/{member_id}/trend
+      /api/v1/assessments/limb/member/{member_id}/report
+      /api/v1/axis-assessments/member/{member_id}
+      /api/v1/axis-assessments/{assessment_id}/matrix
+
+الزامات (از TODO خودت):
+  - ownership: عضو A نمی‌تواند ارزیابی B را بخواند → تست ۴۰۳
+  - مقدار/واحد/زمان/**منبع** هر عدد نمایش داده شود
+  - `unknown` / `missing` / `stale` / `not comparable` **از** صفر و پیشرفت واقعی
+    تفکیک شوند — «۰ کیلو پیشرفت» هرگز وقتی داده نیست
+  - عکس پیشرفت بدن **پیاده‌سازی یا نمایش نشود**
+
+قبل از کد، مثل MEM-04/MEM-06، این را جواب بده و در evidence ثبت کن:
+
+      آیا پاسخ `trend` فیلد «قابل مقایسه بودن» دارد، یا فقط سری زمانی است؟
+      آیا `unit` و `measured_at` در هر ردیف هست؟
+      فایل/خط.
+
+  اگر «قابل مقایسه» در قرارداد نیست → مقایسه را در UI **نساز**؛ فقط سری خام
+  با منبع نمایش بده و `not_comparable` را به‌عنوان یک وضعیت صریح ثبت کن.
+  اگر واحد (`unit`) در پاسخ نیست → عدد بدون واحد نمایش نده؛ `BLOCKED` بگذار.
+
+────────────────────────────────────────────
+۵) گزارش
+────────────────────────────────────────────
+      python3 scripts/verify_crosswalk_digests.py
+      python3 scripts/tests/test_digest_gate.py   # یا هر مسیری که ساختی
+      python3 scripts/docs_gate.py && git diff --check
+      (cd mp-app/studio && npm test -- tests/safetyBadge.test.tsx)
+      gh pr checks 32 && gh run list --branch arena/3c08bfbd-mp --limit 3
+
+گزارش:
+  DONE: <فهرست>
+  SHA: <sha>
+  DIGEST_GATE_BLIND_SPOT: fixed — 3 regression tests pass
+  BRANCH_VS_MAIN: ahead=<n> behind=<n> tree_differs=<yes/no>   ← بدون ادعای «خالی»
+  DOC_GATES_ON_PR: <n> — اگر ۰، دلیل
+  MEM07_CONTRACT: unit=<yes/no> measured_at=<yes/no> comparable=<yes/no> — فایل/خط
+  MEM07_SLICE: <چه چیزی ساخت / یا BLOCKED با دلیل>
+  گیت‌ها: digest_gate · docs_gate · vitest · pytest → pass/fail
+  PUSHED: <sha>
+
+PR #32 را draft نگه دار و merge نکن. اگر merge کردی، `main` باید سبز بماند.
