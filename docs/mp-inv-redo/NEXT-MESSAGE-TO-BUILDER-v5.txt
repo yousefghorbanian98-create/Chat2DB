@@ -1,0 +1,148 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) ارزیابی این دور (بی‌تعارف)
+────────────────────────────────────────────
+این بهترین دور تو تا امروز بود. چیزهایی که **واقعاً** انجام دادی و تأیید کردم:
+
+  • `/member` دیگر placeholder نیست: `MemberAccount.tsx` ساخته شد و
+    `App.tsx` در خط ۱۰۲–۱۰۵ واقعاً آن را route می‌کند (role !== "member" → AccessDenied).
+  • `memberAccount.ts`: پارس UTC بدون Z، تقویم فارسی/Asia/Tehran، حالت «نامعلوم»
+    که «منقضی» تلقی نمی‌شود، و برچسب constraint با fallback خام. این طراحی درست است.
+  • live-contract واقعاً اجرا شد: `9 passed`, `exit_code=0`, با backend محلی،
+    با fixture token که در شاهد چاپ نشد. **این دقیقاً همان چیزی بود که خواستم.**
+  • `backend-ci-coverage-repro.txt`: 1338 passed + آستانه‌های coverage همه PASS.
+    شکست CI قدیمی هم مستند شد، بدون ادعای علت قطعی.
+  • `stage_slice.py` + allowlist متنی: ۴۰ مسیر از ۱۰۰ staged، ۶۰ مسیر نامرتبط
+    دست‌نخورده. این همان مکانیزه‌کردنی است که می‌خواستم.
+  • PR #30 روی `9cdd965`: **۲۰ از ۲۰ check سبز**.
+
+خوب. حالا یک شکاف باقی است که خودت هم در `current-run.md` صادقانه نوشتی —
+و همین، تفاوت PARTIAL و DONE است.
+
+────────────────────────────────────────────
+۱) شکاف اصلی: live-contract سفر member را نمی‌زند
+────────────────────────────────────────────
+خودت نوشتی:
+
+  «this existing live-contract suite … does not directly exercise the new
+   `/members/me` → owner-scoped memberships account page flow.»
+
+این جمله درست است و همان چیزی است که MEM-01 را PARTIAL نگه می‌دارد.
+`liveContract.test.ts` توابعی مثل `fetchMembersSummary`, `fetchKpis`,
+`browseFoods` را می‌زند — **هیچ‌کدام مسیر حساب عضو نیست**.
+
+کار این دور: یک تست زندهٔ جدید که دقیقاً همان چیزی را بزند که صفحه استفاده می‌کند.
+
+  فایل جدید: `mp-app/studio/tests/liveContractMember.test.ts`
+
+  الگو را از `liveContract.test.ts` بردار (همان skip-if-no-env، همان
+  installLiveFetch). محتوای تست:
+
+    describe("member account live contract (MEM-01)")
+      it("GET /members/me returns the authenticated member identity")
+        → assert: body.id عددی، body.user_id عددی، و role در توکن member است
+        → assert: **هیچ** فیلد عضوِ دیگری در پاسخ نیست (کلیدهای pii اضافه نباشند)
+
+      it("memberships are fetched by Member.id, not User.id")
+        → id = body.id از مرحلهٔ قبل
+        → const list = await fetchMemberMemberships(id, token)
+        → assert: آرایه است، هر ردیف member_id === id
+        → assert: id را از توکن/user_id نساز (یعنی تست یک بار با user_id هم صدا بزند
+          و 403/404 بگیرد — این خودش تست منفی است)
+
+      it("membership view maps unknown status without calling it expired")
+        → روی همان داده، getMemberMembershipView را بزن
+        → اگر status ناشناخته بود، state === "unknown" و daysLeft === null
+
+      it("expiry is rendered in Asia/Tehran Persian calendar")
+        → formatMemberDateTime روی یک instant مرزی (۲۳:۳۰ UTC)
+
+  نتیجه را در `evidence/<DATE>/MEM-01/live-contract-member.txt` ذخیره کن.
+
+  اگر تابع `fetchMemberMemberships` در `src/lib/api.ts` نیست، اول اضافه‌اش کن
+  (این خودش تغییر کد محصول است و درست است) و بعد تست را بنویس.
+
+────────────────────────────────────────────
+۲) تست منفی «شناسهٔ کاربر ≠ شناسهٔ عضو» را صریح کن
+────────────────────────────────────────────
+این حساس‌ترین بخش MEM-01 است. یک تست جدا در backend:
+
+  `mp-app/backend/tests/integration/test_mem01_member_identity.py`
+
+    - عضو A لاگین می‌کند (fixture)
+    - GET /api/v1/members/me → id == A.member_id
+    - GET /api/v1/members/{A.user_id}/memberships → باید 403/404 بدهد
+      (چون user_id ≠ member_id و server نباید قبول کند)
+    - GET /api/v1/members/{B.member_id}/memberships → 403
+
+  این تست باید **assert کند که اشتباه رد می‌شود**، نه فقط اینکه مسیر درست کار می‌کند.
+  بدون این، هر کسی فردا `Member.id` را با `User.id` جابه‌جا کند، تست‌های سبز
+  می‌مانند و باگ به production می‌رود.
+
+  خروجی: `evidence/<DATE>/MEM-01/identity-negative.txt`
+
+────────────────────────────────────────────
+۳) `/member/today` — بستهٔ کوچک بعدی (نه الان)
+────────────────────────────────────────────
+در گزارش گفتی «`/member/today` همچنان بدون برنامهٔ ساختگی است». این درست است.
+ولی طبق قانون «برنامهٔ بی‌منبع نساز»، تا وقتی endpoint واقعی برنامهٔ عضو آماده و
+تأییدشده نیست، **صفحهٔ today باید empty-state صریح داشته باشد**، نه mock:
+
+  - اگر API داده ندارد → پیام «برنامه‌ای برای امروز ثبت نشده» + لینک به پشتیبانی
+  - اگر API خطا داد → پیام خطا + retry
+  - اگر نقش عضو نیست → AccessDenied
+
+  این را در همین دور به‌عنوان یک تست بنویس، نه یک صفحهٔ کامل:
+  `memberAccountPage.test.tsx` → «today shows an honest empty state, never mock data».
+
+────────────────────────────────────────────
+۴) یک کار کوچک اما مهم: STATE را از «تاریخ مرجع» جدا کن
+────────────────────────────────────────────
+STATE فعلی تاریخ مرجع `2026-11-23` دارد ولی evidence تازه در `2026-11-27` است.
+این باعث می‌شود خواننده فکر کند STATE کهنه است. این دو خط را اضافه کن:
+
+      STATE_LAST_UPDATED=<UTC timestamp واقعی این دور>
+      EVIDENCE_DATE_DIRS=2026-11-23, 2026-11-27
+      NOTE: تاریخ مرجع (2026-11-23) تاریخ شروع برنامه است، نه تاریخ STATE.
+
+────────────────────────────────────────────
+۵) commit + push + گزارش
+────────────────────────────────────────────
+  # allowlist جدید برای این برش؛ از stage_slice.py استفاده کن
+  cat > scripts/allowlists/MEM-01-live.txt <<'EOF'
+  mp-app/studio/src/lib/api.ts
+  mp-app/studio/tests/liveContractMember.test.ts
+  mp-app/studio/tests/memberAccountPage.test.tsx
+  mp-app/backend/tests/integration/test_mem01_member_identity.py
+  evidence/2026-11-27/MEM-01/live-contract-member.txt
+  evidence/2026-11-27/MEM-01/identity-negative.txt
+  docs/MuscleParadise/PWA-EXECUTION-STATE.md
+  docs/MuscleParadise/SESSION_HANDOFF.md
+  EOF
+
+  python3 scripts/stage_slice.py scripts/allowlists/MEM-01-live.txt
+  git diff --cached --stat
+
+  python3 scripts/docs_gate.py && git diff --check
+  (cd mp-app/studio && npm run lint && npm test -- tests/liveContractMember.test.ts)
+  (cd mp-app/backend && python -m pytest tests/integration/test_mem01_member_identity.py -q)
+
+  git commit -m "MEM-01: live member-account contract + identity negative test — evidence: <sha>"
+  git push origin arena/5e0f64cf-mp
+  gh pr checks 30
+
+گزارش (کوتاه):
+  DONE: MEM-01 live contract + identity negative
+  SHA: <sha> — branch: arena/5e0f64cf-mp
+  CODE_CHANGED: <فایل‌ها>
+  LIVE_MEMBER: pass/fail/skip — <چرا>
+  NEGATIVE: <n> passed
+  TODAY_EMPTY_STATE: pass/fail
+  INDEX: staged=<n> from allowlist=<n> · unrelated preserved=<n>
+  گیت‌ها: docs_gate · lint · vitest · pytest → pass/fail
+  NEXT: MEM-03
+  BLOCKED: <IDs>
+  PUSHED: <sha>    ← خالی = کار تمام نشده
+
+بعد از این، MEM-03 (تغییر شماره با OTP) را شروع کن. PR #30 را merge نکن.
