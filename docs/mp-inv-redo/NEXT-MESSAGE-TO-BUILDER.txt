@@ -1,0 +1,143 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن و به بیلدر بده)
+=================================================================
+
+خوب کار کردی: خام و تفسیر را جدا نگه داشتی و چیزی را بی‌شاهد PASS نکردی.
+حالا سه کار، به همین ترتیب. هیچ‌کدام نیاز به سؤال از مالک ندارد.
+
+────────────────────────────────────────────
+۰) یک تصمیم مسیر که باید بدانی (بدون این، کارت دوباره دفن می‌شود)
+────────────────────────────────────────────
+مخزن فقط دو شاخه دارد:
+  • arena/5e0f64cf-mp  → a3fbf01 — **این شاخه از PR #29 ادغام شده و مرده است**
+  • main               → 3527810
+
+یعنی commit مستنداتی `a3fbf01` که push کردی روی یک شاخهٔ **ادغام‌شده** نشسته و
+در main نیست. اگر همین‌جا ادامه بدهی، هیچ‌کس (نه reviewer، نه PR، نه نشست بعدی)
+آن را نمی‌بیند. این همان الگویی است که کار crosswalk قبلی را نابود کرد، فقط
+این‌بار شاخه هم مرده است.
+
+تصمیم (اجرا کن، منتظر تأیید نمان):
+  شاخهٔ کار جدید از main بساز و کار را آنجا ادامه بده:
+      git fetch origin
+      git checkout -b arena/<session>-mp origin/main
+      # کارهای a3fbf01 را با یک commit قابل‌حمل منتقل کن، نه با reset/cherry-pick کورکورانه:
+      git diff origin/main...a3fbf0195f -- docs evidence | git apply -3
+  اگر تعارض داشت، فایل‌به‌فایل حل کن و در commit message بنویس از کدام SHA آمده.
+  شاخهٔ قدیمی را حذف نکن؛ فقط رویش کار نکن.
+
+  ⚠ اگر نتوانستی شاخهٔ جدید بسازی (مجوز یا سیاست)، حداقل بگو «BLOCKED: شاخه».
+    ادامه دادن روی شاخهٔ مرده ممنوع است.
+
+────────────────────────────────────────────
+۱) اثبات اینکه واقعاً push شده (بدون این، کارت تمام نیست)
+────────────────────────────────────────────
+گزارش قبلی‌ات گفت «commit یا push نشد» اما روی ریموت commit مستنداتی هست.
+پس اول وضعیت را قطعی کن:
+      git ls-remote origin | grep -E 'refs/heads/(main|arena)'
+      git log --oneline origin/main -1
+      git log --oneline origin/arena/5e0f64cf-mp -3
+      gh api repos/yousefghorbanian98-create/MP/contents/evidence/2026-11-27 \
+        --jq '.[].name' || true
+
+سپس در STATE این سه خط را بنویس (هر کدام یک مقدار، بدون تفسیر):
+      CURRENT_BRANCH=
+      REMOTE_HAS_MY_COMMIT=yes|no
+      MAIN_HEAD=
+
+────────────────────────────────────────────
+۲) crosswalk v2 — سه false-negative را با ابزار رفع کن، نه با دست
+────────────────────────────────────────────
+خودت در review.md سه ایراد درست پیدا کردی. هر سه در یک اسکریپت جدید حل شده‌اند
+(نه patch روی v1). دانلود کن و روی شاخهٔ جدید اجرا کن:
+
+      curl -fsSL "https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/c1fb460b-chat2db/docs/mp-inv-redo/crosswalk_v2.py" \
+           -o scripts/crosswalk_v2.py
+
+      python3 scripts/crosswalk_v2.py --repo . --kind member \
+              --out evidence/$(date -u +%F)/INV-02
+      python3 scripts/crosswalk_v2.py --repo . --kind staff \
+              --out evidence/$(date -u +%F)/INV-03
+
+چه چیزی را در v2 حل کرده‌ام (این سه را دیگر دستی تعمیر نکن):
+  • `${base}/admin/...` در adminApi.ts → قبلاً Analytics به‌غلط «بدون call-site» بود.
+    حالا `analytics` از `adminApi.ts` با call-site واقعی شکار می‌شود.
+  • alias نقش (`ALL_STAFF`) → حالا باز می‌شود؛ ستون نقش خالی نمی‌ماند.
+  • مسیرهای پویا (`${API_BASE}/members/${id}/checkins`) → وضعیت تازهٔ
+    `DYNAMIC_UNCOVERED` می‌گیرند، نه GAP کاذب و نه PASS.
+
+خروجی مرجع روی main@3527810 (برای مقایسهٔ صحت، نه هدف):
+      member → PARTIAL_REVIEW=14  GAP=3
+      staff  → PARTIAL_REVIEW=12  GAP=0
+اگر اعداد تو خیلی فاصله دارد، اول تفاوت را توضیح بده؛ کورکورانه commit نکن.
+
+قواعدی که باید در review.md بنویسی (لحن گزارش، نه ادعا):
+  • «v1 سه false-negative داشت؛ v2 آن‌ها را رفع کرد.»
+  • «v2 همچنان مجوز و مالکیت را اثبات نمی‌کند؛ سقف PARTIAL_REVIEW است.»
+  • «تفکیک call-site عضو از پنل کارکنان دستی است و باقی می‌ماند.»
+  • «مسیرهای پویا با DYNAMIC_UNCOVERED علامت خورده‌اند، نه پوشش‌داده‌شده.»
+
+────────────────────────────────────────────
+۳) SEC-01 — ماتریس را از مشتی تست به سه‌گانهٔ قابل‌اثبات تبدیل کن
+────────────────────────────────────────────
+گزارش تو: «۹۰ passed» روی پنج فایل، اما روی `3527810` و نه HEAD فعلی شاخه.
+این کافی نیست. برای SEC-01 سه چیز لازم است:
+
+  الف) یک تست ماتریسی که **همهٔ** ردیف‌های routes.json را با هر شش نقش می‌زند:
+       برای هر (مسیر × نقش) انتظار allow یا deny از `mp-app/backend/security/rbac.py`
+       را assert کن — نه نمونه‌ای، بلکه کامل. اگر اجرای کامل سنگین است،
+       حداقل همهٔ مسیرهای حساس مالی/سلامت/فایل/export را کامل بزن.
+       خروجی: evidence/<DATE>/SEC-01/rbac-matrix.txt (جدول method×path×role×decision)
+
+  ب) تست منفی واقعی روی API، نه فقط unit:
+       عضو A نباید دادهٔ عضو B را بگیرد — روی مسیرهای members/assessments/
+       payments/chat/checkin. اگر 200 گرفتی، همان لحظه BLOCKED بزن و گزارش کن؛
+       تست را دور نزن.
+
+  ج) اجرا روی **همان SHA** که ادعا می‌کنی:
+       SHA=$(git rev-parse HEAD)
+       cd mp-app/backend && python -m pytest -q 2>&1 | tail -5
+       python3 - <<'PY'
+       import json, hashlib, pathlib, subprocess
+       sha = subprocess.run(["git","rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()
+       print("tested_sha:", sha)
+       PY
+       در گزارش، SHA اجرا را کنار SHA ادعا بگذار. اگر یکی نیستند → NOT_RUN.
+
+  وضعیت SEC-01 را بالاتر از PARTIAL نبر. CURRENT برای اعطای نقش/مالکیت نیاز به
+  تست منفی + شاهد اجرا دارد.
+
+────────────────────────────────────────────
+۴) گیت‌ها و commit (فقط مسیرهای همین کار)
+────────────────────────────────────────────
+      python3 scripts/docs_gate.py
+      git diff --check
+
+      git add scripts/crosswalk_v2.py \
+              evidence/$(date -u +%F)/INV-02 evidence/$(date -u +%F)/INV-03 \
+              evidence/<DATE>/SEC-01 \
+              docs/MuscleParadise/PWA-EXECUTION-STATE.md \
+              docs/MuscleParadise/SESSION_HANDOFF.md \
+              docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md
+      git commit -m "INV-02/03 v2 + SEC-01 matrix on <sha> — evidence: see evidence/<DATE>/"
+      git push -u origin arena/<session>-mp
+
+      # تأیید نهایی
+      gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-02 \
+        --jq '.[].name'
+
+ممنوع: git add -A · git clean · git reset --hard · push به main ·
+ادامه‌دادن روی شاخهٔ ادغام‌شده.
+
+────────────────────────────────────────────
+۵) گزارش پایان (کوتاه، با خط PUSHED اجباری)
+────────────────────────────────────────────
+      DONE: INV-02 v2 · INV-03 v2 · SEC-01 (matrix+negative)
+      SHA: <sha اجرا> — branch: <branch>
+      اعداد: member PARTIAL_REVIEW=? GAP=? · staff PARTIAL_REVIEW=? GAP=?
+      SEC-01: matrix rows=? · negative tests pass/fail=?
+      گیت‌ها: docs_gate · diff --check · pytest → pass/fail
+      NEXT: <ID بعدی> — چرا
+      BLOCKED: <IDs + یک خط>
+      PUSHED: <sha> روی <branch>     ← اگر خالی است، کار تمام نشده
+
+بعد از این گزارش، بدون سؤال سراغ WEB-01..11 برو و همان چرخه را ادامه بده.

@@ -1,0 +1,595 @@
+{
+  "meta": {
+    "kind": "member",
+    "sha": "352781043ad2ba202d8b3b459df1ce7e3d914ef7",
+    "branch": "main",
+    "tracked_dirty": false,
+    "untracked": 1,
+    "sources": {
+      "backend/api/routes.json": "7f0333dfb92a5bb56514b7e003cc78370fc7e8fabe3a9a8b5342ccaab9a84cf8",
+      "backend/security/rbac.py": "a8740f75b33e864e1a3990f4d77e2fa781f0c2105c133d9892a41ce63fdf9d2c",
+      "studio/src/lib/roleNav.ts": "650ff74343af6e25010f6a07bab4de477d2ffefcee94be3923a200ed05d53220",
+      "studio/src/lib/api.ts": "f5e977948640587ac5a9c0816c401b63246f4613de77504accfd563b1950af28",
+      "studio/src/lib/adminApi.ts": "612cbd1e89a78301545f67c88264519a7c492d148ef44779050f50cc1327f2ce",
+      "studio/src/lib/navigation.ts": "71fa84e7d3d0ca190e3a79ab91cb43beff7d2b8743ccc71a598b6a3722b73172"
+    },
+    "site_kinds": {
+      "template-base": 28,
+      "helper": 57,
+      "literal": 0
+    },
+    "dynamic_sites": 0,
+    "status_counts": {
+      "PARTIAL_REVIEW": 14,
+      "GAP": 3
+    },
+    "role_aliases_resolved": {
+      "dashboard": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "members": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception"
+      ],
+      "programs": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "member"
+      ],
+      "nutrition": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "member"
+      ],
+      "assessment": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "member"
+      ],
+      "chat": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "checkin": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "finance": [
+        "super_admin",
+        "admin",
+        "manager"
+      ],
+      "expenses": [
+        "super_admin",
+        "admin",
+        "manager"
+      ],
+      "analytics": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach"
+      ],
+      "settings": [
+        "super_admin",
+        "admin"
+      ],
+      "shop": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ]
+    },
+    "generated_by": "scripts/crosswalk_v2.py"
+  },
+  "rows": [
+    {
+      "key": "assessment14",
+      "files": [
+        "mp-app/client/lib/features/assessment14/assessment14_page.dart",
+        "mp-app/client/lib/features/assessment14/assessment14_providers.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "apis_total": 7,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_api_contract.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py",
+        "test_e2e_dataflow.py",
+        "test_m54_segmental.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "auth",
+      "files": [
+        "mp-app/client/lib/features/auth/otp_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions"
+      ],
+      "apis_total": 10,
+      "consumers": [
+        "api.ts",
+        "session.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "apiCoverage.test.ts",
+        "authFlow.test.tsx",
+        "deviceSessions.test.tsx",
+        "locustfile.py",
+        "locustfile_full.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "bodycomp",
+      "files": [
+        "mp-app/client/lib/features/bodycomp/bodycomp_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "apis_total": 8,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_api_contract.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py",
+        "test_e2e_dataflow.py",
+        "test_m54_segmental.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "chat",
+      "files": [
+        "mp-app/client/lib/features/chat/member_chat_data.dart",
+        "mp-app/client/lib/features/chat/member_chat_page.dart"
+      ],
+      "route": null,
+      "roles": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "apis_used": [
+        "/api/v1/chat/conversations"
+      ],
+      "apis_total": 3,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "test_e2e_adaptive_loop.py",
+        "test_m51_chat.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "checkin",
+      "files": [
+        "mp-app/client/lib/features/checkin/checkin_page.dart",
+        "mp-app/client/lib/features/checkin/member_checkin_history.dart"
+      ],
+      "route": null,
+      "roles": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "apis_used": [
+        "/api/v1/admin/checkins"
+      ],
+      "apis_total": 12,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "locustfile_full.py",
+        "test_m45_checkin_feed.py",
+        "test_m46_security_matrix.py",
+        "test_m80_member_checkin_history.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "classes",
+      "files": [
+        "mp-app/client/lib/features/classes/classes_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/classes"
+      ],
+      "apis_total": 3,
+      "consumers": [
+        "ScheduleTimeline.tsx"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "authFlow.test.tsx",
+        "test_classes_finance.py",
+        "test_e2e_dataflow.py",
+        "test_m59_shop.py",
+        "test_m74_class_cancel.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "feedback",
+      "files": [
+        "mp-app/client/lib/features/feedback/feedback_providers.dart",
+        "mp-app/client/lib/features/feedback/offline_feedback_queue_card.dart",
+        "mp-app/client/lib/features/feedback/set_feedback_sheet.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/programs",
+        "/api/v1/programs/{program_id}"
+      ],
+      "apis_total": 10,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "locustfile_full.py",
+        "test_axis_assessment_api.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py",
+        "test_e2e_dataflow.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "home",
+      "files": [
+        "mp-app/client/lib/features/home/home_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/members/me"
+      ],
+      "apis_total": 11,
+      "consumers": [
+        "AuthContext.tsx",
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "authFlow.test.tsx",
+        "locustfile_full.py",
+        "pwa.test.ts",
+        "test_e2e_dataflow.py",
+        "test_m46_whoami.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "intake",
+      "files": [
+        "mp-app/client/lib/features/intake/intake_page.dart",
+        "mp-app/client/lib/features/intake/program_result.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [],
+      "apis_total": 3,
+      "consumers": [],
+      "tests": [],
+      "uncovered_dynamic": [],
+      "status": "GAP",
+      "reason": "هیچ call-site استاتیکی برای مسیرهای این دامنه نیست"
+    },
+    {
+      "key": "notifications",
+      "files": [
+        "mp-app/client/lib/features/notifications/notifications_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [],
+      "apis_total": 4,
+      "consumers": [],
+      "tests": [],
+      "uncovered_dynamic": [],
+      "status": "GAP",
+      "reason": "هیچ call-site استاتیکی برای مسیرهای این دامنه نیست"
+    },
+    {
+      "key": "nutrition",
+      "files": [
+        "mp-app/client/lib/features/nutrition/adaptive_nutrition_card.dart",
+        "mp-app/client/lib/features/nutrition/nutrition_page.dart"
+      ],
+      "route": null,
+      "roles": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "member"
+      ],
+      "apis_used": [
+        "/api/v1/nutrition/food-logs",
+        "/api/v1/nutrition/foods",
+        "/api/v1/nutrition/weight-logs"
+      ],
+      "apis_total": 8,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "test_e2e_adaptive_loop.py",
+        "test_m49_adaptive_nutrition.py",
+        "test_m49_food_logging.py",
+        "test_m78_adaptive_nutrition_client.py",
+        "test_rbac.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "profile",
+      "files": [
+        "mp-app/client/lib/features/profile/phone_change_dialog.dart",
+        "mp-app/client/lib/features/profile/profile_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/members/me"
+      ],
+      "apis_total": 10,
+      "consumers": [
+        "AuthContext.tsx",
+        "api.ts",
+        "session.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "authFlow.test.tsx",
+        "locustfile_full.py",
+        "phoneChange.test.tsx",
+        "pwa.test.ts",
+        "session.test.ts"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "progress",
+      "files": [
+        "mp-app/client/lib/features/progress/progress_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "apis_total": 7,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_api_contract.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py",
+        "test_e2e_dataflow.py",
+        "test_m54_segmental.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "shell",
+      "files": [
+        "mp-app/client/lib/features/shell/app_shell.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions"
+      ],
+      "apis_total": 10,
+      "consumers": [
+        "api.ts",
+        "session.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "apiCoverage.test.ts",
+        "authFlow.test.tsx",
+        "deviceSessions.test.tsx",
+        "locustfile.py",
+        "locustfile_full.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "shop",
+      "files": [
+        "mp-app/client/lib/features/shop/my_orders_sheet.dart",
+        "mp-app/client/lib/features/shop/order_receipt_sheet.dart",
+        "mp-app/client/lib/features/shop/shop_page.dart"
+      ],
+      "route": null,
+      "roles": [
+        "super_admin",
+        "admin",
+        "manager",
+        "coach",
+        "reception",
+        "member"
+      ],
+      "apis_used": [
+        "/api/v1/shop/cart",
+        "/api/v1/shop/categories",
+        "/api/v1/shop/change-requests",
+        "/api/v1/shop/gateways",
+        "/api/v1/shop/orders",
+        "/api/v1/shop/prices",
+        "/api/v1/shop/products",
+        "/api/v1/shop/status"
+      ],
+      "apis_total": 15,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_m59_shop.py",
+        "test_phase2_shop_display.py",
+        "test_phase3_no_online_gateway.py",
+        "test_role_nav_parity.py",
+        "test_wp24_rbac_decision_cache.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    },
+    {
+      "key": "today",
+      "files": [
+        "mp-app/client/lib/features/today/readiness_card.dart",
+        "mp-app/client/lib/features/today/today_controller.dart",
+        "mp-app/client/lib/features/today/today_page.dart",
+        "mp-app/client/lib/features/today/volume_card.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [],
+      "apis_total": 4,
+      "consumers": [],
+      "tests": [],
+      "uncovered_dynamic": [],
+      "status": "GAP",
+      "reason": "هیچ call-site استاتیکی برای مسیرهای این دامنه نیست"
+    },
+    {
+      "key": "wallet",
+      "files": [
+        "mp-app/client/lib/features/wallet/wallet_ledger.dart",
+        "mp-app/client/lib/features/wallet/wallet_page.dart"
+      ],
+      "route": null,
+      "roles": null,
+      "apis_used": [
+        "/api/v1/payments",
+        "/api/v1/payments/coupons",
+        "/api/v1/payments/finance/commission",
+        "/api/v1/payments/finance/summary"
+      ],
+      "apis_total": 25,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "locustfile_full.py",
+        "paymentPanel.test.tsx",
+        "receiptQueue.test.tsx",
+        "test_api_contract.py",
+        "test_battle.py",
+        "test_classes_finance.py"
+      ],
+      "uncovered_dynamic": [],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route/نقش + call-site + اشارهٔ تستی پیدا شد؛ مجوز با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده"
+    }
+  ]
+}
