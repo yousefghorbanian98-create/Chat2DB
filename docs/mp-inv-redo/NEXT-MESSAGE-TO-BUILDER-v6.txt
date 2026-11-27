@@ -1,0 +1,212 @@
+دستور بعدی — Muscle Paradise (این را کامل کپی کن)
+================================================
+
+۰) داوری این دور
+────────────────────────────────────────────
+MEM-03 را کد‌به‌کد خواندم. کار واقعی است، نه ادعا:
+
+  • `session.ts`: `tokenSubject` از `sub` می‌خواند (jwt.py واقعاً `sub = str(user_id)`
+    می‌گذارد)، `clearSessionForAccount` سه حالت دارد، و `sessionGeneration` جلوی
+    refresh دیررس را می‌گیرد. طراحی درست.
+  • `PhoneChangeDialog`: guard را **قبل** از ارسال `confirm` می‌گیرد و به `onCompleted`
+    می‌دهد؛ `MemberAccount` فقط در حالت `different-account` پیام می‌دهد و دست به نشست
+    نمی‌زند. همان باگ کلاسِ درست، بسته شده.
+  • `liveContractPhoneChange.test.ts`: ۴۰۹ شمارهٔ متعلق به دیگری، ۴۰۰ کد غلط در دو
+    مرحله، ۲۰۰ تأیید، ۴۰۱ روی access/refresh کهنه، ورود با همان `user.id`، ۴۰۱ بعد از
+    `logout-all`. و `db-state-after-run.txt` با `auth_version=2` و دو refresh revoked
+    این را تأیید می‌کند. **قوی‌ترین شاهد کل repo همین است.**
+  • مستثنای «TODO: پنل امنیتی» از `apiCoverage.test.ts` واقعاً حذف شد.
+
+سه نقص اما هست که در گزارش نیامده. هر سه را خودم با API تأیید کردم.
+
+────────────────────────────────────────────
+۱) P0 — digestهای crosswalk کهنه‌اند (بدون ادعا: اندازه‌گیری)
+────────────────────────────────────────────
+در `evidence/2026-11-27/INV-02/member-capability-crosswalk.json`:
+
+      meta.sha = f06f2a95
+      meta.tracked_dirty = true
+      meta.untracked = 145
+      meta.sources["studio/src/lib/api.ts"] = f5e977948640…
+
+اما sha256 واقعی همان فایل در HEAD (`arena/3c08bfbd-mp`) این است:
+
+      ca62f4a37a28…
+
+پنج منبع دیگر (routes.json، rbac.py، roleNav.ts، adminApi.ts، navigation.ts) با HEAD
+می‌خوانند؛ فقط `api.ts` نه — چون در `7deb122` (MEM-03) تابع‌های `logoutAllSessions` و
+`fetchSessions` به آن اضافه شد و crosswalk بازتولید نشد.
+
+درست حدس زدی که «digest است نه credential»؛ ولی artifact ادعا می‌کند «این بررسی روی
+این منبع انجام شد» و منبع از آن زمان عوض شده. یعنی **invariant «claimed_sha == tested_sha»
+نقض شده** — همان قانونی که خودت در متن جهانی نوشتی.
+
+و علت ریشه‌ای: `crosswalk_v2.py` در خط ۲۸۷ فقط `tracked_dirty` را **می‌نویسد**؛ هیچ
+گیتی آن را رد نمی‌کند و `docs_gate.py` هیچ بررسی digest ندارد. پس این خرابی بی‌صدا
+تکرار می‌شود.
+
+کار:
+
+  الف) با درخت تمیز، هر چهار crosswalk را در HEAD بازتولید کن و
+       `meta.tracked_dirty` را `false` بگذار. اگر dirty بود، artifact را نساز؛
+       اول commit کن، بعد بساز. digest روی درخت dirty، بازتولیدپذیر نیست.
+
+  ب) فایل `scripts/verify_crosswalk_digests.py`:
+       - هر `evidence/**/…-crosswalk.json` را پیدا کن
+       - برای هر جفت (path, sha256) در meta.sources، sha256 فایل واقعی را حساب کن
+       - اگر فرق داشت → exit 1 و چاپ «<path>: recorded=<12> actual=<12>»
+       - اگر `meta.tracked_dirty` بود → exit 1 با پیام «digest روی درخت dirty»
+
+  ج) یک step در job `docs` یا `backend` در ci.yml که این اسکریپت را صدا بزند.
+
+  د) قاعدهٔ تازه در STATE: هر artifact که digestش با HEAD نمی‌خواند، یا بازتولید
+     می‌شود یا در نامش `STALE` می‌گیرد. بدون استثنا.
+
+────────────────────────────────────────────
+۲) P0 — `secret-scan` قرمز است و ادعا هنوز تأییدپذیر نیست
+────────────────────────────────────────────
+دو واقعیت را جدا کن:
+
+  - «همان job روی main هم قرمز است» درست است (run 46036816362). ولی این **تسلی**
+    نیست: یعنی گیتی که می‌خواهی رویش merge کنی هم قرمز است. این نقص ارثی، مانع
+    دائمی release است، نه نویز.
+  - ادعای «پنج finding همه ۶۴-hex در sources» **تأییدپذیر نیست**. من امتحان کردم:
+    log همان job از API قابل بازیابی نیست (blob 404)، و اسکن روی **کل تاریخ git**
+    است (`gitleaks git`)، پس از محتوای فایل امروز نمی‌توان مکان findingها در تاریخ
+    را استنتاج کرد. عددی که دادی محتمل است، اما سندش در دسترس داور نیست.
+
+کار:
+
+  الف) در job `secret-scan`، بعد از اسکن، فیلدهای **قبلاً redact‌شده**ی هر finding
+       (`File`، `RuleID`، `Line`، `Commit`، `Fingerprint`) را در
+       `$GITHUB_STEP_SUMMARY` و یک artifact بنویس. مقدار secret چاپ نشود — همین
+       اسکریپت فعلی‌ات هم می‌داند چطور این کار را بکند؛ فقط جای خروجی را عوض کن.
+       بدون این، هر بار باید log را التماس کنیم.
+
+  ب) سپس یکی از دو راه، و فقط همین دو:
+       (i) ریشهٔ مشکل: در generator، digest را با پیشوند بنویس — `sha256:<hex>` —
+           تا قاعدهٔ `generic-api-key` دیگر match نکند. این آینده را می‌بندد.
+       (ii) برای رکوردهای گذشته: یک خط fingerprint دقیق به `.gitleaksignore`
+           با کامنت مرجع این evidence. دقیقاً همان الگویی که شش بار در همان فایل
+           استفاده کرده‌ای.
+
+  هرگز allowlist روی rule یا path نگذار. اگر راه (ii) را انتخاب کردی، تعداد خطوط
+  اضافه‌شده باید برابر تعداد findingها باشد — نه بیشتر.
+
+────────────────────────────────────────────
+۳) P1 — تصمیم نهایی `finishPhoneChange` تست ندارد
+────────────────────────────────────────────
+پوشش فعلی:
+  - `session.test.ts` → خود `clearSessionForAccount` (چهار حالت) ✔
+  - `phoneChange.test.tsx` → دیالوگ guard را می‌فرستد ✔
+  - **`AuthContext.finishPhoneChange` → هیچ تستی** ✘
+
+و این همان جایی است که تصمیم واقعی گرفته می‌شود:
+
+      const outcome = clearSessionForAccount(guard);
+      if (outcome !== "ended") return outcome;        ← این خط
+      if (refreshToken) void logoutSession(refreshToken);
+
+اگر فردا کسی این ترتیب را جابه‌جا کند، `logoutSession` با refresh token حساب
+**تازه** صدا زده می‌شود و سرور آن نشست را هم revoke می‌کند — همان باگی که این دور
+بستی، از در دیگر برمی‌گردد.
+
+تست لازم در `tests/session.test.ts`:
+  - با نشست حساب B در localStorage و guard حساب A:
+      finishPhoneChange(guardA) باید `"different-account"` برگرداند،
+      localStorage دست‌نخورده بماند، و **fetch به `/auth/logout` صدا زده نشود**.
+  - با همان حساب: `"ended"` + storage پاک.
+
+────────────────────────────────────────────
+۴) P1 — برای این شاخه PR وجود ندارد
+────────────────────────────────────────────
+`gh pr list --head arena/3c08bfbd-mp` → هیچ. و PR #30 در 2026-11-27T16:49:20Z
+**merge شده**؛ پس «PR #30 OPEN/DRAFT» دیگر واقعیت نیست و `gh pr checks 30` هم
+بی‌معناست.
+
+پنج کامیت روی `arena/3c08bfbd-mp` بدون PR نشسته‌اند: نه سطح review، نه شمارش diff،
+نه چک‌های PR. CI روی push اجرا می‌شود (۸ check) که خوب است، ولی برای پذیرش کافی نیست.
+
+کار: PR #31 از همین شاخه به `main`، **draft**، عنوان:
+  «MEM-03: member phone-change + device sessions (PWA-32)»
+و از این به بعد گزارش با `gh pr checks 31` نوشته شود. merge نکن.
+
+────────────────────────────────────────────
+۵) P2 — ۶۰ مسیر staged، سومین دور
+────────────────────────────────────────────
+`INDEX_ALLOWLISTED_COUNT=0` و «60 unrelated staged paths remain untouched» در سه
+دور تکرار شده. این دیگر محافظه‌کاری نیست، بدهی است: درخت محلی اکنون با `main`
+(`ebebef3`) هم‌خوان نیست و ۶۰ مسیر در index معلق مانده‌اند.
+
+کار یک‌بار برای همیشه:
+
+      git diff --cached --name-only | sort > /tmp/staged.txt
+      # همهٔ allowlistهای MEM-01 و MEM-03 را در یک فایل جمع کن
+      sort -u scripts/allowlists/*.txt > /tmp/known.txt
+      comm -23 /tmp/staged.txt /tmp/known.txt > /tmp/foreign.txt
+      xargs -a /tmp/foreign.txt git restore --staged
+
+و در گزارش: `INDEX_FOREIGN_CLEARED=<n>`. اگر مسیری واقعاً باید بماند، به allowlist
+اضافه‌اش کن — نه به index.
+
+────────────────────────────────────────────
+۶) بعدی: MEM-04 — اما اول اجازهٔ route را چک کن
+────────────────────────────────────────────
+خبر خوب: endpointهای واقعی از قبل هستند:
+
+      GET /api/v1/programs/member/{member_id}
+      GET /api/v1/programs/member/{member_id}/readiness
+      GET /api/v1/programs/member/{member_id}/volume
+      GET /api/v1/programs/{program_id}
+
+پس ساختن برنامهٔ ساختگی لازم نیست.
+
+اما **قبل از هر خط UI**، این را جواب بده و در evidence ثبت کن:
+
+      آیا نقش `member` در route_policy/rbac به
+      `/programs/member/{member_id}` دسترسی دارد، و آیا ownership به Member.id
+      خودش محدود است؟
+
+اگر نه → MEM-04 = `BLOCKED` با دلیل دقیق و فایل/خط. دور نزن، نساز، mock نکن.
+اگر بله → برش:
+  - version، تاریخ برنامه، readiness و **منبع** هر عدد نمایش داده شود
+  - هر عددی که منبع ندارد، نمایش داده نشود (KPI/کالری/ادعای پزشکی ممنوع)
+  - `meals: []` یا برنامهٔ خالی = empty state صادق، نه «برنامهٔ کامل»
+  - تست: member A نمی‌تواند برنامهٔ B را بخواند (403)
+
+────────────────────────────────────────────
+۷) commit + push + گزارش
+────────────────────────────────────────────
+      cat > scripts/allowlists/MEM-03-fix.txt <<'EOF'
+      scripts/verify_crosswalk_digests.py
+      scripts/allowlists/MEM-03-fix.txt
+      .github/workflows/ci.yml
+      .gitleaksignore
+      evidence/2026-11-27/INV-02/member-capability-crosswalk.json
+      evidence/2026-11-27/INV-03/staff-page-crosswalk.json
+      mp-app/studio/tests/session.test.ts
+      docs/MuscleParadise/PWA-EXECUTION-STATE.md
+      docs/MuscleParadise/SESSION_HANDOFF.md
+      EOF
+
+      python3 scripts/verify_crosswalk_digests.py        # باید exit 0 بدهد
+      python3 scripts/docs_gate.py && git diff --check
+      (cd mp-app/studio && npm test -- tests/session.test.ts)
+
+      git commit -m "MEM-03 fixes: digest gate, secret-scan evidence, guard test, PR #31"
+      git push origin arena/3c08bfbd-mp
+      gh pr checks 31
+
+گزارش:
+  DONE: <فهرست>
+  SHA: <sha>
+  CROSSWALK_DIGESTS: fresh/stale — <تعداد بازتولیدشده>
+  SECRET_SCAN: red — findings=<n> · artifact=<path> · fix=<generator|ignore|هیچ>
+  FINISH_PHONE_CHANGE_TEST: pass/fail
+  INDEX_FOREIGN_CLEARED: <n>
+  PR: #31 draft
+  MEM04_ROUTE_ACCESS: member=<yes/no> — فایل/خط
+  گیت‌ها: docs_gate · digest_gate · vitest → pass/fail
+  PUSHED: <sha>
+
+PR #31 را merge نکن. PR #30 بسته است؛ به آن ارجاع نده.
