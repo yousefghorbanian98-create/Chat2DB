@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "sha": "352781043ad2ba202d8b3b459df1ce7e3d914ef7",
+    "branch": "main",
+    "dirty": false,
+    "sources": {
+      "backend/api/routes.json": "7f0333dfb92a5bb56514b7e003cc78370fc7e8fabe3a9a8b5342ccaab9a84cf8",
+      "studio/src/lib/roleNav.ts": "650ff74343af6e25010f6a07bab4de477d2ffefcee94be3923a200ed05d53220",
+      "studio/src/lib/navigation.ts": "71fa84e7d3d0ca190e3a79ab91cb43beff7d2b8743ccc71a598b6a3722b73172",
+      "studio/src/stores/appStore.ts": "bb10aa017b194cf1f6367153311b7fb9b2db2997f0b2f2de76182c0ecb663f18"
+    },
+    "counts": {
+      "pages": 12,
+      "routed_pages": 12,
+      "server_routes": 141
+    },
+    "status_counts": {
+      "PARTIAL_REVIEW": 11,
+      "GAP": 1
+    },
+    "role_rules_parsed": 8,
+    "generated_by": "scripts/inv03_staff_crosswalk.py"
+  },
+  "rows": [
+    {
+      "page": "dashboard",
+      "component": "mp-app/studio/src/pages/Dashboard.tsx",
+      "route": "/staff/dashboard",
+      "roles": [],
+      "apis_total": 4,
+      "apis_used": 3,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "api.test.ts",
+        "authFlow.test.tsx",
+        "liveContract.test.ts",
+        "locustfile_full.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "members",
+      "component": "mp-app/studio/src/pages/Members.tsx",
+      "route": "/staff/members",
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "reception",
+        "super_admin"
+      ],
+      "apis_total": 11,
+      "apis_used": 3,
+      "consumers": [
+        "AuthContext.tsx",
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "apiCoverage.test.ts",
+        "authFlow.test.tsx",
+        "locustfile_full.py",
+        "pwa.test.ts"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "programs",
+      "component": "mp-app/studio/src/pages/Programs.tsx",
+      "route": "/staff/programs",
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "apis_total": 10,
+      "apis_used": 2,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "locustfile_full.py",
+        "test_axis_assessment_api.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "nutrition",
+      "component": "mp-app/studio/src/pages/Nutrition.tsx",
+      "route": "/staff/nutrition",
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "apis_total": 9,
+      "apis_used": 3,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "test_e2e_adaptive_loop.py",
+        "test_m49_adaptive_nutrition.py",
+        "test_m49_food_logging.py",
+        "test_m78_adaptive_nutrition_client.py",
+        "test_rbac.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "assessment",
+      "component": "mp-app/studio/src/pages/Assessment.tsx",
+      "route": "/staff/assessment",
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "apis_total": 8,
+      "apis_used": 3,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_ai_kpis.py",
+        "test_api_contract.py",
+        "test_battle.py",
+        "test_e2e_adaptive_loop.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "chat",
+      "component": "mp-app/studio/src/pages/Chat.tsx",
+      "route": "/staff/chat",
+      "roles": [],
+      "apis_total": 3,
+      "apis_used": 1,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "test_e2e_adaptive_loop.py",
+        "test_m51_chat.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "checkin",
+      "component": "mp-app/studio/src/pages/CheckIn.tsx",
+      "route": "/staff/checkin",
+      "roles": [],
+      "apis_total": 11,
+      "apis_used": 1,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "locustfile_full.py",
+        "test_m45_checkin_feed.py",
+        "test_m46_security_matrix.py",
+        "test_m80_member_checkin_history.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "finance",
+      "component": "mp-app/studio/src/pages/Finance.tsx",
+      "route": "/staff/finance",
+      "roles": [
+        "admin",
+        "manager",
+        "super_admin"
+      ],
+      "apis_total": 21,
+      "apis_used": 4,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "locustfile_full.py",
+        "paymentPanel.test.tsx",
+        "receiptQueue.test.tsx",
+        "test_api_contract.py",
+        "test_battle.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "expenses",
+      "component": "mp-app/studio/src/pages/Expenses.tsx",
+      "route": "/staff/expenses",
+      "roles": [
+        "admin",
+        "manager",
+        "super_admin"
+      ],
+      "apis_total": 3,
+      "apis_used": 1,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "test_phase6c_expenses.py",
+        "test_phase8_release_sweep.py",
+        "test_qf06_expense_receipt.py",
+        "test_routes_effective_guards.py",
+        "test_wp24_rbac_decision_cache.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "analytics",
+      "component": "mp-app/studio/src/pages/Analytics.tsx",
+      "route": "/staff/analytics",
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "super_admin"
+      ],
+      "apis_total": 4,
+      "apis_used": 0,
+      "consumers": [],
+      "tests": [],
+      "status": "GAP",
+      "reason": "هیچ call-site در Studio به 4 مسیر این دامنه اشاره نمی‌کند"
+    },
+    {
+      "page": "settings",
+      "component": "mp-app/studio/src/pages/Settings.tsx",
+      "route": "/staff/settings",
+      "roles": [
+        "admin",
+        "super_admin"
+      ],
+      "apis_total": 17,
+      "apis_used": 5,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "a11y.test.tsx",
+        "api.test.ts",
+        "authFlow.test.tsx",
+        "liveContract.test.ts",
+        "locustfile_full.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    },
+    {
+      "page": "shop",
+      "component": "mp-app/studio/src/pages/Shop.tsx",
+      "route": "/staff/shop",
+      "roles": [],
+      "apis_total": 15,
+      "apis_used": 8,
+      "consumers": [
+        "api.ts"
+      ],
+      "tests": [
+        "apiCoverage.test.ts",
+        "test_m59_shop.py",
+        "test_phase2_shop_display.py",
+        "test_phase3_no_online_gateway.py",
+        "test_role_nav_parity.py"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "route + نقش + call-site + اشارهٔ تستی پیدا شد؛ اثر نهایی/مجوز و مرور صفحه با data واقعیِ ساختگی انجام نشده"
+    }
+  ]
+}

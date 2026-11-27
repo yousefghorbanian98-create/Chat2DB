@@ -1,0 +1,113 @@
+پاکت نجات INV-02 / INV-03 — Muscle Paradise
+===========================================
+
+دستور بیلدر: این کل متن را بخوان و دقیقاً اجرا کن. هدف، بازگرداندن کارِ
+crosswalk عضو (INV-02) و کارکنان (INV-03) است که نشست قبلی ساخت و push نکرد،
+پس با بسته‌شدن نشست از بین رفت. متن آن نسخه در هیچ ریموتی نیست؛ چیزی که
+بازمی‌گردد «روش تولید قابل‌تکرار» است، نه خروجی قبلی.
+
+منبع ابزار (مخزن عمومی):
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv02_member_crosswalk.py
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv03_staff_crosswalk.py
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/run-inv-redo.sh
+
+────────────────────────────────────────────
+۰) قانون اول
+────────────────────────────────────────────
+کار تا push نشود تمام نیست. «فایل در worktree محلی» = PARTIAL، نه DONE.
+هیچ‌جا CURRENT ننویس؛ سقف این کار PARTIAL_REVIEW است.
+
+────────────────────────────────────────────
+۱) SHA امن‌شده بگیر، نه شاخهٔ محلی خودت
+────────────────────────────────────────────
+  cd <repo MP>
+  git fetch origin
+  git status --short --branch        # کار dirty خودت را حفظ کن، پاک نکن
+  TARGET=$(git rev-parse origin/main)
+  echo "TARGET=$TARGET"
+
+اگر شاخهٔ کاری‌ات dirty است، در worktree جدا اجرا کن تا خروجی به SHA تمیز بچسبد:
+  git worktree add /tmp/inv-redo "$TARGET"
+  cd /tmp/inv-redo
+
+────────────────────────────────────────────
+۲) ابزار را بگذار
+────────────────────────────────────────────
+  mkdir -p scripts
+  curl -fsSL <URL inv02>   -o scripts/inv02_member_crosswalk.py
+  curl -fsSL <URL inv03>   -o scripts/inv03_staff_crosswalk.py
+  curl -fsSL <URL run>     -o scripts/run-inv-redo.sh
+  chmod +x scripts/run-inv-redo.sh
+
+اگر دانلود نشد، فایل‌ها را از مخزن Chat2DB در مسیر docs/mp-inv-redo/ کپی کن.
+حتماً اسکریپت را قبل از اجرا یک‌بار بخوان؛ فقط‌خواندنی است و چیزی را overwrite نمی‌کند.
+
+────────────────────────────────────────────
+۳) اجرا
+────────────────────────────────────────────
+  bash scripts/run-inv-redo.sh "$TARGET"
+
+خروجی نمونه روی main@3527810 (برای مقایسه، نه هدف):
+  INV-02 → features=17  routes=141  PARTIAL_REVIEW=13  GAP=4
+  INV-03 → pages=12  routed=12  PARTIAL_REVIEW=11  GAP=1
+
+اگر اعداد تو با این خیلی فاصله دارد، یعنی کد عوض شده یا الگوی پارس شکسته؛
+خروجی را کورکورانه commit نکن، اول تفاوت را توضیح بده.
+
+────────────────────────────────────────────
+۴) مرور دستی که اسکریپت نمی‌تواند انجام دهد
+────────────────────────────────────────────
+- ردیف‌های PARTIAL_REVIEW: آیا call-site واقعاً به صفحهٔ عضو مربوط است یا
+  مصرف‌کنندهٔ کارکنان؟ (در INV-02 نگاه کن به api.ts که مشترک است.)
+- ردیف‌های GAP: برای هر کدام یک تصمیم ثبت کن: «در scope انتشار اول» یا
+  «defer با دلیل». هیچ GAP را بی‌تصمیم رها نکن.
+- ردیف BLOCKED: یا نقشهٔ دامنه (FEATURE_TO_API / PAGE_TO_API) را با تصمیم
+  اصلاح کن، یا BLOCKED را ثبت و رد شو. حدس نزن.
+
+────────────────────────────────────────────
+۵) commit و push — فقط مسیرهای همین کار
+────────────────────────────────────────────
+  git add scripts/inv02_member_crosswalk.py \
+          scripts/inv03_staff_crosswalk.py \
+          scripts/run-inv-redo.sh \
+          evidence/$(date -u +%F)/INV-02 \
+          evidence/$(date -u +%F)/INV-03
+  git commit -m "INV-02/03: generated crosswalks — evidence: scripts/run-inv-redo.sh"
+  git push origin HEAD:arena/<session>-mp
+
+هرگز: git add -A ، git clean ، git reset --hard ، push به main.
+
+────────────────────────────────────────────
+۶) تأیید وجود شاهد روی ریموت (بدون این، تمام نیست)
+────────────────────────────────────────────
+  git ls-remote origin | grep <session>
+  gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-02 \
+     --jq '.[].name'
+
+اگر این دو فایل را روی ریموت دیدی، تازه می‌توانی بگویی «push شد».
+
+────────────────────────────────────────────
+۷) به‌روزرسانی tracker — با سقف
+────────────────────────────────────────────
+- INV-02: از PROPOSED به PARTIAL (نه بیشتر). دلیل: crosswalk تولید و push شد؛
+  تست منفی مجوز اجرا نشده.
+- INV-03: همان، اگر جدول صفحات کامل و مرور شد.
+- در SESSION_HANDOFF این را بنویس: SHA، دستور اجرا، شمارش‌ها، و اینکه
+  PARTIAL است.
+- PWA-01 همچنان PROPOSED/NOT_RUN می‌ماند تا acceptance کامل شود.
+
+────────────────────────────────────────────
+۸) چه چیزی این پاکت حل نمی‌کند (صادقانه بنویس)
+────────────────────────────────────────────
+- متن ۲۱ ردیفی نسخهٔ گم‌شده را بازنمی‌گرداند؛ در هیچ ریموتی نیست.
+- مالکیت/مجوز را اثبات نمی‌کند؛ فقط call-site و اشارهٔ تستی را نشان می‌دهد.
+- دادهٔ واقعی، browser/device، نصب‌پذیری، SMS واقعی و reviewer مستقل را
+  پوشش نمی‌دهد.
+- تصمیم محصول (کدام GAP در انتشار اول) مال مالک است، نه تو.
+
+────────────────────────────────────────────
+۹) بعد از این کار
+────────────────────────────────────────────
+سراغ SEC-01 (ماتریس نقش نهایی) برو: الگوی جدول همان crosswalk است، ولی
+منبع اثباتش `mp-app/backend/security/rbac.py` + `routes.json` + تست منفی
+سمت سرور است، نه اسکن متنی. کار مستقل بعدی را خودت انتخاب کن و ادامه بده.

@@ -1,0 +1,778 @@
+{
+  "meta": {
+    "sha": "352781043ad2ba202d8b3b459df1ce7e3d914ef7",
+    "branch": "main",
+    "dirty": false,
+    "untracked": 2,
+    "sources": {
+      "backend/api/routes.json": "7f0333dfb92a5bb56514b7e003cc78370fc7e8fabe3a9a8b5342ccaab9a84cf8",
+      "backend/security/rbac.py": "a8740f75b33e864e1a3990f4d77e2fa781f0c2105c133d9892a41ce63fdf9d2c",
+      "studio/src/lib/navigation.ts": "71fa84e7d3d0ca190e3a79ab91cb43beff7d2b8743ccc71a598b6a3722b73172",
+      "studio/src/lib/api.ts": "f5e977948640587ac5a9c0816c401b63246f4613de77504accfd563b1950af28"
+    },
+    "counts": {
+      "flutter_features": 17,
+      "server_routes": 141,
+      "studio_call_paths": 47
+    },
+    "status_counts": {
+      "PARTIAL_REVIEW": 13,
+      "GAP": 4
+    },
+    "studio_routes": [
+      "/",
+      "/login",
+      "/member",
+      "/staff",
+      "/staff/${page}"
+    ],
+    "generated_by": "scripts/inv02_member_crosswalk.py"
+  },
+  "rows": [
+    {
+      "feature": "assessment14",
+      "flutter": [
+        "mp-app/client/lib/features/assessment14/assessment14_page.dart",
+        "mp-app/client/lib/features/assessment14/assessment14_providers.dart"
+      ],
+      "apis": [
+        "/api/v1/assessments",
+        "/api/v1/assessments/jp7",
+        "/api/v1/assessments/jp7/member/{member_id}/trend",
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/limb/member/{member_id}/report",
+        "/api/v1/assessments/member/{member_id}",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "consumed": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_battle.py",
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m54_segmental.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_reporting.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/studio/tests/apiCoverage.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "auth",
+      "flutter": [
+        "mp-app/client/lib/features/auth/otp_page.dart"
+      ],
+      "apis": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/logout-all",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions",
+        "/api/v1/auth/sessions/{session_id}"
+      ],
+      "consumed": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts",
+        "mp-app/studio/src/lib/session.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_m67_studio_auth.py",
+        "mp-app/backend/tests/integration/test_m82_phone_change.py",
+        "mp-app/backend/tests/integration/test_phase4_identity_session.py",
+        "mp-app/backend/tests/integration/test_phase4b_device_sessions.py",
+        "mp-app/backend/tests/integration/test_routes_effective_guards.py",
+        "mp-app/backend/tests/integration/test_security.py",
+        "mp-app/backend/tests/integration/test_sms.py",
+        "mp-app/backend/tests/integration/test_wp14_logout_all.py",
+        "mp-app/backend/tests/load/locustfile.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_wp11_xff_trust.py",
+        "mp-app/backend/tests/regression/test_wp12_env_failsafe.py",
+        "mp-app/studio/tests/a11y.test.tsx",
+        "mp-app/studio/tests/apiCoverage.test.ts",
+        "mp-app/studio/tests/authFlow.test.tsx",
+        "mp-app/studio/tests/deviceSessions.test.tsx",
+        "mp-app/studio/tests/phoneChange.test.tsx",
+        "mp-app/studio/tests/session.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "bodycomp",
+      "flutter": [
+        "mp-app/client/lib/features/bodycomp/bodycomp_page.dart"
+      ],
+      "apis": [
+        "/api/v1/assessments",
+        "/api/v1/assessments/jp7",
+        "/api/v1/assessments/jp7/member/{member_id}/trend",
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/limb/member/{member_id}/report",
+        "/api/v1/assessments/member/{member_id}",
+        "/api/v1/assessments/{assessment_id}",
+        "/api/v1/nutrition/member/{member_id}/adaptive"
+      ],
+      "consumed": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_battle.py",
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m54_segmental.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_reporting.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/studio/tests/apiCoverage.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "chat",
+      "flutter": [
+        "mp-app/client/lib/features/chat/member_chat_data.dart",
+        "mp-app/client/lib/features/chat/member_chat_page.dart"
+      ],
+      "apis": [
+        "/api/v1/chat/conversations",
+        "/api/v1/chat/conversations/{conversation_id}/messages",
+        "/api/v1/chat/conversations/{conversation_id}/read"
+      ],
+      "consumed": [
+        "/api/v1/chat/conversations"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_m51_chat.py",
+        "mp-app/studio/tests/a11y.test.tsx"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "checkin",
+      "flutter": [
+        "mp-app/client/lib/features/checkin/checkin_page.dart",
+        "mp-app/client/lib/features/checkin/member_checkin_history.dart"
+      ],
+      "apis": [
+        "/api/v1/face/checkin",
+        "/api/v1/face/checkin-qr",
+        "/api/v1/face/checkins/{checkin_id}/exit",
+        "/api/v1/face/consent",
+        "/api/v1/face/consent/revoke",
+        "/api/v1/face/deep-status",
+        "/api/v1/face/enroll",
+        "/api/v1/face/enroll/{member_id}",
+        "/api/v1/face/privacy-notice",
+        "/api/v1/face/qr-token"
+      ],
+      "consumed": [],
+      "consumers": [],
+      "tests": [],
+      "roles": [],
+      "status": "GAP",
+      "reason": "Flutter 2 فایل دارد اما هیچ call-site در mp-app/studio/src به 10 مسیر این دامنه اشاره نمی‌کند"
+    },
+    {
+      "feature": "classes",
+      "flutter": [
+        "mp-app/client/lib/features/classes/classes_page.dart"
+      ],
+      "apis": [
+        "/api/v1/classes",
+        "/api/v1/classes/book",
+        "/api/v1/classes/cancel"
+      ],
+      "consumed": [
+        "/api/v1/classes"
+      ],
+      "consumers": [
+        "mp-app/studio/src/components/ScheduleTimeline.tsx"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_classes_finance.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m59_shop.py",
+        "mp-app/backend/tests/integration/test_m74_class_cancel.py",
+        "mp-app/backend/tests/integration/test_m84_class_booking_name.py",
+        "mp-app/backend/tests/integration/test_unhandled_errors.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/studio/tests/a11y.test.tsx",
+        "mp-app/studio/tests/authFlow.test.tsx"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "feedback",
+      "flutter": [
+        "mp-app/client/lib/features/feedback/feedback_providers.dart",
+        "mp-app/client/lib/features/feedback/offline_feedback_queue_card.dart",
+        "mp-app/client/lib/features/feedback/set_feedback_sheet.dart"
+      ],
+      "apis": [
+        "/api/v1/programs",
+        "/api/v1/programs/from-engine",
+        "/api/v1/programs/member/{member_id}",
+        "/api/v1/programs/member/{member_id}/readiness",
+        "/api/v1/programs/member/{member_id}/volume",
+        "/api/v1/programs/set-feedback",
+        "/api/v1/programs/sync/set-feedback",
+        "/api/v1/programs/{program_id}",
+        "/api/v1/programs/{program_id}/approve",
+        "/api/v1/programs/{program_id}/reject"
+      ],
+      "consumed": [
+        "/api/v1/programs",
+        "/api/v1/programs/{program_id}"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_axis_assessment_api.py",
+        "mp-app/backend/tests/integration/test_battle.py",
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m45_programs_list.py",
+        "mp-app/backend/tests/integration/test_m48_feedback_applied.py",
+        "mp-app/backend/tests/integration/test_m48_volume_api.py",
+        "mp-app/backend/tests/integration/test_pilot_dry_run.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/backend/tests/unit/test_rbac_policies.py",
+        "mp-app/studio/tests/apiCoverage.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "home",
+      "flutter": [
+        "mp-app/client/lib/features/home/home_page.dart"
+      ],
+      "apis": [
+        "/api/v1/members/me",
+        "/api/v1/members/me/checkins",
+        "/api/v1/members/me/face-consent",
+        "/api/v1/members/memberships",
+        "/api/v1/members/memberships/from-plan",
+        "/api/v1/members/memberships/plans",
+        "/api/v1/members/memberships/{membership_id}/invoice",
+        "/api/v1/notifications/member/{member_id}",
+        "/api/v1/programs/member/{member_id}",
+        "/api/v1/programs/member/{member_id}/readiness",
+        "/api/v1/programs/member/{member_id}/volume"
+      ],
+      "consumed": [
+        "/api/v1/members/me"
+      ],
+      "consumers": [
+        "mp-app/studio/src/auth/AuthContext.tsx",
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m46_whoami.py",
+        "mp-app/backend/tests/integration/test_m67_studio_auth.py",
+        "mp-app/backend/tests/integration/test_m80_member_checkin_history.py",
+        "mp-app/backend/tests/integration/test_m82_phone_change.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_phase4_identity_session.py",
+        "mp-app/backend/tests/integration/test_phase4b_device_sessions.py",
+        "mp-app/backend/tests/integration/test_phase7_member_scope_sweep.py",
+        "mp-app/backend/tests/integration/test_routes_effective_guards.py",
+        "mp-app/backend/tests/integration/test_wp31_id_floor.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_wp24_rbac_decision_cache.py",
+        "mp-app/studio/tests/a11y.test.tsx",
+        "mp-app/studio/tests/authFlow.test.tsx",
+        "mp-app/studio/tests/pwa.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "intake",
+      "flutter": [
+        "mp-app/client/lib/features/intake/intake_page.dart",
+        "mp-app/client/lib/features/intake/program_result.dart"
+      ],
+      "apis": [
+        "/api/v1/population/gate-check",
+        "/api/v1/population/intake/next",
+        "/api/v1/population/paths"
+      ],
+      "consumed": [],
+      "consumers": [],
+      "tests": [],
+      "roles": [],
+      "status": "GAP",
+      "reason": "Flutter 2 فایل دارد اما هیچ call-site در mp-app/studio/src به 3 مسیر این دامنه اشاره نمی‌کند"
+    },
+    {
+      "feature": "notifications",
+      "flutter": [
+        "mp-app/client/lib/features/notifications/notifications_page.dart"
+      ],
+      "apis": [
+        "/api/v1/notifications",
+        "/api/v1/notifications/member/{member_id}",
+        "/api/v1/notifications/reminders/member/{member_id}",
+        "/api/v1/notifications/{notification_id}/read"
+      ],
+      "consumed": [],
+      "consumers": [],
+      "tests": [],
+      "roles": [],
+      "status": "GAP",
+      "reason": "Flutter 1 فایل دارد اما هیچ call-site در mp-app/studio/src به 4 مسیر این دامنه اشاره نمی‌کند"
+    },
+    {
+      "feature": "nutrition",
+      "flutter": [
+        "mp-app/client/lib/features/nutrition/adaptive_nutrition_card.dart",
+        "mp-app/client/lib/features/nutrition/nutrition_page.dart"
+      ],
+      "apis": [
+        "/api/v1/nutrition/food-logs",
+        "/api/v1/nutrition/food-logs/member/{member_id}/daily",
+        "/api/v1/nutrition/foods",
+        "/api/v1/nutrition/member/{member_id}/adaptive",
+        "/api/v1/nutrition/plans",
+        "/api/v1/nutrition/plans/member/{member_id}",
+        "/api/v1/nutrition/plans/{plan_id}/approve",
+        "/api/v1/nutrition/weight-logs"
+      ],
+      "consumed": [
+        "/api/v1/nutrition/food-logs",
+        "/api/v1/nutrition/foods",
+        "/api/v1/nutrition/weight-logs"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_m49_adaptive_nutrition.py",
+        "mp-app/backend/tests/integration/test_m49_food_logging.py",
+        "mp-app/backend/tests/integration/test_m78_adaptive_nutrition_client.py",
+        "mp-app/backend/tests/regression/test_rbac.py"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "profile",
+      "flutter": [
+        "mp-app/client/lib/features/profile/phone_change_dialog.dart",
+        "mp-app/client/lib/features/profile/profile_page.dart"
+      ],
+      "apis": [
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/members/me",
+        "/api/v1/members/me/checkins",
+        "/api/v1/members/me/face-consent",
+        "/api/v1/members/memberships",
+        "/api/v1/members/memberships/from-plan",
+        "/api/v1/members/memberships/plans",
+        "/api/v1/members/memberships/{membership_id}/invoice"
+      ],
+      "consumed": [
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/members/me"
+      ],
+      "consumers": [
+        "mp-app/studio/src/auth/AuthContext.tsx",
+        "mp-app/studio/src/lib/api.ts",
+        "mp-app/studio/src/lib/session.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m46_whoami.py",
+        "mp-app/backend/tests/integration/test_m67_studio_auth.py",
+        "mp-app/backend/tests/integration/test_m80_member_checkin_history.py",
+        "mp-app/backend/tests/integration/test_m82_phone_change.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_phase4_identity_session.py",
+        "mp-app/backend/tests/integration/test_phase4b_device_sessions.py",
+        "mp-app/backend/tests/integration/test_phase7_member_scope_sweep.py",
+        "mp-app/backend/tests/integration/test_routes_effective_guards.py",
+        "mp-app/backend/tests/integration/test_wp31_id_floor.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_wp24_rbac_decision_cache.py",
+        "mp-app/studio/tests/a11y.test.tsx",
+        "mp-app/studio/tests/authFlow.test.tsx",
+        "mp-app/studio/tests/phoneChange.test.tsx",
+        "mp-app/studio/tests/pwa.test.ts",
+        "mp-app/studio/tests/session.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "progress",
+      "flutter": [
+        "mp-app/client/lib/features/progress/progress_page.dart"
+      ],
+      "apis": [
+        "/api/v1/assessments",
+        "/api/v1/assessments/jp7",
+        "/api/v1/assessments/jp7/member/{member_id}/trend",
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/limb/member/{member_id}/report",
+        "/api/v1/assessments/member/{member_id}",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "consumed": [
+        "/api/v1/assessments/limb",
+        "/api/v1/assessments/{assessment_id}"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_battle.py",
+        "mp-app/backend/tests/integration/test_e2e_adaptive_loop.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_m54_segmental.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_reporting.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/studio/tests/apiCoverage.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "shell",
+      "flutter": [
+        "mp-app/client/lib/features/shell/app_shell.dart"
+      ],
+      "apis": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/logout-all",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions",
+        "/api/v1/auth/sessions/{session_id}"
+      ],
+      "consumed": [
+        "/api/v1/auth/logout",
+        "/api/v1/auth/otp/request",
+        "/api/v1/auth/otp/verify",
+        "/api/v1/auth/phone-change/confirm",
+        "/api/v1/auth/phone-change/request",
+        "/api/v1/auth/phone-change/verify-old",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/sessions"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts",
+        "mp-app/studio/src/lib/session.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_m67_studio_auth.py",
+        "mp-app/backend/tests/integration/test_m82_phone_change.py",
+        "mp-app/backend/tests/integration/test_phase4_identity_session.py",
+        "mp-app/backend/tests/integration/test_phase4b_device_sessions.py",
+        "mp-app/backend/tests/integration/test_routes_effective_guards.py",
+        "mp-app/backend/tests/integration/test_security.py",
+        "mp-app/backend/tests/integration/test_sms.py",
+        "mp-app/backend/tests/integration/test_wp14_logout_all.py",
+        "mp-app/backend/tests/load/locustfile.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_wp11_xff_trust.py",
+        "mp-app/backend/tests/regression/test_wp12_env_failsafe.py",
+        "mp-app/studio/tests/a11y.test.tsx",
+        "mp-app/studio/tests/apiCoverage.test.ts",
+        "mp-app/studio/tests/authFlow.test.tsx",
+        "mp-app/studio/tests/deviceSessions.test.tsx",
+        "mp-app/studio/tests/phoneChange.test.tsx",
+        "mp-app/studio/tests/session.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "shop",
+      "flutter": [
+        "mp-app/client/lib/features/shop/my_orders_sheet.dart",
+        "mp-app/client/lib/features/shop/order_receipt_sheet.dart",
+        "mp-app/client/lib/features/shop/shop_page.dart"
+      ],
+      "apis": [
+        "/api/v1/shop/cart",
+        "/api/v1/shop/cart/{item_id}",
+        "/api/v1/shop/categories",
+        "/api/v1/shop/change-requests",
+        "/api/v1/shop/change-requests/{request_id}/review",
+        "/api/v1/shop/checkout",
+        "/api/v1/shop/gateways",
+        "/api/v1/shop/gateways/{gateway_id}",
+        "/api/v1/shop/orders",
+        "/api/v1/shop/orders/{order_id}",
+        "/api/v1/shop/orders/{order_id}/receipt",
+        "/api/v1/shop/prices",
+        "/api/v1/shop/products",
+        "/api/v1/shop/products/{product_id}",
+        "/api/v1/shop/status"
+      ],
+      "consumed": [
+        "/api/v1/shop/cart",
+        "/api/v1/shop/categories",
+        "/api/v1/shop/change-requests",
+        "/api/v1/shop/gateways",
+        "/api/v1/shop/orders",
+        "/api/v1/shop/prices",
+        "/api/v1/shop/products",
+        "/api/v1/shop/status"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_m59_shop.py",
+        "mp-app/backend/tests/integration/test_phase2_shop_display.py",
+        "mp-app/backend/tests/integration/test_phase3_no_online_gateway.py",
+        "mp-app/backend/tests/integration/test_wp34_member_profile_required.py",
+        "mp-app/backend/tests/regression/test_role_nav_parity.py",
+        "mp-app/backend/tests/regression/test_wp24_rbac_decision_cache.py",
+        "mp-app/studio/tests/apiCoverage.test.ts"
+      ],
+      "roles": [
+        "admin",
+        "coach",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    },
+    {
+      "feature": "today",
+      "flutter": [
+        "mp-app/client/lib/features/today/readiness_card.dart",
+        "mp-app/client/lib/features/today/today_controller.dart",
+        "mp-app/client/lib/features/today/today_page.dart",
+        "mp-app/client/lib/features/today/volume_card.dart"
+      ],
+      "apis": [
+        "/api/v1/nutrition/member/{member_id}/adaptive",
+        "/api/v1/programs/member/{member_id}",
+        "/api/v1/programs/member/{member_id}/readiness",
+        "/api/v1/programs/member/{member_id}/volume"
+      ],
+      "consumed": [],
+      "consumers": [],
+      "tests": [],
+      "roles": [],
+      "status": "GAP",
+      "reason": "Flutter 4 فایل دارد اما هیچ call-site در mp-app/studio/src به 4 مسیر این دامنه اشاره نمی‌کند"
+    },
+    {
+      "feature": "wallet",
+      "flutter": [
+        "mp-app/client/lib/features/wallet/wallet_ledger.dart",
+        "mp-app/client/lib/features/wallet/wallet_page.dart"
+      ],
+      "apis": [
+        "/api/v1/members/memberships",
+        "/api/v1/members/memberships/from-plan",
+        "/api/v1/members/memberships/plans",
+        "/api/v1/members/memberships/{membership_id}/invoice",
+        "/api/v1/payments",
+        "/api/v1/payments/coupons",
+        "/api/v1/payments/finance/commission",
+        "/api/v1/payments/finance/export.csv",
+        "/api/v1/payments/finance/summary",
+        "/api/v1/payments/invoice/{member_id}",
+        "/api/v1/payments/ledger/{entry_id}/reverse",
+        "/api/v1/payments/ledger/{member_id}",
+        "/api/v1/payments/wallet/charge",
+        "/api/v1/payments/wallet/pay",
+        "/api/v1/payments/wallet/{member_id}",
+        "/api/v1/payments/wallet/{member_id}/transactions",
+        "/api/v1/payments/{payment_id}/approve",
+        "/api/v1/payments/{payment_id}/callback",
+        "/api/v1/payments/{payment_id}/fail",
+        "/api/v1/payments/{payment_id}/gateway-return",
+        "/api/v1/payments/{payment_id}/receipt",
+        "/api/v1/payments/{payment_id}/refund",
+        "/api/v1/payments/{payment_id}/reject",
+        "/api/v1/payments/{payment_id}/start",
+        "/api/v1/payments/{payment_id}/verify"
+      ],
+      "consumed": [
+        "/api/v1/payments",
+        "/api/v1/payments/coupons",
+        "/api/v1/payments/finance/commission",
+        "/api/v1/payments/finance/summary"
+      ],
+      "consumers": [
+        "mp-app/studio/src/lib/api.ts"
+      ],
+      "tests": [
+        "mp-app/backend/tests/integration/test_api_contract.py",
+        "mp-app/backend/tests/integration/test_battle.py",
+        "mp-app/backend/tests/integration/test_classes_finance.py",
+        "mp-app/backend/tests/integration/test_e2e_dataflow.py",
+        "mp-app/backend/tests/integration/test_g2_coupons.py",
+        "mp-app/backend/tests/integration/test_m59_shop.py",
+        "mp-app/backend/tests/integration/test_ownership.py",
+        "mp-app/backend/tests/integration/test_phase3_no_online_gateway.py",
+        "mp-app/backend/tests/integration/test_phase5_admin_permissions.py",
+        "mp-app/backend/tests/integration/test_phase6_card_to_card.py",
+        "mp-app/backend/tests/integration/test_phase8_outbox.py",
+        "mp-app/backend/tests/integration/test_phase8_release_sweep.py",
+        "mp-app/backend/tests/integration/test_q6_gateway.py",
+        "mp-app/backend/tests/integration/test_qf00_ownership_gaps.py",
+        "mp-app/backend/tests/integration/test_sandbox_bank.py",
+        "mp-app/backend/tests/integration/test_security.py",
+        "mp-app/backend/tests/load/locustfile_full.py",
+        "mp-app/backend/tests/regression/test_rbac.py",
+        "mp-app/backend/tests/regression/test_role_nav_parity.py",
+        "mp-app/backend/tests/regression/test_wp24_rbac_decision_cache.py",
+        "mp-app/studio/tests/paymentPanel.test.tsx",
+        "mp-app/studio/tests/receiptQueue.test.tsx"
+      ],
+      "roles": [
+        "admin",
+        "manager",
+        "member",
+        "reception",
+        "super_admin"
+      ],
+      "status": "PARTIAL_REVIEW",
+      "reason": "مسیر + مصرف‌کننده + اشارهٔ تستی پیدا شد؛ مجوز/مالکیت با تست منفی اثبات نشده و اجرای تست در این اجرا انجام نشده است"
+    }
+  ]
+}
