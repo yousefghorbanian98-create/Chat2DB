@@ -1,0 +1,442 @@
+MUSCLE PARADISE — دستور کامل بیلدر (یک متن، کپی-پیست)
+=======================================================
+این تنها پیامی است که لازم است دریافت کنی. آن را کامل بخوان و از بند ۰ اجرا کن.
+از این لحظه بدون پرسیدن «ادامه بدهم؟» کار کن؛ توقف فقط طبق بند ۱۰ همین متن.
+
+┌─────────────────────────────────────────────────────────────┐
+│ وضعیت واقعی (بررسی‌شده روی گیت‌هاب — نه حافظه):              │
+│  • شاخهٔ arena/5e0f64cf-mp مرده است و از طریق PR #29 در main  │
+│    ادغام شده. روی آن commit نکن و آن را دوباره نساز.          │
+│  • main = 3527810 · هیچ PR باز وجود ندارد.                    │
+│  • evidence/ روی main فقط m60 است؛ INV-02 و INV-03 وجود ندارند.│
+│  • کار نشست قبل push نشد و از بین رفت. دوباره‌اش نساز،        │
+│    مگر خروجی و شاهدش را در ریموت ببینی.                       │
+└─────────────────────────────────────────────────────────────┘
+
+۰) قانون سخت (سه خط)
+   - کار تا push نشود تمام نیست. فایل در worktree محلی = PARTIAL.
+   - روی main مستقیم commit نکن. شاخهٔ کار = شاخهٔ نشست جاری خودت.
+   - هرگز CURRENT/PASS برای کاری که خودت اجرا نکرده‌ای ننویس.
+
+۱) آماده‌سازی محیط (قبل از هر کار دیگری)
+   git fetch origin
+   git status --short --branch
+   git rev-parse origin/main
+   git checkout -b arena/<session>-mp origin/main
+   # اگر شاخهٔ نشست از قبل وجود دارد:
+   git checkout arena/<session>-mp && git merge --ff-only origin/arena/<session>-mp
+
+   اگر gh pr create خطای permission داد، نایست: push تنها کافی است.
+   اگر کار dirty قبلی داری، آن را پاک نکن؛ اول STATE را push کن.
+
+۲) دانلود ابزارها (فقط این سه فایل — بقیه را نساز)
+   mkdir -p scripts
+   BASE="https://raw.githubusercontent.com/yousefghorbanian98-create/Chat2DB/arena/c1fb460b-chat2db/docs/mp-inv-redo"
+   curl -fsSL "$BASE/inv02_member_crosswalk.py" -o scripts/inv02_member_crosswalk.py
+   curl -fsSL "$BASE/inv03_staff_crosswalk.py"  -o scripts/inv03_staff_crosswalk.py
+   curl -fsSL "$BASE/run-inv-redo.sh"           -o scripts/run-inv-redo.sh
+   chmod +x scripts/run-inv-redo.sh
+
+   اگر curl کار نکرد، همین فایل‌ها را از این لینک‌ها دستی بگیر:
+     https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv02_member_crosswalk.py
+     https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv03_staff_crosswalk.py
+     https://github.com/yousefghorbanian98-create/Chat2DB/blob/arena/c1fb460b-chat2db/docs/mp-inv-redo/run-inv-redo.sh
+
+   سپس یک‌بار بخوانشان؛ فقط‌خواندنی‌اند و چیزی را overwrite نمی‌کنند.
+
+۳) مأموریت A — بازسازی crosswalk و بردنش روی ریموت (INV-02 + INV-03)
+   bash scripts/run-inv-redo.sh "$(git rev-parse HEAD)"
+   # سپس مرحلهٔ ۴ (مرور) و ۵ (commit+push) و ۶ (تأیید) را اجرا کن.
+
+   خروجی مرجع روی main@3527810 (برای مقایسه، نه هدف):
+     INV-02 → features=17  routes=141  PARTIAL_REVIEW=13  GAP=4
+     INV-03 → pages=12     routed=12   PARTIAL_REVIEW=11  GAP=1
+
+   اگر اعداد تو خیلی فاصله دارد: کد عوض شده یا الگوی پارس شکسته؛
+   کورکورانه commit نکن، اول تفاوت را توضیح بده.
+
+۴) مرور دستی که اسکریپت نمی‌تواند انجام دهد
+   - PARTIAL_REVIEW: آیا call-site واقعاً به صفحهٔ عضو مربوط است یا کارکنان؟
+   - GAP: برای هر ردیف یک تصمیم ثبت کن: «در scope انتشار اول» یا «defer + دلیل».
+   - BLOCKED: نقشهٔ دامنه را با تصمیم اصلاح کن یا BLOCKED را ثبت کن. حدس نزن.
+
+۵) commit + push (فقط مسیرهای همین کار)
+   git add scripts/inv02_member_crosswalk.py scripts/inv03_staff_crosswalk.py \
+           scripts/run-inv-redo.sh \
+           evidence/$(date -u +%F)/INV-02 evidence/$(date -u +%F)/INV-03
+   git commit -m "INV-02/03: generated crosswalks — evidence: scripts/run-inv-redo.sh"
+   git push -u origin arena/<session>-mp
+
+   ممنوع: git add -A · git clean · git reset --hard · push به main.
+
+۶) تأیید وجود شاهد روی ریموت (بدون این، تمام نیست)
+   git ls-remote origin | grep <session>
+   gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-02 --jq '.[].name'
+   gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-03 --jq '.[].name'
+   اگر این دو فایل را روی ریموت دیدی، تازه می‌توانی بگویی «push شد».
+
+۷) به‌روزرسانی tracker (با سقف)
+   - INV-02 و INV-03: از PROPOSED به PARTIAL (نه بیشتر).
+   - SESSION_HANDOFF: SHA، دستور، شمارش‌ها، و «PARTIAL».
+   - PWA-01 تا acceptance کامل همچنان PROPOSED/NOT_RUN می‌ماند.
+   - STATE را در docs/MuscleParadise/PWA-EXECUTION-STATE.md بساز:
+     ترتیب | ID | parent | وضعیت | شاهد | اقدام بعدی | blocked_by | دستور ادامه
+
+۸) مأموریت B — ادامهٔ حلقه تا شرایط توقف
+   ترتیب وابستگی tracker:
+     DOC-05,06 → INV-01..09 → SEC-01..10 → WEB-01..11 →
+     MEM-01..16 → STAFF-01..08 → QA-01..09 → OPS-01..14 + PRIV-01,02
+   الگوریتم انتخاب کار: (الف) PARTIAL موجود را کامل کن، (ب) کار مستقل بعدی،
+   (ج) کار پرهزینه/خارجی آخر و BLOCKED.
+   قبل از شروع هر item، acceptance همان PWA-XX در کارت canonical را بخوان؛
+   اگر بخشی ساخته شده، تطبیق بده و شاهدش را ثبت کن — دوباره نساز.
+
+   درون این محیط قابل انجام: DOC · INV · SEC (ماتریس و تست منفی) · WEB
+   (route/SW/manifest/nginx/headless) · MEM/STAFF (vertical slice با دادهٔ
+   ساختگی) · QA (Playwright + axe) · OPS-config · PRIV-draft.
+   قابل اثبات نیست: دستگاه/مرورگر واقعی، SMS/Push واقعی، دوربین، تطبیق بانکی،
+   staging/TLS، secret، backup خارج‌میزبان، reviewer مستقل، Go/No-Go مالک.
+   برای این‌ها BLOCKED بزن، نه PASS.
+
+۹) گیت‌های واقعی هر چرخه (اجرا کن، نتیجه را ثبت کن)
+   - Studio: cd mp-app/studio && npm ci && npm run lint && npm run build
+     تست: npm test -- --shard=1/3 · 2/3 · 3/3 (کل یک‌جا timeout می‌شود)
+   - Backend: python -m venv .venv && . .venv/bin/activate &&
+     python -m pip install -e "mp-app/backend[dev]" &&
+     cd mp-app/backend && python -m pytest   (+ ruff check · ruff format --check .)
+   - Docs: python3 scripts/docs_gate.py · assemble_project_guide.py --check ·
+     interaction_map.py --check · repo_hygiene_gate.py · git diff --check
+     Mermaid: cd tools/mermaid-check && npm ci && node check.mjs
+   - مرورگر: build واقعی + preview روی 0.0.0.0 + Playwright/Chromium با دادهٔ ساختگی
+   - بعد از push: gh pr checks / gh run list برای همان SHA
+
+   PASS نیست: mock · screenshot تنها · تست skip · CI روی SHA دیگر · «صفحه هست».
+
+۱۰) توقف فقط در این چهار حالت
+   (الف) همهٔ کارهای بخش ۱ tracker بسته یا BLOCKED/UNKNOWNِ مستند شده‌اند
+         → گزارش «پایان صف محلی» + فهرست بلاکرها + پرسش‌های مالک (هر کدام یک خط).
+   (ب) مالک صریحاً «توقف» بدهد.
+   (ج) کار بعدی فقط با تصمیم برگشت‌ناپذیر/خارج از scope جلو می‌رود.
+   (د) محدودیت سخت محیط بدون جایگزین (فقط همان item را متوقف می‌کند، نه حلقه).
+   در همهٔ حالت‌ها قبل از پایان، STATE را طوری بنویس که «ادامه» از جای درست شروع شود.
+
+۱۱) قالب گزارش پایان چرخه (کوتاه)
+   DONE: <IDها> | وضعیت: از X به Y | شاهد: <دستور + نتیجهٔ عددی>
+   DIFF: <فایل‌های اصلی>
+   گیت‌ها: lint/build/test/docs → pass/fail
+   NEXT: <ID بعدی> — چرا
+   BLOCKED: <IDs + یک خط>
+   PUSHED: <sha> روی <branch>  ← اگر این خط خالی است، کار تمام نشده
+
+═══════════════════════════════════════════════════════════
+پیوست ۱ — پرامپت اصلی حلقهٔ ساخت PWA (مرجع کامل؛ همین حالا اجرا کن)
+═══════════════════════════════════════════════════════════
+
+REPO: yousefghorbanian98-create/MP
+BRANCH: از نشست جاری خودت (الگوی arena/<session>-mp)؛ اگر شاخهٔ کارت هنوز نیست آن را از origin/main بساز.
+  ⚠ شاخهٔ arena/5e0f64cf-mp در ۲۰۲۶-۱۱-۲۷ از طریق PR #29 در main merge شد و دیگر شاخهٔ کار نیست؛
+    روی آن commit نکن و آن را دوباره نساز. WORK-IS-NOT-DONE-UNTIL-PUSHED.
+  ⚠ مجوز هوش مصنوعی GitHub برای ساخت PR پیش‌نویس ممکن است فعال نباشد؛ اگر `gh pr create`
+    با خطای permission شکست خورد، همان push کافی است — با خطا نایست، ادامه بده.
+PRODUCT: یک PWA مشترک (عضو + کادر) روی mp-app/studio — طبق ADR-007. اپ React دوم ساخته نشود.
+TRACKER: docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md   (۱۰۴ checkbox؛ ۱۰۰ باز)
+BACKLOG: docs/MuscleParadise/TODO-2026-11-16.md#pwa-ui-ux-full-backlog-2026-11-23  (۵۰ کارت PWA-00…PWA-56)
+STATE: docs/MuscleParadise/PWA-EXECUTION-STATE.md  (اگر نبود، در چرخهٔ اول بساز)
+SCOPE: DOC-05,06 | INV-01..09 | SEC-01..10 | WEB-01..11 | MEM-01..16 | STAFF-01..08 | QA-01..09 | OPS-01..14 | PRIV-01,02
+AUTONOMY: FULL_LOCAL  (تعریف دقیق در بند ۵)
+ON_BLOCKER: ثبت BLOCKED و ادامهٔ کار مستقل بعدی — توقف فقط طبق بند ۱۴
+REPORT: فشرده، حداکثر ۱۵ خط در پایان هر چرخه
+
+۰) قرارداد اجرا
+این متن یک «مجوز ایستا» (standing authorization) از طرف مالک است، نه یک درخواست تک‌کار.
+مالک به تو اجازه داده همهٔ کارهای محلی، برگشت‌پذیر و درون‌دامنهٔ بخش ۱ همان tracker را
+پشت‌سرهم و بدون پرسیدن تأیید انجام بدهی، commit کنی و به همان شاخهٔ نشست push کنی.
+پرسیدن «ادامه بدهم؟» یا پایان‌دادن نوبت با سؤال، نقض این قرارداد است.
+کار بعدی را خودت انتخاب کن و همان‌جا شروع کن.
+
+۱) منبع حقیقت و ترتیب خواندن (با سقف)
+- اول: AGENTS.md ریشهٔ MP، سپس بخش «وضعیت جاری» و آخرین snapshot از docs/MuscleParadise/SESSION_HANDOFF.md.
+- بعد: فقط فاز/بخش لازم از TODO-PWA و کارت canonical همان parent. فایل‌های بزرگ را کامل نخوان
+  (TODO-2026-11-16 حدود ۲۳۴KB و PROJECT_GUIDE حدود ۱۰۶KB). با anchor و grep کار کن.
+- ADR-006/ADR-007، OWNER-DECISIONS.md و TODO بخش ۳ (۸ قید scope) را یک‌بار بخوان و دیگر بازبینی نکن.
+- اولویت در تعارض: دستور صریح مالک > AGENTS.md > کد/تست/CI واقعی > tracker جاری > ADR > نقشه/handoff > حافظه.
+  تعارض را کوتاه ثبت کن، طبق کد/تست تصمیم بگیر، و سند قدیمی را بی‌صدا بازنویسی نکن.
+
+۲) نقشهٔ فنی
+- mp-app/backend/  → FastAPI + SQLite + alembic + tests + security. منبع حقیقت مجوز: سمت سرور.
+- mp-app/studio/   → همان PWA: React 18 + Vite + TS + antd + framer-motion + recharts + zustand.
+  src/pages/{Login,Dashboard,Members,Programs,Nutrition,Assessment,Chat,CheckIn,Finance,Expenses,Analytics,Settings,Shop}.tsx
+  src/lib/{navigation,roleNav,session,motion,update,money,clock,designTokens,api,adminApi}.ts
+  nginx.conf · Dockerfile · tests/{pwa,update,navigation,authFlow,a11y,roleNav,...}
+- mp-app/client/   → Flutter/Android؛ فقط مرز رگرسیون است: دست نزن، CI‌اش را ضعیف نکن.
+- mp-app/deploy، mp-app/infra، docker/Compose، .github/workflows/{ci,container,deploy,web,pwa00-doc-quality}.yml
+- scripts/{docs_gate,assemble_project_guide,interaction_map,repo_hygiene_gate,build_audit_inventory}.py
+- گیت‌های mp-ci: secret-scan، docs، backend(ruff+pytest+coverage+bandit+semgrep)، studio(lint+vitest+build+audit)،
+  client-flutter، live-contract. حذف/ضعیف/skip نکن؛ فقط سبز نگه دار.
+
+۳) مرز «قابل ساخت در همین فضا»
+قابل انجام و جزو حلقه:
+- DOC: هم‌راستاسازی و لینک‌دهی اسناد + گیت مستندات.
+- INV: snapshot، crosswalkها، inventory چهارحالته، فهرست mock، نقشهٔ actor/داده، baseline CI، acceptance matrix.
+- SEC: ماتریس نقش/مالکیت سمت سرور، چرخهٔ نشست، OTP با provider جعلی، تست منفی API
+  (anonymous، شش نقش، عضو A/B، grant منقضی، export/file، درخواست مستقیم).
+- WEB: route/back-forward، shell نقش‌محور، RTL/a11y + axe، تقویم/ارقام، manifest، Service Worker با allowlist،
+  چرخهٔ update، Nginx config + تست ایستا، و مرورگر headless روی build واقعی با دادهٔ ساختگی.
+- MEM/STAFF: vertical slice واقعی UI→API→DB با SQLite و دادهٔ کاملاً ساختگی؛ مجوز سمت سرور enforce شود.
+- QA: پنج سفر E2E با Playwright روی backend واقعی محلی، axe، shard تست‌ها، evidence bundle.
+- OPS (فقط config/اسکریپت): Compose/Nginx/backup/restore روی scratch، ruleهای alert، تولید SBOM.
+- PRIV: متن draft سیاست + تست‌های redaction/minimization.
+
+قابل اثبات نیست — تلاش کن اما PASS ننویس:
+دستگاه/مرورگر/OS واقعی، screen-reader انسانی، تحویل واقعی SMS/Push، دوربین فیزیکی، تطبیق واقعی بانکی،
+میزبان staging با TLS/DNS، secret/signing واقعی، مقصد backup خارج‌میزبان، receiver واقعی alert، on-call،
+بازبینی مستقل انسانی، تأیید حقوقی/حریم، و Go/No-Go مالک.
+
+۴) کارهای مجاز بدون پرسیدن
+- خواندن هر فایل مخزن؛ rg/git log/diff/blame؛ gh برای خواندن PR/checks/run.
+- ویرایش source/tests/docs/config درون scope؛ ساخت fixture و دادهٔ ساختگی؛ اسکریپت/گیت کوچک در همان دامنه.
+- نصب وابستگی OSS عمومی (npm/PyPI) و Playwright/Chromium در همین محیط، با ثبت نام/نسخه/مجوز.
+- اجرای build/lint/test/typed-check/docs gate/axe/headless؛ تولید شاهد در evidence/ و artifacts/ بدون secret.
+- commit با پیام «<ID>: <خلاصه> — evidence: <دستور/نتیجه>»؛ یک commit برای هر برش معنادار.
+- push فقط به شاخهٔ نشست خودت: «git push origin HEAD:arena/<session>-mp». هرگز مستقیم روی main.
+  PR پیش‌نویس اختیاری است؛ اگر GitHub اجازه نداد، رد شو و به کار بعدی برو.
+- به‌روزرسانی checkbox tracker فقط با شاهد واقعی، و به‌روزرسانی SESSION_HANDOFF + STATE.
+
+۵) ممنوعیت‌های بی‌اجازهٔ صریح
+- merge به main، deploy/staging/production، tag، release، publish، تغییر دامنه/TLS/DNS، دست‌زدن به secret یا signing key.
+- داده/شماره/فیش/اعتبارنامهٔ واقعی؛ ارسال کد یا دادهٔ عضو به مدل/سرویس بیرونی؛ فعال‌کردن gateway/merchant.
+- force-push، rebase شاخهٔ مشترک، reset --hard، git clean، git add -A، حذف/بازنویسی فایل دیگران یا تاریخچه.
+  (worktree ده‌ها فایل untracked دارد، از جمله رسید خصوصی — فقط با مسیر صریح add کن.)
+- بازکردن scopeهای قفل‌شدهٔ TODO بخش ۳: یک کلاینت React (نه اپ دوم) · شش نقش (نه ادغام/گسترش) ·
+  SQLite baseline (نه PostgreSQL بدون ADR/benchmark) · کارت‌به‌کارت با بررسی انسانی و Shop فقط نمایشی (بدون checkout) ·
+  QR با اعتبارسنجی سرور (بدون face-recognition) · تست فقط با دادهٔ ساختگی · کنترل UI از کتابخانهٔ موجود (نه ساخت دستی).
+- تغییر ADR پذیرفته‌شده، ضعیف‌کردن/حذف تست یا گیت، یا نوشتن PASS برای کاری که اجرا نشده.
+
+۶) الگوریتم انتخاب کار بعدی
+1. اگر STATE هست: از اولین ردیف غیربستهٔ آن شروع کن.
+2. وگرنه ترتیب وابستگی tracker: DOC-05,06 → INV-01..09 → SEC-01..10 → WEB-01..11 → MEM-01..16 →
+   STAFF-01..08 → QA-01..09 → OPS-01..14 + PRIV-01,02.
+3. اولویت درون گروه: (الف) itemهای PARTIAL را کامل کن نه از صفر؛ (ب) کارهای مستقل و بی‌وابسته؛
+   (ج) کارهای پرهزینه/خارجی آخر و BLOCKED.
+4. قبل از شروع هر item، acceptance همان PWA-XX در کارت canonical و ردیف شاهد موجودش را بخوان؛
+   اگر بخشی ساخته شده، تطبیق بده و شاهدش را ثبت کن — دوباره نساز.
+5. هر چرخه = یک برش کوچک و کامل. اگر برش بزرگ شد، به دو item شکان کن و هر دو را ثبت کن.
+
+۷) چرخهٔ اجرا (هفت گام، هر بار)
+1. وضعیت: git status --short --branch و git rev-parse HEAD؛ کار dirty قبلی را حفظ کن؛ آخر STATE/HANDOFF را بخوان.
+2. انتخاب: طبق بند ۶؛ یک جمله «NEXT: <ID> — چرا».
+3. طراحی ریز: فایل‌های لمس‌شدنی، تست موجود، تست تازه، ریسک. معماری/وابستگی تازه بدون ضرورت مستندشده ممنوع.
+4. پیاده‌سازی + تست هم‌زمان (تست منفی هم بنویس؛ سرور منبع مجوز است).
+5. اجرای گیت‌های بند ۸ با دستور واقعی؛ خروجی خام را نگه دار.
+6. ثبت شاهد طبق بند ۱۰؛ به‌روزرسانی ردیف tracker با وضعیت واقعی؛ STATE و بخش جاری HANDOFF.
+7. commit و push در چک‌پوینت‌ها (بدون push، شاهد رسمی نیست) و بی‌درنگ گام ۲ بعدی در همان نوبت.
+
+۸) گیت‌های واقعی (از ریشهٔ مخزن؛ نسخه‌ها را در evidence بنویس)
+- Studio: cd mp-app/studio && npm ci && npm run lint && npm run build
+  تست کامل از سقف زمان می‌گذرد → shard کن: npm test -- --shard=1/3 ، 2/3 ، 3/3.
+- Backend: python -m venv .venv && . .venv/bin/activate && python -m pip install -e "mp-app/backend[dev]"
+  سپس cd mp-app/backend && python -m pytest (کامل حدود ۲۰۰ ثانیه؛ در حین کار تست هدفمند همان حوزه).
+  ruff check و ruff format --check .
+  اگر coverage_run.sh با خطای env شکست خورد، PASS ننویس.
+- Docs: python3 scripts/docs_gate.py ، python3 scripts/assemble_project_guide.py --check ،
+  python3 scripts/interaction_map.py --check ، python3 scripts/repo_hygiene_gate.py ،
+  cd tools/mermaid-check && npm ci && node check.mjs ، git diff --check.
+- مرورگر: build واقعی + preview روی 0.0.0.0 و Playwright/Chromium headless با دادهٔ ساختگی.
+  اگر کتابخانهٔ سیستمی کم بود (libnspr4 و مانند آن)، نسخهٔ OSS جایگزین را امتحان کن؛ نشد → BLOCKED با خطای دقیق، نه PASS.
+- بعد از push: gh pr checks و gh run list برای همان SHA؛ نتیجه را در evidence ثبت کن.
+  CI سبز روی SHA دیگر یا worktree dirty شاهد این کار نیست.
+
+۹) تعریف انجام‌شده (DoD)
+PASS فقط وقتی: AC همان کارت رعایت شده + تست/گیت روی همین SHA اجرا شده + خروجی ثبت شده +
+بدون regression (lint/build/test همان حوزه و همسایه‌ها) + مجوز سمت سرور آزموده شده (هرجا نقش دخیل است) +
+سند/handoff به‌روز.
+PASS نیست: mock یا fallback، screenshot تنها، تست skip‌شده، CI روی commit دیگر، «صفحه هست»، «API هست» بدون نقش/مالکیت،
+و هر ادعایی که خودت اجرا نکرده‌ای. وضعیت میانی را PARTIAL بگذار با دلیل باقی‌ماندهٔ دقیق.
+DONE یعنی شاهد در یک commit روی ریموت (push‌شده) وجود دارد؛ «فایل در worktree محلی» DONE نیست.
+اگر evidence/… یا STATE فقط local ماند، همان item PARTIAL است — نه DONE و نه PASS.
+subagent یا review مستقل را ادعا نکن؛ اگر خودت اجرا نکردی بنویس «مرور دستیِ ایجنت اصلی».
+
+۱۰) قالب ثبت شاهد (برای هر item)
+  ID و parent PWA-*:
+  وضعیت: PROPOSED | READY | IN_PROGRESS | PARTIAL | PASS | BLOCKED | UNKNOWN | NOT_RUN
+  دلیل تغییر وضعیت:
+  SHA / diff fingerprint / محیط:
+  وابستگی‌ها و تصمیم مصوب:
+  فایل/route/API/نقش‌های تحت پوشش:
+  دستورها + نسخهٔ ابزار + cwd:
+  نتیجه pass/fail/skip (+ تست منفی):
+  لینک شاهد پالایش‌شده:
+  ریسک باقی‌مانده / blocker / جبران:
+  وضعیت برگشت‌پذیری:
+
+۱۱) STATE و ادامهٔ خودکار
+فایل docs/MuscleParadise/PWA-EXECUTION-STATE.md را با این جدول بساز و هر چرخه به‌روز کن:
+ترتیب | ID | parent | وضعیت | شاهد | اقدام بعدی دقیق | blocked_by | دستور ادامه
+- بالاترین ردیف باز همیشه «اقدام بعدی» است.
+- پایین فایل همیشه یک «کارت ادامه» داشته باشد: SHA، شاخه، فرمان بعدی، و آخرین چیز سبز.
+- STATE/HANDOFF را با transcript پر نکن؛ فقط چیزی که نشست بعد لازم دارد.
+
+۱۲) قواعد ضد اتلاف
+- هر چرخه باید یک diff واقعی (کد/تست) یا یک blocker ثبت‌شده تولید کند؛ «سند برنامه‌ریزی جدید» جای کار نیست.
+- از خواندن کل فایل‌های بزرگ، تست کامل بی‌دلیل، و تکرار گیت‌های سبزشده پرهیز کن؛ checkpoint هر ۵ item یا قبل از push.
+- گزارش چرخه کوتاه و ساختاری (بند ۱۴)؛ توضیح بلند فقط وقتی خواسته شد.
+- سه تلاش پیاپی ناموفق روی یک مشکل ⇒ همان item را BLOCKED کن با خطای دقیق و برو سراغ بعدی.
+- وابستگی/فایل تازه فقط با توجیه در evidence (نسخه، license، جایگزین موجود).
+
+۱۳) حفاظت شواهد
+- خروجی خام گیت‌ها را در evidence/<تاریخ>/<ID>/ نگه دار؛ متن‌ها پالایش‌شده و بدون secret/PII.
+- فایل‌های خصوصی/رسید/دادهٔ واقعی نه در docs باز می‌شوند نه commit.
+- مسیر استاندارد شاهد: evidence/<تاریخ>/<ID>/ (همان تاریخ tracker، مثلاً evidence/2026-11-23/INV-02/).
+- بعد از هر push، وجود شاهد روی ریموت را چک کن (git ls-remote یا API contents) و در STATE بنویس.
+- هر عدد در گزارش باید از خروجی همان اجرا آمده باشد؛ اگر شک داری، «اجرا نشد» بنویس.
+
+۱۴) گزارش پایان چرخه و شرایط توقف
+گزارش:
+  DONE: <IDها> | وضعیت: از X به Y | شاهد: <دستور + نتیجهٔ عددی>
+  DIFF: <فایل‌های اصلی>
+  گیت‌ها: lint/build/test/docs → pass/fail
+  NEXT: <ID بعدی> — <یک جمله چرا>
+  BLOCKED: <IDs + دلیل یک‌خطی>  (در صورت وجود)
+
+توقف فقط در این حالت‌ها:
+(الف) همهٔ itemهای بخش ۳ بسته یا BLOCKED/UNKNOWN با شاهد شده‌اند و کار مستقل نمانده →
+      گزارش «پایان صف محلی» + فهرست بلاکرها + پرسش‌های مالک (هر کدام یک خط با گزینه‌ها).
+(ب) مالک صریحاً «توقف» بدهد.
+(ج) کار بعدی فقط با تصمیم برگشت‌ناپذیر/خارج از scope بند ۵ جلو می‌رود.
+(د) محدودیت سخت محیط بدون ابزار جایگزین — که فقط همان item را متوقف می‌کند، نه حلقه را.
+در حالت (الف) و (د) قبل از پایان، STATE را طوری بنویس که «ادامه» دقیقاً از کار درست شروع شود.
+
+شروع: همین حالا بند ۱ و ۲ را انجام بده، STATE را بساز یا بخوان، اولین item را انتخاب کن و
+بدون پرسیدن سؤال، چرخه را تا شرایط توقف بند ۱۴ ادامه بده.
+
+
+════════════ توکن ادامه (بعد از هر قطع‌شدن فقط این را بفرست) ════════════
+
+CONTINUE-LOOP(MP): از docs/MuscleParadise/PWA-EXECUTION-STATE.md ادامه بده. بدون مقدمه، کار بعدی را انتخاب کن و تا شرایط توقف بند ۱۴ پیوسته اجرا کن.
+
+═══════════════════════════════════════════════════════════
+پیوست ۲ — مشخصات دقیق پاکت نجات INV-02/INV-03
+═══════════════════════════════════════════════════════════
+
+پاکت نجات INV-02 / INV-03 — Muscle Paradise
+===========================================
+
+>>> اول این را به بیلدر بگو: کار فعلی‌ات را با commit+push تمام کن، بعد این را شروع کن. <<<
+اگر وسط کار نیمه‌تمام هستی، همین حالا STATE را بنویس و push کن، سپس این پاکت.
+ادامه‌دادن این پاکت روی کار نیمه‌تمام فقط worktree را قاطی می‌کند.
+
+دستور بیلدر: این کل متن را بخوان و دقیقاً اجرا کن. هدف، بازگرداندن کارِ
+crosswalk عضو (INV-02) و کارکنان (INV-03) است که نشست قبلی ساخت و push نکرد،
+پس با بسته‌شدن نشست از بین رفت. متن آن نسخه در هیچ ریموتی نیست؛ چیزی که
+بازمی‌گردد «روش تولید قابل‌تکرار» است، نه خروجی قبلی.
+
+منبع ابزار (مخزن عمومی):
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv02_member_crosswalk.py
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/inv03_staff_crosswalk.py
+  https://github.com/yousefghorbanian98-create/Chat2DB/raw/arena/c1fb460b-chat2db/docs/mp-inv-redo/run-inv-redo.sh
+
+────────────────────────────────────────────
+۰) قانون اول
+────────────────────────────────────────────
+کار تا push نشود تمام نیست. «فایل در worktree محلی» = PARTIAL، نه DONE.
+هیچ‌جا CURRENT ننویس؛ سقف این کار PARTIAL_REVIEW است.
+
+────────────────────────────────────────────
+۱) SHA امن‌شده بگیر، نه شاخهٔ محلی خودت
+────────────────────────────────────────────
+  cd <repo MP>
+  git fetch origin
+  git status --short --branch        # کار dirty خودت را حفظ کن، پاک نکن
+  TARGET=$(git rev-parse origin/main)
+  echo "TARGET=$TARGET"
+
+اگر شاخهٔ کاری‌ات dirty است، در worktree جدا اجرا کن تا خروجی به SHA تمیز بچسبد:
+  git worktree add /tmp/inv-redo "$TARGET"
+  cd /tmp/inv-redo
+
+────────────────────────────────────────────
+۲) ابزار را بگذار
+────────────────────────────────────────────
+  mkdir -p scripts
+  curl -fsSL <URL inv02>   -o scripts/inv02_member_crosswalk.py
+  curl -fsSL <URL inv03>   -o scripts/inv03_staff_crosswalk.py
+  curl -fsSL <URL run>     -o scripts/run-inv-redo.sh
+  chmod +x scripts/run-inv-redo.sh
+
+اگر دانلود نشد، فایل‌ها را از مخزن Chat2DB در مسیر docs/mp-inv-redo/ کپی کن.
+حتماً اسکریپت را قبل از اجرا یک‌بار بخوان؛ فقط‌خواندنی است و چیزی را overwrite نمی‌کند.
+
+────────────────────────────────────────────
+۳) اجرا
+────────────────────────────────────────────
+  bash scripts/run-inv-redo.sh "$TARGET"
+
+خروجی نمونه روی main@3527810 (برای مقایسه، نه هدف):
+  INV-02 → features=17  routes=141  PARTIAL_REVIEW=13  GAP=4
+  INV-03 → pages=12  routed=12  PARTIAL_REVIEW=11  GAP=1
+
+اگر اعداد تو با این خیلی فاصله دارد، یعنی کد عوض شده یا الگوی پارس شکسته؛
+خروجی را کورکورانه commit نکن، اول تفاوت را توضیح بده.
+
+────────────────────────────────────────────
+۴) مرور دستی که اسکریپت نمی‌تواند انجام دهد
+────────────────────────────────────────────
+- ردیف‌های PARTIAL_REVIEW: آیا call-site واقعاً به صفحهٔ عضو مربوط است یا
+  مصرف‌کنندهٔ کارکنان؟ (در INV-02 نگاه کن به api.ts که مشترک است.)
+- ردیف‌های GAP: برای هر کدام یک تصمیم ثبت کن: «در scope انتشار اول» یا
+  «defer با دلیل». هیچ GAP را بی‌تصمیم رها نکن.
+- ردیف BLOCKED: یا نقشهٔ دامنه (FEATURE_TO_API / PAGE_TO_API) را با تصمیم
+  اصلاح کن، یا BLOCKED را ثبت و رد شو. حدس نزن.
+
+────────────────────────────────────────────
+۵) commit و push — فقط مسیرهای همین کار
+────────────────────────────────────────────
+  git add scripts/inv02_member_crosswalk.py \
+          scripts/inv03_staff_crosswalk.py \
+          scripts/run-inv-redo.sh \
+          evidence/$(date -u +%F)/INV-02 \
+          evidence/$(date -u +%F)/INV-03
+  git commit -m "INV-02/03: generated crosswalks — evidence: scripts/run-inv-redo.sh"
+  git push origin HEAD:arena/<session>-mp
+
+هرگز: git add -A ، git clean ، git reset --hard ، push به main.
+اگر `gh pr create` خطای permission داد، بی‌خیال شو؛ push تنها کافی است و کار تمام است.
+
+────────────────────────────────────────────
+۶) تأیید وجود شاهد روی ریموت (بدون این، تمام نیست)
+────────────────────────────────────────────
+  git ls-remote origin | grep <session>
+  gh api repos/yousefghorbanian98-create/MP/contents/evidence/$(date -u +%F)/INV-02 \
+     --jq '.[].name'
+
+اگر این دو فایل را روی ریموت دیدی، تازه می‌توانی بگویی «push شد».
+
+────────────────────────────────────────────
+۷) به‌روزرسانی tracker — با سقف
+────────────────────────────────────────────
+- INV-02: از PROPOSED به PARTIAL (نه بیشتر). دلیل: crosswalk تولید و push شد؛
+  تست منفی مجوز اجرا نشده.
+- INV-03: همان، اگر جدول صفحات کامل و مرور شد.
+- در SESSION_HANDOFF این را بنویس: SHA، دستور اجرا، شمارش‌ها، و اینکه
+  PARTIAL است.
+- PWA-01 همچنان PROPOSED/NOT_RUN می‌ماند تا acceptance کامل شود.
+
+────────────────────────────────────────────
+۸) چه چیزی این پاکت حل نمی‌کند (صادقانه بنویس)
+────────────────────────────────────────────
+- متن ۲۱ ردیفی نسخهٔ گم‌شده را بازنمی‌گرداند؛ در هیچ ریموتی نیست.
+- مالکیت/مجوز را اثبات نمی‌کند؛ فقط call-site و اشارهٔ تستی را نشان می‌دهد.
+- دادهٔ واقعی، browser/device، نصب‌پذیری، SMS واقعی و reviewer مستقل را
+  پوشش نمی‌دهد.
+- تصمیم محصول (کدام GAP در انتشار اول) مال مالک است، نه تو.
+
+────────────────────────────────────────────
+۹) بعد از این کار
+────────────────────────────────────────────
+سراغ SEC-01 (ماتریس نقش نهایی) برو: الگوی جدول همان crosswalk است، ولی
+منبع اثباتش `mp-app/backend/security/rbac.py` + `routes.json` + تست منفی
+سمت سرور است، نه اسکن متنی. کار مستقل بعدی را خودت انتخاب کن و ادامه بده.
+
+═══════════════════════════════════════════════════════════
+پایان متن. از بند ۰ شروع کن.
+═══════════════════════════════════════════════════════════
