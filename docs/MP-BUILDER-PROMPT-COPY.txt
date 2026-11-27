@@ -1,4 +1,5 @@
 REPO: yousefghorbanian98-create/MP
+BRANCH: arena/5e0f64cf-mp   (همهٔ commit/push فقط روی همین شاخه؛ شاخهٔ دیگر نساز و عوض نکن)
 PRODUCT: یک PWA مشترک (عضو + کادر) روی mp-app/studio — طبق ADR-007. اپ React دوم ساخته نشود.
 TRACKER: docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md   (۱۰۴ checkbox؛ ۱۰۰ باز)
 BACKLOG: docs/MuscleParadise/TODO-2026-11-16.md#pwa-ui-ux-full-backlog-2026-11-23  (۵۰ کارت PWA-00…PWA-56)
@@ -59,7 +60,7 @@ REPORT: فشرده، حداکثر ۱۵ خط در پایان هر چرخه
 - نصب وابستگی OSS عمومی (npm/PyPI) و Playwright/Chromium در همین محیط، با ثبت نام/نسخه/مجوز.
 - اجرای build/lint/test/typed-check/docs gate/axe/headless؛ تولید شاهد در evidence/ و artifacts/ بدون secret.
 - commit با پیام «<ID>: <خلاصه> — evidence: <دستور/نتیجه>»؛ یک commit برای هر برش معنادار.
-- push فقط به همان شاخهٔ نشست (arena/*-mp) با «git push origin <همان شاخه>»؛ اختیاری: PR پیش‌نویس از همان شاخه به main.
+- push فقط به شاخهٔ arena/5e0f64cf-mp با «git push origin arena/5e0f64cf-mp»؛ اختیاری: PR پیش‌نویس از همان شاخه به main.
 - به‌روزرسانی checkbox tracker فقط با شاهد واقعی، و به‌روزرسانی SESSION_HANDOFF + STATE.
 
 ۵) ممنوعیت‌های بی‌اجازهٔ صریح

@@ -18,6 +18,7 @@
 ```text
 ━━━ CONFIG ━━━
 REPO: yousefghorbanian98-create/MP
+BRANCH: arena/5e0f64cf-mp   (همهٔ commit/push فقط روی همین شاخه؛ شاخهٔ دیگر نساز و عوض نکن)
 PRODUCT TARGET: یک PWA مشترک (عضو + کادر) روی mp-app/studio — ADR-007. کلاینت React دوم ساخته نشود.
 TRACKER: docs/MuscleParadise/TODO-PWA-RELEASE-2026-11-23.fa.md   (۱۰۴ checkbox؛ ۱۰۰ باز)
 BACKLOG: docs/MuscleParadise/TODO-2026-11-16.md#pwa-ui-ux-full-backlog-2026-11-23  (۵۰ کارت PWA-00…PWA-56)
